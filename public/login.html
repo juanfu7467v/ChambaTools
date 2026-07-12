@@ -4,15 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
   
-  <title>Login Masitaprex | Registro y Acceso a la Infraestructura</title>
-  <meta name="description" content="Acceso exclusivo a Masitaprex. Inicia sesión, realiza tu registro o recupera tu cuenta para gestionar créditos, APIs Dev y PeliPREX HD.">
-  <meta name="keywords" content="login masitaprex, registro masitaprex, recuperar cuenta masitaprex, acceso masitaprex, comprar creditos masitaprex, paquetes masitaprex" />
+  <title>Login FacilitoTools | Registro y Acceso a la Infraestructura</title>
+  <meta name="description" content="Acceso exclusivo a FacilitoTools. Inicia sesión, realiza tu registro o recupera tu cuenta para gestionar créditos, APIs Dev y PeliPREX HD.">
+  <meta name="keywords" content="login facilitotools, registro facilitotools, recuperar cuenta facilitotools, acceso facilitotools, comprar creditos facilitotools, paquetes facilitotools" />
   <meta name="robots" content="index, follow">
 
-  <meta property="og:title" content="Acceso a Masitaprex | Gestión de Cuenta y Créditos" />
+  <meta property="og:title" content="Acceso a FacilitoTools | Gestión de Cuenta y Créditos" />
   <meta property="og:description" content="Ingresa a tu panel de control. Gestiona tus APIs de consulta, tus créditos y tu suscripción a la infraestructura de élite." />
   <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://masitaprex.com/login" />
+  <meta property="og:url" content="https://facilitotools.com/login" />
   <meta property="og:image" content="https://cdn-icons-png.flaticon.com/128/747/747965.png" />
   <meta property="og:image:width" content="128" />
   <meta property="og:image:height" content="128" />
@@ -58,13 +58,62 @@
         margin: 0;
         padding: 0;
         font-family: 'Poppins', sans-serif;
-        background: var(--bg-gradient);
+        background: #0a0f1e;
         color: var(--text-dark);
         min-height: 100vh;
         display: flex;
         justify-content: center;
         align-items: center;
         width: 100%;
+        position: relative;
+        overflow-x: hidden;
+    }
+
+    /* Fondo 3D sin contenedores extra */
+    body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: 
+            radial-gradient(circle at 20% 50%, rgba(0, 114, 255, 0.15) 0%, transparent 50%),
+            radial-gradient(circle at 80% 20%, rgba(0, 230, 118, 0.12) 0%, transparent 50%),
+            radial-gradient(circle at 50% 80%, rgba(255, 64, 129, 0.1) 0%, transparent 50%);
+        background-size: 200% 200%;
+        animation: floatBackground 15s ease-in-out infinite;
+        z-index: 0;
+        pointer-events: none;
+    }
+
+    body::after {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: 
+            linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px),
+            linear-gradient(0deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+        background-size: 50px 50px;
+        transform: perspective(600px) rotateX(60deg) scale(1.8);
+        animation: moveGrid 20s linear infinite;
+        z-index: 0;
+        pointer-events: none;
+    }
+
+    @keyframes floatBackground {
+        0%, 100% { background-position: 0% 0%; }
+        25% { background-position: 50% 30%; }
+        50% { background-position: 100% 70%; }
+        75% { background-position: 30% 90%; }
+    }
+
+    @keyframes moveGrid {
+        0% { transform: perspective(600px) rotateX(60deg) translateY(0) scale(1.8); }
+        100% { transform: perspective(600px) rotateX(60deg) translateY(50px) scale(1.8); }
     }
 
     #app-container {
@@ -74,6 +123,8 @@
         flex-direction: column;
         justify-content: center;
         align-items: center;
+        position: relative;
+        z-index: 1;
     }
 
     .screen {
@@ -99,7 +150,7 @@
 
     .form-subtitle {
         text-align: center;
-        color: var(--text-muted);
+        color: #cbd5e1;
         font-size: 1rem;
         margin-bottom: 32px;
         font-weight: 400;
@@ -117,19 +168,24 @@
         height: 62px;
         padding: 0 20px 0 54px;
         font-size: 1rem;
-        border: 2px solid transparent;
+        border: 2px solid rgba(255,255,255,0.08);
         border-radius: var(--radius);
-        background: var(--input-bg);
-        color: var(--text-dark);
+        background: rgba(15, 23, 42, 0.7);
+        backdrop-filter: blur(12px);
+        color: #f1f5f9;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         font-family: 'Inter', sans-serif;
     }
 
     .input-field:focus {
-        background: #fff;
+        background: rgba(15, 23, 42, 0.9);
         border-color: var(--primary);
-        box-shadow: 0 10px 25px -5px rgba(0, 114, 255, 0.15);
+        box-shadow: 0 8px 32px rgba(0, 114, 255, 0.2);
         outline: none;
+    }
+
+    .input-field::placeholder {
+        color: #94a3b8;
     }
 
     .field-icon {
@@ -137,12 +193,12 @@
         left: 20px;
         top: 50%;
         transform: translateY(-50%);
-        color: var(--text-muted);
+        color: #94a3b8;
         font-size: 22px;
         transition: color 0.3s;
     }
 
-    .input-field:focus + .field-icon {
+    .input-field:focus ~ .field-icon {
         color: var(--primary);
     }
 
@@ -152,7 +208,7 @@
         top: 50%;
         transform: translateY(-50%);
         cursor: pointer;
-        color: var(--text-muted);
+        color: #94a3b8;
         padding: 4px;
         user-select: none;
         transition: color 0.3s;
@@ -178,8 +234,15 @@
         gap: 10px;
         margin: 12px 0;
         box-shadow: 0 12px 24px -6px rgba(0, 114, 255, 0.4);
-        transition: all 0.3s ease;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         cursor: pointer;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .primary-btn:hover, .recover-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 20px 40px -8px rgba(0, 114, 255, 0.5);
     }
 
     .primary-btn:active, .recover-btn:active {
@@ -190,19 +253,26 @@
     .register-btn {
         width: 100%;
         height: var(--btn-height);
-        background: white;
-        color: var(--primary);
-        border: 2px solid #e2e8f0;
+        background: rgba(255,255,255,0.08);
+        backdrop-filter: blur(12px);
+        color: #f1f5f9;
+        border: 1px solid rgba(255,255,255,0.15);
         border-radius: var(--radius);
         font-size: 1rem;
         font-weight: 600;
-        transition: all 0.3s ease;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         margin-top: 8px;
     }
 
-    .register-btn:active {
-        background: #f8fafc;
+    .register-btn:hover {
+        background: rgba(255,255,255,0.15);
         border-color: var(--primary);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 114, 255, 0.2);
+    }
+
+    .register-btn:active {
+        transform: scale(0.98);
     }
 
     /* Welcome Screen Buttons */
@@ -216,29 +286,73 @@
         align-items: center;
         gap: 12px;
         margin-bottom: 14px;
-        transition: all 0.3s ease;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn:hover {
+        transform: translateY(-2px);
+    }
+
+    .btn:active {
+        transform: scale(0.97);
     }
 
     .btn-primary-gradient {
-        background: #fff;
-        border: 2px solid #0072ff;
-        color: #0072ff;
+        background: rgba(255,255,255,0.08);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(0, 114, 255, 0.3);
+        color: #ffffff;
     }
 
-    .btn-google { background: white; border: 1px solid #e2e8f0; color: #444; }
-    .btn-github { background: #24292e; border: none; color: #fff; }
-    .btn-login-red { background: #fee2e2; border: none; color: #dc2626; }
+    .btn-primary-gradient:hover {
+        background: rgba(0, 114, 255, 0.2);
+        box-shadow: 0 10px 30px rgba(0, 114, 255, 0.3);
+    }
+
+    .btn-google { 
+        background: rgba(255,255,255,0.08);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255,255,255,0.1);
+        color: #f1f5f9;
+    }
+    .btn-google:hover {
+        background: rgba(255,255,255,0.15);
+    }
+
+    .btn-github { 
+        background: rgba(36, 41, 46, 0.9);
+        backdrop-filter: blur(12px);
+        border: none;
+        color: #fff;
+    }
+    .btn-github:hover {
+        background: #24292e;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+
+    .btn-login-red { 
+        background: rgba(220, 38, 38, 0.2);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(220,38,38,0.3);
+        color: #fecaca;
+    }
+    .btn-login-red:hover {
+        background: rgba(220,38,38,0.3);
+        box-shadow: 0 10px 30px rgba(220,38,38,0.2);
+    }
 
     /* Forms container */
     .login-form, .register-form, .recover-password-form {
         display: none;
         flex-direction: column;
         width: 100%;
-        animation: fadeIn 0.5s ease-out;
+        animation: fadeInUp 0.6s cubic-bezier(0.23, 1, 0.32, 1);
     }
 
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(30px); }
         to { opacity: 1; transform: translateY(0); }
     }
 
@@ -257,7 +371,7 @@
         content: '';
         flex: 1;
         height: 1px;
-        background: #e2e8f0;
+        background: rgba(255,255,255,0.15);
     }
 
     .separator span { padding: 0 15px; }
@@ -266,12 +380,18 @@
         text-align: center;
         margin-top: 12px;
         font-size: 0.95rem;
+        color: #cbd5e1;
     }
 
     .text-link a {
         color: var(--primary);
         font-weight: 600;
         text-decoration: none;
+        transition: color 0.3s;
+    }
+
+    .text-link a:hover {
+        color: var(--secondary);
     }
 
     /* ReCAPTCHA centering */
@@ -284,12 +404,15 @@
 
     /* Modal 3D modern */
     .modal-3d {
-        background: white;
+        background: rgba(15, 23, 42, 0.95);
+        backdrop-filter: blur(20px);
         padding: 32px;
         border-radius: 30px;
         width: 90%;
         max-width: 400px;
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(255,255,255,0.1);
+        color: #f1f5f9;
     }
 
     .welcome-icon {
@@ -304,8 +427,8 @@
     .message-modal-overlay {
         position: fixed;
         inset: 0;
-        background: rgba(0, 0, 0, 0.5);
-        backdrop-filter: blur(4px);
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(8px);
         z-index: 50000;
         display: none;
         align-items: center;
@@ -350,13 +473,15 @@
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        background: white;
+        background: rgba(15, 23, 42, 0.95);
+        backdrop-filter: blur(20px);
         border-radius: 24px;
         padding: 32px 24px;
         width: 90%;
         max-width: 360px;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
         text-align: center;
+        border: 1px solid rgba(255,255,255,0.1);
         animation: slideInModal 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
@@ -372,7 +497,7 @@
     .message-modal-text {
         font-size: 16px;
         font-weight: 500;
-        color: #334155;
+        color: #e2e8f0;
         line-height: 1.5;
         margin: 0;
     }
@@ -385,9 +510,10 @@
     /* ── Checkbox de términos ── */
     .terms-check-wrapper {
         width: 100%;
-        background: var(--input-bg);
+        background: rgba(15, 23, 42, 0.6);
+        backdrop-filter: blur(12px);
         border-radius: var(--radius);
-        border: 2px solid transparent;
+        border: 1px solid rgba(255,255,255,0.08);
         display: flex;
         align-items: center;
         gap: 14px;
@@ -400,7 +526,7 @@
 
     .terms-check-wrapper:has(input:checked) {
         border-color: var(--primary);
-        background: rgba(0, 114, 255, 0.04);
+        background: rgba(0, 114, 255, 0.1);
     }
 
     .terms-check-wrapper input[type="checkbox"] {
@@ -415,7 +541,7 @@
 
     .terms-check-wrapper label {
         font-size: 0.875rem;
-        color: var(--text-muted);
+        color: #cbd5e1;
         cursor: pointer;
         line-height: 1.4;
         font-family: 'Inter', sans-serif;
@@ -430,15 +556,36 @@
     .terms-check-wrapper label a:hover {
         text-decoration: underline;
     }
+
+    /* Mejoras responsive y texto */
+    h1 {
+        color: #f1f5f9;
+        font-size: 2.5rem;
+        font-weight: 800;
+        letter-spacing: -1px;
+    }
+    .welcome-subtitle {
+        color: #94a3b8;
+    }
+    .footer-text {
+        color: #94a3b8;
+    }
+    .footer-text a {
+        color: #cbd5e1;
+        transition: color 0.3s;
+    }
+    .footer-text a:hover {
+        color: var(--primary);
+    }
   </style>
 </head>
 <body>
   <div id="app-container">
     
     <div id="welcome-screen" class="screen" style="display: flex;">
-        <img src="https://cdn-icons-png.flaticon.com/128/17202/17202358.png" alt="Seguridad" style="width: 80px; height: 80px; margin-bottom: 20px;">
-        <h1 class="text-4xl font-extrabold mb-2 tracking-tight">Masitaprex</h1>
-        <p class="text-slate-500 mb-10 text-center px-6">Acceso exclusivo a la infraestructura de alto rendimiento.</p>
+        <img src="https://i.postimg.cc/fLYYD0Bb/1000153255-preview-rev-1.png" alt="Seguridad" style="width: 80px; height: 80px; margin-bottom: 20px; filter: drop-shadow(0 0 10px rgba(0,114,255,0.5));">
+        <h1 class="text-4xl font-extrabold mb-2 tracking-tight">FacilitoTools</h1>
+        <p class="text-slate-400 mb-10 text-center px-6 welcome-subtitle">Acceso exclusivo a la infraestructura de alto rendimiento.</p>
         
         <button class="btn btn-primary-gradient" onclick="showRegisterFormFromWelcome()">
           <span class="material-icons">person_add</span>
@@ -446,9 +593,9 @@
         </button>
         
         <div class="w-full flex items-center my-4">
-            <div class="flex-1 h-px bg-slate-200"></div>
+            <div class="flex-1 h-px bg-slate-600/30"></div>
             <span class="px-3 text-xs text-slate-400 font-bold uppercase">O accede con</span>
-            <div class="flex-1 h-px bg-slate-200"></div>
+            <div class="flex-1 h-px bg-slate-600/30"></div>
         </div>
 
         <button class="btn btn-google" onclick="signInWithGoogle()">
@@ -466,8 +613,8 @@
           <span>Ingreso tradicional</span>
         </button>
 
-        <div class="mt-8 text-xs text-slate-400 font-medium text-center">
-            <p class="mb-2">El acceso a los servicios de Masitaprex está sujeto a la aceptación previa de nuestro marco regulatorio y políticas de protección.</p>
+        <div class="mt-8 text-xs text-slate-400 font-medium text-center footer-text">
+            <p class="mb-2">El acceso a los servicios de FacilitoTools está sujeto a la aceptación previa de nuestro marco regulatorio y políticas de protección.</p>
             <div class="flex gap-4 justify-center">
                 <a href="politica-privacidad.html">Política de Privacidad</a>
                 <span>|</span>
@@ -558,7 +705,7 @@
 
       <div id="recover-password-form" class="recover-password-form">
           <div class="text-center mb-6">
-              <span class="material-icons text-blue-500 text-6xl">key</span>
+              <span class="material-icons text-blue-400 text-6xl">key</span>
           </div>
           <h3 style="font-size: 2rem;">¿Olvidaste tu clave?</h3>
           <p class="form-subtitle">Enviaremos instrucciones a tu correo</p>
@@ -584,19 +731,19 @@
   <div id="terms-modal" class="modal-overlay fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[20000] hidden flex items-center justify-center p-4">
     <div class="modal-3d animate-in zoom-in duration-300">
         <div class="flex flex-col items-center text-center">
-            <span class="material-icons text-5xl text-emerald-500 mb-4">verified</span>
-            <h4 class="text-xl font-bold mb-2">Términos de Servicio</h4>
-            <div class="bg-slate-50 p-4 rounded-2xl text-sm text-slate-600 mb-6 text-left border border-slate-100">
-                Al registrarte, confirmas que eres mayor de edad y que harás un uso responsable de los servicios de Masitaprex. No se permiten actividades ilícitas.
+            <span class="material-icons text-5xl text-emerald-400 mb-4">verified</span>
+            <h4 class="text-xl font-bold mb-2 text-white">Términos de Servicio</h4>
+            <div class="bg-slate-800/50 p-4 rounded-2xl text-sm text-slate-300 mb-6 text-left border border-slate-700">
+                Al registrarte, confirmas que eres mayor de edad y que harás un uso responsable de los servicios de FacilitoTools. No se permiten actividades ilícitas.
             </div>
             <label class="flex items-start gap-3 mb-6 cursor-pointer group">
-                <input type="checkbox" id="accept-terms-check" class="mt-1 w-5 h-5 accent-blue-600 rounded">
-                <span class="text-sm text-slate-500 text-left group-hover:text-slate-700 transition-colors">Acepto los términos y el aviso de privacidad de datos.</span>
+                <input type="checkbox" id="accept-terms-check" class="mt-1 w-5 h-5 accent-blue-500 rounded">
+                <span class="text-sm text-slate-400 text-left group-hover:text-slate-200 transition-colors">Acepto los términos y el aviso de privacidad de datos.</span>
             </label>
             <button id="confirm-terms-btn" class="primary-btn !m-0 disabled:opacity-50 disabled:shadow-none" disabled>
                 Confirmar Registro
             </button>
-            <button onclick="closeTermsModal()" class="mt-4 text-sm font-semibold text-slate-400">Quizás más tarde</button>
+            <button onclick="closeTermsModal()" class="mt-4 text-sm font-semibold text-slate-400 hover:text-white transition-colors">Quizás más tarde</button>
         </div>
     </div>
   </div>
@@ -611,11 +758,11 @@
     </div>
   </div>
   
-  <div id="loading-indicator" class="fixed inset-0 bg-white/90 backdrop-blur-md z-[10000] hidden items-center justify-center">
+  <div id="loading-indicator" class="fixed inset-0 bg-black/60 backdrop-blur-md z-[10000] hidden items-center justify-center">
       <div class="flex gap-2">
-          <div class="w-4 h-4 rounded-full bg-blue-600 animate-bounce"></div>
-          <div class="w-4 h-4 rounded-full bg-emerald-500 animate-bounce [animation-delay:-.3s]"></div>
-          <div class="w-4 h-4 rounded-full bg-blue-600 animate-bounce [animation-delay:-.5s]"></div>
+          <div class="w-4 h-4 rounded-full bg-blue-500 animate-bounce"></div>
+          <div class="w-4 h-4 rounded-full bg-emerald-400 animate-bounce [animation-delay:-.3s]"></div>
+          <div class="w-4 h-4 rounded-full bg-blue-500 animate-bounce [animation-delay:-.5s]"></div>
       </div>
   </div>
 
@@ -1086,64 +1233,64 @@
     // ================================================================
     // ✅ GOOGLE LOGIN: await + delay 500ms + delay 1000ms
     // ================================================================
-	    window.signInWithGoogle = async function() {
-	        try {
-	            showLoadingOverlay();
-	            const provider = new GoogleAuthProvider();
-	            provider.setCustomParameters({ prompt: 'select_account' });
-	            
-	            console.log('[🔵 GOOGLE] Iniciando autenticación...');
-	            const result = await signInWithPopup(auth, provider);
-	            console.log('[🔵 GOOGLE] Login exitoso:', result.user.email);
-	
-	            // 1. Guardar perfil
-	            await saveUserProfile(result.user, result.user.displayName);
-	            console.log('[🔵 GOOGLE] Perfil guardado');
-	
-	            // ✅ CORRECCIÓN: Detectar si es usuario nuevo
-	            const isNewUser = !!(result._tokenResponse?.isNewUser === true || 
-	                              (result.additionalUserInfo && result.additionalUserInfo.isNewUser === true));
-	            console.log('[🔵 GOOGLE] ¿Usuario nuevo?', isNewUser);
+    window.signInWithGoogle = async function() {
+        try {
+            showLoadingOverlay();
+            const provider = new GoogleAuthProvider();
+            provider.setCustomParameters({ prompt: 'select_account' });
+            
+            console.log('[🔵 GOOGLE] Iniciando autenticación...');
+            const result = await signInWithPopup(auth, provider);
+            console.log('[🔵 GOOGLE] Login exitoso:', result.user.email);
 
-	            // 2. ✅ CORRECCIÓN: Llamar a /api/login-success con isNewUser
-	            // para sincronizar plan, créditos y documento en "usuarios"
-	            console.log('[🔵 GOOGLE] Sincronizando con backend...');
-	            let attempts = 0;
-	            const maxAttempts = 3;
-	            while (attempts < maxAttempts) {
-	                try {
-	                    const controller = new AbortController();
-	                    const timeoutId = setTimeout(() => controller.abort(), 20000);
-	                    if (attempts > 0) showMessageModal('Sincronizando con el servidor...', 'loading');
-	                    const deviceModel = await getDeviceModel();
-	                    const idToken = await result.user.getIdToken();
-	                    const lsResp = await fetch('/api/login-success', {
-	                        method: 'POST',
-	                        headers: { 'Content-Type': 'application/json' },
-	                        body: JSON.stringify({
-	                            email: result.user.email,
-	                            uid: result.user.uid,
-	                            displayName: result.user.displayName,
-	                            isNewUser: isNewUser,
-	                            idToken: idToken,
-	                            deviceModel: deviceModel
-	                        }),
-	                        signal: controller.signal
-	                    });
-	                    clearTimeout(timeoutId);
-	                    if (lsResp.ok) {
-	                        console.log('[🔵 GOOGLE] Backend sincronizado correctamente');
-	                    } else {
-	                        console.warn('[🔵 GOOGLE] Backend respondió con error:', lsResp.status);
-	                    }
-	                    break;
-	                } catch (e) {
-	                    attempts++;
-	                    if (attempts >= maxAttempts) console.warn('Backend notification failed after retries');
-	                    await new Promise(r => setTimeout(r, 2000));
-	                }
-	            }
-	            if (attempts > 0) closeMessageModal();
+            // 1. Guardar perfil
+            await saveUserProfile(result.user, result.user.displayName);
+            console.log('[🔵 GOOGLE] Perfil guardado');
+
+            // ✅ CORRECCIÓN: Detectar si es usuario nuevo
+            const isNewUser = !!(result._tokenResponse?.isNewUser === true || 
+                              (result.additionalUserInfo && result.additionalUserInfo.isNewUser === true));
+            console.log('[🔵 GOOGLE] ¿Usuario nuevo?', isNewUser);
+
+            // 2. ✅ CORRECCIÓN: Llamar a /api/login-success con isNewUser
+            // para sincronizar plan, créditos y documento en "usuarios"
+            console.log('[🔵 GOOGLE] Sincronizando con backend...');
+            let attempts = 0;
+            const maxAttempts = 3;
+            while (attempts < maxAttempts) {
+                try {
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 20000);
+                    if (attempts > 0) showMessageModal('Sincronizando con el servidor...', 'loading');
+                    const deviceModel = await getDeviceModel();
+                    const idToken = await result.user.getIdToken();
+                    const lsResp = await fetch('/api/login-success', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            email: result.user.email,
+                            uid: result.user.uid,
+                            displayName: result.user.displayName,
+                            isNewUser: isNewUser,
+                            idToken: idToken,
+                            deviceModel: deviceModel
+                        }),
+                        signal: controller.signal
+                    });
+                    clearTimeout(timeoutId);
+                    if (lsResp.ok) {
+                        console.log('[🔵 GOOGLE] Backend sincronizado correctamente');
+                    } else {
+                        console.warn('[🔵 GOOGLE] Backend respondió con error:', lsResp.status);
+                    }
+                    break;
+                } catch (e) {
+                    attempts++;
+                    if (attempts >= maxAttempts) console.warn('Backend notification failed after retries');
+                    await new Promise(r => setTimeout(r, 2000));
+                }
+            }
+            if (attempts > 0) closeMessageModal();
             
             // 3. ✅ Delay de seguridad 500ms
             console.log('[🔵 GOOGLE] Delay seguridad 500ms...');
@@ -1170,64 +1317,64 @@
     // ================================================================
     // ✅ GITHUB LOGIN: await + delay 500ms + delay 1000ms
     // ================================================================
-	    window.signInWithGithub = async function() {
-	        try {
-	            showLoadingOverlay();
-	            const provider = new GithubAuthProvider();
-	            provider.setCustomParameters({ allow_signup: 'true' });
-	            
-	            console.log('[⚫ GITHUB] Iniciando autenticación...');
-	            const result = await signInWithPopup(auth, provider);
-	            console.log('[⚫ GITHUB] Login exitoso:', result.user.email);
-	
-	            // 1. Guardar perfil
-	            await saveUserProfile(result.user, result.user.displayName);
-	            console.log('[⚫ GITHUB] Perfil guardado');
-	
-	            // ✅ CORRECCIÓN: Detectar si es usuario nuevo
-	            const isNewUser = !!(result._tokenResponse?.isNewUser === true || 
-	                              (result.additionalUserInfo && result.additionalUserInfo.isNewUser === true));
-	            console.log('[⚫ GITHUB] ¿Usuario nuevo?', isNewUser);
+    window.signInWithGithub = async function() {
+        try {
+            showLoadingOverlay();
+            const provider = new GithubAuthProvider();
+            provider.setCustomParameters({ allow_signup: 'true' });
+            
+            console.log('[⚫ GITHUB] Iniciando autenticación...');
+            const result = await signInWithPopup(auth, provider);
+            console.log('[⚫ GITHUB] Login exitoso:', result.user.email);
 
-	            // 2. ✅ CORRECCIÓN: Llamar a /api/login-success con isNewUser
-	            // para sincronizar plan, créditos y documento en "usuarios"
-	            console.log('[⚫ GITHUB] Sincronizando con backend...');
-	            let attempts = 0;
-	            const maxAttempts = 3;
-	            while (attempts < maxAttempts) {
-	                try {
-	                    const controller = new AbortController();
-	                    const timeoutId = setTimeout(() => controller.abort(), 20000);
-	                    if (attempts > 0) showMessageModal('Sincronizando con el servidor...', 'loading');
-	                    const deviceModel = await getDeviceModel();
-	                    const idToken = await result.user.getIdToken();
-	                    const lsResp = await fetch('/api/login-success', {
-	                        method: 'POST',
-	                        headers: { 'Content-Type': 'application/json' },
-	                        body: JSON.stringify({
-	                            email: result.user.email,
-	                            uid: result.user.uid,
-	                            displayName: result.user.displayName,
-	                            isNewUser: isNewUser,
-	                            idToken: idToken,
-	                            deviceModel: deviceModel
-	                        }),
-	                        signal: controller.signal
-	                    });
-	                    clearTimeout(timeoutId);
-	                    if (lsResp.ok) {
-	                        console.log('[⚫ GITHUB] Backend sincronizado correctamente');
-	                    } else {
-	                        console.warn('[⚫ GITHUB] Backend respondió con error:', lsResp.status);
-	                    }
-	                    break;
-	                } catch (e) {
-	                    attempts++;
-	                    if (attempts >= maxAttempts) console.warn('Backend notification failed after retries');
-	                    await new Promise(r => setTimeout(r, 2000));
-	                }
-	            }
-	            if (attempts > 0) closeMessageModal();
+            // 1. Guardar perfil
+            await saveUserProfile(result.user, result.user.displayName);
+            console.log('[⚫ GITHUB] Perfil guardado');
+
+            // ✅ CORRECCIÓN: Detectar si es usuario nuevo
+            const isNewUser = !!(result._tokenResponse?.isNewUser === true || 
+                              (result.additionalUserInfo && result.additionalUserInfo.isNewUser === true));
+            console.log('[⚫ GITHUB] ¿Usuario nuevo?', isNewUser);
+
+            // 2. ✅ CORRECCIÓN: Llamar a /api/login-success con isNewUser
+            // para sincronizar plan, créditos y documento en "usuarios"
+            console.log('[⚫ GITHUB] Sincronizando con backend...');
+            let attempts = 0;
+            const maxAttempts = 3;
+            while (attempts < maxAttempts) {
+                try {
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 20000);
+                    if (attempts > 0) showMessageModal('Sincronizando con el servidor...', 'loading');
+                    const deviceModel = await getDeviceModel();
+                    const idToken = await result.user.getIdToken();
+                    const lsResp = await fetch('/api/login-success', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            email: result.user.email,
+                            uid: result.user.uid,
+                            displayName: result.user.displayName,
+                            isNewUser: isNewUser,
+                            idToken: idToken,
+                            deviceModel: deviceModel
+                        }),
+                        signal: controller.signal
+                    });
+                    clearTimeout(timeoutId);
+                    if (lsResp.ok) {
+                        console.log('[⚫ GITHUB] Backend sincronizado correctamente');
+                    } else {
+                        console.warn('[⚫ GITHUB] Backend respondió con error:', lsResp.status);
+                    }
+                    break;
+                } catch (e) {
+                    attempts++;
+                    if (attempts >= maxAttempts) console.warn('Backend notification failed after retries');
+                    await new Promise(r => setTimeout(r, 2000));
+                }
+            }
+            if (attempts > 0) closeMessageModal();
             
             // 3. ✅ Delay de seguridad 500ms
             console.log('[⚫ GITHUB] Delay seguridad 500ms...');
@@ -1254,68 +1401,68 @@
     // ================================================================
     // ✅ LOGIN CON EMAIL - CORREGIDO: NO REPORTAR FALLOS SI ES EXITOSO
     // ================================================================
-	    window.loginWithEmail = async () => {
-	      const email = document.getElementById('login-email')?.value;
-	      const password = document.getElementById('login-password')?.value;
-	      
-	      if (!email || !password) { 
-	          showMessageModal('Por favor completa todos los campos', 'warning');
-	          return; 
-	      }
-	      
-	      const recaptchaResponse = grecaptcha.getResponse(loginRecaptchaWidgetId);
-	      if (!recaptchaResponse) { 
-	          showMessageModal('Por favor, verifica que no eres un robot', 'warning');
-	          return; 
-	      }
-	      
-	      showLoadingOverlay();
-	      
-	      try {
-	          // ✅ 1. VALIDAR CON EL BACKEND ANTES DE FIREBASE
-	          const deviceId = getDeviceId();
-	          const deviceModel = await getDeviceModel();
-	          const returnTo = getUrlParameter('returnTo') || sessionStorage.getItem('returnTo') || '';
-	          
-	          let backendResponse;
-	          let backendData;
-	          let attempts = 0;
-	          const maxAttempts = 3;
+    window.loginWithEmail = async () => {
+      const email = document.getElementById('login-email')?.value;
+      const password = document.getElementById('login-password')?.value;
+      
+      if (!email || !password) { 
+          showMessageModal('Por favor completa todos los campos', 'warning');
+          return; 
+      }
+      
+      const recaptchaResponse = grecaptcha.getResponse(loginRecaptchaWidgetId);
+      if (!recaptchaResponse) { 
+          showMessageModal('Por favor, verifica que no eres un robot', 'warning');
+          return; 
+      }
+      
+      showLoadingOverlay();
+      
+      try {
+          // ✅ 1. VALIDAR CON EL BACKEND ANTES DE FIREBASE
+          const deviceId = getDeviceId();
+          const deviceModel = await getDeviceModel();
+          const returnTo = getUrlParameter('returnTo') || sessionStorage.getItem('returnTo') || '';
+          
+          let backendResponse;
+          let backendData;
+          let attempts = 0;
+          const maxAttempts = 3;
 
-	          while (attempts < maxAttempts) {
-	              try {
-	                  const controller = new AbortController();
-	                  const timeoutId = setTimeout(() => controller.abort(), 25000); // 25s timeout
+          while (attempts < maxAttempts) {
+              try {
+                  const controller = new AbortController();
+                  const timeoutId = setTimeout(() => controller.abort(), 25000); // 25s timeout
 
-	                  if (attempts > 0) {
-	                      showMessageModal('Conectando al servidor...', 'loading');
-	                  }
+                  if (attempts > 0) {
+                      showMessageModal('Conectando al servidor...', 'loading');
+                  }
 
-	                  backendResponse = await fetch('/api/login', {
-	                      method: 'POST',
-	                      headers: { 'Content-Type': 'application/json' },
-	                      body: JSON.stringify({
-	                          email,
-	                          password,
-	                          recaptchaResponse,
-	                          returnTo,
-	                          deviceId,
-	                          deviceModel
-	                      }),
-	                      signal: controller.signal
-	                  });
+                  backendResponse = await fetch('/api/login', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                          email,
+                          password,
+                          recaptchaResponse,
+                          returnTo,
+                          deviceId,
+                          deviceModel
+                      }),
+                      signal: controller.signal
+                  });
 
-	                  clearTimeout(timeoutId);
-	                  backendData = await backendResponse.json();
-	                  break;
-	              } catch (fetchError) {
-	                  attempts++;
-	                  if (attempts >= maxAttempts) throw fetchError;
-	                  await new Promise(resolve => setTimeout(resolve, 2000));
-	              }
-	          }
+                  clearTimeout(timeoutId);
+                  backendData = await backendResponse.json();
+                  break;
+              } catch (fetchError) {
+                  attempts++;
+                  if (attempts >= maxAttempts) throw fetchError;
+                  await new Promise(resolve => setTimeout(resolve, 2000));
+              }
+          }
 
-	          if (attempts > 0) closeMessageModal();
+          if (attempts > 0) closeMessageModal();
 
           // ✅ 2. SI EL BACKEND DEVUELVE ERROR account_blocked, DETENER
           if (!backendResponse.ok) {
@@ -1360,14 +1507,14 @@
               errorCode === 'auth/wrong-password' || 
               errorCode === 'auth/user-not-found') {
               
-	              // ✅ REPORTAR INTENTO FALLIDO AL BACKEND
-	              try {
-	                  const deviceModel = await getDeviceModel();
-	                  const reportResponse = await fetch('/api/report-failed-login', {
-	                      method: 'POST',
-	                      headers: { 'Content-Type': 'application/json' },
-	                      body: JSON.stringify({ email, deviceModel })
-	                  });
+              // ✅ REPORTAR INTENTO FALLIDO AL BACKEND
+              try {
+                  const deviceModel = await getDeviceModel();
+                  const reportResponse = await fetch('/api/report-failed-login', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ email, deviceModel })
+                  });
 
                   const reportData = await reportResponse.json();
 
