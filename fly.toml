@@ -1,10 +1,10 @@
-# fly.toml app configuration file generated for masitaprexv2 on 2026-05-02T16:31:58Z
+# fly.toml app configuration file generated for facilitotools on 2026-07-12T19:57:33Z
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = 'masitaprexv2'
-primary_region = 'iad'
+app = 'facilitotools'
+primary_region = 'ams'
 
 [build]
 
@@ -26,9 +26,6 @@ primary_region = 'iad'
   auto_start_machines = true
   min_machines_running = 1
   processes = ['app']
-  # Kill timeout de 10 minutos para dar margen antes del apagado total
-  kill_signal = 'SIGTERM'
-  kill_timeout = '600s'
 
 [[vm]]
   memory = '512mb'
