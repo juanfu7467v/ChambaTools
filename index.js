@@ -7,44 +7,36 @@ import { MercadoPagoConfig, Payment } from "mercadopago";
 import path from "path";
 import { fileURLToPath } from "url";
 import fs from "fs";
+import axios from "axios";
 import { Resend } from "resend";
 import helmet from "helmet";
 import { helmetConfig, corsAllowedOrigins } from './cspConfig.js';
 import ReturnConfigServer from './returnConfigServer.js';
+import plantillasRouter from './plantillas.js';
 
 // Importar módulos de seguridad y negocios
-import {
-  logger,
-  getClientIp,
-  checkLoginBlock,
-  registerFailedLogin,
-  resetLoginAttempts,
+import { 
+  logger, 
+  getClientIp, 
+  checkLoginBlock, 
+  registerFailedLogin, 
+  resetLoginAttempts, 
   validateRecaptcha,
-  generateFingerprint,
-  getLocationFromIP,
   RECAPTCHA_SITE_KEY,
-  MAX_LOGIN_ATTEMPTS,
-  BLOCK_DURATION_HOURS
 } from './seguridad.js';
 
-import {
-  initFirebase,
-  buildServiceAccountFromEnv,
-  db,
-  otorgarBeneficio,
-  enviarBienvenida,
-  enviarCorreoSospechoso,
+import { 
+  initFirebase, 
+  buildServiceAccountFromEnv, 
+  db, 
+  otorgarBeneficio, 
+  enviarBienvenida, 
+  enviarCorreoSospechoso, 
   enviarCorreoRechazo,
-  enviarCorreoExito,
   enviarCorreoSoporte,
   PAQUETES_CREDITOS,
   PLANES_ILIMITADOS,
-  buildInvoiceProxyUrl,
-  resolveInvoiceStoragePath,
-  downloadInvoiceBufferFromStorage
 } from './negocios.js';
-
-import plantillasRouter from './plantillas.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -108,171 +100,10 @@ const mpClient = MERCADOPAGO_ACCESS_TOKEN ? new MercadoPagoConfig({
 }) : null;
 
 // ================================================================
-// 📦 PLANES FACILITOTOOLS — Estrategia comercial completa
-// ================================================================
-// El plan Gratis sólo desbloquea Moderna Azul y aplica marca de agua.
-// Los planes pagos desbloquean Grafito, Índigo y Esmeralda y eliminan la marca de agua.
-const PLANES_FACILITOTOOLS = {
-  gratis: {
-    id: 'gratis',
-    nombre: 'Plan Gratis',
-    eslogan: 'Solo plantilla Moderna Azul con marca de agua',
-    precio: 0,
-    duracionDias: null,
-    limite: 5,
-    plantillasPermitidas: ['moderna'],
-    marcaAgua: true,
-    descripcion: 'Podrás emitir hasta 5 comprobantes con la plantilla Moderna Azul. Tus recibos mostrarán la marca de agua FacilitoTools.'
-  },
-  semanal: {
-    id: 'semanal',
-    nombre: 'Prueba Corta',
-    eslogan: 'Ideal para campañas o ferias de fin de semana',
-    precio: 7.00,
-    duracionDias: 7,
-    limite: 150,
-    plantillasPermitidas: ['moderna', 'elegante', 'corporativa', 'premium'],
-    marcaAgua: false,
-    descripcion: 'S/ 7.00 por semana. Hasta 150 comprobantes generados.'
-  },
-  mensual: {
-    id: 'mensual',
-    nombre: 'Emprendedor Digital',
-    eslogan: 'El favorito de las tiendas de Instagram y Facebook',
-    precio: 19.00,
-    duracionDias: 30,
-    limite: 800,
-    plantillasPermitidas: ['moderna', 'elegante', 'corporativa', 'premium'],
-    marcaAgua: false,
-    descripcion: 'S/ 19.00 por mes. Hasta 800 comprobantes al mes.'
-  },
-  bimestral: {
-    id: 'bimestral',
-    nombre: 'Negocio Estable',
-    eslogan: 'Ahorra más y asegura tu campaña de 2 meses',
-    precio: 32.00,
-    duracionDias: 60,
-    limite: 1800,
-    plantillasPermitidas: ['moderna', 'elegante', 'corporativa', 'premium'],
-    marcaAgua: false,
-    descripcion: 'S/ 32.00 por 2 meses (equivale a S/ 16.00/mes). Hasta 1.800 comprobantes en total.'
-  },
-  semestral: {
-    id: 'semestral',
-    nombre: 'Crecimiento Pro',
-    eslogan: 'El control total de tu negocio por menos de S/ 0.50 al día',
-    precio: 75.00,
-    duracionDias: 180,
-    limite: 6000,
-    plantillasPermitidas: ['moderna', 'elegante', 'corporativa', 'premium'],
-    marcaAgua: false,
-    descripcion: 'S/ 75.00 por 6 meses (equivale a S/ 12.50/mes). Hasta 6.000 comprobantes en total.'
-  }
-};
-
-function esFechaExpirada(fechaFin) {
-  if (!fechaFin) return false;
-  try {
-    const fin = fechaFin.toDate ? fechaFin.toDate() : new Date(fechaFin);
-    return fin.getTime() < Date.now();
-  } catch {
-    return false;
-  }
-}
-
-async function obtenerInfoPlanUsuario(uid) {
-  if (!db || !uid) {
-    const plan = PLANES_FACILITOTOOLS.gratis;
-    return {
-      ok: true,
-      planId: 'gratis',
-      plan,
-      limite: plan.limite,
-      emitidos: 0,
-      restantes: plan.limite,
-      plantillasPermitidas: plan.plantillasPermitidas,
-      marcaAgua: plan.marcaAgua,
-      fechaFin: null,
-      expiro: false
-    };
-  }
-  const userRef = db.collection('usuarios').doc(uid);
-  const userSnap = await userRef.get();
-  const data = userSnap.exists ? userSnap.data() : {};
-  const planIdCrudo = data.tipoPlan;
-  const planId = PLANES_FACILITOTOOLS[planIdCrudo] ? planIdCrudo : 'gratis';
-  const plan = PLANES_FACILITOTOOLS[planId];
-  const limite = typeof data.limite_plan === 'number' ? data.limite_plan : plan.limite;
-  const emitidos = typeof data.recibos_emitidos === 'number' ? data.recibos_emitidos : 0;
-  const expiro = esFechaExpirada(data.fecha_fin_plan);
-  return {
-    ok: true,
-    planId,
-    plan,
-    limite,
-    emitidos,
-    restantes: Math.max(0, limite - emitidos),
-    plantillasPermitidas: plan.plantillasPermitidas,
-    marcaAgua: plan.marcaAgua,
-    fechaFin: data.fecha_fin_plan || null,
-    expiro
-  };
-}
-
-async function asegurarPlanGratisInicial(uid, email, displayName) {
-  if (!db || !uid) return;
-  const userRef = db.collection('usuarios').doc(uid);
-  const userSnap = await userRef.get();
-  const data = userSnap.exists ? userSnap.data() : {};
-  if (!PLANES_FACILITOTOOLS[data.tipoPlan] || (data.tipoPlan === 'gratis' && !data.fecha_inicio_plan)) {
-    await userRef.set({
-      email: email || data.email || null,
-      displayName: displayName || data.displayName || null,
-      tipoPlan: 'gratis',
-      limite_plan: PLANES_FACILITOTOOLS.gratis.limite,
-      recibos_emitidos: typeof data.recibos_emitidos === 'number' ? data.recibos_emitidos : 0,
-      fecha_inicio_plan: admin.firestore.FieldValue.serverTimestamp(),
-      fecha_fin_plan: null,
-      updatedAt: admin.firestore.FieldValue.serverTimestamp()
-    }, { merge: true });
-    logger.info('PLAN_GRATIS', 'Plan gratis inicial asignado', { uid, email });
-  }
-}
-
-// ================================================================
-// 🔌 MONTAJE DE RUTAS DE COMPROBANTES
+// 🛣️ RUTAS DE LA API
 // ================================================================
 
-app.use('/api/comprobantes', plantillasRouter);
-
-// ================================================================
-// 📊 ENDPOINTS PÚBLICOS DE PLANES
-// ================================================================
-
-app.get('/api/planes', (req, res) => {
-  res.json({
-    ok: true,
-    planes: Object.values(PLANES_FACILITOTOOLS)
-  });
-});
-
-app.get('/api/comprobantes-info/:uid', async (req, res) => {
-  try {
-    const { uid } = req.params;
-    if (!uid) return res.status(400).json({ ok: false, error: 'uid requerido' });
-    await asegurarPlanGratisInicial(uid, null, null);
-    const info = await obtenerInfoPlanUsuario(uid);
-    res.json(info);
-  } catch (error) {
-    logger.error('PLAN_INFO', error);
-    res.status(500).json({ ok: false, error: 'Error interno' });
-  }
-});
-
-// ================================================================
-// 🔐 ENDPOINTS DE LOGIN
-// ================================================================
-
+// --- Endpoint de login exitoso (modificado para asignar plan gratuito) ---
 app.post("/api/login-success", async (req, res) => {
   const context = 'LOGIN_SUCCESS_API';
   try {
@@ -283,26 +114,26 @@ app.post("/api/login-success", async (req, res) => {
       if (db && uid) {
         const userRef = db.collection("usuarios").doc(uid);
         const userDoc = await userRef.get();
-
+        
         if (userDoc.exists) {
           const userData = userDoc.data();
           const lastDevice = userData.lastDeviceModel;
-
+          
           if (lastDevice && deviceModel && lastDevice !== deviceModel) {
             const ip = getClientIp(req);
             const location = await getLocationFromIP(ip);
             const nombre = displayName || userData.name || email.split('@')[0];
-
+            
             logger.warn(context, '⚠️ Inicio de sesión sospechoso detectado (cambio de dispositivo)', {
               email, uid, oldDevice: lastDevice, newDevice: deviceModel, ip
             });
-
+            
             enviarCorreoSospechoso(email, nombre, location, ip, req.headers['user-agent'], resend)
               .catch(err => logger.error(context, 'Error enviando correo sospechoso', err));
           }
-
+          
           if (deviceModel) {
-            await userRef.update({
+            await userRef.update({ 
               lastDeviceModel: deviceModel,
               lastLoginAt: admin.firestore.FieldValue.serverTimestamp()
             });
@@ -315,6 +146,7 @@ app.post("/api/login-success", async (req, res) => {
 
     await resetLoginAttempts(email);
 
+    // ✅ Asignar plan gratuito o mantener el existente
     if (uid) {
       let waitAttempts = 0;
       while (!db && waitAttempts < 10) {
@@ -334,18 +166,17 @@ app.post("/api/login-success", async (req, res) => {
           lastLoginAt: admin.firestore.FieldValue.serverTimestamp()
         };
 
-        const tienePlanValido = userData && PLANES_FACILITOTOOLS[userData.tipoPlan];
-        if (!tienePlanValido) {
-          updateData.tipoPlan = 'gratis';
-          updateData.limite_plan = PLANES_FACILITOTOOLS.gratis.limite;
-          if (typeof userData?.recibos_emitidos !== 'number') {
-            updateData.recibos_emitidos = 0;
-          }
-          updateData.fecha_inicio_plan = admin.firestore.FieldValue.serverTimestamp();
-          updateData.fecha_fin_plan = null;
-          logger.info(context, 'Asignando Plan Gratis FacilitoTools en "usuarios"', { uid, email });
+        // Si es usuario nuevo o no tiene plan, asignar plan gratuito
+        if (!userData || !userData.plan) {
+          updateData.plan = 'gratuito';
+          updateData.limite = 10;
+          updateData.recibos_emitidos = 0;
+          updateData.fecha_inicio = admin.firestore.FieldValue.serverTimestamp();
+          // fecha_fin no aplica para gratuito
+          logger.info(context, 'Asignando plan gratuito a nuevo usuario', { uid, email });
         }
 
+        // Si es nuevo usuario: enviar correo de bienvenida y crear doc en "empresas"
         if (isNewUser) {
           const welcomeResult = await enviarBienvenida(email, nombre, resend);
           if (welcomeResult.success) {
@@ -386,6 +217,7 @@ app.post("/api/login-success", async (req, res) => {
   }
 });
 
+// --- Endpoint de notificación de verificación (similar, asignar plan gratuito) ---
 app.post("/api/notify-verification", async (req, res) => {
   const context = 'NOTIFY_VERIFICATION';
   try {
@@ -411,8 +243,16 @@ app.post("/api/notify-verification", async (req, res) => {
           welcomeEmailSent: true,
           welcomeEmailSentAt: admin.firestore.FieldValue.serverTimestamp()
         }, { merge: true });
-
-        await asegurarPlanGratisInicial(uid, email, displayName || email.split('@')[0]);
+        
+        const userDoc = await db.collection("usuarios").doc(uid).get();
+        if (!userDoc.exists || !userDoc.data().plan) {
+          await db.collection("usuarios").doc(uid).set({
+            plan: 'gratuito',
+            limite: 10,
+            recibos_emitidos: 0,
+            fecha_inicio: admin.firestore.FieldValue.serverTimestamp()
+          }, { merge: true });
+        }
 
         const empresaRef = db.collection("empresas").doc(uid);
         const secureToken = crypto.randomBytes(32).toString('hex');
@@ -437,88 +277,82 @@ app.post("/api/notify-verification", async (req, res) => {
   }
 });
 
-// ================================================================
-// ⚙️ ENDPOINT DE CONFIGURACIÓN
-// ================================================================
+// --- Endpoint de análisis con Gemini (se mantiene) ---
+app.post("/api/analyze", async (req, res) => {
+  const { movieTitle, movieDescription } = req.body;
+  const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+  if (!GEMINI_API_KEY) return res.status(500).json({ error: "GEMINI_API_KEY no configurada" });
 
-app.get("/api/config", (req, res) => {
-  res.json({
-    mercadopagoPublicKey: process.env.MERCADOPAGO_PUBLIC_KEY,
-    recaptchaSiteKey: RECAPTCHA_SITE_KEY,
-    firebaseConfig: {
-      apiKey: process.env.FIREBASE_API_KEY,
-      authDomain: process.env.FIREBASE_AUTH_DOMAIN,
-      projectId: process.env.FIREBASE_PROJECT_ID,
-      storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
-      messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
-      appId: process.env.FIREBASE_APP_ID,
-      measurementId: process.env.FIREBASE_MEASUREMENT_ID
-    },
-    environment: process.env.NODE_ENV || 'production',
-    planes: Object.values(PLANES_FACILITOTOOLS),
-    timestamp: new Date().toISOString()
-  });
-});
-
-// ================================================================
-// 🔐 RECAPTCHA + LOGIN + SOPORTE
-// ================================================================
-
-app.post("/api/validate-recaptcha", async (req, res) => {
+  const prompt = `Actúa como un crítico de cine experto y redacta un análisis completo para "${movieTitle}". Sinopsis: "${movieDescription}". Sin negritas.`;
   try {
-    const { recaptchaResponse } = req.body;
-    const result = await validateRecaptcha(recaptchaResponse, process.env.RECAPTCHA_CLAVE_SECRETA);
-    res.json({ success: true, ...result });
+    const response = await axios.post(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`,
+      { contents: [{ parts: [{ text: prompt }] }] },
+      { headers: { 'Content-Type': 'application/json' } }
+    );
+    res.json(response.data);
   } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
-  }
-});
-
-app.post("/api/login", async (req, res) => {
-  const context = 'LOGIN_API';
-  try {
-    const { email, recaptchaResponse, deviceId, deviceModel } = req.body;
-    if (!email || !deviceId) return res.status(400).json({ success: false, error: 'Email and deviceId required' });
-
-    const blockStatus = await checkLoginBlock(email);
-    if (blockStatus.isBlocked) {
-      return res.status(403).json({ success: false, error: 'account_blocked', remainingMinutes: blockStatus.remainingMinutes });
-    }
-
-    if (recaptchaResponse) {
-      await validateRecaptcha(recaptchaResponse, process.env.RECAPTCHA_CLAVE_SECRETA);
-    }
-
-    res.json({ success: true, message: 'Login allowed' });
-  } catch (error) {
-    logger.error(context, 'Error en login', error);
-    res.status(400).json({ success: false, error: error.message });
-  }
-});
-
-app.post("/api/report-failed-login", async (req, res) => {
-  const context = 'REPORT_FAILED_LOGIN';
-  try {
-    const { email, deviceModel, errorType } = req.body;
-    if (!email) return res.status(400).json({ success: false, error: 'Email is required' });
-
-    const result = await registerFailedLogin(email, req, deviceModel);
-    if (result.blocked) {
-      const ip = getClientIp(req);
-      const location = await getLocationFromIP(ip);
-      await enviarCorreoSospechoso(email, null, location, ip, req.headers['user-agent'], resend);
-    }
-    res.json({ success: true, ...result });
-  } catch (error) {
-    logger.error(context, 'Error reportando fallo', error);
-    res.status(500).json({ success: false, error: 'Internal server error' });
+    logger.error('GEMINI_API', 'Error en Gemini', error);
+    res.status(500).json({ error: "Error en Gemini" });
   }
 });
 
 // ================================================================
-// 💳 PAGO + WEBHOOK MERCADO PAGO
+// 🆕 ENDPOINT PARA CONSULTAR PLAN DEL USUARIO
+// ================================================================
+app.get("/api/user/plan", async (req, res) => {
+  try {
+    const { uid } = req.query;
+    if (!uid) return res.status(400).json({ error: 'uid requerido' });
+    if (!db) return res.status(503).json({ error: 'Base de datos no disponible' });
+
+    const userRef = db.collection('usuarios').doc(uid);
+    const userDoc = await userRef.get();
+    if (!userDoc.exists) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    const data = userDoc.data();
+    const plan = data.plan || 'gratuito';
+    const limite = data.limite || 10;
+    const recibos_emitidos = data.recibos_emitidos || 0;
+    const disponibles = Math.max(0, limite - recibos_emitidos);
+    const fecha_inicio = data.fecha_inicio ? data.fecha_inicio.toDate() : null;
+    const fecha_fin = data.fecha_fin ? data.fecha_fin.toDate() : null;
+
+    res.json({
+      plan,
+      limite,
+      recibos_emitidos,
+      disponibles,
+      fecha_inicio,
+      fecha_fin,
+      // Para mostrar en frontend
+      planNombre: obtenerNombrePlan(plan),
+      limiteDescripcion: limite === -1 ? 'Ilimitado' : `${limite} comprobantes`
+    });
+  } catch (error) {
+    logger.error('USER_PLAN', error);
+    res.status(500).json({ error: 'Error interno' });
+  }
+});
+
+function obtenerNombrePlan(planId) {
+  const map = {
+    gratuito: 'Gratuito',
+    semanal: 'Semanal (Prueba Corta)',
+    mensual: 'Mensual (Emprendedor Digital)',
+    bimestral: 'Bimestral (Negocio Estable)',
+    semestral: 'Semestral (Crecimiento Pro)'
+  };
+  return map[planId] || planId;
+}
+
+// ================================================================
+// 💰 ENDPOINTS DE PAGO Y WEBHOOK (se mantienen)
 // ================================================================
 
+// Endpoint de pago (se ajusta para aceptar planes)
 app.post("/api/pay", async (req, res) => {
   const context = 'PAY_API';
   try {
@@ -539,10 +373,10 @@ app.post("/api/pay", async (req, res) => {
         payment_method_id,
         payer,
         notification_url: `${HOST_URL}/api/webhook/mercadopago`,
-        metadata: {
-          uid,
-          email: payer.email,
-          amount: transaction_amount,
+        metadata: { 
+          uid, 
+          email: payer.email, 
+          amount: transaction_amount, 
           tipoPlan,
           tipo_plan: tipoPlan
         }
@@ -567,14 +401,14 @@ app.post("/api/pay", async (req, res) => {
           }
         }
       } catch (err) {}
-
+      
       enviarCorreoRechazo(
-        payer.email,
-        userName,
-        result.id.toString(),
-        transaction_amount,
-        description || 'Compra en FacilitoTools',
-        result.status_detail || result.status,
+        payer.email, 
+        userName, 
+        result.id.toString(), 
+        transaction_amount, 
+        description || 'Suscripción a plan', 
+        result.status_detail || result.status, 
         resend
       ).catch(err => logger.error(context, 'Error enviando correo de rechazo', err));
     }
@@ -585,6 +419,7 @@ app.post("/api/pay", async (req, res) => {
   }
 });
 
+// Webhook de Mercado Pago (se mantiene)
 app.post("/api/webhook/mercadopago", async (req, res) => {
   const context = 'WEBHOOK_MP';
   const webhookData = req.body;
@@ -615,7 +450,7 @@ app.post("/api/webhook/mercadopago", async (req, res) => {
         const email = metadata.email || paymentInfo.payer?.email;
         const uid = metadata.uid;
         const tipoPlan = metadata.tipoPlan;
-
+        
         if (email && uid) {
           let userName = email.split('@')[0];
           try {
@@ -638,7 +473,7 @@ app.post("/api/webhook/mercadopago", async (req, res) => {
             userName,
             paymentId.toString(),
             metadata.amount || paymentInfo.transaction_amount,
-            paymentInfo.description || 'Compra en FacilitoTools',
+            paymentInfo.description || 'Suscripción a plan',
             paymentInfo.status_detail || paymentInfo.status,
             resend
           ).catch(err => logger.error(context, 'Error enviando correo de rechazo desde webhook', err));
@@ -651,18 +486,21 @@ app.post("/api/webhook/mercadopago", async (req, res) => {
 });
 
 // ================================================================
-// 🔍 ESTADO DE PAGOS
+// 🆕 ENDPOINTS PARA CONSULTAR ESTADO DE PAGO (se mantienen)
 // ================================================================
 
 app.get("/api/payment-status/:paymentId", async (req, res) => {
   try {
     const paymentId = req.params.paymentId;
     if (!paymentId) return res.status(400).json({ error: 'paymentId requerido' });
+
     if (!db) return res.status(503).json({ error: 'Database no disponible' });
+
     const pagoDoc = await db.collection("pagos_registrados").doc(paymentId).get();
     if (!pagoDoc.exists) {
       return res.json({ status: 'pending', processed: false });
     }
+
     const data = pagoDoc.data();
     res.json({
       status: data.estado || 'pending',
@@ -679,14 +517,18 @@ app.get("/api/payment-reference/:externalRef", async (req, res) => {
   try {
     const externalRef = req.params.externalRef;
     if (!externalRef) return res.status(400).json({ error: 'externalRef requerido' });
+
     if (!db) return res.status(503).json({ error: 'Database no disponible' });
+
     const pagosQuery = await db.collection("pagos_registrados")
       .where("externalReference", "==", externalRef)
       .limit(1)
       .get();
+
     if (pagosQuery.empty) {
       return res.json({ status: 'pending', processed: false, paymentId: null });
     }
+
     const doc = pagosQuery.docs[0];
     const data = doc.data();
     res.json({
@@ -701,25 +543,38 @@ app.get("/api/payment-reference/:externalRef", async (req, res) => {
 });
 
 // ================================================================
-// 🧾 DESCARGA DE BOLETAS (PDF)
+// 🧾 MANEJADOR DE DESCARGA DE BOLETAS (se mantiene)
 // ================================================================
-
 const handleInvoiceDownload = async (req, res) => {
   const context = 'INVOICE_DOWNLOAD';
+
   try {
     const rawPaymentId = req.params.paymentId || req.params.paymentIdWithExt;
     const paymentId = (rawPaymentId || '').replace(/\.pdf$/i, '');
-    if (!paymentId) return res.status(400).json({ error: 'paymentId requerido' });
-    if (!db) return res.status(503).json({ error: 'Database no disponible' });
+
+    if (!paymentId) {
+      return res.status(400).json({ error: 'paymentId requerido' });
+    }
+
+    if (!db) {
+      return res.status(503).json({ error: 'Database no disponible' });
+    }
+
     const pagoDoc = await db.collection("pagos_registrados").doc(paymentId).get();
-    if (!pagoDoc.exists) return res.status(404).json({ error: 'Pago no encontrado' });
+    if (!pagoDoc.exists) {
+      return res.status(404).json({ error: 'Pago no encontrado' });
+    }
+
     const data = pagoDoc.data();
     const storagePath = resolveInvoiceStoragePath(paymentId, data);
     const invoiceFile = await downloadInvoiceBufferFromStorage(storagePath);
+
     if (!invoiceFile?.buffer) {
       return res.status(404).json({ error: 'La boleta aún no está disponible. Intenta en unos segundos.' });
     }
+
     const fileName = `boleta-${paymentId}.pdf`;
+
     res.setHeader('Content-Type', invoiceFile.contentType || 'application/pdf');
     res.setHeader('Content-Length', invoiceFile.size);
     res.setHeader('Content-Disposition', `attachment; filename="${fileName}"; filename*=UTF-8''${encodeURIComponent(fileName)}`);
@@ -727,6 +582,7 @@ const handleInvoiceDownload = async (req, res) => {
     res.setHeader('Pragma', 'no-cache');
     res.setHeader('Expires', '0');
     res.setHeader('X-Robots-Tag', 'noindex, nofollow, noarchive');
+
     return res.send(invoiceFile.buffer);
   } catch (error) {
     logger.error(context, error);
@@ -742,6 +598,7 @@ app.get("/api/payment/:paymentId", async (req, res) => {
     if (!db) return res.status(503).json({ error: 'Database not available' });
     const pagoDoc = await db.collection("pagos_registrados").doc(req.params.paymentId).get();
     if (!pagoDoc.exists) return res.status(404).json({ error: 'Payment not found' });
+    
     const data = pagoDoc.data();
     const fecha = data.fechaRegistro?.toDate() || new Date();
     res.json({
@@ -763,38 +620,15 @@ app.get("/api/payment/:paymentId", async (req, res) => {
 });
 
 // ================================================================
-// 📧 SOPORTE
+// 📄 SERVICIO DE ARCHIVOS ESTÁTICOS
 // ================================================================
 
-app.post("/api/support/send", async (req, res) => {
-  const context = 'SUPPORT_SEND_API';
-  try {
-    const { name, email, subject, message, timestamp } = req.body;
-    if (!name || !email || !subject || !message) {
-      return res.status(400).json({ success: false, error: 'Todos los campos son obligatorios' });
-    }
-    logger.info(context, 'Recibida nueva consulta de soporte', { email, subject });
-    const result = await enviarCorreoSoporte({ name, email, subject, message, timestamp }, resend);
-    if (result.success) {
-      res.json({ success: true, message: 'Consulta enviada correctamente' });
-    } else {
-      res.status(500).json({ success: false, error: 'Error al enviar el correo de soporte' });
-    }
-  } catch (error) {
-    logger.error(context, 'Error procesando envío de soporte', error);
-    res.status(500).json({ success: false, error: 'Internal server error' });
-  }
-});
-
-// ================================================================
-// 🌐 ARCHIVOS ESTÁTICOS + GA
-// ================================================================
-
-const PUBLIC_ROUTES = ['/login', '/register', '/verify', '/reset-password', '/disclaimer-apis', '/API-Docs'];
+const PUBLIC_ROUTES = ['/login', '/register', '/verify', '/reset-password', '/disclaimer-apis', '/API-Docs', '/planes'];
 
 const injectGA = (html) => {
   const gaId = process.env.GOOGLE_ANALYTICS_ID;
   if (!gaId) return html;
+
   const gaScript = `
     <!-- Google Analytics 4 (GA4) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=${gaId}"></script>
@@ -807,12 +641,14 @@ const injectGA = (html) => {
       });
     </script>
   `;
+  
   if (html.includes('</head>')) {
     return html.replace('</head>', `${gaScript}</head>`);
   }
   return gaScript + html;
 };
 
+// Middleware para servir HTML con GA y sin metadatos de películas
 const serveHtmlWithGA = (req, res, next) => {
   let fileName = '';
   if (req.path === '/') {
@@ -827,6 +663,7 @@ const serveHtmlWithGA = (req, res, next) => {
       fileName = potentialFile;
     }
   }
+
   if (fileName) {
     const filePath = path.join(__dirname, 'public', fileName);
     if (fs.existsSync(filePath)) {
@@ -835,7 +672,7 @@ const serveHtmlWithGA = (req, res, next) => {
         html = injectGA(html);
         return res.send(html);
       } catch (err) {
-        logger.error('HTML_SERVE', `Error sirviendo ${fileName}`, err);
+        logger.error('STATIC_SERVE', `Error sirviendo ${fileName}`, err);
         return res.sendFile(filePath);
       }
     }
@@ -846,15 +683,66 @@ const serveHtmlWithGA = (req, res, next) => {
 app.use(serveHtmlWithGA);
 app.use(express.static(path.join(__dirname, 'public'), { extensions: ['html'] }));
 
+// ================================================================
+// 🛣️ RUTAS DE PLANTILLAS (GENERADOR DE COMPROBANTES)
+// ================================================================
+app.use('/api/comprobantes', plantillasRouter);
+
+// ================================================================
+// 📌 ENDPOINTS DE SOPORTE Y CONFIGURACIÓN
+// ================================================================
+
+app.get("/api/config", (req, res) => {
+  res.json({
+    mercadopagoPublicKey: process.env.MERCADOPAGO_PUBLIC_KEY,
+    recaptchaSiteKey: RECAPTCHA_SITE_KEY,
+    firebaseConfig: {
+      apiKey: process.env.FIREBASE_API_KEY,
+      authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+      projectId: process.env.FIREBASE_PROJECT_ID,
+      storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+      messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
+      appId: process.env.FIREBASE_APP_ID,
+      measurementId: process.env.FIREBASE_MEASUREMENT_ID
+    },
+    environment: process.env.NODE_ENV || 'production',
+    timestamp: new Date().toISOString()
+  });
+});
+
+app.post("/api/support/send", async (req, res) => {
+  const context = 'SUPPORT_SEND_API';
+  try {
+    const { name, email, subject, message, timestamp } = req.body;
+    if (!name || !email || !subject || !message) {
+      return res.status(400).json({ success: false, error: 'Todos los campos son obligatorios' });
+    }
+
+    logger.info(context, 'Recibida nueva consulta de soporte', { email, subject });
+
+    const result = await enviarCorreoSoporte({ name, email, subject, message, timestamp }, resend);
+
+    if (result.success) {
+      res.json({ success: true, message: 'Consulta enviada correctamente' });
+    } else {
+      res.status(500).json({ success: false, error: 'Error al enviar el correo de soporte' });
+    }
+  } catch (error) {
+    logger.error(context, 'Error procesando envío de soporte', error);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+});
+
 app.get("/api", (req, res) => res.json({ status: "ok" }));
 
+// Manejo de errores global
 app.use((err, req, res, next) => {
   logger.error('GLOBAL_ERROR', 'Error no manejado', err);
   res.status(500).json({ error: 'Error interno del servidor' });
 });
 
 // ================================================================
-// 🚀 ARRANQUE
+// 🚀 ARRANQUE DEL SERVIDOR
 // ================================================================
 
 const PORT = process.env.PORT || 8080;
@@ -865,8 +753,9 @@ async function arrancarServidor() {
     if (!db) {
       await new Promise(resolve => setTimeout(resolve, 1500));
     }
+
     app.listen(PORT, "0.0.0.0", () => {
-      logger.info('SERVER', `🚀 FacilitoTools server activo en puerto ${PORT}`, { version: '4.0.0-facilito' });
+      logger.info('SERVER', `🚀 Servidor iniciado con base de datos vinculada en puerto ${PORT}`, { version: '4.0.0' });
     });
   } catch (error) {
     logger.error('SERVER', '❌ Fallo crítico: No se pudo arrancar el servidor por error en Firebase', error);
