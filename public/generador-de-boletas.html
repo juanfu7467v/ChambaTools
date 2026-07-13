@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Generador de boletas y facturas</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #ffffff;
+      --panel-soft: #f8fafc;
+      --ink: #0f172a;
+      --muted: #64748b;
+      --line: #e2e8f0;
+      --primary: #2563eb;
+      --primary-soft: #dbeafe;
+      --success: #0f766e;
+      --danger: #dc2626;
+      --shadow: 0 22px 60px rgba(15, 23, 42, 0.18);
+      --radius: 22px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(37, 99, 235, 0.18), transparent 34%),
+        radial-gradient(circle at top right, rgba(15, 118, 110, 0.12), transparent 28%),
+        linear-gradient(180deg, #eff6ff 0%, #f8fafc 38%, #eef2ff 100%);
+      color: var(--ink);
+      min-height: 100vh;
+    }
+
+    .page {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 28px 18px 40px;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, #0f172a 0%, #1d4ed8 52%, #0f766e 100%);
+      color: white;
+      border-radius: 28px;
+      padding: 30px;
+      box-shadow: var(--shadow);
+      margin-bottom: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::after {
+      content: '';
+      position: absolute;
+      inset: auto -80px -120px auto;
+      width: 260px;
+      height: 260px;
+      background: rgba(255,255,255,0.10);
+      border-radius: 999px;
+      filter: blur(4px);
+    }
+
+    .hero h1 {
+      margin: 0 0 10px;
+      font-size: clamp(2rem, 4vw, 3rem);
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero p {
+      margin: 0;
+      max-width: 840px;
+      color: rgba(255,255,255,0.86);
+      line-height: 1.65;
+      position: relative;
+      z-index: 1;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(360px, 500px) minmax(0, 1fr);
+      gap: 22px;
+      align-items: start;
+    }
+
+    .panel {
+      background: rgba(255,255,255,0.94);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.62);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .panel-header {
+      padding: 22px 22px 0;
+    }
+
+    .panel-title {
+      margin: 0;
+      font-size: 1.2rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .panel-subtitle {
+      margin: 6px 0 0;
+      color: var(--muted);
+      line-height: 1.55;
+      font-size: 0.95rem;
+    }
+
+    .form-wrap {
+      padding: 18px 22px 24px;
+    }
+
+    .section {
+      margin-top: 22px;
+      padding-top: 20px;
+      border-top: 1px solid var(--line);
+    }
+
+    .section:first-child {
+      margin-top: 0;
+      padding-top: 0;
+      border-top: none;
+    }
+
+    .section h3 {
+      margin: 0 0 14px;
+      font-size: 0.92rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #334155;
+    }
+
+    .grid,
+    .grid-2,
+    .grid-3 {
+      display: grid;
+      gap: 14px;
+    }
+
+    .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+    label {
+      display: block;
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #334155;
+      margin-bottom: 8px;
+    }
+
+    input,
+    select,
+    textarea,
+    button {
+      font: inherit;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: white;
+      color: var(--ink);
+      padding: 12px 14px;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: #93c5fd;
+      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
+    }
+
+    textarea {
+      min-height: 92px;
+      resize: vertical;
+    }
+
+    .template-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .template-card {
+      position: relative;
+      border: 1px solid var(--line);
+      background: white;
+      border-radius: 18px;
+      padding: 14px;
+      cursor: pointer;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+      min-height: 142px;
+    }
+
+    .template-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 16px 36px rgba(15, 23, 42, 0.12);
+    }
+
+    .template-card.active {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+    }
+
+    .template-swatch {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .template-swatch span {
+      height: 12px;
+      flex: 1;
+      border-radius: 999px;
+      display: block;
+    }
+
+    .template-card h4 {
+      margin: 0 0 8px;
+      font-size: 0.97rem;
+    }
+
+    .template-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.85rem;
+      line-height: 1.45;
+    }
+
+    .item-list {
+      display: grid;
+      gap: 14px;
+    }
+
+    .item-row {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: var(--panel-soft);
+      padding: 14px;
+    }
+
+    .item-row-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      gap: 12px;
+    }
+
+    .item-row-title {
+      font-size: 0.86rem;
+      font-weight: 800;
+      color: #334155;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .btn,
+    .btn-secondary,
+    .btn-danger,
+    .btn-ghost {
+      border: none;
+      border-radius: 14px;
+      padding: 12px 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.18s ease, opacity 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .btn:hover,
+    .btn-secondary:hover,
+    .btn-danger:hover,
+    .btn-ghost:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn {
+      background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+      color: white;
+      box-shadow: 0 16px 30px rgba(37, 99, 235, 0.26);
+    }
+
+    .btn-secondary {
+      background: linear-gradient(135deg, #0f766e 0%, #0d9488 100%);
+      color: white;
+      box-shadow: 0 16px 30px rgba(15, 118, 110, 0.24);
+    }
+
+    .btn-danger {
+      background: white;
+      color: var(--danger);
+      border: 1px solid rgba(220, 38, 38, 0.2);
+    }
+
+    .btn-ghost {
+      background: white;
+      color: #334155;
+      border: 1px solid var(--line);
+    }
+
+    .actions,
+    .preview-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .inline-toggle {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 11px 14px;
+      background: white;
+      color: #334155;
+    }
+
+    .inline-toggle input {
+      width: auto;
+      margin: 0;
+    }
+
+    .preview-panel {
+      min-height: 100%;
+    }
+
+    .preview-top {
+      padding: 22px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      border-radius: 999px;
+      background: #eef2ff;
+      color: #3730a3;
+      padding: 10px 14px;
+      font-weight: 700;
+      font-size: 0.92rem;
+    }
+
+    .summary-boxes {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      width: 100%;
+    }
+
+    .summary-card {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: white;
+      padding: 14px;
+    }
+
+    .summary-card small {
+      display: block;
+      color: var(--muted);
+      margin-bottom: 8px;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 700;
+    }
+
+    .summary-card strong {
+      font-size: 1.15rem;
+      letter-spacing: -0.02em;
+    }
+
+    .preview-body {
+      padding: 18px 18px 24px;
+    }
+
+    .preview-frame {
+      width: 100%;
+      min-height: 1080px;
+      border: 1px solid var(--line);
+      background: white;
+      border-radius: 18px;
+    }
+
+    .helper {
+      color: var(--muted);
+      font-size: 0.84rem;
+      line-height: 1.5;
+      margin-top: 8px;
+    }
+
+    .notice,
+    .error,
+    .success {
+      border-radius: 16px;
+      padding: 14px 16px;
+      line-height: 1.55;
+      margin-bottom: 16px;
+      font-size: 0.95rem;
+    }
+
+    .notice {
+      background: #eff6ff;
+      color: #1d4ed8;
+      border: 1px solid #bfdbfe;
+    }
+
+    .error {
+      background: #fef2f2;
+      color: #b91c1c;
+      border: 1px solid #fecaca;
+      display: none;
+    }
+
+    .success {
+      background: #ecfdf5;
+      color: #047857;
+      border: 1px solid #a7f3d0;
+      display: none;
+    }
+
+    .hidden { display: none !important; }
+
+    @media (max-width: 1100px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+      .preview-frame {
+        min-height: 900px;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .page { padding: 16px 12px 30px; }
+      .hero { padding: 22px 20px; }
+      .template-grid,
+      .grid-2,
+      .grid-3,
+      .summary-boxes {
+        grid-template-columns: 1fr;
+      }
+      .preview-frame { min-height: 760px; }
+      .panel-header,
+      .form-wrap,
+      .preview-top,
+      .preview-body {
+        padding-left: 16px;
+        padding-right: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <section class="hero">
+      <h1>Boletas y facturas listas en segundos</h1>
+      <p>
+        Elige una plantilla profesional, completa un formulario simple y genera un comprobante listo para vista previa,
+        descarga en PDF o compartir por WhatsApp, Instagram o cualquier canal compatible con Web Share.
+      </p>
+    </section>
+
+    <div class="layout">
+      <section class="panel">
+        <div class="panel-header">
+          <h2 class="panel-title">Configuración del comprobante</h2>
+          <p class="panel-subtitle">Todo está preparado para que puedas añadir más plantillas sin tocar el flujo del formulario.</p>
+        </div>
+
+        <div class="form-wrap">
+          <div id="errorBox" class="error"></div>
+          <div id="successBox" class="success"></div>
+          <div class="notice">
+            Consejo: si vendes por redes sociales, deja plantillas, datos del negocio y textos frecuentes preconfigurados para emitir más rápido.
+          </div>
+
+          <form id="voucherForm">
+            <section class="section">
+              <h3>Plantilla</h3>
+              <div id="templateGrid" class="template-grid"></div>
+              <input type="hidden" id="templateId" name="templateId" value="moderna" />
+            </section>
+
+            <section class="section">
+              <h3>Tipo de comprobante</h3>
+              <div class="grid-2">
+                <div>
+                  <label for="documentType">Documento</label>
+                  <select id="documentType" name="documentType">
+                    <option value="boleta">Boleta de venta</option>
+                    <option value="factura">Factura</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="paymentMethod">Forma de pago</label>
+                  <input id="paymentMethod" name="paymentMethod" value="Yape / Transferencia / Efectivo" />
+                </div>
+              </div>
+            </section>
+
+            <section class="section">
+              <h3>Datos del emisor</h3>
+              <div class="grid">
+                <div>
+                  <label for="issuerBusinessName">Razón social o nombre comercial</label>
+                  <input id="issuerBusinessName" name="issuerBusinessName" placeholder="Mi Tienda Online" required />
+                </div>
+                <div class="grid-2">
+                  <div>
+                    <label for="issuerDocumentNumber">RUC / DNI</label>
+                    <input id="issuerDocumentNumber" name="issuerDocumentNumber" placeholder="20123456789" />
+                  </div>
+                  <div>
+                    <label for="issuerPhone">Teléfono</label>
+                    <input id="issuerPhone" name="issuerPhone" placeholder="987654321" />
+                  </div>
+                </div>
+                <div>
+                  <label for="issuerAddress">Dirección</label>
+                  <input id="issuerAddress" name="issuerAddress" placeholder="Av. Principal 123" />
+                </div>
+                <div class="grid-2">
+                  <div>
+                    <label for="issuerEmail">Email</label>
+                    <input id="issuerEmail" name="issuerEmail" placeholder="ventas@mitienda.com" />
+                  </div>
+                  <div>
+                    <label for="issuerWebsite">Web o Instagram</label>
+                    <input id="issuerWebsite" name="issuerWebsite" placeholder="instagram.com/mitienda" />
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section class="section">
+              <h3>Datos del cliente</h3>
+              <div class="grid">
+                <div>
+                  <label for="customerName">Nombre o razón social</label>
+                  <input id="customerName" name="customerName" placeholder="Cliente final" required />
+                </div>
+                <div class="grid-3">
+                  <div>
+                    <label for="customerDocumentType">Tipo de documento</label>
+                    <select id="customerDocumentType" name="customerDocumentType">
+                      <option value="DNI">DNI</option>
+                      <option value="RUC">RUC</option>
+                      <option value="CE">CE</option>
+                      <option value="PAS">Pasaporte</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label for="customerDocumentNumber">Número</label>
+                    <input id="customerDocumentNumber" name="customerDocumentNumber" placeholder="12345678" />
+                  </div>
+                  <div>
+                    <label for="issueDate">Fecha</label>
+                    <input id="issueDate" name="issueDate" type="datetime-local" />
+                  </div>
+                </div>
+                <div class="grid-2">
+                  <div>
+                    <label for="customerEmail">Email</label>
+                    <input id="customerEmail" name="customerEmail" placeholder="cliente@email.com" />
+                  </div>
+                  <div>
+                    <label for="customerPhone">Teléfono</label>
+                    <input id="customerPhone" name="customerPhone" placeholder="999888777" />
+                  </div>
+                </div>
+                <div>
+                  <label for="customerAddress">Dirección</label>
+                  <input id="customerAddress" name="customerAddress" placeholder="Dirección del cliente" />
+                </div>
+              </div>
+            </section>
+
+            <section class="section">
+              <h3>Productos o servicios</h3>
+              <div id="itemList" class="item-list"></div>
+              <div class="actions" style="margin-top: 14px;">
+                <button type="button" class="btn-ghost" id="addItemButton">+ Añadir otro ítem</button>
+              </div>
+            </section>
+
+            <section class="section">
+              <h3>Impuestos y notas</h3>
+              <div class="grid-2">
+                <div>
+                  <label for="taxRate">IGV</label>
+                  <input id="taxRate" name="taxRate" type="number" step="0.01" min="0" value="0.18" />
+                  <div class="helper">Usa 0.18 para 18%.</div>
+                </div>
+                <div>
+                  <label class="inline-toggle">
+                    <input id="pricesIncludeTax" name="pricesIncludeTax" type="checkbox" checked />
+                    El precio ingresado ya incluye IGV
+                  </label>
+                </div>
+              </div>
+              <div style="margin-top: 14px;">
+                <label for="notes">Observaciones</label>
+                <textarea id="notes" name="notes" placeholder="Entrega inmediata por WhatsApp. Gracias por tu compra."></textarea>
+              </div>
+            </section>
+
+            <section class="section">
+              <div class="actions">
+                <button class="btn" type="submit" id="generateButton">Generar vista previa</button>
+                <button class="btn-ghost" type="button" id="resetButton">Limpiar formulario</button>
+              </div>
+            </section>
+          </form>
+        </div>
+      </section>
+
+      <section class="panel preview-panel">
+        <div class="preview-top">
+          <div>
+            <h2 class="panel-title" style="margin-bottom: 6px;">Vista previa en vivo</h2>
+            <div id="statusBadge" class="status">Esperando datos para generar</div>
+          </div>
+          <div class="preview-actions">
+            <button class="btn-secondary" type="button" id="downloadButton" disabled>Descargar PDF</button>
+            <button class="btn-ghost" type="button" id="shareButton" disabled>Compartir</button>
+          </div>
+          <div id="summaryBoxes" class="summary-boxes hidden">
+            <div class="summary-card">
+              <small>Subtotal</small>
+              <strong id="summarySubtotal">S/ 0.00</strong>
+            </div>
+            <div class="summary-card">
+              <small>IGV</small>
+              <strong id="summaryTax">S/ 0.00</strong>
+            </div>
+            <div class="summary-card">
+              <small>Total</small>
+              <strong id="summaryTotal">S/ 0.00</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="preview-body">
+          <iframe id="previewFrame" class="preview-frame" title="Vista previa del comprobante"></iframe>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <template id="itemRowTemplate">
+    <div class="item-row">
+      <div class="item-row-header">
+        <div class="item-row-title">Ítem <span class="item-index"></span></div>
+        <button type="button" class="btn-danger remove-item">Eliminar</button>
+      </div>
+      <div class="grid">
+        <div>
+          <label>Descripción</label>
+          <input class="item-description" placeholder="Producto o servicio" required />
+        </div>
+        <div class="grid-3">
+          <div>
+            <label>Unidad</label>
+            <input class="item-unit-label" value="UND" />
+          </div>
+          <div>
+            <label>Cantidad</label>
+            <input class="item-quantity" type="number" min="0.01" step="0.01" value="1" required />
+          </div>
+          <div>
+            <label>Precio unitario</label>
+            <input class="item-unit-price" type="number" min="0" step="0.01" value="0" required />
+          </div>
+        </div>
+        <div>
+          <label>SKU o referencia</label>
+          <input class="item-sku" placeholder="Opcional" />
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <script>
+    const API_BASE = '/api/comprobantes';
+    const templateGrid = document.getElementById('templateGrid');
+    const templateIdInput = document.getElementById('templateId');
+    const itemList = document.getElementById('itemList');
+    const itemRowTemplate = document.getElementById('itemRowTemplate');
+    const voucherForm = document.getElementById('voucherForm');
+    const previewFrame = document.getElementById('previewFrame');
+    const summaryBoxes = document.getElementById('summaryBoxes');
+    const summarySubtotal = document.getElementById('summarySubtotal');
+    const summaryTax = document.getElementById('summaryTax');
+    const summaryTotal = document.getElementById('summaryTotal');
+    const downloadButton = document.getElementById('downloadButton');
+    const shareButton = document.getElementById('shareButton');
+    const statusBadge = document.getElementById('statusBadge');
+    const errorBox = document.getElementById('errorBox');
+    const successBox = document.getElementById('successBox');
+    const addItemButton = document.getElementById('addItemButton');
+    const resetButton = document.getElementById('resetButton');
+    const documentTypeSelect = document.getElementById('documentType');
+    const customerDocumentTypeSelect = document.getElementById('customerDocumentType');
+    const issueDateInput = document.getElementById('issueDate');
+
+    let currentTemplates = [];
+    let lastPayload = null;
+    let lastDocumentName = 'comprobante.pdf';
+    let lastShareText = 'Comprobante generado';
+
+    function showError(message) {
+      errorBox.textContent = message;
+      errorBox.style.display = 'block';
+      successBox.style.display = 'none';
+    }
+
+    function showSuccess(message) {
+      successBox.textContent = message;
+      successBox.style.display = 'block';
+      errorBox.style.display = 'none';
+    }
+
+    function clearMessages() {
+      errorBox.style.display = 'none';
+      successBox.style.display = 'none';
+      errorBox.textContent = '';
+      successBox.textContent = '';
+    }
+
+    function formatMoney(value, currency = 'PEN') {
+      return new Intl.NumberFormat('es-PE', {
+        style: 'currency',
+        currency,
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }).format(Number(value || 0));
+    }
+
+    function setStatus(text) {
+      statusBadge.textContent = text;
+    }
+
+    function setDefaultDateTime() {
+      const now = new Date();
+      now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+      issueDateInput.value = now.toISOString().slice(0, 16);
+    }
+
+    function addItemRow(data = {}) {
+      const fragment = itemRowTemplate.content.cloneNode(true);
+      const row = fragment.querySelector('.item-row');
+      row.querySelector('.item-description').value = data.description || '';
+      row.querySelector('.item-unit-label').value = data.unitLabel || 'UND';
+      row.querySelector('.item-quantity').value = data.quantity ?? 1;
+      row.querySelector('.item-unit-price').value = data.unitPrice ?? 0;
+      row.querySelector('.item-sku').value = data.sku || '';
+
+      row.querySelector('.remove-item').addEventListener('click', () => {
+        if (itemList.children.length === 1) {
+          showError('Debe existir al menos un ítem.');
+          return;
+        }
+        row.remove();
+        refreshItemIndexes();
+      });
+
+      itemList.appendChild(row);
+      refreshItemIndexes();
+    }
+
+    function refreshItemIndexes() {
+      Array.from(itemList.children).forEach((row, index) => {
+        row.querySelector('.item-index').textContent = index + 1;
+      });
+    }
+
+    function createTemplateCard(template) {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'template-card';
+      button.dataset.templateId = template.id;
+      button.innerHTML = `
+        <div class="template-swatch">
+          <span style="background:${template.accent};"></span>
+          <span style="background:${template.accentSoft};"></span>
+        </div>
+        <h4>${template.name}</h4>
+        <p>${template.description}</p>
+      `;
+
+      button.addEventListener('click', () => selectTemplate(template.id));
+      return button;
+    }
+
+    function selectTemplate(templateId) {
+      templateIdInput.value = templateId;
+      document.querySelectorAll('.template-card').forEach((card) => {
+        card.classList.toggle('active', card.dataset.templateId === templateId);
+      });
+    }
+
+    async function loadTemplates() {
+      const response = await fetch(`${API_BASE}/templates`);
+      if (!response.ok) throw new Error('No se pudieron cargar las plantillas.');
+      const data = await response.json();
+      currentTemplates = data.templates || [];
+      templateGrid.innerHTML = '';
+      currentTemplates.forEach((template) => {
+        templateGrid.appendChild(createTemplateCard(template));
+      });
+      selectTemplate(templateIdInput.value || (currentTemplates[0] && currentTemplates[0].id) || 'moderna');
+    }
+
+    function buildPayload() {
+      const items = Array.from(itemList.querySelectorAll('.item-row')).map((row) => ({
+        description: row.querySelector('.item-description').value.trim(),
+        unitLabel: row.querySelector('.item-unit-label').value.trim() || 'UND',
+        quantity: Number(row.querySelector('.item-quantity').value),
+        unitPrice: Number(row.querySelector('.item-unit-price').value),
+        sku: row.querySelector('.item-sku').value.trim()
+      }));
+
+      return {
+        templateId: templateIdInput.value,
+        documentType: document.getElementById('documentType').value,
+        paymentMethod: document.getElementById('paymentMethod').value.trim(),
+        issueDate: document.getElementById('issueDate').value ? new Date(document.getElementById('issueDate').value).toISOString() : new Date().toISOString(),
+        taxRate: Number(document.getElementById('taxRate').value || 0.18),
+        pricesIncludeTax: document.getElementById('pricesIncludeTax').checked,
+        notes: document.getElementById('notes').value.trim(),
+        issuer: {
+          businessName: document.getElementById('issuerBusinessName').value.trim(),
+          documentNumber: document.getElementById('issuerDocumentNumber').value.trim(),
+          address: document.getElementById('issuerAddress').value.trim(),
+          phone: document.getElementById('issuerPhone').value.trim(),
+          email: document.getElementById('issuerEmail').value.trim(),
+          website: document.getElementById('issuerWebsite').value.trim()
+        },
+        customer: {
+          name: document.getElementById('customerName').value.trim(),
+          documentType: document.getElementById('customerDocumentType').value,
+          documentNumber: document.getElementById('customerDocumentNumber').value.trim(),
+          email: document.getElementById('customerEmail').value.trim(),
+          phone: document.getElementById('customerPhone').value.trim(),
+          address: document.getElementById('customerAddress').value.trim()
+        },
+        items
+      };
+    }
+
+    async function requestPreview(payload) {
+      const response = await fetch(`${API_BASE}/preview`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await response.json();
+      if (!response.ok || !data.ok) {
+        throw new Error(data.message || 'No se pudo generar la vista previa.');
+      }
+      return data;
+    }
+
+    async function requestPdfBlob(payload) {
+      const response = await fetch(`${API_BASE}/pdf`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        let message = 'No se pudo generar el PDF.';
+        try {
+          const data = await response.json();
+          message = data.message || message;
+        } catch (_) {}
+        throw new Error(message);
+      }
+
+      return response.blob();
+    }
+
+    function renderPreview(result) {
+      previewFrame.srcdoc = result.html;
+      previewFrame.addEventListener('load', () => {
+        const body = previewFrame.contentWindow?.document?.body;
+        if (body) {
+          previewFrame.style.height = `${Math.max(body.scrollHeight + 30, 760)}px`;
+        }
+      }, { once: true });
+
+      summarySubtotal.textContent = formatMoney(result.summary.subtotal, result.summary.currency);
+      summaryTax.textContent = formatMoney(result.summary.tax, result.summary.currency);
+      summaryTotal.textContent = formatMoney(result.summary.total, result.summary.currency);
+      summaryBoxes.classList.remove('hidden');
+      downloadButton.disabled = false;
+      shareButton.disabled = false;
+      lastDocumentName = `${result.summary.documentType}_${result.documentNumber}.pdf`;
+      lastShareText = result.shareText || 'Comprobante generado';
+      setStatus(`Vista previa lista · ${result.documentNumber}`);
+    }
+
+    async function generatePreview() {
+      clearMessages();
+      setStatus('Generando vista previa...');
+      const payload = buildPayload();
+      const result = await requestPreview(payload);
+      lastPayload = payload;
+      renderPreview(result);
+      showSuccess('Vista previa generada correctamente. Ya puedes descargar o compartir.');
+    }
+
+    async function downloadPdf() {
+      if (!lastPayload) {
+        showError('Primero genera la vista previa del comprobante.');
+        return;
+      }
+      clearMessages();
+      setStatus('Generando PDF...');
+      const blob = await requestPdfBlob(lastPayload);
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = lastDocumentName;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+      setStatus('PDF generado y descargado');
+      showSuccess('PDF descargado correctamente.');
+    }
+
+    async function sharePdf() {
+      if (!lastPayload) {
+        showError('Primero genera la vista previa del comprobante.');
+        return;
+      }
+      clearMessages();
+      setStatus('Preparando archivo para compartir...');
+      const blob = await requestPdfBlob(lastPayload);
+      const file = new File([blob], lastDocumentName, { type: 'application/pdf' });
+
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: 'Comprobante listo',
+          text: lastShareText
+        });
+        setStatus('Comprobante compartido');
+        showSuccess('Comprobante compartido correctamente.');
+        return;
+      }
+
+      if (navigator.clipboard) {
+        await navigator.clipboard.writeText(lastShareText);
+      }
+
+      const url = URL.createObjectURL(blob);
+      window.open(url, '_blank');
+      setStatus('Archivo abierto para compartir');
+      showSuccess('Tu navegador no soporta compartir archivos directamente. Se abrió el PDF en otra pestaña y se copió un texto base al portapapeles si estaba disponible.');
+      setTimeout(() => URL.revokeObjectURL(url), 30000);
+    }
+
+    function resetForm() {
+      voucherForm.reset();
+      itemList.innerHTML = '';
+      addItemRow({ description: 'Producto principal', quantity: 1, unitPrice: 0, unitLabel: 'UND' });
+      templateIdInput.value = 'moderna';
+      selectTemplate('moderna');
+      setDefaultDateTime();
+      previewFrame.srcdoc = '<html><body style="font-family:Inter,Arial,sans-serif;padding:40px;background:#f8fafc;color:#475569;"><h2 style="margin-top:0;color:#0f172a;">Aquí verás la vista previa</h2><p>Completa el formulario de la izquierda y pulsa <strong>Generar vista previa</strong>.</p></body></html>';
+      summaryBoxes.classList.add('hidden');
+      downloadButton.disabled = true;
+      shareButton.disabled = true;
+      lastPayload = null;
+      lastDocumentName = 'comprobante.pdf';
+      lastShareText = 'Comprobante generado';
+      setStatus('Formulario reiniciado');
+      clearMessages();
+    }
+
+    addItemButton.addEventListener('click', () => addItemRow());
+    resetButton.addEventListener('click', resetForm);
+
+    voucherForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      try {
+        await generatePreview();
+      } catch (error) {
+        setStatus('Error al generar');
+        showError(error.message || 'Ocurrió un error inesperado.');
+      }
+    });
+
+    downloadButton.addEventListener('click', async () => {
+      try {
+        await downloadPdf();
+      } catch (error) {
+        setStatus('Error al descargar');
+        showError(error.message || 'No se pudo descargar el PDF.');
+      }
+    });
+
+    shareButton.addEventListener('click', async () => {
+      try {
+        await sharePdf();
+      } catch (error) {
+        setStatus('Error al compartir');
+        showError(error.message || 'No se pudo compartir el comprobante.');
+      }
+    });
+
+    documentTypeSelect.addEventListener('change', () => {
+      customerDocumentTypeSelect.value = documentTypeSelect.value === 'factura' ? 'RUC' : 'DNI';
+    });
+
+    (async function init() {
+      try {
+        setDefaultDateTime();
+        addItemRow({ description: 'Servicio / producto principal', quantity: 1, unitPrice: 0, unitLabel: 'UND' });
+        await loadTemplates();
+        resetForm();
+      } catch (error) {
+        showError(error.message || 'No se pudo iniciar la página.');
+      }
+    })();
+  </script>
+</body>
+</html>
