@@ -33,7 +33,9 @@ import {
   enviarCorreoSoporte,
   buildInvoiceProxyUrl,
   resolveInvoiceStoragePath,
-  downloadInvoiceBufferFromStorage
+  downloadInvoiceBufferFromStorage,
+  otorgarBeneficio,          // <--- Importamos la nueva función
+  PLANES_CONFIG              // <--- Opcional, para validar planes
 } from './negocios.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -158,17 +160,19 @@ app.post("/api/login-success", async (req, res) => {
         const userDoc = await userRef.get();
         const userData = userDoc.exists ? userDoc.data() : null;
 
-        // Datos base del plan gratis
+        // Datos base del plan gratis (según PLANES_CONFIG)
+        const gratisConfig = PLANES_CONFIG.gratis;
         const defaultPlanData = {
           tipoPlan: "gratis",
           planStatus: "active",
           planExpiration: null,
           comprobantesEmitidos: 0,
-          comprobantesLimite: 5,
+          comprobantesLimite: gratisConfig.comprobantesLimite,
           consultasConsumidas: 0,
-          consultasLimite: 10,
+          consultasLimite: gratisConfig.consultasLimite,
           consultasTelefonosConsumidas: 0,
-          consultasTelefonosLimite: 5
+          consultasTelefonosLimite: gratisConfig.consultasTelefonosLimite,
+          planActivationDate: admin.firestore.FieldValue.serverTimestamp()
         };
 
         const updateData = {
@@ -202,6 +206,7 @@ app.post("/api/login-success", async (req, res) => {
         }
 
         if (userDoc.exists) {
+          // Verificar que todos los campos del plan existan, si no, agregarlos
           for (const [key, value] of Object.entries(defaultPlanData)) {
             if (!(key in userData) || userData[key] === undefined) {
               updateData[key] = value;
@@ -259,16 +264,18 @@ app.post("/api/notify-verification", async (req, res) => {
         // Asegurar que el documento tenga los campos del plan gratis
         const userDoc = await db.collection("usuarios").doc(uid).get();
         const userData = userDoc.exists ? userDoc.data() : {};
+        const gratisConfig = PLANES_CONFIG.gratis;
         const defaultPlanData = {
           tipoPlan: "gratis",
           planStatus: "active",
           planExpiration: null,
           comprobantesEmitidos: 0,
-          comprobantesLimite: 5,
+          comprobantesLimite: gratisConfig.comprobantesLimite,
           consultasConsumidas: 0,
-          consultasLimite: 10,
+          consultasLimite: gratisConfig.consultasLimite,
           consultasTelefonosConsumidas: 0,
-          consultasTelefonosLimite: 5,
+          consultasTelefonosLimite: gratisConfig.consultasTelefonosLimite,
+          planActivationDate: admin.firestore.FieldValue.serverTimestamp(),
           createdAt: admin.firestore.FieldValue.serverTimestamp()
         };
         const updateData = {};
@@ -305,7 +312,7 @@ app.post("/api/notify-verification", async (req, res) => {
 });
 
 // ================================================================
-// (Eliminados completamente: endpoints de películas, PeliPREX, créditos, reproducción, descarga y análisis Gemini)
+// (Eliminados completamente: endpoints de películas, PeliPREX, créditos, etc.)
 // ================================================================
 
 // Endpoint de configuración
@@ -385,15 +392,21 @@ app.post("/api/report-failed-login", async (req, res) => {
   }
 });
 
-// Endpoint de pago (sin otorgar créditos ni planes ilimitados)
+// Endpoint de pago (actualizado para usar planId)
 app.post("/api/pay", async (req, res) => {
   const context = 'PAY_API';
   try {
-    const { transaction_amount, token, description, installments, payment_method_id, payer, uid, tipoPlan } = req.body;
+    const { transaction_amount, token, description, installments, payment_method_id, payer, uid, planId } = req.body;
     if (!mpClient) return res.status(503).json({ error: 'Mercado Pago not configured' });
     if (!payer || !payer.email) {
       logger.error(context, 'Payer email missing in request body');
       return res.status(400).json({ error: 'Payer email is required' });
+    }
+
+    // Validar que planId sea válido
+    if (!planId || !PLANES_CONFIG[planId]) {
+      logger.error(context, 'planId inválido o no proporcionado', { planId });
+      return res.status(400).json({ error: 'Invalid planId' });
     }
 
     const payment = new Payment(mpClient);
@@ -410,8 +423,7 @@ app.post("/api/pay", async (req, res) => {
           uid, 
           email: payer.email, 
           amount: transaction_amount, 
-          tipoPlan,
-          tipo_plan: tipoPlan
+          plan_id: planId
         }
       }
     });
@@ -420,11 +432,9 @@ app.post("/api/pay", async (req, res) => {
       let userName = payer.email.split('@')[0];
       try {
         if (db) {
-          const collectionName = tipoPlan === 'revenue_recovery' ? 'empresas' : 'usuarios';
-          let userSnap = await db.collection(collectionName).doc(uid).get();
+          let userSnap = await db.collection("usuarios").doc(uid).get();
           if (!userSnap.exists) {
-            const alternativeCollection = collectionName === 'empresas' ? 'usuarios' : 'empresas';
-            userSnap = await db.collection(alternativeCollection).doc(uid).get();
+            userSnap = await db.collection("empresas").doc(uid).get();
           }
           if (userSnap.exists) {
             const userData = userSnap.data();
@@ -438,7 +448,7 @@ app.post("/api/pay", async (req, res) => {
         userName, 
         result.id.toString(), 
         transaction_amount, 
-        description || 'Compra en Consulta PE', 
+        description || `Compra del plan ${planId}`, 
         result.status_detail || result.status, 
         resend
       ).catch(err => logger.error(context, 'Error enviando correo de rechazo', err));
@@ -450,7 +460,7 @@ app.post("/api/pay", async (req, res) => {
   }
 });
 
-// Webhook de Mercado Pago (sin otorgar beneficios)
+// Webhook de Mercado Pago (sin otorgar beneficios directamente, se maneja en otorgarBeneficio)
 app.post("/api/webhook/mercadopago", async (req, res) => {
   const context = 'WEBHOOK_MP';
   const webhookData = req.body;
@@ -465,22 +475,36 @@ app.post("/api/webhook/mercadopago", async (req, res) => {
       const paymentInfo = await payment.get({ id: paymentId });
 
       if (paymentInfo.status === "approved") {
-        logger.info(context, 'Pago aprobado (sin beneficio automático)', { paymentId, email: paymentInfo.payer?.email });
+        const metadata = paymentInfo.metadata || {};
+        const uid = metadata.uid || paymentInfo.external_reference;
+        const planId = metadata.plan_id;
+        const email = metadata.email || paymentInfo.payer?.email;
+
+        if (uid && planId && email) {
+          await otorgarBeneficio(
+            uid,
+            email,
+            paymentInfo.transaction_amount,
+            'MercadoPago_Webhook',
+            paymentId.toString(),
+            resend,
+            planId
+          );
+        } else {
+          logger.error(context, 'Datos insuficientes en webhook aprobado', { paymentId, uid, planId });
+        }
       } else if (paymentInfo.status === "rejected" || paymentInfo.status === "cancelled") {
         const metadata = paymentInfo.metadata || {};
         const email = metadata.email || paymentInfo.payer?.email;
         const uid = metadata.uid;
-        const tipoPlan = metadata.tipoPlan;
         
         if (email && uid) {
           let userName = email.split('@')[0];
           try {
             if (db) {
-              const collectionName = tipoPlan === 'revenue_recovery' ? 'empresas' : 'usuarios';
-              let userSnap = await db.collection(collectionName).doc(uid).get();
+              let userSnap = await db.collection("usuarios").doc(uid).get();
               if (!userSnap.exists) {
-                const alternativeCollection = collectionName === 'empresas' ? 'usuarios' : 'empresas';
-                userSnap = await db.collection(alternativeCollection).doc(uid).get();
+                userSnap = await db.collection("empresas").doc(uid).get();
               }
               if (userSnap.exists) {
                 const userData = userSnap.data();
@@ -494,7 +518,7 @@ app.post("/api/webhook/mercadopago", async (req, res) => {
             userName,
             paymentId.toString(),
             metadata.amount || paymentInfo.transaction_amount,
-            paymentInfo.description || 'Compra en Consulta PE',
+            paymentInfo.description || 'Compra de plan',
             paymentInfo.status_detail || paymentInfo.status,
             resend
           ).catch(err => logger.error(context, 'Error enviando correo de rechazo desde webhook', err));
@@ -632,7 +656,7 @@ app.get("/api/payment/:paymentId", async (req, res) => {
       hora: fecha.toLocaleTimeString('es-PE'),
       estado: data.estado,
       procesado: data.procesado,
-      tipoPlan: data.tipoPlanNuevo || 'creditos', // Se mantiene por compatibilidad
+      tipoPlan: data.tipoPlanNuevo || 'gratis',
       pdfUrl: (data.pdfUrl || data.pdfStoragePath || data.pdfPublicUrl) ? buildInvoiceProxyUrl(req.params.paymentId) : null
     });
   } catch (error) {
