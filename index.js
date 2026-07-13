@@ -7,19 +7,18 @@ import { MercadoPagoConfig, Payment } from "mercadopago";
 import path from "path";
 import { fileURLToPath } from "url";
 import fs from "fs";
-import axios from "axios";
 import { Resend } from "resend";
 import helmet from "helmet";
 import { helmetConfig, corsAllowedOrigins } from './cspConfig.js';
 import ReturnConfigServer from './returnConfigServer.js';
 
-// Importar nuevos módulos
-import { 
-  logger, 
-  getClientIp, 
-  checkLoginBlock, 
-  registerFailedLogin, 
-  resetLoginAttempts, 
+// Importar módulos de seguridad y negocios
+import {
+  logger,
+  getClientIp,
+  checkLoginBlock,
+  registerFailedLogin,
+  resetLoginAttempts,
   validateRecaptcha,
   generateFingerprint,
   getLocationFromIP,
@@ -28,13 +27,13 @@ import {
   BLOCK_DURATION_HOURS
 } from './seguridad.js';
 
-import { 
-  initFirebase, 
-  buildServiceAccountFromEnv, 
-  db, 
-  otorgarBeneficio, 
-  enviarBienvenida, 
-  enviarCorreoSospechoso, 
+import {
+  initFirebase,
+  buildServiceAccountFromEnv,
+  db,
+  otorgarBeneficio,
+  enviarBienvenida,
+  enviarCorreoSospechoso,
   enviarCorreoRechazo,
   enviarCorreoExito,
   enviarCorreoSoporte,
@@ -44,6 +43,8 @@ import {
   resolveInvoiceStoragePath,
   downloadInvoiceBufferFromStorage
 } from './negocios.js';
+
+import plantillasRouter from './plantillas.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -107,28 +108,171 @@ const mpClient = MERCADOPAGO_ACCESS_TOKEN ? new MercadoPagoConfig({
 }) : null;
 
 // ================================================================
-// 🛠️ FUNCIONES AUXILIARES
+// 📦 PLANES FACILITOTOOLS — Estrategia comercial completa
 // ================================================================
+// El plan Gratis sólo desbloquea Moderna Azul y aplica marca de agua.
+// Los planes pagos desbloquean Grafito, Índigo y Esmeralda y eliminan la marca de agua.
+const PLANES_FACILITOTOOLS = {
+  gratis: {
+    id: 'gratis',
+    nombre: 'Plan Gratis',
+    eslogan: 'Solo plantilla Moderna Azul con marca de agua',
+    precio: 0,
+    duracionDias: null,
+    limite: 5,
+    plantillasPermitidas: ['moderna'],
+    marcaAgua: true,
+    descripcion: 'Podrás emitir hasta 5 comprobantes con la plantilla Moderna Azul. Tus recibos mostrarán la marca de agua FacilitoTools.'
+  },
+  semanal: {
+    id: 'semanal',
+    nombre: 'Prueba Corta',
+    eslogan: 'Ideal para campañas o ferias de fin de semana',
+    precio: 7.00,
+    duracionDias: 7,
+    limite: 150,
+    plantillasPermitidas: ['moderna', 'elegante', 'corporativa', 'premium'],
+    marcaAgua: false,
+    descripcion: 'S/ 7.00 por semana. Hasta 150 comprobantes generados.'
+  },
+  mensual: {
+    id: 'mensual',
+    nombre: 'Emprendedor Digital',
+    eslogan: 'El favorito de las tiendas de Instagram y Facebook',
+    precio: 19.00,
+    duracionDias: 30,
+    limite: 800,
+    plantillasPermitidas: ['moderna', 'elegante', 'corporativa', 'premium'],
+    marcaAgua: false,
+    descripcion: 'S/ 19.00 por mes. Hasta 800 comprobantes al mes.'
+  },
+  bimestral: {
+    id: 'bimestral',
+    nombre: 'Negocio Estable',
+    eslogan: 'Ahorra más y asegura tu campaña de 2 meses',
+    precio: 32.00,
+    duracionDias: 60,
+    limite: 1800,
+    plantillasPermitidas: ['moderna', 'elegante', 'corporativa', 'premium'],
+    marcaAgua: false,
+    descripcion: 'S/ 32.00 por 2 meses (equivale a S/ 16.00/mes). Hasta 1.800 comprobantes en total.'
+  },
+  semestral: {
+    id: 'semestral',
+    nombre: 'Crecimiento Pro',
+    eslogan: 'El control total de tu negocio por menos de S/ 0.50 al día',
+    precio: 75.00,
+    duracionDias: 180,
+    limite: 6000,
+    plantillasPermitidas: ['moderna', 'elegante', 'corporativa', 'premium'],
+    marcaAgua: false,
+    descripcion: 'S/ 75.00 por 6 meses (equivale a S/ 12.50/mes). Hasta 6.000 comprobantes en total.'
+  }
+};
 
-/**
- * Extrae el proveedor a partir de la URL de la película.
- */
-function obtenerProveedor(url) {
+function esFechaExpirada(fechaFin) {
+  if (!fechaFin) return false;
   try {
-    const hostname = new URL(url).hostname;
-    if (hostname.includes('peliprex.masitaprex.com')) return 'peliprex.masitaprex.com';
-    if (hostname.includes('drive.google.com')) return 'drive.google.com';
-    return 'otro';
-  } catch (e) {
-    return 'desconocido';
+    const fin = fechaFin.toDate ? fechaFin.toDate() : new Date(fechaFin);
+    return fin.getTime() < Date.now();
+  } catch {
+    return false;
+  }
+}
+
+async function obtenerInfoPlanUsuario(uid) {
+  if (!db || !uid) {
+    const plan = PLANES_FACILITOTOOLS.gratis;
+    return {
+      ok: true,
+      planId: 'gratis',
+      plan,
+      limite: plan.limite,
+      emitidos: 0,
+      restantes: plan.limite,
+      plantillasPermitidas: plan.plantillasPermitidas,
+      marcaAgua: plan.marcaAgua,
+      fechaFin: null,
+      expiro: false
+    };
+  }
+  const userRef = db.collection('usuarios').doc(uid);
+  const userSnap = await userRef.get();
+  const data = userSnap.exists ? userSnap.data() : {};
+  const planIdCrudo = data.tipoPlan;
+  const planId = PLANES_FACILITOTOOLS[planIdCrudo] ? planIdCrudo : 'gratis';
+  const plan = PLANES_FACILITOTOOLS[planId];
+  const limite = typeof data.limite_plan === 'number' ? data.limite_plan : plan.limite;
+  const emitidos = typeof data.recibos_emitidos === 'number' ? data.recibos_emitidos : 0;
+  const expiro = esFechaExpirada(data.fecha_fin_plan);
+  return {
+    ok: true,
+    planId,
+    plan,
+    limite,
+    emitidos,
+    restantes: Math.max(0, limite - emitidos),
+    plantillasPermitidas: plan.plantillasPermitidas,
+    marcaAgua: plan.marcaAgua,
+    fechaFin: data.fecha_fin_plan || null,
+    expiro
+  };
+}
+
+async function asegurarPlanGratisInicial(uid, email, displayName) {
+  if (!db || !uid) return;
+  const userRef = db.collection('usuarios').doc(uid);
+  const userSnap = await userRef.get();
+  const data = userSnap.exists ? userSnap.data() : {};
+  if (!PLANES_FACILITOTOOLS[data.tipoPlan] || (data.tipoPlan === 'gratis' && !data.fecha_inicio_plan)) {
+    await userRef.set({
+      email: email || data.email || null,
+      displayName: displayName || data.displayName || null,
+      tipoPlan: 'gratis',
+      limite_plan: PLANES_FACILITOTOOLS.gratis.limite,
+      recibos_emitidos: typeof data.recibos_emitidos === 'number' ? data.recibos_emitidos : 0,
+      fecha_inicio_plan: admin.firestore.FieldValue.serverTimestamp(),
+      fecha_fin_plan: null,
+      updatedAt: admin.firestore.FieldValue.serverTimestamp()
+    }, { merge: true });
+    logger.info('PLAN_GRATIS', 'Plan gratis inicial asignado', { uid, email });
   }
 }
 
 // ================================================================
-// 🛣️ RUTAS DE LA API
+// 🔌 MONTAJE DE RUTAS DE COMPROBANTES
 // ================================================================
 
-// Endpoint de login exitoso
+app.use('/api/comprobantes', plantillasRouter);
+
+// ================================================================
+// 📊 ENDPOINTS PÚBLICOS DE PLANES
+// ================================================================
+
+app.get('/api/planes', (req, res) => {
+  res.json({
+    ok: true,
+    planes: Object.values(PLANES_FACILITOTOOLS)
+  });
+});
+
+app.get('/api/comprobantes-info/:uid', async (req, res) => {
+  try {
+    const { uid } = req.params;
+    if (!uid) return res.status(400).json({ ok: false, error: 'uid requerido' });
+    await asegurarPlanGratisInicial(uid, null, null);
+    const info = await obtenerInfoPlanUsuario(uid);
+    res.json(info);
+  } catch (error) {
+    logger.error('PLAN_INFO', error);
+    res.status(500).json({ ok: false, error: 'Error interno' });
+  }
+});
+
+// ================================================================
+// 🔐 ENDPOINTS DE LOGIN
+// ================================================================
+
 app.post("/api/login-success", async (req, res) => {
   const context = 'LOGIN_SUCCESS_API';
   try {
@@ -139,26 +283,26 @@ app.post("/api/login-success", async (req, res) => {
       if (db && uid) {
         const userRef = db.collection("usuarios").doc(uid);
         const userDoc = await userRef.get();
-        
+
         if (userDoc.exists) {
           const userData = userDoc.data();
           const lastDevice = userData.lastDeviceModel;
-          
+
           if (lastDevice && deviceModel && lastDevice !== deviceModel) {
             const ip = getClientIp(req);
             const location = await getLocationFromIP(ip);
             const nombre = displayName || userData.name || email.split('@')[0];
-            
+
             logger.warn(context, '⚠️ Inicio de sesión sospechoso detectado (cambio de dispositivo)', {
               email, uid, oldDevice: lastDevice, newDevice: deviceModel, ip
             });
-            
+
             enviarCorreoSospechoso(email, nombre, location, ip, req.headers['user-agent'], resend)
               .catch(err => logger.error(context, 'Error enviando correo sospechoso', err));
           }
-          
+
           if (deviceModel) {
-            await userRef.update({ 
+            await userRef.update({
               lastDeviceModel: deviceModel,
               lastLoginAt: admin.firestore.FieldValue.serverTimestamp()
             });
@@ -171,10 +315,6 @@ app.post("/api/login-success", async (req, res) => {
 
     await resetLoginAttempts(email);
 
-    // ✅ CORRECCIÓN: Garantizar documento en "usuarios" tanto para usuarios nuevos
-    // como para usuarios existentes que inician sesión con Google o GitHub.
-    // Esto resuelve: créditos no asignados, "Error al cargar la información de tu plan",
-    // y plan no reconocido en usuarios que regresan tras cerrar sesión.
     if (uid) {
       let waitAttempts = 0;
       while (!db && waitAttempts < 10) {
@@ -188,22 +328,24 @@ app.post("/api/login-success", async (req, res) => {
         const userDoc = await userRef.get();
         const userData = userDoc.exists ? userDoc.data() : null;
 
-        // Construir objeto de actualización base (siempre se actualiza lastLogin)
         const updateData = {
           email,
           lastLogin: admin.firestore.FieldValue.serverTimestamp(),
           lastLoginAt: admin.firestore.FieldValue.serverTimestamp()
         };
 
-        // Si el documento no existe o no tiene créditos/plan → inicializar
-        // (aplica a usuarios nuevos de Google/GitHub y a usuarios que no tienen documento en "usuarios")
-        if (!userData || userData.creditos === undefined) {
-          updateData.creditos = 9;
-          updateData.tipoPlan = "creditos";
-          logger.info(context, 'Asignando créditos de bienvenida en "usuarios"', { uid, email });
+        const tienePlanValido = userData && PLANES_FACILITOTOOLS[userData.tipoPlan];
+        if (!tienePlanValido) {
+          updateData.tipoPlan = 'gratis';
+          updateData.limite_plan = PLANES_FACILITOTOOLS.gratis.limite;
+          if (typeof userData?.recibos_emitidos !== 'number') {
+            updateData.recibos_emitidos = 0;
+          }
+          updateData.fecha_inicio_plan = admin.firestore.FieldValue.serverTimestamp();
+          updateData.fecha_fin_plan = null;
+          logger.info(context, 'Asignando Plan Gratis FacilitoTools en "usuarios"', { uid, email });
         }
 
-        // Si es nuevo usuario: enviar correo de bienvenida y crear doc en "empresas"
         if (isNewUser) {
           const welcomeResult = await enviarBienvenida(email, nombre, resend);
           if (welcomeResult.success) {
@@ -226,7 +368,6 @@ app.post("/api/login-success", async (req, res) => {
           logger.info(context, 'Datos guardados en colección empresas', { uid, email });
         }
 
-        // Guardar (merge: true para no sobreescribir datos existentes como tipoPlan ilimitado)
         await userRef.set(updateData, { merge: true });
         logger.info(context, 'Documento en "usuarios" sincronizado correctamente', { uid, email, isNewUser: !!isNewUser });
       }
@@ -245,7 +386,6 @@ app.post("/api/login-success", async (req, res) => {
   }
 });
 
-// Endpoint de notificación de verificación
 app.post("/api/notify-verification", async (req, res) => {
   const context = 'NOTIFY_VERIFICATION';
   try {
@@ -271,11 +411,8 @@ app.post("/api/notify-verification", async (req, res) => {
           welcomeEmailSent: true,
           welcomeEmailSentAt: admin.firestore.FieldValue.serverTimestamp()
         }, { merge: true });
-        
-        const userDoc = await db.collection("usuarios").doc(uid).get();
-        if (!userDoc.exists || userDoc.data().creditos === undefined) {
-          await db.collection("usuarios").doc(uid).set({ creditos: 11, tipoPlan: "creditos" }, { merge: true });
-        }
+
+        await asegurarPlanGratisInicial(uid, email, displayName || email.split('@')[0]);
 
         const empresaRef = db.collection("empresas").doc(uid);
         const secureToken = crypto.randomBytes(32).toString('hex');
@@ -300,93 +437,10 @@ app.post("/api/notify-verification", async (req, res) => {
   }
 });
 
-// Endpoint de análisis con Gemini
-app.post("/api/analyze", async (req, res) => {
-  const { movieTitle, movieDescription } = req.body;
-  const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-  if (!GEMINI_API_KEY) return res.status(500).json({ error: "GEMINI_API_KEY no configurada" });
-
-  const prompt = `Actúa como un crítico de cine experto y redacta un análisis completo para "${movieTitle}". Sinopsis: "${movieDescription}". Sin negritas.`;
-  try {
-    const response = await axios.post(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`,
-      { contents: [{ parts: [{ text: prompt }] }] },
-      { headers: { 'Content-Type': 'application/json' } }
-    );
-    res.json(response.data);
-  } catch (error) {
-    logger.error('GEMINI_API', 'Error en Gemini', error);
-    res.status(500).json({ error: "Error en Gemini" });
-  }
-});
-
 // ================================================================
-// 💰 ENDPOINT DE COBRO POR REPRODUCCIÓN (BACKEND EXCLUSIVO)
+// ⚙️ ENDPOINT DE CONFIGURACIÓN
 // ================================================================
-app.post("/api/peliprex/deduct", async (req, res) => {
-  const context = 'DEDUCT_CREDITS';
-  try {
-    const { uid, cost, titulo } = req.body;
-    if (!uid || !cost || cost <= 0) {
-      return res.status(400).json({ success: false, message: 'Parámetros inválidos' });
-    }
 
-    if (!db) {
-      return res.status(503).json({ success: false, message: 'Base de datos no disponible' });
-    }
-
-    const userRef = db.collection('usuarios').doc(uid);
-    const userDoc = await userRef.get();
-
-    if (!userDoc.exists) {
-      return res.status(404).json({ success: false, message: 'Usuario no encontrado' });
-    }
-
-    const userData = userDoc.data();
-    const tipoPlan = userData.tipoPlan || 'creditos';
-
-    // Si tiene plan ilimitado, no descontamos
-    if (tipoPlan === 'ilimitado') {
-      return res.json({ success: true, message: 'Plan ilimitado: sin descuento' });
-    }
-
-    // Solo descuenta si el plan es por créditos
-    if (tipoPlan !== 'creditos') {
-      return res.status(400).json({ success: false, message: 'Plan no válido para descuento' });
-    }
-
-    const creditosActuales = parseInt(userData.creditos) || 0;
-
-    // Validar créditos suficientes
-    if (creditosActuales < cost) {
-      return res.status(402).json({
-        success: false,
-        code: 'INSUFFICIENT_CREDITS',
-        message: 'Créditos insuficientes para esta reproducción.',
-        creditosActuales,
-        creditosNecesarios: cost
-      });
-    }
-
-    // Descontar atómicamente
-    await userRef.update({
-      creditos: admin.firestore.FieldValue.increment(-cost)
-    });
-
-    logger.info(context, `Descuento realizado: ${cost} créditos por "${titulo || 'sin título'}"`, { uid, cost });
-
-    return res.json({
-      success: true,
-      message: `Se descontaron ${cost} créditos.`,
-      creditosRestantes: creditosActuales - cost
-    });
-
-  } catch (error) {
-    logger.error(context, 'Error interno al descontar créditos', error);
-    return res.status(500).json({ success: false, message: 'Error interno del servidor' });
-  }
-});
-// Endpoint de configuración
 app.get("/api/config", (req, res) => {
   res.json({
     mercadopagoPublicKey: process.env.MERCADOPAGO_PUBLIC_KEY,
@@ -401,393 +455,15 @@ app.get("/api/config", (req, res) => {
       measurementId: process.env.FIREBASE_MEASUREMENT_ID
     },
     environment: process.env.NODE_ENV || 'production',
-    peliprexBaseUrl: process.env.PELIPREX_BASE_URL,
+    planes: Object.values(PLANES_FACILITOTOOLS),
     timestamp: new Date().toISOString()
   });
 });
 
 // ================================================================
-// 🎬 PROXY PELIPREX — Oculta la URL real del servicio en Fly.io
-// Todas las peticiones del frontend pasan por aquí.
-// El cliente nunca ve la dirección https://peliprex-pe-v2.fly.dev
+// 🔐 RECAPTCHA + LOGIN + SOPORTE
 // ================================================================
 
-const PELIPREX_UPSTREAM = process.env.PELIPREX_BASE_URL;
-
-// Helper: reenvía una petición GET al upstream y devuelve la respuesta
-async function peliprexGet(path, res) {
-  if (!PELIPREX_UPSTREAM) {
-    return res.status(503).json({ error: 'Servicio de películas no configurado' });
-  }
-  try {
-    const upstream = await axios.get(`${PELIPREX_UPSTREAM}${path}`, {
-      timeout: 15000,
-      headers: { 'User-Agent': 'MasitaPrexBackend/1.0' }
-    });
-    return res.status(upstream.status).json(upstream.data);
-  } catch (error) {
-    const status = error.response?.status || 502;
-    const data   = error.response?.data  || { error: 'Error en el servicio de películas' };
-    logger.error('PELIPREX_PROXY', `Error en proxy GET ${path}`, error);
-    return res.status(status).json(data);
-  }
-}
-
-// GET /api/peliprex/peliculas  → /peliculas
-app.get('/api/peliprex/peliculas', (req, res) => {
-  peliprexGet('/peliculas', res);
-});
-
-// GET /api/peliprex/peliculas/categoria/:genre  → /peliculas/categoria/:genre
-app.get('/api/peliprex/peliculas/categoria/:genre', (req, res) => {
-  const genre = encodeURIComponent(req.params.genre);
-  const limit = req.query.limit ? `?limit=${encodeURIComponent(req.query.limit)}` : '';
-  peliprexGet(`/peliculas/categoria/${genre}${limit}`, res);
-});
-
-// GET /api/peliprex/vistohoy  → /vistohoy
-app.get('/api/peliprex/vistohoy', (req, res) => {
-  peliprexGet('/vistohoy', res);
-});
-
-// GET /api/peliprex/buscar?q=...  → /buscar?q=...
-app.get('/api/peliprex/buscar', (req, res) => {
-  const q = req.query.q ? `?q=${encodeURIComponent(req.query.q)}` : '';
-  peliprexGet(`/buscar${q}`, res);
-});
-
-// GET /api/peliprex/sugerencias?titulo=...&generos=...&id=...
-app.get('/api/peliprex/sugerencias', (req, res) => {
-  const params = new URLSearchParams();
-  if (req.query.titulo)  params.set('titulo',  req.query.titulo);
-  if (req.query.generos) params.set('generos', req.query.generos);
-  if (req.query.id)      params.set('id',      req.query.id);
-  peliprexGet(`/sugerencias?${params.toString()}`, res);
-});
-
-// GET /api/peliprex/user/profile?email=...
-app.get('/api/peliprex/user/profile', (req, res) => {
-  const email = req.query.email ? `?email=${encodeURIComponent(req.query.email)}` : '';
-  peliprexGet(`/user/profile${email}`, res);
-});
-
-// GET /api/peliprex/user/activity?email=...
-app.get('/api/peliprex/user/activity', (req, res) => {
-  const email = req.query.email ? `?email=${encodeURIComponent(req.query.email)}` : '';
-  peliprexGet(`/user/activity${email}`, res);
-});
-
-// GET /api/peliprex/user/favorites?email=...
-app.get('/api/peliprex/user/favorites', (req, res) => {
-  const email = req.query.email ? `?email=${encodeURIComponent(req.query.email)}` : '';
-  peliprexGet(`/user/favorites${email}`, res);
-});
-
-// GET /api/peliprex/user/add_history?email=...&titulo=...&imagen_url=...&pelicula_url=...
-app.get('/api/peliprex/user/add_history', (req, res) => {
-  const params = new URLSearchParams();
-  if (req.query.email)       params.set('email',       req.query.email);
-  if (req.query.titulo)      params.set('titulo',      req.query.titulo);
-  if (req.query.imagen_url)  params.set('imagen_url',  req.query.imagen_url);
-  if (req.query.pelicula_url) params.set('pelicula_url', req.query.pelicula_url);
-  peliprexGet(`/user/add_history?${params.toString()}`, res);
-});
-
-// GET /api/peliprex/user/history?email=...
-app.get('/api/peliprex/user/history', (req, res) => {
-  const email = req.query.email ? `?email=${encodeURIComponent(req.query.email)}` : '';
-  peliprexGet(`/user/history${email}`, res);
-});
-
-// GET /api/peliprex/user/history/remove?email=...&pelicula_url=...
-app.get('/api/peliprex/user/history/remove', (req, res) => {
-  const params = new URLSearchParams();
-  if (req.query.email)        params.set('email',        req.query.email);
-  if (req.query.pelicula_url) params.set('pelicula_url', req.query.pelicula_url);
-  peliprexGet(`/user/history/remove?${params.toString()}`, res);
-});
-
-// GET /api/peliprex/user/history/clear?email=...
-app.get('/api/peliprex/user/history/clear', (req, res) => {
-  const email = req.query.email ? `?email=${encodeURIComponent(req.query.email)}` : '';
-  peliprexGet(`/user/history/clear${email}`, res);
-});
-
-// GET /api/peliprex/user/favorites/remove?email=...&pelicula_url=...
-app.get('/api/peliprex/user/favorites/remove', (req, res) => {
-  const params = new URLSearchParams();
-  if (req.query.email)        params.set('email',        req.query.email);
-  if (req.query.pelicula_url) params.set('pelicula_url', req.query.pelicula_url);
-  peliprexGet(`/user/favorites/remove?${params.toString()}`, res);
-});
-
-// GET /api/peliprex/user/favorites/clear?email=...
-app.get('/api/peliprex/user/favorites/clear', (req, res) => {
-  const email = req.query.email ? `?email=${encodeURIComponent(req.query.email)}` : '';
-  peliprexGet(`/user/favorites/clear${email}`, res);
-});
-
-// GET /api/peliprex/user/remove_favorite  (sin lógica de créditos — solo eliminar)
-app.get('/api/peliprex/user/remove_favorite', (req, res) => {
-  const params = new URLSearchParams();
-  if (req.query.email)       params.set('email',       req.query.email);
-  if (req.query.titulo)      params.set('titulo',      req.query.titulo);
-  if (req.query.imagen_url)  params.set('imagen_url',  req.query.imagen_url);
-  if (req.query.pelicula_url) params.set('pelicula_url', req.query.pelicula_url);
-  peliprexGet(`/user/remove_favorite?${params.toString()}`, res);
-});
-
-// ================================================================
-// ⭐ ADD FAVORITE CON GESTIÓN SEGURA DE CRÉDITOS (backend-only)
-//
-// El frontend ya NO toca Firestore para créditos.
-// Este endpoint:
-//   1. Verifica que el usuario exista en Firestore.
-//   2. Valida si tiene plan ilimitado o suficientes créditos.
-//   3. Descuenta los créditos de forma atómica.
-//   4. Llama al upstream para registrar el favorito.
-//   5. Revierte el descuento si el upstream falla.
-//   6. Devuelve el resultado final al frontend.
-// ================================================================
-const CREDITOS_FAVORITO = 3; // coste en créditos por añadir favorito
-
-app.post('/api/peliprex/user/add_favorite', async (req, res) => {
-  const context = 'ADD_FAVORITE_SECURE';
-
-  if (!PELIPREX_UPSTREAM) {
-    return res.status(503).json({ ok: false, message: 'Servicio de películas no configurado' });
-  }
-
-  const { uid, email, titulo, imagen_url, pelicula_url } = req.body;
-
-  if (!uid || !email || !titulo || !pelicula_url) {
-    return res.status(400).json({ ok: false, message: 'Faltan campos requeridos (uid, email, titulo, pelicula_url)' });
-  }
-
-  if (!db) {
-    return res.status(503).json({ ok: false, message: 'Base de datos no disponible' });
-  }
-
-  try {
-    // 1. Leer documento del usuario
-    const userRef = db.collection('usuarios').doc(uid);
-    const userDoc = await userRef.get();
-
-    if (!userDoc.exists) {
-      return res.status(404).json({ ok: false, message: 'Usuario no encontrado' });
-    }
-
-    const userData  = userDoc.data();
-    const tipoPlan  = userData.tipoPlan || 'creditos';
-    const creditos  = parseInt(userData.creditos) || 0;
-
-    // 2. Validar créditos (solo si no es ilimitado)
-    if (tipoPlan !== 'ilimitado') {
-      if (creditos < CREDITOS_FAVORITO) {
-        return res.status(402).json({
-          ok: false,
-          code: 'INSUFFICIENT_CREDITS',
-          message: `Necesitas al menos ${CREDITOS_FAVORITO} créditos para añadir a favoritos.`,
-          creditosActuales: creditos,
-          creditosNecesarios: CREDITOS_FAVORITO
-        });
-      }
-
-      // 3. Descontar créditos de forma atómica
-      await userRef.update({
-        creditos: admin.firestore.FieldValue.increment(-CREDITOS_FAVORITO)
-      });
-    }
-
-    // 4. Llamar al upstream para registrar el favorito
-    try {
-      const params = new URLSearchParams({ email, titulo, pelicula_url });
-      if (imagen_url) params.set('imagen_url', imagen_url);
-
-      const upstream = await axios.get(
-        `${PELIPREX_UPSTREAM}/user/add_favorite?${params.toString()}`,
-        { timeout: 12000, headers: { 'User-Agent': 'MasitaPrexBackend/1.0' } }
-      );
-
-      // 5. Éxito: devolver respuesta del upstream enriquecida
-      return res.status(upstream.status).json({
-        ...upstream.data,
-        ok: true
-      });
-
-    } catch (upstreamError) {
-      // 6. Revertir descuento si el upstream falló (y era plan de créditos)
-      if (tipoPlan !== 'ilimitado') {
-        try {
-          await userRef.update({
-            creditos: admin.firestore.FieldValue.increment(CREDITOS_FAVORITO)
-          });
-          logger.info(context, 'Créditos revertidos tras fallo en upstream', { uid, email });
-        } catch (revertError) {
-          logger.error(context, 'Error crítico: no se pudieron revertir créditos', { uid, email, revertError });
-        }
-      }
-
-      const status  = upstreamError.response?.status  || 502;
-      const message = upstreamError.response?.data?.message || 'Error al registrar el favorito en el servicio externo';
-      logger.error(context, 'Error en upstream add_favorite', { uid, email, status });
-      return res.status(status).json({ ok: false, message });
-    }
-
-  } catch (error) {
-    logger.error(context, 'Error interno en add_favorite seguro', error);
-    return res.status(500).json({ ok: false, message: 'Error interno del servidor' });
-  }
-});
-
-// ================================================================
-// 🆕 NUEVOS ENDPOINTS PARA REPRODUCCIÓN Y DESCARGA (COBRO AUTOMÁTICO)
-// ================================================================
-
-// POST /api/reproduccion/validar
-// Valida si el usuario puede iniciar la reproducción (plan o créditos suficientes)
-// y registra una sesión de reproducción para controlar los 6 minutos.
-app.post('/api/reproduccion/validar', async (req, res) => {
-  const context = 'VALIDAR_REPRODUCCION';
-  try {
-    const { uid, movieUrl } = req.body;
-    if (!uid || !movieUrl) return res.status(400).json({ ok: false, error: 'uid y movieUrl requeridos' });
-    if (!db) return res.status(503).json({ ok: false, error: 'Base de datos no disponible' });
-
-    const userRef = db.collection('usuarios').doc(uid);
-    const userDoc = await userRef.get();
-    if (!userDoc.exists) return res.status(404).json({ ok: false, error: 'Usuario no encontrado' });
-
-    const userData = userDoc.data();
-    const tipoPlan = userData.tipoPlan || 'creditos';
-    const provider = obtenerProveedor(movieUrl);
-    const costo = provider === 'peliprex.masitaprex.com' ? 25 : 3;
-
-    if (tipoPlan === 'ilimitado') {
-      // Registrar sesión sin costo
-      const sessionRef = await db.collection('reproducciones').add({
-        uid,
-        movieUrl,
-        startTime: admin.firestore.FieldValue.serverTimestamp(),
-        provider,
-        costo: 0,
-        descontado: false,
-        tipoPlan: 'ilimitado'
-      });
-      return res.json({ ok: true, sessionId: sessionRef.id, requierePago: false });
-    }
-
-    // Plan créditos
-    const creditos = parseInt(userData.creditos) || 0;
-    if (creditos < costo) {
-      return res.status(402).json({ ok: false, code: 'INSUFFICIENT_CREDITS', costo, creditos });
-    }
-
-    const sessionRef = await db.collection('reproducciones').add({
-      uid,
-      movieUrl,
-      startTime: admin.firestore.FieldValue.serverTimestamp(),
-      provider,
-      costo,
-      descontado: false,
-      tipoPlan: 'creditos'
-    });
-    return res.json({ ok: true, sessionId: sessionRef.id, requierePago: true, costo });
-  } catch (error) {
-    logger.error(context, error);
-    res.status(500).json({ ok: false, error: 'Error interno del servidor' });
-  }
-});
-
-// POST /api/reproduccion/descontar
-// Descuenta los créditos si ya han transcurrido al menos 6 minutos desde el inicio.
-app.post('/api/reproduccion/descontar', async (req, res) => {
-  const context = 'DESCONTAR_REPRODUCCION';
-  try {
-    const { sessionId, uid } = req.body;
-    if (!sessionId || !uid) return res.status(400).json({ ok: false, error: 'sessionId y uid requeridos' });
-    if (!db) return res.status(503).json({ ok: false, error: 'Base de datos no disponible' });
-
-    const sessionRef = db.collection('reproducciones').doc(sessionId);
-    const sessionDoc = await sessionRef.get();
-    if (!sessionDoc.exists) return res.status(404).json({ ok: false, error: 'Sesión no encontrada' });
-
-    const sessionData = sessionDoc.data();
-    if (sessionData.uid !== uid) return res.status(403).json({ ok: false, error: 'No autorizado' });
-    if (sessionData.descontado) return res.json({ ok: true, message: 'Ya se había descontado anteriormente' });
-
-    const startTime = sessionData.startTime.toDate();
-    const ahora = new Date();
-    const diffMin = (ahora - startTime) / (1000 * 60);
-    if (diffMin < 6) {
-      return res.status(400).json({ ok: false, error: 'Aún no han transcurrido 6 minutos de reproducción' });
-    }
-
-    if (sessionData.tipoPlan === 'ilimitado') {
-      await sessionRef.update({ descontado: true, fechaDescuento: admin.firestore.FieldValue.serverTimestamp() });
-      return res.json({ ok: true, message: 'Plan ilimitado, sin costo' });
-    }
-
-    const userRef = db.collection('usuarios').doc(uid);
-    const userDoc = await userRef.get();
-    if (!userDoc.exists) return res.status(404).json({ ok: false, error: 'Usuario no encontrado' });
-
-    const costo = sessionData.costo || (sessionData.provider === 'peliprex.masitaprex.com' ? 25 : 3);
-    const creditos = parseInt(userDoc.data().creditos) || 0;
-    if (creditos < costo) {
-      return res.status(402).json({ ok: false, code: 'INSUFFICIENT_CREDITS', message: 'Créditos insuficientes en el momento del descuento' });
-    }
-
-    await userRef.update({ creditos: admin.firestore.FieldValue.increment(-costo) });
-    await sessionRef.update({ descontado: true, fechaDescuento: admin.firestore.FieldValue.serverTimestamp() });
-
-    logger.info(context, `Descontados ${costo} créditos a ${uid} por ${sessionData.movieUrl}`);
-    return res.json({ ok: true, message: `Se han descontado ${costo} créditos` });
-  } catch (error) {
-    logger.error(context, error);
-    res.status(500).json({ ok: false, error: 'Error interno del servidor' });
-  }
-});
-
-// POST /api/descarga/validar
-// Valida créditos/plan y descuenta inmediatamente para permitir la descarga.
-app.post('/api/descarga/validar', async (req, res) => {
-  const context = 'VALIDAR_DESCARGA';
-  try {
-    const { uid, movieUrl } = req.body;
-    if (!uid || !movieUrl) return res.status(400).json({ ok: false, error: 'uid y movieUrl requeridos' });
-    if (!db) return res.status(503).json({ ok: false, error: 'Base de datos no disponible' });
-
-    const userRef = db.collection('usuarios').doc(uid);
-    const userDoc = await userRef.get();
-    if (!userDoc.exists) return res.status(404).json({ ok: false, error: 'Usuario no encontrado' });
-
-    const userData = userDoc.data();
-    const tipoPlan = userData.tipoPlan || 'creditos';
-    const provider = obtenerProveedor(movieUrl);
-    const costo = provider === 'peliprex.masitaprex.com' ? 25 : 3;
-
-    if (tipoPlan !== 'ilimitado') {
-      const creditos = parseInt(userData.creditos) || 0;
-      if (creditos < costo) {
-        return res.status(402).json({ ok: false, code: 'INSUFFICIENT_CREDITS', costo, creditos });
-      }
-      await userRef.update({ creditos: admin.firestore.FieldValue.increment(-costo) });
-      logger.info(context, `Descontados ${costo} créditos por descarga a ${uid}`);
-    }
-
-    return res.json({ ok: true, message: 'Descarga autorizada' });
-  } catch (error) {
-    logger.error(context, error);
-    res.status(500).json({ ok: false, error: 'Error interno del servidor' });
-  }
-});
-
-// ================================================================
-// RESTO DE ENDPOINTS (webhooks, pagos, facturas, etc.)
-// ================================================================
-
-// Endpoint de validación de reCAPTCHA
 app.post("/api/validate-recaptcha", async (req, res) => {
   try {
     const { recaptchaResponse } = req.body;
@@ -798,7 +474,6 @@ app.post("/api/validate-recaptcha", async (req, res) => {
   }
 });
 
-// Endpoint de login con bloqueo
 app.post("/api/login", async (req, res) => {
   const context = 'LOGIN_API';
   try {
@@ -821,7 +496,6 @@ app.post("/api/login", async (req, res) => {
   }
 });
 
-// Endpoint para reportar login fallido
 app.post("/api/report-failed-login", async (req, res) => {
   const context = 'REPORT_FAILED_LOGIN';
   try {
@@ -841,7 +515,10 @@ app.post("/api/report-failed-login", async (req, res) => {
   }
 });
 
-// Endpoint de pago (corregido para usar tipoPlan)
+// ================================================================
+// 💳 PAGO + WEBHOOK MERCADO PAGO
+// ================================================================
+
 app.post("/api/pay", async (req, res) => {
   const context = 'PAY_API';
   try {
@@ -862,12 +539,12 @@ app.post("/api/pay", async (req, res) => {
         payment_method_id,
         payer,
         notification_url: `${HOST_URL}/api/webhook/mercadopago`,
-        metadata: { 
-          uid, 
-          email: payer.email, 
-          amount: transaction_amount, 
+        metadata: {
+          uid,
+          email: payer.email,
+          amount: transaction_amount,
           tipoPlan,
-          tipo_plan: tipoPlan // Duplicamos por seguridad para el webhook
+          tipo_plan: tipoPlan
         }
       }
     });
@@ -890,14 +567,14 @@ app.post("/api/pay", async (req, res) => {
           }
         }
       } catch (err) {}
-      
+
       enviarCorreoRechazo(
-        payer.email, 
-        userName, 
-        result.id.toString(), 
-        transaction_amount, 
-        description || 'Compra en Consulta PE', 
-        result.status_detail || result.status, 
+        payer.email,
+        userName,
+        result.id.toString(),
+        transaction_amount,
+        description || 'Compra en FacilitoTools',
+        result.status_detail || result.status,
         resend
       ).catch(err => logger.error(context, 'Error enviando correo de rechazo', err));
     }
@@ -908,7 +585,6 @@ app.post("/api/pay", async (req, res) => {
   }
 });
 
-// Webhook de Mercado Pago
 app.post("/api/webhook/mercadopago", async (req, res) => {
   const context = 'WEBHOOK_MP';
   const webhookData = req.body;
@@ -939,7 +615,7 @@ app.post("/api/webhook/mercadopago", async (req, res) => {
         const email = metadata.email || paymentInfo.payer?.email;
         const uid = metadata.uid;
         const tipoPlan = metadata.tipoPlan;
-        
+
         if (email && uid) {
           let userName = email.split('@')[0];
           try {
@@ -962,7 +638,7 @@ app.post("/api/webhook/mercadopago", async (req, res) => {
             userName,
             paymentId.toString(),
             metadata.amount || paymentInfo.transaction_amount,
-            paymentInfo.description || 'Compra en Consulta PE',
+            paymentInfo.description || 'Compra en FacilitoTools',
             paymentInfo.status_detail || paymentInfo.status,
             resend
           ).catch(err => logger.error(context, 'Error enviando correo de rechazo desde webhook', err));
@@ -975,22 +651,18 @@ app.post("/api/webhook/mercadopago", async (req, res) => {
 });
 
 // ================================================================
-// 🆕 NUEVOS ENDPOINTS PARA CONSULTAR ESTADO DE PAGO
+// 🔍 ESTADO DE PAGOS
 // ================================================================
 
-// Obtener estado de un pago por ID de Mercado Pago
 app.get("/api/payment-status/:paymentId", async (req, res) => {
   try {
     const paymentId = req.params.paymentId;
     if (!paymentId) return res.status(400).json({ error: 'paymentId requerido' });
-
     if (!db) return res.status(503).json({ error: 'Database no disponible' });
-
     const pagoDoc = await db.collection("pagos_registrados").doc(paymentId).get();
     if (!pagoDoc.exists) {
       return res.json({ status: 'pending', processed: false });
     }
-
     const data = pagoDoc.data();
     res.json({
       status: data.estado || 'pending',
@@ -1003,23 +675,18 @@ app.get("/api/payment-status/:paymentId", async (req, res) => {
   }
 });
 
-// Obtener estado por external_reference (opcional)
 app.get("/api/payment-reference/:externalRef", async (req, res) => {
   try {
     const externalRef = req.params.externalRef;
     if (!externalRef) return res.status(400).json({ error: 'externalRef requerido' });
-
     if (!db) return res.status(503).json({ error: 'Database no disponible' });
-
     const pagosQuery = await db.collection("pagos_registrados")
       .where("externalReference", "==", externalRef)
       .limit(1)
       .get();
-
     if (pagosQuery.empty) {
       return res.json({ status: 'pending', processed: false, paymentId: null });
     }
-
     const doc = pagosQuery.docs[0];
     const data = doc.data();
     res.json({
@@ -1034,38 +701,25 @@ app.get("/api/payment-reference/:externalRef", async (req, res) => {
 });
 
 // ================================================================
-// 🧾 MANEJADOR DE DESCARGA DE BOLETAS (NUEVO)
+// 🧾 DESCARGA DE BOLETAS (PDF)
 // ================================================================
+
 const handleInvoiceDownload = async (req, res) => {
   const context = 'INVOICE_DOWNLOAD';
-
   try {
     const rawPaymentId = req.params.paymentId || req.params.paymentIdWithExt;
     const paymentId = (rawPaymentId || '').replace(/\.pdf$/i, '');
-
-    if (!paymentId) {
-      return res.status(400).json({ error: 'paymentId requerido' });
-    }
-
-    if (!db) {
-      return res.status(503).json({ error: 'Database no disponible' });
-    }
-
+    if (!paymentId) return res.status(400).json({ error: 'paymentId requerido' });
+    if (!db) return res.status(503).json({ error: 'Database no disponible' });
     const pagoDoc = await db.collection("pagos_registrados").doc(paymentId).get();
-    if (!pagoDoc.exists) {
-      return res.status(404).json({ error: 'Pago no encontrado' });
-    }
-
+    if (!pagoDoc.exists) return res.status(404).json({ error: 'Pago no encontrado' });
     const data = pagoDoc.data();
     const storagePath = resolveInvoiceStoragePath(paymentId, data);
     const invoiceFile = await downloadInvoiceBufferFromStorage(storagePath);
-
     if (!invoiceFile?.buffer) {
       return res.status(404).json({ error: 'La boleta aún no está disponible. Intenta en unos segundos.' });
     }
-
     const fileName = `boleta-${paymentId}.pdf`;
-
     res.setHeader('Content-Type', invoiceFile.contentType || 'application/pdf');
     res.setHeader('Content-Length', invoiceFile.size);
     res.setHeader('Content-Disposition', `attachment; filename="${fileName}"; filename*=UTF-8''${encodeURIComponent(fileName)}`);
@@ -1073,7 +727,6 @@ const handleInvoiceDownload = async (req, res) => {
     res.setHeader('Pragma', 'no-cache');
     res.setHeader('Expires', '0');
     res.setHeader('X-Robots-Tag', 'noindex, nofollow, noarchive');
-
     return res.send(invoiceFile.buffer);
   } catch (error) {
     logger.error(context, error);
@@ -1081,17 +734,14 @@ const handleInvoiceDownload = async (req, res) => {
   }
 };
 
-// Endpoint para descargar la boleta de venta (PDF)
 app.get("/api/invoice/:paymentId", handleInvoiceDownload);
 app.get("/boleta/:paymentIdWithExt", handleInvoiceDownload);
 
-// Endpoint para obtener información del pago (ya existente, pero lo dejamos)
 app.get("/api/payment/:paymentId", async (req, res) => {
   try {
     if (!db) return res.status(503).json({ error: 'Database not available' });
     const pagoDoc = await db.collection("pagos_registrados").doc(req.params.paymentId).get();
     if (!pagoDoc.exists) return res.status(404).json({ error: 'Payment not found' });
-    
     const data = pagoDoc.data();
     const fecha = data.fechaRegistro?.toDate() || new Date();
     res.json({
@@ -1113,7 +763,31 @@ app.get("/api/payment/:paymentId", async (req, res) => {
 });
 
 // ================================================================
-// SERVICIO DE ARCHIVOS ESTÁTICOS Y METADATOS (sin cambios relevantes)
+// 📧 SOPORTE
+// ================================================================
+
+app.post("/api/support/send", async (req, res) => {
+  const context = 'SUPPORT_SEND_API';
+  try {
+    const { name, email, subject, message, timestamp } = req.body;
+    if (!name || !email || !subject || !message) {
+      return res.status(400).json({ success: false, error: 'Todos los campos son obligatorios' });
+    }
+    logger.info(context, 'Recibida nueva consulta de soporte', { email, subject });
+    const result = await enviarCorreoSoporte({ name, email, subject, message, timestamp }, resend);
+    if (result.success) {
+      res.json({ success: true, message: 'Consulta enviada correctamente' });
+    } else {
+      res.status(500).json({ success: false, error: 'Error al enviar el correo de soporte' });
+    }
+  } catch (error) {
+    logger.error(context, 'Error procesando envío de soporte', error);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+});
+
+// ================================================================
+// 🌐 ARCHIVOS ESTÁTICOS + GA
 // ================================================================
 
 const PUBLIC_ROUTES = ['/login', '/register', '/verify', '/reset-password', '/disclaimer-apis', '/API-Docs'];
@@ -1121,7 +795,6 @@ const PUBLIC_ROUTES = ['/login', '/register', '/verify', '/reset-password', '/di
 const injectGA = (html) => {
   const gaId = process.env.GOOGLE_ANALYTICS_ID;
   if (!gaId) return html;
-
   const gaScript = `
     <!-- Google Analytics 4 (GA4) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=${gaId}"></script>
@@ -1134,111 +807,10 @@ const injectGA = (html) => {
       });
     </script>
   `;
-  
   if (html.includes('</head>')) {
     return html.replace('</head>', `${gaScript}</head>`);
   }
   return gaScript + html;
-};
-
-const SOCIAL_BOTS = [
-  'facebookexternalhit',
-  'twitterbot',
-  'whatsapp',
-  'telegrambot',
-  'linkedinbot',
-  'discordbot',
-  'slackbot'
-];
-
-const generateCroppedImageUrl = (imageUrl) => {
-  if (!imageUrl || imageUrl.includes('flaticon.com')) return imageUrl;
-  if (imageUrl.includes('drive.google.com')) {
-    const match = imageUrl.match(/\/d\/([^/]+)/);
-    if (match) {
-      return `https://drive.google.com/thumbnail?id=${match[1]}&sz=w1200`;
-    }
-  }
-  return imageUrl;
-};
-
-const serveDynamicMetadata = async (req, res, next) => {
-  const userAgent = (req.headers['user-agent'] || '').toLowerCase();
-  const isBot = SOCIAL_BOTS.some(bot => userAgent.includes(bot));
-  const movieId = req.query.movie;
-
-  if (movieId && (isBot || req.path.includes('PeliPREX.html') || req.path === '/PeliPREX')) {
-    try {
-      if (!db) {
-        return next();
-      }
-
-      let movieData = null;
-      const moviesRef = db.collection('peliculas');
-      
-      const doc = await moviesRef.doc(movieId).get();
-      if (doc.exists) {
-        movieData = doc.data();
-        movieData.id = doc.id;
-      } else {
-        const querySnapshot = await moviesRef.where('titulo', '==', movieId).limit(1).get();
-        if (!querySnapshot.empty) {
-          movieData = querySnapshot.docs[0].data();
-          movieData.id = querySnapshot.docs[0].id;
-        }
-      }
-
-      if (movieData) {
-        const title = `${movieData.titulo} - PeliPREX`;
-        const description = (movieData.descripcion || `Ver ${movieData.titulo} en línea con la mejor calidad en PeliPREX.`).substring(0, 160);
-        let imageUrl = generateCroppedImageUrl(movieData.imagen_url || 'https://cdn-icons-png.flaticon.com/128/747/747965.png');
-        const pageUrl = `${HOST_URL}${req.path}?movie=${encodeURIComponent(movieId)}`;
-
-        if (isBot) {
-          const botHtml = `
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>${title}</title>
-    <meta name="description" content="${description}">
-    <meta property="og:type" content="video.movie">
-    <meta property="og:title" content="${title}">
-    <meta property="og:description" content="${description}">
-    <meta property="og:image" content="${imageUrl}">
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="630">
-    <meta property="og:image:type" content="image/jpeg">
-    <meta property="og:url" content="${pageUrl}">
-    <meta property="og:site_name" content="PeliPREX HD">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="${title}">
-    <meta name="twitter:description" content="${description}">
-    <meta name="twitter:image" content="${imageUrl}">
-    <meta name="twitter:image:alt" content="${movieData.titulo}">
-</head>
-<body>
-    <h1>${title}</h1>
-    <p>${description}</p>
-    <img src="${imageUrl}" alt="${title}">
-</body>
-</html>`;
-          return res.send(botHtml);
-        } else {
-          req.dynamicMetadata = {
-            title,
-            description,
-            imageUrl,
-            pageUrl,
-            movieData
-          };
-        }
-      }
-    } catch (error) {
-      logger.error('METADATA_BOT', `Error obteniendo metadatos para película ${movieId}`, error);
-    }
-  }
-  next();
 };
 
 const serveHtmlWithGA = (req, res, next) => {
@@ -1255,97 +827,15 @@ const serveHtmlWithGA = (req, res, next) => {
       fileName = potentialFile;
     }
   }
-
   if (fileName) {
     const filePath = path.join(__dirname, 'public', fileName);
     if (fs.existsSync(filePath)) {
       try {
         let html = fs.readFileSync(filePath, 'utf8');
-        
-        if (req.dynamicMetadata) {
-          const { title, description, imageUrl, pageUrl } = req.dynamicMetadata;
-          
-          html = html.replace(/<title>.*?<\/title>/i, `<title>${title}</title>`);
-          if (html.includes('name="description"')) {
-            html = html.replace(/<meta name="description" content=".*?">/i, `<meta name="description" content="${description}">`);
-          }
-
-          const dynamicMetaTags = `
-    <!-- Dynamic Open Graph -->
-    <meta property="og:title" content="${title}" />
-    <meta property="og:description" content="${description}" />
-    <meta property="og:image" content="${imageUrl}" />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
-    <meta property="og:image:type" content="image/jpeg" />
-    <meta property="og:url" content="${pageUrl}" />
-    <meta property="og:type" content="video.movie" />
-    <meta property="og:site_name" content="PeliPREX HD" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="${title}" />
-    <meta name="twitter:description" content="${description}" />
-    <meta name="twitter:image" content="${imageUrl}" />
-    <meta name="twitter:image:alt" content="${title}" />
-          `;
-
-          html = html.replace(/<meta property="og:title"[^>]*>/gi, '');
-          html = html.replace(/<meta property="og:description"[^>]*>/gi, '');
-          html = html.replace(/<meta property="og:image"[^>]*>/gi, '');
-          html = html.replace(/<meta property="og:image:width"[^>]*>/gi, '');
-          html = html.replace(/<meta property="og:image:height"[^>]*>/gi, '');
-          html = html.replace(/<meta property="og:image:type"[^>]*>/gi, '');
-          html = html.replace(/<meta property="og:url"[^>]*>/gi, '');
-          html = html.replace(/<meta property="og:type"[^>]*>/gi, '');
-          html = html.replace(/<meta property="og:site_name"[^>]*>/gi, '');
-          html = html.replace(/<meta name="twitter:card"[^>]*>/gi, '');
-          html = html.replace(/<meta name="twitter:title"[^>]*>/gi, '');
-          html = html.replace(/<meta name="twitter:description"[^>]*>/gi, '');
-          html = html.replace(/<meta name="twitter:image"[^>]*>/gi, '');
-          html = html.replace(/<meta name="twitter:image:alt"[^>]*>/gi, '');
-          
-          html = html.replace('<head>', `<head>${dynamicMetaTags}`);
-        }
-
-        const metadataScript = `
-<script>
-  window.injectedMovieData = ${JSON.stringify(req.dynamicMetadata?.movieData || {})};
-  function updateOGTagsFromServer(movie) {
-    if (!movie || !movie.titulo) return;
-    const setMeta = (selector, attr, value) => {
-      let el = document.querySelector(selector);
-      if (!el) {
-        el = document.createElement('meta');
-        const parts = selector.match(/\\[(\\w+)="([^"]+)"\\]/);
-        if (parts) {
-          el.setAttribute(parts[1], parts[2]);
-          document.head.appendChild(el);
-        }
-      }
-      if (el) el.setAttribute(attr, value);
-    };
-    const titulo = movie.titulo || '';
-    const descripcion = (movie.descripcion || 'Ver en PeliPREX HD').substring(0, 160);
-    const imagen = movie.imagen_url || 'https://cdn-icons-png.flaticon.com/128/747/747965.png';
-    setMeta('meta[property="og:title"]', 'content', titulo + ' | PeliPREX HD');
-    setMeta('meta[property="og:description"]', 'content', descripcion);
-    setMeta('meta[property="og:image"]', 'content', imagen);
-    setMeta('meta[property="og:image:width"]', 'content', '1200');
-    setMeta('meta[property="og:image:height"]', 'content', '630');
-    setMeta('meta[name="twitter:title"]', 'content', titulo + ' | PeliPREX HD');
-    setMeta('meta[name="twitter:description"]', 'content', descripcion);
-    setMeta('meta[name="twitter:image"]', 'content', imagen);
-  }
-  if (window.injectedMovieData && window.injectedMovieData.titulo) {
-    updateOGTagsFromServer(window.injectedMovieData);
-  }
-</script>
-        `;
-        
-        html = html.replace('</head>', metadataScript + '</head>');
         html = injectGA(html);
         return res.send(html);
       } catch (err) {
-        logger.error('GA_INJECTION', `Error inyectando GA en ${fileName}`, err);
+        logger.error('HTML_SERVE', `Error sirviendo ${fileName}`, err);
         return res.sendFile(filePath);
       }
     }
@@ -1353,59 +843,34 @@ const serveHtmlWithGA = (req, res, next) => {
   next();
 };
 
-app.use(serveDynamicMetadata);
 app.use(serveHtmlWithGA);
 app.use(express.static(path.join(__dirname, 'public'), { extensions: ['html'] }));
 
 app.get("/api", (req, res) => res.json({ status: "ok" }));
-
-app.post("/api/support/send", async (req, res) => {
-  const context = 'SUPPORT_SEND_API';
-  try {
-    const { name, email, subject, message, timestamp } = req.body;
-    if (!name || !email || !subject || !message) {
-      return res.status(400).json({ success: false, error: 'Todos los campos son obligatorios' });
-    }
-
-    logger.info(context, 'Recibida nueva consulta de soporte', { email, subject });
-
-    const result = await enviarCorreoSoporte({ name, email, subject, message, timestamp }, resend);
-
-    if (result.success) {
-      res.json({ success: true, message: 'Consulta enviada correctamente' });
-    } else {
-      res.status(500).json({ success: false, error: 'Error al enviar el correo de soporte' });
-    }
-  } catch (error) {
-    logger.error(context, 'Error procesando envío de soporte', error);
-    res.status(500).json({ success: false, error: 'Internal server error' });
-  }
-});
 
 app.use((err, req, res, next) => {
   logger.error('GLOBAL_ERROR', 'Error no manejado', err);
   res.status(500).json({ error: 'Error interno del servidor' });
 });
 
-//  SOLUCIÓN: Esperar la inicialización de Firebase antes de abrir el puerto
+// ================================================================
+// 🚀 ARRANQUE
+// ================================================================
+
 const PORT = process.env.PORT || 8080;
 
 async function arrancarServidor() {
   try {
-    // Forzamos a que espere la inicialización si initFirebase devuelve promesa
-    await initFirebase(serviceAccount); 
-    
-    // Pequeña espera de seguridad para asegurar el enlace de la variable db
+    await initFirebase(serviceAccount);
     if (!db) {
       await new Promise(resolve => setTimeout(resolve, 1500));
     }
-
     app.listen(PORT, "0.0.0.0", () => {
-      logger.info('SERVER', `🚀 Servidor iniciado con base de datos vinculada en puerto ${PORT}`, { version: '3.6.1' });
+      logger.info('SERVER', `🚀 FacilitoTools server activo en puerto ${PORT}`, { version: '4.0.0-facilito' });
     });
   } catch (error) {
     logger.error('SERVER', '❌ Fallo crítico: No se pudo arrancar el servidor por error en Firebase', error);
-    process.exit(1); // Apaga la máquina para que Fly active las alertas de despliegue
+    process.exit(1);
   }
 }
 
