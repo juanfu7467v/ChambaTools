@@ -1,0 +1,1534 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FacilitoTools.com — Activa tu plan en segundos | Generación de comprobantes y validación</title>
+    <meta name="description" content="Genera boletas y comprobantes profesionales, valida DNI, RUC y teléfonos. Planes diseñados para emprendedores y empresas." />
+    <meta name="keywords" content="facilitotools, comprobantes, boletas, validacion dni, consulta ruc, consulta telefonica, planes empresariales" />
+    <meta name="robots" content="index, follow" />
+    <meta property="og:title" content="FacilitoTools.com — Activa tu plan en segundos" />
+    <meta property="og:description" content="Genera comprobantes profesionales y valida la identidad de tus clientes con un solo clic." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://facilitotools.com/planes" />
+    <!-- Logo actualizado -->
+    <meta property="og:image" content="https://i.postimg.cc/fLYYD0Bb/1000153255-preview-rev-1.png" />
+    <link rel="icon" type="image/png" href="https://i.postimg.cc/fLYYD0Bb/1000153255-preview-rev-1.png" />
+    <link rel="shortcut icon" type="image/png" href="https://i.postimg.cc/fLYYD0Bb/1000153255-preview-rev-1.png" />
+    <link rel="apple-touch-icon" href="https://i.postimg.cc/fLYYD0Bb/1000153255-preview-rev-1.png" />
+
+    <!-- Tailwind CSS (CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <!-- Remixicon (opcional) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" />
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700;800&family=DM+Mono:wght@400;500&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&display=swap" rel="stylesheet" />
+
+    <!-- Firebase (se mantiene) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="returnConfig.js"></script>
+
+    <style>
+        /* ========== ESTILOS COMPLETOS (mejorados) ========== */
+        :root {
+            --navy-deep: #0A1628;
+            --navy-surface: #0F1F3D;
+            --navy-card: #15294A;
+            --navy-border: #1E3A5F;
+            --emerald: #00C853;
+            --emerald-light: #69F0AE;
+            --emerald-dark: #00A844;
+            --emerald-glow: rgba(0, 200, 83, 0.2);
+            --emerald-glow-strong: rgba(0, 200, 83, 0.35);
+            --gold: #FFD700;
+            --gold-light: #FFED4A;
+            --gold-dim: #B8960F;
+            --gold-glow: rgba(255, 215, 0, 0.15);
+            --ruby: #E53935;
+            --ruby-light: #FF5252;
+            --ruby-glow: rgba(229, 57, 53, 0.2);
+            --white: #F8FAFC;
+            --text-primary: #E2E8F0;
+            --text-muted: #94A3B8;
+            --text-subtle: #64748B;
+            --border-subtle: rgba(255,255,255,0.06);
+            --border-active: rgba(0,200,83,0.25);
+            --border-gold: rgba(255,215,0,0.25);
+            --shadow-card: 0 8px 32px rgba(0,0,0,0.4);
+            --shadow-emerald: 0 4px 20px rgba(0,200,83,0.2);
+            --sh-hov: 0 24px 64px rgba(0,0,0,0.5), 0 6px 24px rgba(0,200,83,0.18);
+            --radius: 20px;
+            --radius-sm: 10px;
+            --font-family: 'Outfit', 'Inter', sans-serif;
+            --font-display: 'Space Grotesk', 'Outfit', sans-serif;
+            --font-serif: 'Cormorant Garamond', serif;
+            --font-mono: 'DM Mono', monospace;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html { font-size: 106.25%; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; }
+
+        body {
+            font-family: var(--font-family);
+            background: var(--navy-deep);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            -webkit-font-smoothing: antialiased;
+            user-select: none;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0.6;
+        }
+
+        .ambient-1 {
+            position: fixed; top: -20%; left: -10%;
+            width: 60vw; height: 60vw;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(0,200,83,0.03) 0%, transparent 65%);
+            pointer-events: none; z-index: -1;
+            animation: floatAmbient 10s ease-in-out infinite;
+        }
+        .ambient-2 {
+            position: fixed; bottom: -20%; right: -10%;
+            width: 50vw; height: 50vw;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255,215,0,0.04) 0%, transparent 65%);
+            pointer-events: none; z-index: -1;
+            animation: floatAmbient 12s ease-in-out infinite reverse;
+        }
+
+        @keyframes floatAmbient {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(20px, -20px) scale(1.05); }
+            66% { transform: translate(-15px, 15px) scale(0.95); }
+        }
+
+        /* ═══ SIDEBAR ═══ */
+        #sidebar-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 50; opacity: 0;
+            transition: opacity 0.3s ease;
+            display: none;
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+        }
+        #sidebar-overlay.opacity-100 { opacity: 1; }
+        #sidebar-overlay.hidden { display: none; }
+
+        #sidebar {
+            position: fixed;
+            top: 0; left: 0;
+            height: 100%; width: 290px;
+            background: linear-gradient(180deg, #0A1628 0%, #0F1F3D 100%) !important;
+            border-right: 1px solid var(--border-active);
+            z-index: 60;
+            overflow: hidden;
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateX(-100%);
+            display: flex; flex-direction: column;
+            box-shadow: 8px 0 40px rgba(0,0,0,0.5);
+        }
+        #sidebar.open { transform: translateX(0); }
+
+        .sb-header {
+            padding: 32px 20px 20px;
+            background: linear-gradient(160deg, #0A1628 0%, #0F1F3D 100%);
+            border-bottom: 1px solid var(--border-active);
+            text-align: center;
+            position: relative; overflow: hidden;
+            flex-shrink: 0;
+        }
+        .sb-header::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--emerald), var(--gold), transparent);
+            animation: shimmerHeader 3s infinite;
+        }
+        @keyframes shimmerHeader {
+            0%, 100% { transform: translateX(-100%); }
+            50% { transform: translateX(100%); }
+        }
+        .sb-logo-box {
+            width: 68px; height: 68px;
+            margin: 0 auto 12px;
+            border-radius: 18px; overflow: hidden;
+            border: 2px solid var(--border-active);
+            box-shadow: 0 0 25px var(--emerald-glow);
+            transition: transform 0.3s ease;
+            background: rgba(0,200,83,0.05);
+        }
+        .sb-logo-box:hover { transform: scale(1.1) rotate(5deg); }
+        .sb-logo-box img { width: 100%; height: 100%; object-fit: cover; }
+        .sb-brand {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800; font-size: 1.3rem;
+            color: var(--gold) !important;
+            letter-spacing: 0.2em; text-transform: uppercase;
+            text-shadow: 0 0 20px rgba(255,215,0,0.4);
+        }
+        .sb-tagline {
+            font-size: 0.7rem; font-weight: 500;
+            color: var(--text-muted);
+            letter-spacing: 0.15em; margin-top: 6px;
+            text-transform: uppercase;
+        }
+        .sb-scroll-area { flex: 1; overflow-y: auto; padding: 8px 0; }
+        .sb-scroll-area::-webkit-scrollbar { width: 3px; }
+        .sb-scroll-area::-webkit-scrollbar-track { background: transparent; }
+        .sb-scroll-area::-webkit-scrollbar-thumb { background: var(--emerald-dark); border-radius: 3px; }
+        .sb-cat {
+            padding: 14px 24px 8px;
+            font-size: 0.7rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.2em;
+            color: var(--emerald);
+        }
+        #sidebar nav a {
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px 24px;
+            color: var(--text-primary) !important;
+            transition: all 0.25s ease;
+            text-decoration: none;
+            font-size: 0.9rem; font-weight: 500;
+            position: relative; overflow: hidden;
+            cursor: pointer;
+        }
+        #sidebar nav a::before {
+            content: '';
+            position: absolute; left: 0; top: 0; bottom: 0;
+            width: 3px; background: var(--emerald);
+            transform: scaleY(0);
+            transition: transform 0.25s ease;
+        }
+        #sidebar nav a:hover {
+            background: rgba(0,200,83,0.08);
+            color: var(--emerald-light) !important;
+            transform: translateX(4px);
+        }
+        #sidebar nav a:hover::before { transform: scaleY(1); }
+        #sidebar nav a.active {
+            background: linear-gradient(90deg, rgba(0,200,83,0.12) 0%, transparent 100%);
+            color: var(--emerald) !important;
+            font-weight: 700;
+        }
+        #sidebar nav a.active::before { transform: scaleY(1); }
+        .sb-icon {
+            width: 20px; height: 20px;
+            flex-shrink: 0; font-size: 1.1rem;
+            text-align: center; color: var(--text-muted);
+            transition: color 0.25s ease;
+        }
+        #sidebar nav a:hover .sb-icon,
+        #sidebar nav a.active .sb-icon { color: var(--emerald); }
+        .sb-badge {
+            font-size: 0.65rem; padding: 2px 8px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--emerald-dark), var(--emerald));
+            color: #000; font-weight: 800;
+            letter-spacing: 0.05em;
+            animation: pulse 2s infinite;
+            margin-left: auto;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        .sb-footer {
+            padding: 16px 20px;
+            border-top: 1px solid var(--border-subtle);
+            display: flex; gap: 16px;
+            justify-content: center;
+            background: rgba(0,0,0,0.2);
+            flex-shrink: 0;
+        }
+        .sb-footer a {
+            color: var(--text-muted) !important;
+            font-size: 1.3rem;
+            transition: all 0.25s ease;
+        }
+        .sb-footer a:hover { color: var(--emerald) !important; transform: translateY(-3px); }
+
+        /* Botón hamburguesa */
+        #menu-toggle {
+            position: fixed;
+            top: 16px; left: 16px;
+            z-index: 100;
+            background: rgba(15, 31, 61, 0.9);
+            color: var(--emerald);
+            border: 1px solid var(--border-active);
+            width: 44px; height: 44px;
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        #menu-toggle:hover {
+            transform: scale(1.08);
+            background: rgba(0,200,83,0.1);
+            box-shadow: 0 6px 20px var(--emerald-glow);
+        }
+        #menu-toggle i { color: var(--emerald); font-size: 1.3rem; }
+
+        /* ═══ HEADER TYPEWRITER ═══ */
+        #typewriterHeader {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 90;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(10, 22, 40, 0.96);
+            border-bottom: 1px solid var(--border-gold);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            box-shadow: 0 2px 24px rgba(255, 215, 0, 0.08);
+            gap: 8px;
+            padding: 6px 16px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: var(--gold);
+            font-family: var(--font-mono);
+            min-height: 48px;
+        }
+        #typewriterHeader .dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: var(--emerald);
+            animation: pulse-dot 1.5s ease-in-out infinite;
+            flex-shrink: 0;
+        }
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.7); }
+        }
+        .typewriter-cursor {
+            display: inline-block;
+            width: 2px;
+            margin-left: 2px;
+            background-color: var(--gold);
+            animation: blink 1s step-end infinite;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        /* ═══ MAIN ═══ */
+        main {
+            position: relative; z-index: 1; width: 100%;
+            padding-top: 48px;
+        }
+
+        /* ═══ HERO ═══ */
+        .hero {
+            width: 100%;
+            min-height: 100svh;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            padding: 56px 16px 48px;
+            text-align: center;
+            position: relative; overflow: hidden;
+        }
+        .hero-line {
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent 0%, var(--emerald) 50%, transparent 100%);
+        }
+        .hero-eyebrow {
+            font-family: var(--font-mono);
+            font-size: 0.7rem; letter-spacing: 0.3em;
+            text-transform: uppercase; color: var(--text-muted);
+            margin-bottom: 16px;
+            animation: fadeUp 0.8s 0.1s ease forwards; opacity: 0;
+        }
+        .hero-title {
+            font-family: var(--font-serif);
+            font-size: clamp(3.5rem, 12vw, 8rem);
+            font-weight: 300; line-height: 0.9;
+            letter-spacing: -0.02em; color: var(--white);
+            margin-bottom: 8px;
+            animation: fadeUp 0.9s 0.2s ease forwards; opacity: 0;
+        }
+        .hero-title em { font-style: italic; color: var(--emerald); }
+        .hero-divider {
+            width: 60px; height: 2px;
+            background: var(--emerald);
+            margin: 24px auto;
+            animation: expandLine 0.8s 0.4s ease forwards;
+            transform: scaleX(0);
+        }
+        @keyframes expandLine { to { transform: scaleX(1); } }
+        .hero-tagline {
+            font-family: var(--font-serif);
+            font-size: clamp(1.3rem, 3vw, 2rem);
+            font-weight: 300; font-style: italic;
+            color: var(--text-primary); max-width: 600px;
+            line-height: 1.5; margin-bottom: 16px;
+            animation: fadeUp 0.9s 0.5s ease forwards; opacity: 0;
+        }
+        .hero-sub {
+            font-size: 0.88rem; color: var(--text-muted);
+            max-width: 520px; line-height: 1.7;
+            margin-bottom: 40px; font-weight: 300;
+            animation: fadeUp 0.9s 0.6s ease forwards; opacity: 0;
+        }
+        .hero-cta {
+            display: inline-flex; align-items: center; gap: 10px;
+            background: linear-gradient(135deg, var(--emerald), var(--emerald-dark));
+            color: #000;
+            font-weight: 700; font-size: 0.85rem;
+            letter-spacing: 0.12em; text-transform: uppercase;
+            padding: 16px 36px; border-radius: 60px;
+            text-decoration: none;
+            transition: all 0.25s ease;
+            animation: fadeUp 0.9s 0.7s ease forwards; opacity: 0;
+            cursor: pointer; border: none;
+            box-shadow: 0 8px 28px var(--emerald-glow-strong);
+            font-family: var(--font-display);
+        }
+        .hero-cta:hover {
+            background: linear-gradient(135deg, var(--emerald-light), var(--emerald));
+            transform: translateY(-3px);
+            box-shadow: 0 12px 36px var(--emerald-glow-strong);
+        }
+        .hero-stats {
+            display: flex; gap: 0;
+            width: 100%; margin-top: 60px;
+            border-top: 1px solid var(--border-subtle);
+            animation: fadeUp 0.9s 0.8s ease forwards; opacity: 0;
+        }
+        .stat-item {
+            flex: 1; padding: 24px 8px;
+            text-align: center;
+            border-right: 1px solid var(--border-subtle);
+        }
+        .stat-item:last-child { border-right: none; }
+        .stat-num {
+            font-family: var(--font-serif);
+            font-size: 2rem; font-weight: 600;
+            color: var(--emerald); display: block;
+        }
+        .stat-label {
+            font-size: 0.68rem; color: var(--text-muted);
+            letter-spacing: 0.08em; text-transform: uppercase;
+            margin-top: 4px; display: block;
+        }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(24px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ═══ SECTIONS ═══ */
+        .section {
+            width: 100%; padding: 48px 0;
+            position: relative;
+        }
+        .section-label {
+            font-family: var(--font-mono);
+            font-size: 0.7rem; letter-spacing: 0.3em;
+            text-transform: uppercase; color: var(--emerald);
+            margin-bottom: 14px; display: block;
+        }
+        .section-title {
+            font-family: var(--font-serif);
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 300; color: var(--white);
+            line-height: 1.1; margin-bottom: 14px;
+        }
+        .section-title em { font-style: italic; color: var(--emerald); }
+        .section-body {
+            font-size: 0.95rem; color: var(--text-muted);
+            line-height: 1.8;
+        }
+
+        .content-grid {
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 16px;
+            box-sizing: border-box;
+        }
+        .content-grid > * { margin-bottom: 32px; }
+        .content-grid > *:last-child { margin-bottom: 0; }
+
+        /* ═══ PLANES ═══ */
+        .plans-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
+            margin-top: 24px;
+        }
+        @media (min-width: 640px) {
+            .plans-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        @media (min-width: 1024px) {
+            .plans-grid {
+                grid-template-columns: repeat(5, 1fr);
+            }
+        }
+        .plan-card {
+            background: var(--navy-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius);
+            padding: 24px 20px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            transition: all 0.3s ease;
+            animation: fadeUp 0.6s ease forwards;
+            opacity: 0;
+        }
+        .plan-card:hover {
+            transform: translateY(-6px);
+            border-color: var(--border-active);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.5), 0 4px 20px rgba(0,200,83,0.1);
+        }
+        .plan-card.popular {
+            border-color: var(--emerald);
+            box-shadow: 0 0 30px var(--emerald-glow);
+            background: linear-gradient(135deg, rgba(0,200,83,0.08) 0%, var(--navy-card) 100%);
+            transform: scale(1.02);
+            z-index: 2;
+        }
+        .plan-card.popular:hover {
+            transform: scale(1.05) translateY(-8px);
+            box-shadow: 0 20px 50px var(--emerald-glow-strong);
+        }
+        .popular-badge {
+            position: absolute;
+            top: -12px;
+            right: 20px;
+            background: linear-gradient(135deg, var(--emerald), var(--emerald-dark));
+            color: #000;
+            font-size: 0.7rem;
+            font-weight: 800;
+            padding: 4px 14px;
+            border-radius: 20px;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            box-shadow: 0 4px 12px var(--emerald-glow);
+        }
+        .plan-card-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .plan-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .plan-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        .plan-name {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--white);
+            font-family: var(--font-display);
+            margin-bottom: 4px;
+        }
+        .plan-duration {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            letter-spacing: 0.05em;
+        }
+        .plan-price {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .price-amount {
+            font-size: 2.8rem;
+            font-weight: 800;
+            color: var(--emerald);
+            font-family: var(--font-display);
+            line-height: 1;
+        }
+        .price-amount.free {
+            color: var(--gold);
+        }
+        .price-period {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+        .plan-features {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 24px 0;
+            flex-grow: 1;
+        }
+        .plan-features li {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 12px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+        .plan-features li i {
+            color: var(--emerald);
+            font-size: 0.9rem;
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+        .plan-features li strong {
+            color: var(--text-primary);
+        }
+        .plan-btn {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            background: transparent;
+            border: 1px solid var(--border-active);
+            color: var(--emerald);
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            text-align: center;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: var(--font-display);
+            letter-spacing: 0.03em;
+            margin-top: auto;
+        }
+        .plan-card.popular .plan-btn {
+            background: linear-gradient(135deg, var(--emerald), var(--emerald-dark));
+            color: #000;
+            border: none;
+            box-shadow: 0 4px 16px var(--emerald-glow);
+        }
+        .plan-btn:hover {
+            background: var(--emerald);
+            color: #000;
+            border-color: var(--emerald);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px var(--emerald-glow);
+        }
+        .plan-card.popular .plan-btn:hover {
+            background: linear-gradient(135deg, var(--emerald-light), var(--emerald));
+            box-shadow: 0 8px 28px var(--emerald-glow-strong);
+        }
+        .plan-note {
+            font-size: 0.72rem;
+            color: var(--text-subtle);
+            text-align: center;
+            margin-top: 12px;
+            line-height: 1.5;
+        }
+
+        .advantage-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px; width: 100%;
+        }
+        .advantage-item {
+            background: var(--navy-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm); padding: 20px 14px;
+            display: flex; flex-direction: column;
+            align-items: center; text-align: center;
+            gap: 10px; transition: all 0.3s ease;
+        }
+        .advantage-item:hover {
+            border-color: var(--border-active);
+            background: rgba(0,200,83,0.04);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px var(--emerald-glow);
+        }
+        .advantage-item .adv-icon {
+            width: 44px; height: 44px; border-radius: 12px;
+            background: rgba(0,200,83,0.1);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem; color: var(--emerald);
+        }
+        .advantage-item span {
+            font-size: 0.82rem; font-weight: 600; color: var(--text-primary);
+        }
+
+        /* ═══ INSTRUCCIONES (Cómo empezar) ═══ */
+        .instruction-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .instruction-list li {
+            display: flex;
+            gap: 14px;
+            padding: 12px 0;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            align-items: flex-start;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        .instruction-list li:last-child {
+            border-bottom: none;
+        }
+        .instruction-list li::before {
+            content: attr(data-step);
+            min-width: 24px;
+            height: 24px;
+            background: var(--emerald);
+            color: #000;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 24px;
+            font-size: 0.72rem;
+            font-weight: 800;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+        .instruction-list li strong {
+            color: var(--white);
+        }
+
+        .pricing-section {
+            background: var(--navy-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+        .pricing-section-header {
+            display: flex; align-items: center; gap: 14px;
+            padding: 16px 18px;
+            background: rgba(0,200,83,0.05);
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        .pricing-section-icon {
+            width: 44px; height: 44px;
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem;
+            background: rgba(0,200,83,0.1);
+            color: var(--emerald);
+        }
+        .pricing-section-icon.gold {
+            background: rgba(255,215,0,0.1);
+            color: var(--gold);
+        }
+        .pricing-section-title {
+            font-weight: 700; color: var(--white);
+        }
+        .pricing-section-sub {
+            font-size: 0.82rem; color: var(--text-muted);
+        }
+
+        .slider-container {
+            width: 100%; margin: 0 auto;
+            position: relative; overflow: hidden;
+            border-radius: 16px;
+        }
+        .slider-track {
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
+            scrollbar-color: var(--emerald) var(--navy-surface);
+            gap: 14px;
+            padding: 4px 0 20px 0;
+        }
+        .slider-track::-webkit-scrollbar { height: 4px; }
+        .slider-track::-webkit-scrollbar-track { background: var(--navy-surface); border-radius: 10px; }
+        .slider-track::-webkit-scrollbar-thumb { background: var(--emerald); border-radius: 10px; }
+        .slider-slide {
+            flex: 0 0 auto;
+            width: 85%;
+            scroll-snap-align: start;
+            border-radius: 16px;
+            overflow: hidden;
+            background: var(--navy-card);
+            box-shadow: var(--shadow-card);
+            border: 1px solid var(--border-subtle);
+        }
+        .slider-slide img {
+            width: 100%; height: auto;
+            display: block; object-fit: contain;
+            background: var(--navy-surface);
+        }
+        .slider-indicators {
+            display: flex; justify-content: center;
+            gap: 8px; margin-top: 12px; flex-wrap: wrap;
+        }
+        .slider-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: var(--text-subtle);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            opacity: 0.5;
+        }
+        .slider-dot.active {
+            background: var(--emerald);
+            width: 24px; border-radius: 4px;
+            opacity: 1;
+        }
+        .slider-dot:hover { opacity: 0.8; background: var(--emerald-light); }
+
+        @media (min-width: 768px) { .slider-slide { width: 45%; } }
+        @media (min-width: 1024px) { .slider-slide { width: 30%; } }
+
+        .faq-container { text-align: left; width: 100%; }
+        .faq-item { border-bottom: 1px solid var(--border-subtle); }
+        .faq-question {
+            display: flex; align-items: center; gap: 12px;
+            cursor: pointer; padding: 16px 4px;
+            font-weight: 600; font-size: 0.9rem;
+            color: var(--text-primary); transition: color 0.2s; user-select: none;
+        }
+        .faq-question:hover { color: var(--emerald); }
+        .faq-question.active { color: var(--emerald); }
+        .faq-question i {
+            color: var(--emerald); font-size: 0.75rem;
+            flex-shrink: 0; transition: transform 0.3s ease, color 0.2s;
+        }
+        .faq-question.active i { transform: rotate(90deg); color: var(--emerald-light); }
+        .faq-answer {
+            padding: 0 4px 18px 28px; color: var(--text-muted);
+            font-size: 0.88rem; line-height: 1.75;
+        }
+        .faq-answer p { margin-bottom: 8px; }
+        .faq-answer p:last-child { margin-bottom: 0; }
+
+        .elite-statement {
+            width: 100%; padding: 72px 16px;
+            background: linear-gradient(180deg, var(--navy-deep) 0%, rgba(0,200,83,0.03) 50%, var(--navy-deep) 100%);
+            text-align: center; position: relative; overflow: hidden;
+        }
+        .elite-quote {
+            font-family: var(--font-serif);
+            font-size: clamp(1.7rem, 5vw, 3.5rem);
+            font-weight: 300; font-style: italic; color: var(--white);
+            line-height: 1.3; max-width: 100%; margin: 0 auto 24px;
+            position: relative; z-index: 1;
+        }
+        .elite-quote em { color: var(--emerald); font-style: normal; }
+        .elite-quote-sub {
+            font-size: 0.85rem; color: var(--text-muted);
+            position: relative; z-index: 1; letter-spacing: 0.05em;
+        }
+
+        .section-divider {
+            width: 100%; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border-subtle), transparent);
+        }
+
+        /* ═══ FOOTER ═══ */
+        .footer-content {
+            width: 100%; padding: 48px 16px 32px;
+            background: var(--navy-surface);
+            border-top: 1px solid var(--border-active);
+            text-align: center; position: relative; z-index: 1;
+        }
+        .footer-content::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--emerald), transparent);
+        }
+        .footer-content h3 {
+            font-size: 0.85rem; font-weight: 600; color: var(--text-muted);
+            letter-spacing: 0.1em; text-transform: uppercase;
+            margin-bottom: 16px;
+        }
+        .footer-content .social-icons { margin-bottom: 24px; }
+        .footer-content .social-icons a {
+            color: var(--text-muted); font-size: 1.6rem;
+            margin: 0 12px; transition: all 0.2s;
+        }
+        .footer-content .social-icons a:hover { color: var(--emerald); transform: translateY(-3px); }
+        .footer-content p {
+            font-size: 0.78rem; color: var(--text-subtle);
+            line-height: 1.6; margin-bottom: 8px;
+        }
+        .footer-content a { color: var(--emerald-light); text-decoration: none; transition: color 0.2s; font-weight: 600; }
+        .footer-content a:hover { color: var(--emerald); }
+
+        /* ═══ BANNER COMPARTIR ═══ */
+        .banner {
+            width: 100%; max-width: 480px;
+            background: var(--navy-card);
+            border: 1px solid var(--border-active);
+            color: var(--white);
+            position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+            padding: 28px;
+            border-top-left-radius: 20px; border-top-right-radius: 20px;
+            box-shadow: 0 -8px 40px rgba(0,0,0,0.6);
+            display: none; flex-direction: column; align-items: center;
+            text-align: center; z-index: 9999;
+        }
+        .banner-title { font-size: 1.1rem; font-weight: 700; color: var(--emerald); margin-bottom: 12px; }
+        .banner-description { font-size: 0.9rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 20px; }
+        .cta-button {
+            width: 100%; padding: 14px;
+            background: linear-gradient(135deg, var(--emerald), var(--emerald-dark));
+            color: #000;
+            border-radius: 60px; font-size: 0.95rem; font-weight: 700;
+            text-decoration: none; display: block; margin-bottom: 10px;
+            transition: all 0.3s ease;
+            border: none; cursor: pointer;
+        }
+        .cta-button:hover { transform: translateY(-2px); }
+        .close-modal {
+            width: 100%; padding: 12px; background: transparent;
+            color: var(--text-muted); border: 1px solid var(--border-subtle);
+            border-radius: 8px; font-size: 0.9rem; font-weight: 500;
+            cursor: pointer; text-align: center; text-decoration: none;
+            display: block; transition: all 0.2s; font-family: var(--font-family);
+        }
+        .close-modal:hover { border-color: var(--border-active); color: var(--white); }
+
+        /* ═══ WHATSAPP ═══ */
+        .chat-bubble {
+            position: fixed; bottom: 24px; right: 24px;
+            width: 60px; height: 60px;
+            background: linear-gradient(135deg, #25D366, #128C7E);
+            color: white; border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 28px; cursor: pointer;
+            box-shadow: 0 6px 25px rgba(37,211,102,0.4);
+            z-index: 1000;
+            animation: slideIn 1s ease-out forwards;
+            transition: all 0.3s ease;
+            border: none;
+        }
+        .chat-bubble:hover { transform: scale(1.1); }
+        .chat-text {
+            position: fixed; bottom: 94px; right: 24px;
+            background: linear-gradient(135deg, #25D366, #128C7E);
+            color: white;
+            padding: 12px 18px;
+            border-radius: 14px;
+            font-size: 14px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+            white-space: nowrap;
+            opacity: 0; transform: scale(0.9);
+            transition: opacity 0.4s, transform 0.4s;
+            z-index: 1001; cursor: pointer;
+            font-family: var(--font-family); font-weight: 600;
+        }
+        .chat-text.show { opacity: 1; transform: scale(1); }
+        .chat-text.hide { opacity: 0; transform: scale(0.9); }
+        @keyframes slideIn {
+            from { transform: translateX(80px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            .hero-stats { flex-wrap: wrap; }
+            .stat-item { min-width: 50%; border-right: none; border-bottom: 1px solid var(--border-subtle); }
+            .stat-item:nth-child(2n) { border-right: none; }
+            .content-grid { padding: 0 12px; }
+            .section { padding: 40px 0; }
+            .slider-slide { width: 90%; }
+            #sidebar { width: 100%; max-width: 300px; }
+            .advantage-grid { gap: 8px; }
+            .plans-grid { gap: 16px; }
+        }
+        @media (min-width: 768px) {
+            .content-grid { padding: 0 20px; }
+            .slider-slide { width: 45%; }
+        }
+        @media (min-width: 1024px) {
+            .content-grid { max-width: 960px; }
+            .slider-slide { width: 30%; }
+            .advantage-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="ambient-1"></div>
+    <div class="ambient-2"></div>
+
+    <!-- ═══ TYPEWRITER HEADER ═══ -->
+    <header id="typewriterHeader" role="banner">
+        <span class="dot"></span>
+        <span id="typewriterText"></span>
+        <span class="typewriter-cursor"></span>
+    </header>
+
+    <!-- Botón hamburguesa -->
+    <button id="menu-toggle" aria-label="Abrir menú de navegación">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Overlay -->
+    <div id="sidebar-overlay" class="hidden" aria-hidden="true"></div>
+
+    <!-- ═══ SIDEBAR ═══ -->
+    <aside id="sidebar" role="navigation" aria-label="Menú principal">
+        <div class="sb-header">
+            <div class="sb-logo-box">
+                <!-- Logo actualizado -->
+                <img src="https://i.postimg.cc/fLYYD0Bb/1000153255-preview-rev-1.png" alt="Logotipo de FacilitoTools" loading="lazy">
+            </div>
+            <div class="sb-brand">FacilitoTools</div>
+            <div class="sb-tagline">Boletas · Comprobantes · Validación</div>
+        </div>
+        <div class="sb-scroll-area">
+            <nav>
+                <div class="sb-cat">General</div>
+                <a href="#" data-target="home">
+                    <i class="fas fa-home sb-icon"></i>
+                    <span>Inicio</span>
+                </a>
+                <a href="#" data-target="planes" class="active">
+                    <i class="fas fa-bolt sb-icon"></i>
+                    <span>Planes</span>
+                </a>
+                <div class="sb-cat">Herramientas</div>
+                <a href="#" data-target="api-key">
+                    <i class="fas fa-key sb-icon"></i>
+                    <span>Mi API Key</span>
+                </a>
+                <a href="#" data-target="API-Docs">
+                    <i class="fas fa-file-code sb-icon"></i>
+                    <span>Documentación APIs</span>
+                </a>
+                <a href="#" data-target="consultaPe-vercion-web">
+                    <i class="fas fa-globe sb-icon"></i>
+                    <span>ConsultaPe versión web</span>
+                </a>
+                <div class="sb-cat">Entretenimiento</div>
+                <a href="#" data-target="PeliPREX">
+                    <i class="fas fa-film sb-icon"></i>
+                    <span>Estrenos y Películas</span>
+                </a>
+                <div class="sb-cat">Próximamente</div>
+                <a href="#" data-target="bienvenida-Revenue-Recovery-OS">
+                    <i class="fas fa-robot sb-icon"></i>
+                    <span>Revenue-Recovery-OS</span>
+                    <span class="sb-badge">Pronto</span>
+                </a>
+                <div class="sb-cat">Cuenta</div>
+                <a href="#" data-target="ayuda">
+                    <i class="fas fa-headset sb-icon"></i>
+                    <span>Ayuda y soporte</span>
+                </a>
+                <a href="#" data-target="actividad">
+                    <i class="fas fa-user-circle sb-icon"></i>
+                    <span>Mi cuenta</span>
+                </a>
+            </nav>
+        </div>
+        <div class="sb-footer">
+            <a href="https://m.facebook.com/61564349657272/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+            <a href="https://youtube.com/@eltiojota628" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+            <a href="https://wa.me/51944950234" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+        </div>
+    </aside>
+
+    <main>
+
+        <!-- ═══ HERO ═══ -->
+        <section class="hero" id="home">
+            <div class="hero-line"></div>
+            <!-- Texto actualizado -->
+            <span class="hero-eyebrow">Comprobantes profesionales · Validación de clientes · 2026</span>
+            <h1 class="hero-title"><em>FacilitoTools</em><br>Impulsa tu<br>negocio.</h1>
+            <div class="hero-divider"></div>
+            <p class="hero-tagline">⚡ Automatiza tu negocio en segundos</p>
+            <p class="hero-sub">Con FacilitoTools.com puedes validar la identidad de tus clientes y generar comprobantes profesionales desde un solo lugar.</p>
+            <button class="hero-cta" onclick="document.getElementById('planes-cards').scrollIntoView({behavior:'smooth'})">
+                <i class="fas fa-bolt"></i> Ver planes ahora
+            </button>
+            <div class="hero-stats">
+                <div class="stat-item"><span class="stat-num">+2,400</span><span class="stat-label">Usuarios Activos</span></div>
+                <div class="stat-item"><span class="stat-num">6</span><span class="stat-label">Servicios</span></div>
+                <div class="stat-item"><span class="stat-num">24/7</span><span class="stat-label">Disponibilidad</span></div>
+                <div class="stat-item"><span class="stat-num">100%</span><span class="stat-label">Seguridad</span></div>
+            </div>
+        </section>
+
+        <!-- ═══ BENEFICIOS ═══ -->
+        <section class="section">
+            <div class="content-grid">
+                <span class="section-label">Beneficios principales</span>
+                <h2 class="section-title">Todo lo que <em>obtienes</em></h2>
+                <div class="advantage-grid">
+                    <div class="advantage-item"><div class="adv-icon"><i class="fas fa-search"></i></div><span>Consulta DNI, RUC y teléfonos desde un único panel</span></div>
+                    <div class="advantage-item"><div class="adv-icon"><i class="fas fa-file-invoice"></i></div><span>Genera comprobantes con diseños modernos y profesionales</span></div>
+                    <div class="advantage-item"><div class="adv-icon"><i class="fas fa-download"></i></div><span>Descarga o comparte tus documentos al instante</span></div>
+                    <div class="advantage-item"><div class="adv-icon"><i class="fas fa-mobile-alt"></i></div><span>Accede desde cualquier dispositivo</span></div>
+                    <div class="advantage-item"><div class="adv-icon"><i class="fas fa-briefcase"></i></div><span>Diseñado para emprendedores, negocios y empresas</span></div>
+                </div>
+            </div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <!-- ═══ MENSAJE DE CONFIANZA ═══ -->
+        <section class="elite-statement">
+            <p class="elite-quote">Empieza a generar comprobantes y validar clientes <em>en minutos.</em></p>
+            <p class="elite-quote-sub">— Pago seguro, activación automática, sin letra pequeña.</p>
+        </section>
+
+        <!-- ═══ PLANES EN TARJETAS ═══ -->
+        <section class="section" id="planes-cards">
+            <div class="content-grid">
+                <span class="section-label">Elige tu plan</span>
+                <h2 class="section-title">Inversión <em>inteligente</em></h2>
+                <p class="section-body">Planes diseñados para cada etapa de tu negocio. Sin contratos, sin sorpresas.</p>
+
+                <div class="plans-grid">
+                    <!-- Plan Gratuito (icono actualizado) -->
+                    <div class="plan-card" style="animation-delay: 0.05s;">
+                        <div class="plan-card-header">
+                            <div class="plan-icon">
+                                <img src="https://i.postimg.cc/fLYYD0Bb/1000153255-preview-rev-1.png" alt="Plan Gratuito" loading="lazy">
+                            </div>
+                            <div class="plan-name">Gratuito</div>
+                            <div class="plan-duration">Siempre</div>
+                        </div>
+                        <div class="plan-price">
+                            <div class="price-amount free">S/0</div>
+                            <div class="price-period">sin costo</div>
+                        </div>
+                        <ul class="plan-features">
+                            <li><i class="fas fa-check-circle"></i> <strong>Plantilla Moderna Azul</strong> con marca de agua</li>
+                            <li><i class="fas fa-check-circle"></i> <strong>5 consultas</strong> de DNI o RUC</li>
+                            <li><i class="fas fa-check-circle"></i> <strong>1 consulta</strong> de teléfono</li>
+                            <li><i class="fas fa-check-circle"></i> Acceso básico al panel</li>
+                        </ul>
+                        <a href="#" class="plan-btn" onclick="alert('Regístrate gratis y empieza a usar FacilitoTools ahora.')">Comenzar gratis</a>
+                        <p class="plan-note">Ideal para probar el servicio</p>
+                    </div>
+
+                    <!-- Plan Semanal -->
+                    <div class="plan-card" style="animation-delay: 0.1s;">
+                        <div class="plan-card-header">
+                            <div class="plan-icon">
+                                <img src="https://cdn-icons-png.flaticon.com/128/2274/2274543.png" alt="Prueba Corta" loading="lazy">
+                            </div>
+                            <div class="plan-name">Prueba Corta</div>
+                            <div class="plan-duration">Semanal</div>
+                        </div>
+                        <div class="plan-price">
+                            <div class="price-amount">S/7</div>
+                            <div class="price-period">por semana</div>
+                        </div>
+                        <ul class="plan-features">
+                            <li><i class="fas fa-check-circle"></i> <strong>150 comprobantes</strong> por semana</li>
+                            <li><i class="fas fa-check-circle"></i> Hasta <strong>20 consultas</strong> (DNI, RUC, Teléfono)</li>
+                            <li><i class="fas fa-check-circle"></i> Plantillas: <strong>Moderna, Elegante, Corporativa, Premium</strong></li>
+                            <li><i class="fas fa-check-circle"></i> <strong>Sube tu logo</strong> para personalizar</li>
+                        </ul>
+                        <a href="https://wa.me/51944950234?text=Hola%2C%20quiero%20activar%20el%20plan%20Prueba%20Corta%20Semanal" class="plan-btn" target="_blank" rel="noopener noreferrer">Comenzar prueba</a>
+                        <p class="plan-note">Ideal para probar el servicio</p>
+                    </div>
+
+                    <!-- Plan Mensual (Más popular) -->
+                    <div class="plan-card popular" style="animation-delay: 0.2s;">
+                        <span class="popular-badge">⭐ Más popular</span>
+                        <div class="plan-card-header">
+                            <div class="plan-icon">
+                                <img src="https://cdn-icons-png.flaticon.com/128/4160/4160724.png" alt="Emprendedor Digital" loading="lazy">
+                            </div>
+                            <div class="plan-name">Emprendedor Digital</div>
+                            <div class="plan-duration">Mensual</div>
+                        </div>
+                        <div class="plan-price">
+                            <div class="price-amount">S/19</div>
+                            <div class="price-period">por mes</div>
+                        </div>
+                        <ul class="plan-features">
+                            <li><i class="fas fa-check-circle"></i> <strong>800 comprobantes</strong> por mes</li>
+                            <li><i class="fas fa-check-circle"></i> Hasta <strong>60 consultas</strong> (DNI, RUC, Teléfono)</li>
+                            <li><i class="fas fa-check-circle"></i> Plantillas: <strong>Moderna, Elegante, Corporativa, Premium</strong></li>
+                            <li><i class="fas fa-check-circle"></i> <strong>Sube tu logo</strong> y personaliza colores</li>
+                            <li><i class="fas fa-check-circle"></i> Soporte prioritario</li>
+                        </ul>
+                        <a href="https://wa.me/51944950234?text=Hola%2C%20quiero%20activar%20el%20plan%20Emprendedor%20Digital%20Mensual" class="plan-btn" target="_blank" rel="noopener noreferrer">Elegir plan</a>
+                        <p class="plan-note">La opción favorita de emprendedores</p>
+                    </div>
+
+                    <!-- Plan Bimestral -->
+                    <div class="plan-card" style="animation-delay: 0.3s;">
+                        <div class="plan-card-header">
+                            <div class="plan-icon">
+                                <img src="https://cdn-icons-png.flaticon.com/128/9662/9662878.png" alt="Negocio Estable" loading="lazy">
+                            </div>
+                            <div class="plan-name">Negocio Estable</div>
+                            <div class="plan-duration">Bimestral</div>
+                        </div>
+                        <div class="plan-price">
+                            <div class="price-amount">S/32</div>
+                            <div class="price-period">por 2 meses</div>
+                        </div>
+                        <ul class="plan-features">
+                            <li><i class="fas fa-check-circle"></i> <strong>1,800 comprobantes</strong> en total</li>
+                            <li><i class="fas fa-check-circle"></i> Hasta <strong>140 consultas</strong> (DNI, RUC, Teléfono)</li>
+                            <li><i class="fas fa-check-circle"></i> Plantillas: <strong>Moderna, Elegante, Corporativa, Premium</strong></li>
+                            <li><i class="fas fa-check-circle"></i> <strong>Sube tu logo</strong> y personaliza colores</li>
+                            <li><i class="fas fa-check-circle"></i> Ahorro por volumen</li>
+                        </ul>
+                        <a href="https://wa.me/51944950234?text=Hola%2C%20quiero%20activar%20el%20plan%20Negocio%20Estable%20Bimestral" class="plan-btn" target="_blank" rel="noopener noreferrer">Elegir plan</a>
+                        <p class="plan-note">Mayor rendimiento para negocios en crecimiento</p>
+                    </div>
+
+                    <!-- Plan Semestral -->
+                    <div class="plan-card" style="animation-delay: 0.4s;">
+                        <div class="plan-card-header">
+                            <div class="plan-icon">
+                                <img src="https://cdn-icons-png.flaticon.com/128/8944/8944556.png" alt="Crecimiento Pro" loading="lazy">
+                            </div>
+                            <div class="plan-name">Crecimiento Pro</div>
+                            <div class="plan-duration">Semestral</div>
+                        </div>
+                        <div class="plan-price">
+                            <div class="price-amount">S/75</div>
+                            <div class="price-period">por 6 meses</div>
+                        </div>
+                        <ul class="plan-features">
+                            <li><i class="fas fa-check-circle"></i> <strong>6,000 comprobantes</strong> en total</li>
+                            <li><i class="fas fa-check-circle"></i> Hasta <strong>350 consultas</strong> (DNI, RUC, Teléfono)</li>
+                            <li><i class="fas fa-check-circle"></i> Plantillas: <strong>Moderna, Elegante, Corporativa, Premium</strong></li>
+                            <li><i class="fas fa-check-circle"></i> <strong>Sube tu logo</strong> y personaliza colores</li>
+                            <li><i class="fas fa-check-circle"></i> Máximo ahorro</li>
+                        </ul>
+                        <a href="https://wa.me/51944950234?text=Hola%2C%20quiero%20activar%20el%20plan%20Crecimiento%20Pro%20Semestral" class="plan-btn" target="_blank" rel="noopener noreferrer">Elegir plan</a>
+                        <p class="plan-note">Para empresas que buscan el mejor valor</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <!-- ═══ CÓMO EMPEZAR ═══ -->
+        <section class="section">
+            <div class="content-grid">
+                <span class="section-label">Proceso simple</span>
+                <h2 class="section-title">Cómo <em>empezar</em></h2>
+                <p class="section-body">Activa tu plan, accede al panel y comienza a generar comprobantes y validar clientes en minutos.</p>
+                <div class="pricing-section">
+                    <div class="pricing-section-header">
+                        <div class="pricing-section-icon gold"><i class="fas fa-rocket"></i></div>
+                        <div><div class="pricing-section-title">Activación inmediata</div><div class="pricing-section-sub">Sin demoras ni papeleos</div></div>
+                    </div>
+                    <div style="padding: 16px 14px;">
+                        <ul class="instruction-list">
+                            <li data-step="1">Elige el plan que mejor se adapte a tu negocio.</li>
+                            <li data-step="2">Regístrate en FacilitoTools.com y accede al panel con tu plan gratuito.</li>
+                            <li data-step="3">Si deseas más funciones, selecciona un plan de pago y completa el proceso de compra.</li>
+                            <li data-step="4">Empieza a <strong>generar comprobantes y validar identidades.</strong></li>
+                        </ul>
+                        <p style="font-size: 0.78rem; color: var(--text-subtle); margin-top: 12px;">⏱️ Tiempo de activación: Inmediato una vez confirmado el pago.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <!-- ═══ SLIDER ═══ -->
+        <section class="section">
+            <div class="content-grid">
+                <span class="section-label">Conoce cómo funciona</span>
+                <h2 class="section-title">Explora el <em>ecosistema</em></h2>
+                <p class="section-body">Una mirada al interior de FacilitoTools — tecnología, herramientas y acceso en un solo lugar.</p>
+                <div class="slider-container">
+                    <div class="slider-track" id="sliderTrack">
+                        <div class="slider-slide"><img src="https://i.postimg.cc/7Y4h8SSC/image-17.jpg" alt="Captura de pantalla de FacilitoTools 1" loading="lazy"></div>
+                        <div class="slider-slide"><img src="https://i.postimg.cc/15SXhDDf/image-25.jpg" alt="Captura de pantalla de FacilitoTools 2" loading="lazy"></div>
+                        <div class="slider-slide"><img src="https://i.postimg.cc/mZCk5m1P/image-24.jpg" alt="Captura de pantalla de FacilitoTools 3" loading="lazy"></div>
+                        <div class="slider-slide"><img src="https://i.postimg.cc/gc8jTgLJ/image-18.jpg" alt="Captura de pantalla de FacilitoTools 4" loading="lazy"></div>
+                        <div class="slider-slide"><img src="https://i.postimg.cc/8kMc0Zfj/image-11.jpg" alt="Captura de pantalla de FacilitoTools 5" loading="lazy"></div>
+                        <div class="slider-slide"><img src="https://i.postimg.cc/CMk5QcnZ/image-16.jpg" alt="Captura de pantalla de FacilitoTools 6" loading="lazy"></div>
+                    </div>
+                    <div class="slider-indicators" id="sliderIndicators"></div>
+                </div>
+            </div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <!-- ═══ FAQ (acordeón corregido) ═══ -->
+        <section class="section">
+            <div class="content-grid">
+                <span class="section-label">Respuestas directas</span>
+                <h2 class="section-title">Preguntas <em>frecuentes</em></h2>
+                <div class="faq-container">
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)"><i class="fas fa-chevron-right"></i> ¿Cómo genero una boleta o comprobante?</div>
+                        <div class="faq-answer" style="display:none;"><p>Desde el panel principal, selecciona "Nuevo comprobante", elige la plantilla que prefieras (según tu plan), ingresa los datos del cliente y los productos o servicios. Puedes previsualizar y descargar el PDF al instante.</p></div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)"><i class="fas fa-chevron-right"></i> ¿Cómo funcionan las consultas de DNI, RUC y teléfonos?</div>
+                        <div class="faq-answer" style="display:none;"><p>Ingresa el número de documento o teléfono en la sección de validación. El sistema te devuelve los datos públicos disponibles (nombres, razón social, estado) para que puedas verificar la identidad de tus clientes. Cada plan tiene un límite de consultas.</p></div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)"><i class="fas fa-chevron-right"></i> ¿Qué incluye el plan gratuito?</div>
+                        <div class="faq-answer" style="display:none;"><p>El plan gratuito te permite generar comprobantes con la plantilla Moderna Azul (con marca de agua de FacilitoTools), realizar hasta 5 consultas de DNI o RUC y 1 consulta de teléfono. Es ideal para empezar a conocer la plataforma.</p></div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)"><i class="fas fa-chevron-right"></i> ¿Qué ventajas ofrecen los planes de pago?</div>
+                        <div class="faq-answer" style="display:none;"><p>Los planes de pago desbloquean plantillas adicionales (Elegante, Corporativa y Premium), la opción de subir tu propio logotipo, personalizar colores, y un mayor número de comprobantes y consultas. Además, recibes soporte prioritario.</p></div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)"><i class="fas fa-chevron-right"></i> ¿Cómo personalizo mis comprobantes?</div>
+                        <div class="faq-answer" style="display:none;"><p>Con un plan de pago, puedes subir tu logo desde el panel de configuración. También puedes elegir entre varias plantillas y ajustar los colores para que coincidan con la identidad de tu marca.</p></div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)"><i class="fas fa-chevron-right"></i> ¿Puedo descargar o compartir un comprobante?</div>
+                        <div class="faq-answer" style="display:none;"><p>Sí. Cada comprobante generado puede descargarse en PDF o compartirse directamente por WhatsApp, correo electrónico o mediante un enlace desde el panel.</p></div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)"><i class="fas fa-chevron-right"></i> ¿Cómo protegen mi información y la de mis clientes?</div>
+                        <div class="faq-answer" style="display:none;"><p>Utilizamos encriptación avanzada y seguimos estrictas políticas de privacidad. Tus datos y los de tus clientes están protegidos y nunca se comparten con terceros. Todas las consultas se realizan sobre fuentes oficiales.</p></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ═══ FOOTER ═══ -->
+    <footer class="footer-content">
+        <h3>Síguenos</h3>
+        <div class="social-icons">
+            <a href="https://m.facebook.com/61564349657272/" target="_blank" rel="noopener noreferrer"><i class="fab fa-facebook-f"></i></a>
+            <a href="https://youtube.com/@eltiojota628?si=sZw2ZHHTUMdaR0nL" target="_blank" rel="noopener noreferrer"><i class="fab fa-youtube"></i></a>
+        </div>
+        <!-- Texto del footer actualizado -->
+        <p>FacilitoTools.com · Generación de comprobantes y validación de clientes © 2026</p>
+        <p><a href="terminos-condiciones">Términos y condiciones</a> · <a href="politica-privacidad">Política de privacidad</a> · <a href="disclaimer-apis">Aviso legal APIs</a> · <a href="aviso-legal-peliprex">Aviso legal PeliPREX</a> · <a href="politica.compras.html">Política de compras</a></p>
+    </footer>
+
+    <!-- ═══ BANNER COMPARTIR ═══ -->
+    <div class="banner" id="banner">
+        <div class="banner-title"><i class="fas fa-heart" style="margin-right:8px;"></i> Pequeño favorcito</div>
+        <div class="banner-description"><p>Comparte esta página con tus contactos en Facebook y WhatsApp. 📲</p><p>Ayúdanos a crecer para seguir mejorando juntos.</p></div>
+        <button class="cta-button" onclick="sharePage()"><i class="fas fa-share-alt" style="margin-right:8px;"></i> Compartir ahora</button>
+        <button class="close-modal" onclick="closeBanner()">Quizás más tarde</button>
+    </div>
+
+    <!-- ═══ WHATSAPP ═══ -->
+    <button class="chat-bubble" onclick="goToWhatsApp()" aria-label="Contactar por WhatsApp"><i class="fab fa-whatsapp"></i></button>
+    <div class="chat-text" id="chatText" onclick="goToWhatsApp()"></div>
+
+    <!-- ═══ SCRIPTS ═══ -->
+    <script>
+        // Typewriter header
+        (function() {
+            const fullText = "Genera comprobantes y valida clientes";
+            const textElement = document.getElementById("typewriterText");
+            let currentIndex = 0, isDeleting = false, isWaiting = false;
+            function typeEffect() {
+                if (isWaiting) return;
+                if (!isDeleting) {
+                    if (currentIndex <= fullText.length) { textElement.textContent = fullText.substring(0, currentIndex); currentIndex++; setTimeout(typeEffect, 70); }
+                    else { isDeleting = true; isWaiting = true; setTimeout(() => { isWaiting = false; typeEffect(); }, 2500); }
+                } else {
+                    if (currentIndex >= 0) { textElement.textContent = fullText.substring(0, currentIndex); currentIndex--; setTimeout(typeEffect, 50); }
+                    else { isDeleting = false; currentIndex = 0; isWaiting = true; setTimeout(() => { isWaiting = false; typeEffect(); }, 800); }
+                }
+            }
+            typeEffect();
+        })();
+
+        // Slider con dots mejorado
+        (function() {
+            const track = document.getElementById('sliderTrack');
+            const indicatorsContainer = document.getElementById('sliderIndicators');
+            const slides = document.querySelectorAll('.slider-slide');
+            if (!track || !indicatorsContainer || slides.length === 0) return;
+
+            slides.forEach((_, index) => {
+                const dot = document.createElement('div');
+                dot.classList.add('slider-dot');
+                if (index === 0) dot.classList.add('active');
+                dot.setAttribute('role', 'button');
+                dot.setAttribute('aria-label', `Ir a la imagen ${index + 1}`);
+                dot.addEventListener('click', () => {
+                    const slideWidth = slides[0].offsetWidth + 14;
+                    track.scrollTo({ left: index * slideWidth, behavior: 'smooth' });
+                    updateActiveDot(index);
+                });
+                indicatorsContainer.appendChild(dot);
+            });
+
+            function updateActiveDot(activeIndex) {
+                document.querySelectorAll('.slider-dot').forEach((dot, idx) => {
+                    dot.classList.toggle('active', idx === activeIndex);
+                });
+            }
+
+            let scrollTimeout;
+            track.addEventListener('scroll', () => {
+                clearTimeout(scrollTimeout);
+                scrollTimeout = setTimeout(() => {
+                    const slideWidth = slides[0].offsetWidth + 14;
+                    const activeIndex = Math.round(track.scrollLeft / slideWidth);
+                    updateActiveDot(Math.min(activeIndex, slides.length - 1));
+                }, 100);
+            });
+
+            window.addEventListener('resize', () => {
+                const slideWidth = slides[0].offsetWidth + 14;
+                const activeIndex = Math.round(track.scrollLeft / slideWidth);
+                updateActiveDot(Math.min(activeIndex, slides.length - 1));
+            });
+        })();
+
+        // Sidebar
+        const menuToggle = document.getElementById('menu-toggle');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+
+        function toggleMenu() {
+            const isOpen = sidebar.classList.toggle('open');
+            if (isOpen) {
+                overlay.classList.remove('hidden');
+                overlay.style.display = 'block';
+                document.body.style.overflow = 'hidden';
+                requestAnimationFrame(() => overlay.classList.add('opacity-100'));
+            } else {
+                overlay.classList.remove('opacity-100');
+                document.body.style.overflow = '';
+                setTimeout(() => {
+                    if (!sidebar.classList.contains('open')) {
+                        overlay.classList.add('hidden');
+                        overlay.style.display = 'none';
+                    }
+                }, 300);
+            }
+        }
+
+        menuToggle.addEventListener('click', toggleMenu);
+        overlay.addEventListener('click', toggleMenu);
+
+        sidebar.querySelectorAll('nav a').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const target = link.getAttribute('data-target');
+                if (target) {
+                    if (target.startsWith('#')) {
+                        const el = document.querySelector(target);
+                        if (el) el.scrollIntoView({ behavior: 'smooth' });
+                    } else {
+                        window.location.href = target + '.html';
+                    }
+                }
+                if (sidebar.classList.contains('open')) toggleMenu();
+            });
+        });
+
+        // Compartir y banner
+        function sharePage() {
+            const url = "https://facilitotools.com/";
+            if (navigator.share) {
+                navigator.share({
+                    title: "FacilitoTools",
+                    text: "¡Genera comprobantes y valida clientes con FacilitoTools!",
+                    url
+                }).catch(e => console.log(e));
+            } else {
+                navigator.clipboard?.writeText(url).then(() => {
+                    alert('Enlace copiado al portapapeles. ¡Compártelo con tus contactos!');
+                }).catch(() => {
+                    window.open(url, "_blank");
+                });
+            }
+        }
+
+        function closeBanner() {
+            document.getElementById('banner').style.display = 'none';
+            localStorage.setItem('bannerClosed', 'true');
+        }
+
+        (function() {
+            if (!localStorage.getItem('bannerClosed')) {
+                const banner = document.getElementById('banner');
+                setTimeout(() => {
+                    banner.style.display = 'flex';
+                }, 10000);
+            }
+        })();
+
+        // ========== FAQ ACORDEÓN CORREGIDO ==========
+        // Función robusta que busca el contenedor .faq-item y el .faq-answer dentro
+        window.toggleFaq = function(element) {
+            // Buscar el contenedor padre más cercano con clase .faq-item
+            const item = element.closest('.faq-item');
+            if (!item) return;
+            const answer = item.querySelector('.faq-answer');
+            const icon = element.querySelector('i');
+            if (!answer) return;
+
+            // Alternar visibilidad
+            if (answer.style.display === 'none' || answer.style.display === '') {
+                answer.style.display = 'block';
+                element.classList.add('active');
+                icon.className = 'fas fa-chevron-down';
+            } else {
+                answer.style.display = 'none';
+                element.classList.remove('active');
+                icon.className = 'fas fa-chevron-right';
+            }
+        };
+
+        // WhatsApp flotante
+        const chatTextEl = document.getElementById("chatText");
+        const whatsappMessage = "¡Cotiza tu plan por Whatsapp!";
+        let idx = 0;
+        function typeWriterWhatsapp() {
+            if (idx < whatsappMessage.length) {
+                chatTextEl.textContent += whatsappMessage.charAt(idx++);
+                setTimeout(typeWriterWhatsapp, 100);
+            } else {
+                setTimeout(() => {
+                    chatTextEl.classList.remove('show');
+                    chatTextEl.classList.add('hide');
+                    setTimeout(() => {
+                        chatTextEl.textContent = "";
+                        idx = 0;
+                        chatTextEl.classList.remove('hide');
+                        setTimeout(() => {
+                            chatTextEl.classList.add('show');
+                            typeWriterWhatsapp();
+                        }, 500);
+                    }, 1000);
+                }, 2500);
+            }
+        }
+
+        window.goToWhatsApp = function() {
+            window.open(`https://wa.me/51944950234?text=${encodeURIComponent('Hola, necesito información sobre los planes de FacilitoTools.')}`, '_blank');
+        };
+
+        document.addEventListener("DOMContentLoaded", () => {
+            setTimeout(() => {
+                chatTextEl.classList.add('show');
+                typeWriterWhatsapp();
+            }, 1500);
+        });
+    </script>
+</body>
+</html>
