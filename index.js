@@ -7,12 +7,9 @@ import { MercadoPagoConfig, Payment } from "mercadopago";
 import path from "path";
 import { fileURLToPath } from "url";
 import fs from "fs";
-import axios from "axios";
 import { Resend } from "resend";
 import helmet from "helmet";
 import { helmetConfig, corsAllowedOrigins } from './cspConfig.js';
-import ReturnConfigServer from './returnConfigServer.js';
-import plantillasRouter from './plantillas.js';
 
 // Importar módulos de seguridad y negocios
 import { 
@@ -22,20 +19,21 @@ import {
   registerFailedLogin, 
   resetLoginAttempts, 
   validateRecaptcha,
-  RECAPTCHA_SITE_KEY,
+  getLocationFromIP,
+  RECAPTCHA_SITE_KEY
 } from './seguridad.js';
 
 import { 
   initFirebase, 
   buildServiceAccountFromEnv, 
   db, 
-  otorgarBeneficio, 
   enviarBienvenida, 
   enviarCorreoSospechoso, 
   enviarCorreoRechazo,
   enviarCorreoSoporte,
-  PAQUETES_CREDITOS,
-  PLANES_ILIMITADOS,
+  buildInvoiceProxyUrl,
+  resolveInvoiceStoragePath,
+  downloadInvoiceBufferFromStorage
 } from './negocios.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -103,7 +101,7 @@ const mpClient = MERCADOPAGO_ACCESS_TOKEN ? new MercadoPagoConfig({
 // 🛣️ RUTAS DE LA API
 // ================================================================
 
-// --- Endpoint de login exitoso (modificado para asignar plan gratuito) ---
+// Endpoint de login exitoso
 app.post("/api/login-success", async (req, res) => {
   const context = 'LOGIN_SUCCESS_API';
   try {
@@ -146,7 +144,7 @@ app.post("/api/login-success", async (req, res) => {
 
     await resetLoginAttempts(email);
 
-    // ✅ Asignar plan gratuito o mantener el existente
+    // Garantizar documento en "usuarios" con los campos del plan gratis
     if (uid) {
       let waitAttempts = 0;
       while (!db && waitAttempts < 10) {
@@ -160,43 +158,57 @@ app.post("/api/login-success", async (req, res) => {
         const userDoc = await userRef.get();
         const userData = userDoc.exists ? userDoc.data() : null;
 
+        // Datos base del plan gratis
+        const defaultPlanData = {
+          tipoPlan: "gratis",
+          planStatus: "active",
+          planExpiration: null,
+          comprobantesEmitidos: 0,
+          comprobantesLimite: 5,
+          consultasConsumidas: 0,
+          consultasLimite: 10,
+          consultasTelefonosConsumidas: 0,
+          consultasTelefonosLimite: 5
+        };
+
         const updateData = {
           email,
-          lastLogin: admin.firestore.FieldValue.serverTimestamp(),
           lastLoginAt: admin.firestore.FieldValue.serverTimestamp()
         };
 
-        // Si es usuario nuevo o no tiene plan, asignar plan gratuito
-        if (!userData || !userData.plan) {
-          updateData.plan = 'gratuito';
-          updateData.limite = 10;
-          updateData.recibos_emitidos = 0;
-          updateData.fecha_inicio = admin.firestore.FieldValue.serverTimestamp();
-          // fecha_fin no aplica para gratuito
-          logger.info(context, 'Asignando plan gratuito a nuevo usuario', { uid, email });
+        if (!userDoc.exists) {
+          updateData.createdAt = admin.firestore.FieldValue.serverTimestamp();
+          if (isNewUser) {
+            const welcomeResult = await enviarBienvenida(email, nombre, resend);
+            if (welcomeResult.success) {
+              updateData.welcomeEmailSent = true;
+              updateData.welcomeEmailSentAt = admin.firestore.FieldValue.serverTimestamp();
+            }
+
+            const empresaRef = db.collection("empresas").doc(uid);
+            const secureToken = crypto.randomBytes(32).toString('hex');
+            await empresaRef.set({
+              uid,
+              email,
+              nombre,
+              apiToken: secureToken,
+              token: secureToken,
+              createdAt: admin.firestore.FieldValue.serverTimestamp(),
+              updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+              status: 'active'
+            }, { merge: true });
+            logger.info(context, 'Datos guardados en colección empresas', { uid, email });
+          }
         }
 
-        // Si es nuevo usuario: enviar correo de bienvenida y crear doc en "empresas"
-        if (isNewUser) {
-          const welcomeResult = await enviarBienvenida(email, nombre, resend);
-          if (welcomeResult.success) {
-            updateData.welcomeEmailSent = true;
-            updateData.welcomeEmailSentAt = admin.firestore.FieldValue.serverTimestamp();
+        if (userDoc.exists) {
+          for (const [key, value] of Object.entries(defaultPlanData)) {
+            if (!(key in userData) || userData[key] === undefined) {
+              updateData[key] = value;
+            }
           }
-
-          const empresaRef = db.collection("empresas").doc(uid);
-          const secureToken = crypto.randomBytes(32).toString('hex');
-          await empresaRef.set({
-            uid,
-            email,
-            nombre,
-            apiToken: secureToken,
-            token: secureToken,
-            createdAt: admin.firestore.FieldValue.serverTimestamp(),
-            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-            status: 'active'
-          }, { merge: true });
-          logger.info(context, 'Datos guardados en colección empresas', { uid, email });
+        } else {
+          Object.assign(updateData, defaultPlanData);
         }
 
         await userRef.set(updateData, { merge: true });
@@ -217,7 +229,7 @@ app.post("/api/login-success", async (req, res) => {
   }
 });
 
-// --- Endpoint de notificación de verificación (similar, asignar plan gratuito) ---
+// Endpoint de notificación de verificación
 app.post("/api/notify-verification", async (req, res) => {
   const context = 'NOTIFY_VERIFICATION';
   try {
@@ -244,14 +256,29 @@ app.post("/api/notify-verification", async (req, res) => {
           welcomeEmailSentAt: admin.firestore.FieldValue.serverTimestamp()
         }, { merge: true });
         
+        // Asegurar que el documento tenga los campos del plan gratis
         const userDoc = await db.collection("usuarios").doc(uid).get();
-        if (!userDoc.exists || !userDoc.data().plan) {
-          await db.collection("usuarios").doc(uid).set({
-            plan: 'gratuito',
-            limite: 10,
-            recibos_emitidos: 0,
-            fecha_inicio: admin.firestore.FieldValue.serverTimestamp()
-          }, { merge: true });
+        const userData = userDoc.exists ? userDoc.data() : {};
+        const defaultPlanData = {
+          tipoPlan: "gratis",
+          planStatus: "active",
+          planExpiration: null,
+          comprobantesEmitidos: 0,
+          comprobantesLimite: 5,
+          consultasConsumidas: 0,
+          consultasLimite: 10,
+          consultasTelefonosConsumidas: 0,
+          consultasTelefonosLimite: 5,
+          createdAt: admin.firestore.FieldValue.serverTimestamp()
+        };
+        const updateData = {};
+        for (const [key, value] of Object.entries(defaultPlanData)) {
+          if (!(key in userData) || userData[key] === undefined) {
+            updateData[key] = value;
+          }
+        }
+        if (Object.keys(updateData).length > 0) {
+          await db.collection("usuarios").doc(uid).set(updateData, { merge: true });
         }
 
         const empresaRef = db.collection("empresas").doc(uid);
@@ -277,82 +304,88 @@ app.post("/api/notify-verification", async (req, res) => {
   }
 });
 
-// --- Endpoint de análisis con Gemini (se mantiene) ---
-app.post("/api/analyze", async (req, res) => {
-  const { movieTitle, movieDescription } = req.body;
-  const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-  if (!GEMINI_API_KEY) return res.status(500).json({ error: "GEMINI_API_KEY no configurada" });
+// ================================================================
+// (Eliminados completamente: endpoints de películas, PeliPREX, créditos, reproducción, descarga y análisis Gemini)
+// ================================================================
 
-  const prompt = `Actúa como un crítico de cine experto y redacta un análisis completo para "${movieTitle}". Sinopsis: "${movieDescription}". Sin negritas.`;
-  try {
-    const response = await axios.post(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`,
-      { contents: [{ parts: [{ text: prompt }] }] },
-      { headers: { 'Content-Type': 'application/json' } }
-    );
-    res.json(response.data);
-  } catch (error) {
-    logger.error('GEMINI_API', 'Error en Gemini', error);
-    res.status(500).json({ error: "Error en Gemini" });
-  }
+// Endpoint de configuración
+app.get("/api/config", (req, res) => {
+  res.json({
+    mercadopagoPublicKey: process.env.MERCADOPAGO_PUBLIC_KEY,
+    recaptchaSiteKey: RECAPTCHA_SITE_KEY,
+    firebaseConfig: {
+      apiKey: process.env.FIREBASE_API_KEY,
+      authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+      projectId: process.env.FIREBASE_PROJECT_ID,
+      storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+      messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
+      appId: process.env.FIREBASE_APP_ID,
+      measurementId: process.env.FIREBASE_MEASUREMENT_ID
+    },
+    environment: process.env.NODE_ENV || 'production',
+    timestamp: new Date().toISOString()
+  });
 });
 
 // ================================================================
-// 🆕 ENDPOINT PARA CONSULTAR PLAN DEL USUARIO
+// RESTO DE ENDPOINTS (webhooks, pagos, facturas, etc.)
 // ================================================================
-app.get("/api/user/plan", async (req, res) => {
-  try {
-    const { uid } = req.query;
-    if (!uid) return res.status(400).json({ error: 'uid requerido' });
-    if (!db) return res.status(503).json({ error: 'Base de datos no disponible' });
 
-    const userRef = db.collection('usuarios').doc(uid);
-    const userDoc = await userRef.get();
-    if (!userDoc.exists) {
-      return res.status(404).json({ error: 'Usuario no encontrado' });
+// Endpoint de validación de reCAPTCHA
+app.post("/api/validate-recaptcha", async (req, res) => {
+  try {
+    const { recaptchaResponse } = req.body;
+    const result = await validateRecaptcha(recaptchaResponse, process.env.RECAPTCHA_CLAVE_SECRETA);
+    res.json({ success: true, ...result });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+});
+
+// Endpoint de login con bloqueo
+app.post("/api/login", async (req, res) => {
+  const context = 'LOGIN_API';
+  try {
+    const { email, recaptchaResponse, deviceId, deviceModel } = req.body;
+    if (!email || !deviceId) return res.status(400).json({ success: false, error: 'Email and deviceId required' });
+
+    const blockStatus = await checkLoginBlock(email);
+    if (blockStatus.isBlocked) {
+      return res.status(403).json({ success: false, error: 'account_blocked', remainingMinutes: blockStatus.remainingMinutes });
     }
 
-    const data = userDoc.data();
-    const plan = data.plan || 'gratuito';
-    const limite = data.limite || 10;
-    const recibos_emitidos = data.recibos_emitidos || 0;
-    const disponibles = Math.max(0, limite - recibos_emitidos);
-    const fecha_inicio = data.fecha_inicio ? data.fecha_inicio.toDate() : null;
-    const fecha_fin = data.fecha_fin ? data.fecha_fin.toDate() : null;
+    if (recaptchaResponse) {
+      await validateRecaptcha(recaptchaResponse, process.env.RECAPTCHA_CLAVE_SECRETA);
+    }
 
-    res.json({
-      plan,
-      limite,
-      recibos_emitidos,
-      disponibles,
-      fecha_inicio,
-      fecha_fin,
-      // Para mostrar en frontend
-      planNombre: obtenerNombrePlan(plan),
-      limiteDescripcion: limite === -1 ? 'Ilimitado' : `${limite} comprobantes`
-    });
+    res.json({ success: true, message: 'Login allowed' });
   } catch (error) {
-    logger.error('USER_PLAN', error);
-    res.status(500).json({ error: 'Error interno' });
+    logger.error(context, 'Error en login', error);
+    res.status(400).json({ success: false, error: error.message });
   }
 });
 
-function obtenerNombrePlan(planId) {
-  const map = {
-    gratuito: 'Gratuito',
-    semanal: 'Semanal (Prueba Corta)',
-    mensual: 'Mensual (Emprendedor Digital)',
-    bimestral: 'Bimestral (Negocio Estable)',
-    semestral: 'Semestral (Crecimiento Pro)'
-  };
-  return map[planId] || planId;
-}
+// Endpoint para reportar login fallido
+app.post("/api/report-failed-login", async (req, res) => {
+  const context = 'REPORT_FAILED_LOGIN';
+  try {
+    const { email, deviceModel, errorType } = req.body;
+    if (!email) return res.status(400).json({ success: false, error: 'Email is required' });
 
-// ================================================================
-// 💰 ENDPOINTS DE PAGO Y WEBHOOK (se mantienen)
-// ================================================================
+    const result = await registerFailedLogin(email, req, deviceModel);
+    if (result.blocked) {
+      const ip = getClientIp(req);
+      const location = await getLocationFromIP(ip);
+      await enviarCorreoSospechoso(email, null, location, ip, req.headers['user-agent'], resend);
+    }
+    res.json({ success: true, ...result });
+  } catch (error) {
+    logger.error(context, 'Error reportando fallo', error);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+});
 
-// Endpoint de pago (se ajusta para aceptar planes)
+// Endpoint de pago (sin otorgar créditos ni planes ilimitados)
 app.post("/api/pay", async (req, res) => {
   const context = 'PAY_API';
   try {
@@ -383,9 +416,7 @@ app.post("/api/pay", async (req, res) => {
       }
     });
 
-    if (result.status === 'approved') {
-      await otorgarBeneficio(uid, payer.email, transaction_amount, 'MP_CARD_INSTANT', result.id.toString(), resend, tipoPlan);
-    } else if (result.status === 'rejected' || result.status === 'cancelled') {
+    if (result.status === 'rejected' || result.status === 'cancelled') {
       let userName = payer.email.split('@')[0];
       try {
         if (db) {
@@ -407,7 +438,7 @@ app.post("/api/pay", async (req, res) => {
         userName, 
         result.id.toString(), 
         transaction_amount, 
-        description || 'Suscripción a plan', 
+        description || 'Compra en Consulta PE', 
         result.status_detail || result.status, 
         resend
       ).catch(err => logger.error(context, 'Error enviando correo de rechazo', err));
@@ -419,7 +450,7 @@ app.post("/api/pay", async (req, res) => {
   }
 });
 
-// Webhook de Mercado Pago (se mantiene)
+// Webhook de Mercado Pago (sin otorgar beneficios)
 app.post("/api/webhook/mercadopago", async (req, res) => {
   const context = 'WEBHOOK_MP';
   const webhookData = req.body;
@@ -434,17 +465,7 @@ app.post("/api/webhook/mercadopago", async (req, res) => {
       const paymentInfo = await payment.get({ id: paymentId });
 
       if (paymentInfo.status === "approved") {
-        const metadata = paymentInfo.metadata || {};
-        const uid = metadata.uid || paymentInfo.external_reference;
-        const email = metadata.email || paymentInfo.payer?.email;
-        const amount = metadata.amount || paymentInfo.transaction_amount;
-        const planId = metadata.tipo_plan || metadata.tipoPlan || metadata.plan_id;
-
-        if (uid && planId) {
-          await otorgarBeneficio(uid, email, amount, 'MP_WEBHOOK', paymentId.toString(), resend, planId);
-        } else {
-          logger.error(context, 'Datos insuficientes en webhook aprobado', { paymentId, uid, planId });
-        }
+        logger.info(context, 'Pago aprobado (sin beneficio automático)', { paymentId, email: paymentInfo.payer?.email });
       } else if (paymentInfo.status === "rejected" || paymentInfo.status === "cancelled") {
         const metadata = paymentInfo.metadata || {};
         const email = metadata.email || paymentInfo.payer?.email;
@@ -473,7 +494,7 @@ app.post("/api/webhook/mercadopago", async (req, res) => {
             userName,
             paymentId.toString(),
             metadata.amount || paymentInfo.transaction_amount,
-            paymentInfo.description || 'Suscripción a plan',
+            paymentInfo.description || 'Compra en Consulta PE',
             paymentInfo.status_detail || paymentInfo.status,
             resend
           ).catch(err => logger.error(context, 'Error enviando correo de rechazo desde webhook', err));
@@ -486,7 +507,7 @@ app.post("/api/webhook/mercadopago", async (req, res) => {
 });
 
 // ================================================================
-// 🆕 ENDPOINTS PARA CONSULTAR ESTADO DE PAGO (se mantienen)
+// ENDPOINTS PARA CONSULTAR ESTADO DE PAGO
 // ================================================================
 
 app.get("/api/payment-status/:paymentId", async (req, res) => {
@@ -543,7 +564,7 @@ app.get("/api/payment-reference/:externalRef", async (req, res) => {
 });
 
 // ================================================================
-// 🧾 MANEJADOR DE DESCARGA DE BOLETAS (se mantiene)
+// 🧾 MANEJADOR DE DESCARGA DE BOLETAS
 // ================================================================
 const handleInvoiceDownload = async (req, res) => {
   const context = 'INVOICE_DOWNLOAD';
@@ -593,6 +614,7 @@ const handleInvoiceDownload = async (req, res) => {
 app.get("/api/invoice/:paymentId", handleInvoiceDownload);
 app.get("/boleta/:paymentIdWithExt", handleInvoiceDownload);
 
+// Endpoint para obtener información del pago
 app.get("/api/payment/:paymentId", async (req, res) => {
   try {
     if (!db) return res.status(503).json({ error: 'Database not available' });
@@ -605,13 +627,12 @@ app.get("/api/payment/:paymentId", async (req, res) => {
       id: req.params.paymentId,
       email: data.email,
       monto: data.monto,
-      creditos: data.creditosOtorgados || 0,
       descripcion: data.descripcion,
       fecha: fecha.toLocaleDateString('es-PE'),
       hora: fecha.toLocaleTimeString('es-PE'),
       estado: data.estado,
       procesado: data.procesado,
-      tipoPlan: data.tipoPlanNuevo || 'creditos',
+      tipoPlan: data.tipoPlanNuevo || 'creditos', // Se mantiene por compatibilidad
       pdfUrl: (data.pdfUrl || data.pdfStoragePath || data.pdfPublicUrl) ? buildInvoiceProxyUrl(req.params.paymentId) : null
     });
   } catch (error) {
@@ -620,10 +641,10 @@ app.get("/api/payment/:paymentId", async (req, res) => {
 });
 
 // ================================================================
-// 📄 SERVICIO DE ARCHIVOS ESTÁTICOS
+// SERVICIO DE ARCHIVOS ESTÁTICOS Y GA
 // ================================================================
 
-const PUBLIC_ROUTES = ['/login', '/register', '/verify', '/reset-password', '/disclaimer-apis', '/API-Docs', '/planes'];
+const PUBLIC_ROUTES = ['/login', '/register', '/verify', '/reset-password', '/disclaimer-apis', '/API-Docs'];
 
 const injectGA = (html) => {
   const gaId = process.env.GOOGLE_ANALYTICS_ID;
@@ -648,7 +669,7 @@ const injectGA = (html) => {
   return gaScript + html;
 };
 
-// Middleware para servir HTML con GA y sin metadatos de películas
+// Middleware para servir HTML con inyección de GA
 const serveHtmlWithGA = (req, res, next) => {
   let fileName = '';
   if (req.path === '/') {
@@ -672,7 +693,7 @@ const serveHtmlWithGA = (req, res, next) => {
         html = injectGA(html);
         return res.send(html);
       } catch (err) {
-        logger.error('STATIC_SERVE', `Error sirviendo ${fileName}`, err);
+        logger.error('GA_INJECTION', `Error inyectando GA en ${fileName}`, err);
         return res.sendFile(filePath);
       }
     }
@@ -683,32 +704,7 @@ const serveHtmlWithGA = (req, res, next) => {
 app.use(serveHtmlWithGA);
 app.use(express.static(path.join(__dirname, 'public'), { extensions: ['html'] }));
 
-// ================================================================
-// 🛣️ RUTAS DE PLANTILLAS (GENERADOR DE COMPROBANTES)
-// ================================================================
-app.use('/api/comprobantes', plantillasRouter);
-
-// ================================================================
-// 📌 ENDPOINTS DE SOPORTE Y CONFIGURACIÓN
-// ================================================================
-
-app.get("/api/config", (req, res) => {
-  res.json({
-    mercadopagoPublicKey: process.env.MERCADOPAGO_PUBLIC_KEY,
-    recaptchaSiteKey: RECAPTCHA_SITE_KEY,
-    firebaseConfig: {
-      apiKey: process.env.FIREBASE_API_KEY,
-      authDomain: process.env.FIREBASE_AUTH_DOMAIN,
-      projectId: process.env.FIREBASE_PROJECT_ID,
-      storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
-      messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
-      appId: process.env.FIREBASE_APP_ID,
-      measurementId: process.env.FIREBASE_MEASUREMENT_ID
-    },
-    environment: process.env.NODE_ENV || 'production',
-    timestamp: new Date().toISOString()
-  });
-});
+app.get("/api", (req, res) => res.json({ status: "ok" }));
 
 app.post("/api/support/send", async (req, res) => {
   const context = 'SUPPORT_SEND_API';
@@ -733,29 +729,24 @@ app.post("/api/support/send", async (req, res) => {
   }
 });
 
-app.get("/api", (req, res) => res.json({ status: "ok" }));
-
-// Manejo de errores global
 app.use((err, req, res, next) => {
   logger.error('GLOBAL_ERROR', 'Error no manejado', err);
   res.status(500).json({ error: 'Error interno del servidor' });
 });
 
-// ================================================================
-// 🚀 ARRANQUE DEL SERVIDOR
-// ================================================================
-
+//  SOLUCIÓN: Esperar la inicialización de Firebase antes de abrir el puerto
 const PORT = process.env.PORT || 8080;
 
 async function arrancarServidor() {
   try {
-    await initFirebase(serviceAccount);
+    await initFirebase(serviceAccount); 
+    
     if (!db) {
       await new Promise(resolve => setTimeout(resolve, 1500));
     }
 
     app.listen(PORT, "0.0.0.0", () => {
-      logger.info('SERVER', `🚀 Servidor iniciado con base de datos vinculada en puerto ${PORT}`, { version: '4.0.0' });
+      logger.info('SERVER', `🚀 Servidor iniciado con base de datos vinculada en puerto ${PORT}`, { version: '3.6.1' });
     });
   } catch (error) {
     logger.error('SERVER', '❌ Fallo crítico: No se pudo arrancar el servidor por error en Firebase', error);
