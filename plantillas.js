@@ -1,6 +1,7 @@
 import express from 'express';
 import PDFDocument from 'pdfkit';
 import QRCode from 'qrcode';
+import admin from 'firebase-admin';
 
 const router = express.Router();
 router.use(express.json({ limit: '2mb' }));
@@ -72,6 +73,10 @@ const TEMPLATE_REGISTRY = {
   }
 };
 
+// ================================================================
+// 🔧 HELPERS GENERALES
+// ================================================================
+
 function escapeHtml(value = '') {
   return String(value)
     .replace(/&/g, '&amp;')
@@ -92,32 +97,18 @@ function formatMoney(value, currency = CURRENCY) {
 
 function formatDate(value) {
   const date = value ? new Date(value) : new Date();
-  return new Intl.DateTimeFormat(LOCALE, {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric'
-  }).format(date);
+  return new Intl.DateTimeFormat(LOCALE, { day: '2-digit', month: '2-digit', year: 'numeric' }).format(date);
 }
 
 function formatDateTime(value) {
   const date = value ? new Date(value) : new Date();
   return new Intl.DateTimeFormat(LOCALE, {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
+    day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
   }).format(date);
 }
 
-function buildSeries(documentType) {
-  return documentType === 'factura' ? 'F001' : 'B001';
-}
-
-function buildCorrelative() {
-  return String(Date.now()).slice(-8);
-}
-
+function buildSeries(documentType) { return documentType === 'factura' ? 'F001' : 'B001'; }
+function buildCorrelative() { return String(Date.now()).slice(-8); }
 function buildDocumentNumber(documentType, customSeries, customCorrelative) {
   const series = (customSeries || buildSeries(documentType)).toUpperCase();
   const correlative = String(customCorrelative || buildCorrelative()).padStart(8, '0');
@@ -136,49 +127,31 @@ function normalizeItems(rawItems = []) {
       index
     }))
     .filter((item) => item.description && item.quantity > 0 && item.unitPrice >= 0);
-
-  if (!cleaned.length) {
-    throw new Error('Debes ingresar al menos un ítem válido.');
-  }
-
+  if (!cleaned.length) throw new Error('Debes ingresar al menos un ítem válido.');
   return cleaned.map((item, index) => ({ ...item, index: index + 1 }));
 }
 
 function calculateTotals({ items, taxRate = IGV_DEFAULT, pricesIncludeTax = true }) {
   const rate = Number.isFinite(Number(taxRate)) ? Number(taxRate) : IGV_DEFAULT;
-
   const enrichedItems = items.map((item) => {
     const gross = item.quantity * item.unitPrice;
     const subtotal = pricesIncludeTax ? gross / (1 + rate) : gross;
     const tax = subtotal * rate;
     const total = pricesIncludeTax ? gross : subtotal + tax;
-
     return {
       ...item,
-      subtotal,
-      tax,
-      total,
-      gross,
+      subtotal, tax, total, gross,
       unitSubtotal: pricesIncludeTax ? item.unitPrice / (1 + rate) : item.unitPrice,
       unitTotal: pricesIncludeTax ? item.unitPrice : item.unitPrice * (1 + rate)
     };
   });
-
   const subtotal = enrichedItems.reduce((sum, item) => sum + item.subtotal, 0);
   const tax = enrichedItems.reduce((sum, item) => sum + item.tax, 0);
   const total = enrichedItems.reduce((sum, item) => sum + item.total, 0);
-
-  return {
-    items: enrichedItems,
-    subtotal,
-    tax,
-    total,
-    taxRate: rate,
-    pricesIncludeTax
-  };
+  return { items: enrichedItems, subtotal, tax, total, taxRate: rate, pricesIncludeTax };
 }
 
-function normalizePayload(payload = {}) {
+function normalizePayload(payload = {}, options = {}) {
   const documentType = payload.documentType === 'factura' ? 'factura' : 'boleta';
   const templateId = TEMPLATE_REGISTRY[payload.templateId] ? payload.templateId : 'moderna';
   const issueDate = payload.issueDate || new Date().toISOString();
@@ -194,7 +167,6 @@ function normalizePayload(payload = {}) {
     email: String(payload.issuer?.email || '').trim(),
     website: String(payload.issuer?.website || '').trim()
   };
-
   const customer = {
     name: String(payload.customer?.name || 'CLIENTE VARIOS').trim(),
     documentType: String(payload.customer?.documentType || (documentType === 'factura' ? 'RUC' : 'DNI')).trim(),
@@ -203,7 +175,6 @@ function normalizePayload(payload = {}) {
     phone: String(payload.customer?.phone || '').trim(),
     address: String(payload.customer?.address || '').trim()
   };
-
   if (!issuer.businessName) throw new Error('La razón social o nombre comercial del emisor es obligatoria.');
   if (!customer.name) throw new Error('El nombre del cliente es obligatorio.');
 
@@ -212,18 +183,13 @@ function normalizePayload(payload = {}) {
   const numbering = buildDocumentNumber(documentType, payload.series, payload.correlative);
 
   const meta = {
-    issueDate,
-    currency,
+    issueDate, currency,
     notes: String(payload.notes || '').trim(),
     paymentMethod: String(payload.paymentMethod || 'Pago único').trim(),
-    documentType,
-    templateId,
-    pricesIncludeTax,
-    taxRate,
-    issuer,
-    customer,
-    numbering,
-    template: TEMPLATE_REGISTRY[templateId]
+    documentType, templateId, pricesIncludeTax, taxRate,
+    issuer, customer, numbering,
+    template: TEMPLATE_REGISTRY[templateId],
+    marcaAgua: !!options.marcaAgua
   };
 
   const qrContent = [
@@ -249,12 +215,94 @@ function normalizePayload(payload = {}) {
 async function getQrDataUrl(text) {
   return QRCode.toDataURL(text, {
     margin: 1,
-    color: {
-      dark: '#111827',
-      light: '#ffffff'
-    }
+    color: { dark: '#111827', light: '#ffffff' }
   });
 }
+
+// ================================================================
+// 🔒 HELPERS DE PLAN Y CONTADOR (Firestore real)
+// ================================================================
+const PLANES_FACILITOTOOLS = {
+  gratis:      { id: 'gratis',      precio: 0,    duracionDias: null, limite: 5,    plantillasPermitidas: ['moderna'],                                              marcaAgua: true  },
+  semanal:     { id: 'semanal',     precio: 7.00, duracionDias: 7,   limite: 150,  plantillasPermitidas: ['moderna','elegante','corporativa','premium'],          marcaAgua: false },
+  mensual:     { id: 'mensual',     precio: 19.00,duracionDias: 30,  limite: 800,  plantillasPermitidas: ['moderna','elegante','corporativa','premium'],          marcaAgua: false },
+  bimestral:   { id: 'bimestral',   precio: 32.00,duracionDias: 60,  limite: 1800, plantillasPermitidas: ['moderna','elegante','corporativa','premium'],          marcaAgua: false },
+  semestral:   { id: 'semestral',   precio: 75.00,duracionDias: 180, limite: 6000, plantillasPermitidas: ['moderna','elegante','corporativa','premium'],          marcaAgua: false }
+};
+
+function esFechaExpirada(fechaFin) {
+  if (!fechaFin) return false;
+  try {
+    const fin = fechaFin.toDate ? fechaFin.toDate() : new Date(fechaFin);
+    return fin.getTime() < Date.now();
+  } catch { return false; }
+}
+
+async function leerPlanUsuario(db, uid) {
+  if (!db || !uid) {
+    return {
+      planId: 'gratis', plan: PLANES_FACILITOTOOLS.gratis,
+      limite: PLANES_FACILITOTOOLS.gratis.limite,
+      emitidos: 0,
+      restantes: PLANES_FACILITOTOOLS.gratis.limite,
+      plantillasPermitidas: PLANES_FACILITOTOOLS.gratis.plantillasPermitidas,
+      marcaAgua: PLANES_FACILITOTOOLS.gratis.marcaAgua,
+      expiro: false
+    };
+  }
+  const userRef = db.collection('usuarios').doc(uid);
+  const userSnap = await userRef.get();
+  const data = userSnap.exists ? userSnap.data() : {};
+  const planIdCrudo = data.tipoPlan;
+  const planId = PLANES_FACILITOTOOLS[planIdCrudo] ? planIdCrudo : 'gratis';
+  const plan = PLANES_FACILITOTOOLS[planId];
+  const limite = typeof data.limite_plan === 'number' ? data.limite_plan : plan.limite;
+  const emitidos = typeof data.recibos_emitidos === 'number' ? data.recibos_emitidos : 0;
+  const expiro = esFechaExpirada(data.fecha_fin_plan);
+  return {
+    planId, plan, limite, emitidos,
+    restantes: Math.max(0, limite - emitidos),
+    plantillasPermitidas: plan.plantillasPermitidas,
+    marcaAgua: plan.marcaAgua,
+    expiro
+  };
+}
+
+async function consumirRecibo(db, uid) {
+  if (!db || !uid) {
+    return { ok: false, error: 'NO_AUTH' };
+  }
+  const userRef = db.collection('usuarios').doc(uid);
+  const userSnap = await userRef.get();
+  if (!userSnap.exists) return { ok: false, error: 'NO_USER' };
+  const data = userSnap.data();
+  const planIdCrudo = data.tipoPlan;
+  const planId = PLANES_FACILITOTOOLS[planIdCrudo] ? planIdCrudo : 'gratis';
+  const plan = PLANES_FACILITOTOOLS[planId];
+  const limite = typeof data.limite_plan === 'number' ? data.limite_plan : plan.limite;
+  const emitidos = typeof data.recibos_emitidos === 'number' ? data.recibos_emitidos : 0;
+
+  if (esFechaExpirada(data.fecha_fin_plan)) {
+    return { ok: false, error: 'PLAN_EXPIRED', planId, limite, emitidos, restantes: 0 };
+  }
+  if (emitidos >= limite) {
+    return {
+      ok: false, error: 'LIMIT_REACHED',
+      planId, limite, emitidos, restantes: 0,
+      message: 'Has alcanzado el límite de tu plan actual. Actualiza a nuestro Plan Mensual o Bimestral para seguir emitiendo sin interrupciones.'
+    };
+  }
+  await userRef.update({
+    recibos_emitidos: admin.firestore.FieldValue.increment(1),
+    ultimoReciboAt: admin.firestore.FieldValue.serverTimestamp(),
+    updatedAt: admin.firestore.FieldValue.serverTimestamp()
+  });
+  return { ok: true, planId, limite, emitidos: emitidos + 1, restantes: Math.max(0, limite - (emitidos + 1)) };
+}
+
+// ================================================================
+// 🎨 CSS DINÁMICO DE PLANTILLAS + MARCA DE AGUA
+// ================================================================
 
 function buildTemplateCss(theme) {
   return `
@@ -284,6 +332,7 @@ function buildTemplateCss(theme) {
       overflow: hidden;
       box-shadow: 0 24px 80px rgba(15, 23, 42, 0.14);
       border: 1px solid rgba(148, 163, 184, 0.18);
+      position: relative;
     }
     .hero {
       background: linear-gradient(135deg, var(--accent) 0%, #1e293b 100%);
@@ -294,27 +343,9 @@ function buildTemplateCss(theme) {
       gap: 20px;
       align-items: start;
     }
-    .brand-title {
-      font-size: 28px;
-      font-weight: 800;
-      line-height: 1.1;
-      margin-bottom: 10px;
-      letter-spacing: -0.02em;
-    }
-    .brand-meta,
-    .doc-meta,
-    .small-box,
-    .legal,
-    .totals table,
-    .items th,
-    .items td,
-    .summary-pill,
-    .section-title,
-    .empty-note {
-      font-size: 14px;
-    }
-    .brand-meta div,
-    .doc-meta div { margin-bottom: 6px; opacity: 0.96; }
+    .brand-title { font-size: 28px; font-weight: 800; line-height: 1.1; margin-bottom: 10px; letter-spacing: -0.02em; }
+    .brand-meta, .doc-meta, .small-box, .legal, .totals table, .items th, .items td, .summary-pill, .section-title, .empty-note { font-size: 14px; }
+    .brand-meta div, .doc-meta div { margin-bottom: 6px; opacity: 0.96; }
     .doc-card {
       background: rgba(255,255,255,0.14);
       backdrop-filter: blur(8px);
@@ -323,58 +354,19 @@ function buildTemplateCss(theme) {
       padding: 18px 20px;
       box-shadow: inset 0 1px 0 rgba(255,255,255,0.14);
     }
-    .doc-type {
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      opacity: 0.8;
-      margin-bottom: 10px;
-    }
-    .doc-number {
-      font-size: 28px;
-      font-weight: 800;
-      line-height: 1.1;
-      margin-bottom: 12px;
-    }
-    .content {
-      padding: 28px 32px 18px;
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 18px;
-      margin-bottom: 20px;
-    }
-    .box {
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      background: var(--panel);
-      padding: 18px;
-    }
+    .doc-type { font-size: 12px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; opacity: 0.8; margin-bottom: 10px; }
+    .doc-number { font-size: 28px; font-weight: 800; line-height: 1.1; margin-bottom: 12px; }
+    .content { padding: 28px 32px 18px; }
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin-bottom: 20px; }
+    .box { border: 1px solid var(--line); border-radius: 18px; background: var(--panel); padding: 18px; }
     .section-title {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      color: var(--accent);
-      font-weight: 800;
-      margin-bottom: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      font-size: 12px;
+      display: inline-flex; align-items: center; gap: 8px;
+      color: var(--accent); font-weight: 800; margin-bottom: 12px;
+      text-transform: uppercase; letter-spacing: 0.08em; font-size: 12px;
     }
     .small-box div { margin-bottom: 8px; }
-    .items-wrap {
-      border: 1px solid var(--line);
-      border-radius: 20px;
-      overflow: hidden;
-      margin-bottom: 20px;
-    }
-    .items {
-      width: 100%;
-      border-collapse: collapse;
-      background: white;
-    }
+    .items-wrap { border: 1px solid var(--line); border-radius: 20px; overflow: hidden; margin-bottom: 20px; }
+    .items { width: 100%; border-collapse: collapse; background: white; }
     .items thead th {
       background: var(--accent-soft);
       color: var(--accent);
@@ -384,28 +376,12 @@ function buildTemplateCss(theme) {
       letter-spacing: 0.08em;
       text-transform: uppercase;
     }
-    .items tbody td {
-      padding: 14px 16px;
-      border-top: 1px solid var(--line);
-      vertical-align: top;
-    }
-    .items tbody tr:nth-child(even) td {
-      background: var(--panel);
-    }
+    .items tbody td { padding: 14px 16px; border-top: 1px solid var(--line); vertical-align: top; }
+    .items tbody tr:nth-child(even) td { background: var(--panel); }
     .item-name { font-weight: 700; }
     .item-sku { color: var(--muted); font-size: 12px; margin-top: 4px; }
-    .totals-area {
-      display: grid;
-      grid-template-columns: 1fr minmax(280px, 360px);
-      gap: 18px;
-      align-items: start;
-      margin-bottom: 24px;
-    }
-    .summary-pills {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
+    .totals-area { display: grid; grid-template-columns: 1fr minmax(280px, 360px); gap: 18px; align-items: start; margin-bottom: 24px; }
+    .summary-pills { display: flex; flex-wrap: wrap; gap: 10px; }
     .summary-pill {
       border: 1px solid var(--line);
       padding: 12px 14px;
@@ -414,27 +390,12 @@ function buildTemplateCss(theme) {
       font-weight: 600;
       color: var(--muted);
     }
-    .totals {
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      overflow: hidden;
-      background: white;
-    }
-    .totals table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    .totals td {
-      padding: 14px 16px;
-      border-top: 1px solid var(--line);
-    }
+    .totals { border: 1px solid var(--line); border-radius: 18px; overflow: hidden; background: white; }
+    .totals table { width: 100%; border-collapse: collapse; }
+    .totals td { padding: 14px 16px; border-top: 1px solid var(--line); }
     .totals tr:first-child td { border-top: none; }
     .totals td:last-child { text-align: right; font-weight: 700; }
-    .totals .grand td {
-      background: var(--accent);
-      color: white;
-      font-size: 18px;
-    }
+    .totals .grand td { background: var(--accent); color: white; font-size: 18px; }
     .footer {
       display: grid;
       grid-template-columns: 140px 1fr;
@@ -444,52 +405,63 @@ function buildTemplateCss(theme) {
       align-items: start;
       background: linear-gradient(180deg, #fff 0%, var(--panel) 100%);
     }
-    .qr-box {
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      background: white;
-      padding: 10px;
-      text-align: center;
-    }
-    .qr-box img {
-      width: 100%;
-      max-width: 120px;
-      display: block;
-      margin: 0 auto 8px;
-    }
-    .legal {
-      color: var(--muted);
-      line-height: 1.7;
-    }
+    .qr-box { border: 1px solid var(--line); border-radius: 16px; background: white; padding: 10px; text-align: center; }
+    .qr-box img { width: 100%; max-width: 120px; display: block; margin: 0 auto 8px; }
+    .legal { color: var(--muted); line-height: 1.7; }
     .legal strong { color: var(--ink); }
-    .empty-note {
-      padding: 14px 16px;
-      background: var(--accent-soft);
-      border-radius: 14px;
-      color: var(--accent);
-      font-weight: 700;
+    .empty-note { padding: 14px 16px; background: var(--accent-soft); border-radius: 14px; color: var(--accent); font-weight: 700; }
+    .watermark-bar {
+      background: linear-gradient(90deg, #dc2626 0%, #b91c1c 100%);
+      color: white;
+      text-align: center;
+      padding: 10px 16px;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .watermark-overlay {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background-image: repeating-linear-gradient(
+        -30deg,
+        rgba(220, 38, 38, 0.08) 0px,
+        rgba(220, 38, 38, 0.08) 220px,
+        transparent 220px,
+        transparent 460px
+      );
+      z-index: 5;
+    }
+    .watermark-stamp {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(-30deg);
+      font-size: 56px;
+      font-weight: 900;
+      letter-spacing: 0.18em;
+      color: rgba(220, 38, 38, 0.18);
+      text-transform: uppercase;
+      white-space: nowrap;
+      pointer-events: none;
+      z-index: 6;
     }
     @media (max-width: 840px) {
       body { padding: 10px; }
-      .hero,
-      .grid,
-      .totals-area,
-      .footer {
-        grid-template-columns: 1fr;
-      }
-      .content,
-      .hero,
-      .footer { padding-left: 18px; padding-right: 18px; }
+      .hero, .grid, .totals-area, .footer { grid-template-columns: 1fr; }
+      .content, .hero, .footer { padding-left: 18px; padding-right: 18px; }
       .doc-number { font-size: 24px; }
       .brand-title { font-size: 24px; }
       .items-wrap { overflow-x: auto; }
       .items { min-width: 720px; }
+      .watermark-stamp { font-size: 36px; }
     }
   `;
 }
 
 async function renderVoucherHtml(data) {
-  const { template, issuer, customer, numbering, items, subtotal, tax, total, notes, paymentMethod, documentType, currency, taxRate, pricesIncludeTax, qrContent, issueDate } = data;
+  const { template, issuer, customer, numbering, items, subtotal, tax, total, notes, paymentMethod, documentType, currency, taxRate, pricesIncludeTax, qrContent, issueDate, marcaAgua } = data;
   const qrDataUrl = await getQrDataUrl(qrContent);
   const title = documentType === 'factura' ? 'Factura electrónica' : 'Boleta de venta';
   const paymentLabel = paymentMethod || 'Pago único';
@@ -508,6 +480,14 @@ async function renderVoucherHtml(data) {
       </tr>
     `).join('');
 
+  const watermarkHtml = marcaAgua ? `
+    <div class="watermark-bar">
+      Generado con FacilitoTools · Versión Gratuita<span style="margin-left:8px;">Desbloquea todas las plantillas</span>
+    </div>
+    <div class="watermark-overlay" aria-hidden="true"></div>
+    <div class="watermark-stamp" aria-hidden="true">FACILITOTOOLS · GRATIS</div>
+  ` : '';
+
   return `<!DOCTYPE html>
 <html lang="es">
   <head>
@@ -518,6 +498,7 @@ async function renderVoucherHtml(data) {
   </head>
   <body>
     <article class="voucher">
+      ${watermarkHtml}
       <header class="hero">
         <div>
           <div class="brand-title">${escapeHtml(issuer.businessName)}</div>
@@ -592,18 +573,9 @@ async function renderVoucherHtml(data) {
           </div>
           <div class="totals">
             <table>
-              <tr>
-                <td>Subtotal</td>
-                <td>${formatMoney(subtotal, currency)}</td>
-              </tr>
-              <tr>
-                <td>IGV (${(taxRate * 100).toFixed(0)}%)</td>
-                <td>${formatMoney(tax, currency)}</td>
-              </tr>
-              <tr class="grand">
-                <td>Total a pagar</td>
-                <td>${formatMoney(total, currency)}</td>
-              </tr>
+              <tr><td>Subtotal</td><td>${formatMoney(subtotal, currency)}</td></tr>
+              <tr><td>IGV (${(taxRate * 100).toFixed(0)}%)</td><td>${formatMoney(tax, currency)}</td></tr>
+              <tr class="grand"><td>Total a pagar</td><td>${formatMoney(total, currency)}</td></tr>
             </table>
           </div>
         </div>
@@ -625,15 +597,17 @@ async function renderVoucherHtml(data) {
 </html>`;
 }
 
+// ================================================================
+// 📄 GENERACIÓN DEL PDF + MARCA DE AGUA EN CADA PÁGINA
+// ================================================================
+
 function drawText(doc, text, x, y, options = {}) {
   doc.text(String(text ?? ''), x, y, options);
 }
-
 function drawLabelValue(doc, label, value, x, y, width, gap = 14) {
   doc.font('Helvetica-Bold').fillColor('#0f172a').fontSize(9).text(label, x, y, { width });
   doc.font('Helvetica').fillColor('#334155').text(value || '-', x, y + gap, { width });
 }
-
 function ensureSpace(doc, y, neededHeight = 80) {
   if (y + neededHeight > doc.page.height - 60) {
     doc.addPage();
@@ -643,7 +617,7 @@ function ensureSpace(doc, y, neededHeight = 80) {
 }
 
 async function buildPdfBuffer(data) {
-  const { template, issuer, customer, numbering, items, subtotal, tax, total, notes, paymentMethod, documentType, currency, taxRate, qrContent, issueDate } = data;
+  const { template, issuer, customer, numbering, items, subtotal, tax, total, notes, paymentMethod, documentType, currency, taxRate, qrContent, issueDate, marcaAgua } = data;
   const theme = template.theme;
   const qrDataUrl = await getQrDataUrl(qrContent);
   const title = documentType === 'factura' ? 'FACTURA ELECTRÓNICA' : 'BOLETA DE VENTA';
@@ -651,7 +625,6 @@ async function buildPdfBuffer(data) {
   return new Promise((resolve, reject) => {
     const doc = new PDFDocument({ size: 'A4', margin: 40 });
     const chunks = [];
-
     doc.on('data', (chunk) => chunks.push(chunk));
     doc.on('end', () => resolve(Buffer.concat(chunks)));
     doc.on('error', reject);
@@ -692,15 +665,7 @@ async function buildPdfBuffer(data) {
     let y = 285;
     doc.roundedRect(40, y, 515, 28, 10).fill(theme.accentSoft);
     doc.fillColor(theme.accent).font('Helvetica-Bold').fontSize(9);
-    const columns = {
-      index: 50,
-      desc: 78,
-      unit: 320,
-      qty: 380,
-      unitPrice: 430,
-      amount: 495
-    };
-
+    const columns = { index: 50, desc: 78, unit: 320, qty: 380, unitPrice: 430, amount: 495 };
     drawText(doc, '#', columns.index, y + 9);
     drawText(doc, 'DESCRIPCIÓN', columns.desc, y + 9);
     drawText(doc, 'UND', columns.unit, y + 9);
@@ -713,7 +678,6 @@ async function buildPdfBuffer(data) {
       const descHeight = doc.heightOfString(item.description, { width: 220, align: 'left' });
       const rowHeight = Math.max(26, descHeight + 10);
       y = ensureSpace(doc, y, rowHeight + 20);
-
       doc.roundedRect(40, y - 4, 515, rowHeight, 10).fillOpacity(0.08).fill(theme.panelStrong).fillOpacity(1);
       doc.fillColor(theme.ink).font('Helvetica').fontSize(9);
       drawText(doc, item.index, columns.index, y + 6);
@@ -730,10 +694,7 @@ async function buildPdfBuffer(data) {
 
     doc.roundedRect(40, y, 235, 110, 14).fill(theme.panel).stroke(theme.line);
     doc.fillColor(theme.accent).font('Helvetica-Bold').fontSize(10).text('OBSERVACIONES', 55, y + 15);
-    doc.font('Helvetica').fillColor(theme.ink).fontSize(9).text(notes || 'Puedes usar este espacio para garantía, condiciones, método de entrega o agradecimiento al cliente.', 55, y + 34, {
-      width: 205,
-      align: 'left'
-    });
+    doc.font('Helvetica').fillColor(theme.ink).fontSize(9).text(notes || 'Puedes usar este espacio para garantía, condiciones, método de entrega o agradecimiento al cliente.', 55, y + 34, { width: 205, align: 'left' });
 
     doc.roundedRect(300, y, 255, 110, 14).fill('#ffffff').stroke(theme.line);
     doc.fillColor(theme.ink).font('Helvetica').fontSize(10);
@@ -758,15 +719,50 @@ async function buildPdfBuffer(data) {
       `QR: ${qrContent}\n` +
       `Precios ${data.pricesIncludeTax ? 'con' : 'sin'} IGV incluido. Pago: ${paymentMethod || 'Pago único'}.\n` +
       `Este archivo está pensado para ventas rápidas por Instagram, Facebook, WhatsApp y atención directa.`,
-      170,
-      y + 34,
-      { width: 370, lineGap: 2 }
+      170, y + 34, { width: 370, lineGap: 2 }
     );
+
+    if (marcaAgua) {
+      const range = doc.bufferedPageRange();
+      for (let i = range.start; i < range.start + range.count; i++) {
+        doc.switchToPage(i);
+        doc.save();
+
+        doc.save();
+        doc.rect(0, 0, doc.page.width, 26).fill('#dc2626');
+        doc.fillColor('#ffffff').font('Helvetica-Bold').fontSize(11)
+          .text('GENERADO CON FACILITOTOOLS · VERSIÓN GRATUITA', 0, 7, { width: doc.page.width, align: 'center' });
+        doc.restore();
+
+        doc.save();
+        doc.rotate(-30, { origin: [doc.page.width / 2, doc.page.height / 2] });
+        doc.fillColor('#dc2626').opacity(0.12);
+        doc.font('Helvetica-Bold').fontSize(72);
+        doc.text('FACILITOTOOLS · GRATIS', 0, doc.page.height / 2 - 36, { width: doc.page.width, align: 'center' });
+        doc.fillColor('#dc2626').opacity(0.08);
+        doc.fontSize(48);
+        doc.text('FACILITOTOOLS · GRATIS', 0, doc.page.height / 2 + 60, { width: doc.page.width, align: 'center' });
+        doc.restore();
+
+        doc.save();
+        doc.rect(0, doc.page.height - 24, doc.page.width, 24).fill('#fef2f2').stroke('#fecaca');
+        doc.fillColor('#b91c1c').font('Helvetica-Bold').fontSize(9)
+          .text('FacilitoTools · Versión Gratuita · Desbloquea todas las plantillas y elimina esta marca con el Plan Mensual o Bimestral.',
+                20, doc.page.height - 17, { width: doc.page.width - 40, align: 'center' });
+        doc.restore();
+
+        doc.restore();
+      }
+    }
 
     doc.restore();
     doc.end();
   });
 }
+
+// ================================================================
+// 🚦 ENDPOINTS DEL ROUTER
+// ================================================================
 
 router.get('/templates', (req, res) => {
   res.json({
@@ -781,9 +777,52 @@ router.get('/templates', (req, res) => {
   });
 });
 
+router.get('/planes', (req, res) => {
+  res.json({
+    ok: true,
+    planes: Object.values(PLANES_FACILITOTOOLS)
+  });
+});
+
+router.get('/plan-info/:uid', async (req, res) => {
+  try {
+    const { uid } = req.params;
+    if (!uid) return res.status(400).json({ ok: false, error: 'uid requerido' });
+    let dbRef = null;
+    try {
+      const mod = await import('./index.js');
+      dbRef = mod.db || null;
+    } catch (e) { dbRef = null; }
+    const info = await leerPlanUsuario(dbRef, uid);
+    res.json(info);
+  } catch (error) {
+    console.error('plan-info', error);
+    res.status(500).json({ ok: false, error: 'Error interno' });
+  }
+});
+
 router.post('/preview', async (req, res) => {
   try {
-    const normalized = normalizePayload(req.body);
+    const { uid, templateId } = req.body;
+    let plan = { plantillasPermitidas: ['moderna'], marcaAgua: true, planId: 'gratis' };
+    try {
+      const mod = await import('./index.js');
+      if (mod && typeof mod.obtenerInfoPlanUsuario === 'function') {
+        plan = await mod.obtenerInfoPlanUsuario(uid);
+      }
+    } catch (_) {}
+
+    if (uid && templateId && !plan.plantillasPermitidas.includes(templateId)) {
+      return res.status(403).json({
+        ok: false,
+        code: 'TEMPLATE_LOCKED',
+        message: `La plantilla "${templateId}" es exclusiva de los planes pagos. Actualiza a Plan Mensual o Bimestral para desbloquearla.`,
+        plantillasPermitidas: plan.plantillasPermitidas
+      });
+    }
+
+    const marcaAgua = uid ? !!plan.marcaAgua : false;
+    const normalized = normalizePayload(req.body, { marcaAgua });
     const html = await renderVoucherHtml(normalized);
 
     res.json({
@@ -798,6 +837,7 @@ router.post('/preview', async (req, res) => {
         documentType: normalized.documentType
       },
       shareText: normalized.shareText,
+      marcaAgua,
       html
     });
   } catch (error) {
@@ -807,12 +847,66 @@ router.post('/preview', async (req, res) => {
 
 router.post('/pdf', async (req, res) => {
   try {
-    const normalized = normalizePayload(req.body);
+    const { uid, templateId } = req.body;
+    if (!uid) {
+      return res.status(400).json({
+        ok: false,
+        code: 'NO_AUTH',
+        message: 'Debes iniciar sesión para generar PDFs y registrar tu consumo.'
+      });
+    }
+
+    let mod;
+    try { mod = await import('./index.js'); } catch (_) { mod = null; }
+    const dbRef = (mod && mod.db) || null;
+
+    const plan = await leerPlanUsuario(dbRef, uid);
+    if (templateId && !plan.plantillasPermitidas.includes(templateId)) {
+      return res.status(403).json({
+        ok: false,
+        code: 'TEMPLATE_LOCKED',
+        message: `La plantilla "${templateId}" es exclusiva de los planes pagos. Actualiza a Plan Mensual o Bimestral para desbloquearla.`,
+        plantillasPermitidas: plan.plantillasPermitidas,
+        restantes: plan.restantes,
+        limite: plan.limite
+      });
+    }
+
+    const consumo = await consumirRecibo(dbRef, uid);
+    if (!consumo.ok) {
+      if (consumo.error === 'LIMIT_REACHED') {
+        return res.status(402).json({
+          ok: false,
+          code: 'LIMIT_REACHED',
+          message: 'Has alcanzado el límite de tu plan actual. Actualiza a nuestro Plan Mensual o Bimestral para seguir emitiendo sin interrupciones.',
+          limite: consumo.limite,
+          emitidos: consumo.emitidos,
+          restantes: 0,
+          planId: consumo.planId
+        });
+      }
+      if (consumo.error === 'PLAN_EXPIRED') {
+        return res.status(402).json({
+          ok: false,
+          code: 'PLAN_EXPIRED',
+          message: 'Tu plan FacilitoTools ha vencido. Renueva uno de nuestros planes para seguir emitiendo.',
+          planId: consumo.planId
+        });
+      }
+      return res.status(503).json({ ok: false, message: 'No se pudo registrar el consumo del recibo.', error: consumo.error });
+    }
+
+    const marcaAgua = !!plan.marcaAgua;
+    const normalized = normalizePayload(req.body, { marcaAgua });
     const pdfBuffer = await buildPdfBuffer(normalized);
     const filename = `${normalized.documentType}_${normalized.numbering.full}.pdf`.replace(/\s+/g, '_');
 
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('X-Facilito-Plan', plan.planId);
+    res.setHeader('X-Facilito-Limite', String(consumo.limite));
+    res.setHeader('X-Facilito-Emitidos', String(consumo.emitidos));
+    res.setHeader('X-Facilito-Restantes', String(consumo.restantes));
     res.send(pdfBuffer);
   } catch (error) {
     res.status(400).json({ ok: false, message: error.message || 'No se pudo generar el PDF.' });
@@ -820,8 +914,8 @@ router.post('/pdf', async (req, res) => {
 });
 
 router.get('/health', (req, res) => {
-  res.json({ ok: true, service: 'plantillas-comprobantes' });
+  res.json({ ok: true, service: 'plantillas-comprobantes-facilito' });
 });
 
-export { TEMPLATE_REGISTRY, normalizePayload };
+export { TEMPLATE_REGISTRY, normalizePayload, PLANES_FACILITOTOOLS };
 export default router;
