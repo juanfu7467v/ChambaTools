@@ -418,6 +418,7 @@ app.post("/api/pay", async (req, res) => {
         installments: Number(installments),
         payment_method_id,
         payer,
+        external_reference: uid,
         notification_url: `${HOST_URL}/api/webhook/mercadopago`,
         metadata: { 
           uid, 
@@ -488,7 +489,8 @@ app.post("/api/webhook/mercadopago", async (req, res) => {
             'MercadoPago_Webhook',
             paymentId.toString(),
             resend,
-            planId
+            planId,
+            paymentInfo.payment_method_id || null
           );
         } else {
           logger.error(context, 'Datos insuficientes en webhook aprobado', { paymentId, uid, planId });
@@ -657,6 +659,8 @@ app.get("/api/payment/:paymentId", async (req, res) => {
       estado: data.estado,
       procesado: data.procesado,
       tipoPlan: data.tipoPlanNuevo || 'gratis',
+      metodoPago: data.metodoPago || null,
+      transactionId: req.params.paymentId,
       pdfUrl: (data.pdfUrl || data.pdfStoragePath || data.pdfPublicUrl) ? buildInvoiceProxyUrl(req.params.paymentId) : null
     });
   } catch (error) {
