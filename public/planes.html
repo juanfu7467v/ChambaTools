@@ -11,13 +11,12 @@
     <meta property="og:description" content="Genera comprobantes profesionales y valida la identidad de tus clientes con un solo clic." />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://facilitotools.com/planes" />
-    <!-- Logo actualizado -->
     <meta property="og:image" content="https://i.postimg.cc/fLYYD0Bb/1000153255-preview-rev-1.png" />
     <link rel="icon" type="image/png" href="https://i.postimg.cc/fLYYD0Bb/1000153255-preview-rev-1.png" />
     <link rel="shortcut icon" type="image/png" href="https://i.postimg.cc/fLYYD0Bb/1000153255-preview-rev-1.png" />
     <link rel="apple-touch-icon" href="https://i.postimg.cc/fLYYD0Bb/1000153255-preview-rev-1.png" />
 
-    <!-- Tailwind CSS (CDN) -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
@@ -986,7 +985,6 @@
     <aside id="sidebar" role="navigation" aria-label="Menú principal">
         <div class="sb-header">
             <div class="sb-logo-box">
-                <!-- Logo actualizado -->
                 <img src="https://i.postimg.cc/fLYYD0Bb/1000153255-preview-rev-1.png" alt="Logotipo de FacilitoTools" loading="lazy">
             </div>
             <div class="sb-brand">FacilitoTools</div>
@@ -1050,7 +1048,6 @@
         <!-- ═══ HERO ═══ -->
         <section class="hero" id="home">
             <div class="hero-line"></div>
-            <!-- Texto actualizado -->
             <span class="hero-eyebrow">Comprobantes profesionales · Validación de clientes · 2026</span>
             <h1 class="hero-title"><em>FacilitoTools</em><br>Impulsa tu<br>negocio.</h1>
             <div class="hero-divider"></div>
@@ -1098,7 +1095,7 @@
                 <p class="section-body">Planes diseñados para cada etapa de tu negocio. Sin contratos, sin sorpresas.</p>
 
                 <div class="plans-grid">
-                    <!-- Plan Gratuito (icono actualizado) -->
+                    <!-- Plan Gratuito -->
                     <div class="plan-card" style="animation-delay: 0.05s;">
                         <div class="plan-card-header">
                             <div class="plan-icon">
@@ -1117,7 +1114,7 @@
                             <li><i class="fas fa-check-circle"></i> <strong>1 consulta</strong> de teléfono</li>
                             <li><i class="fas fa-check-circle"></i> Acceso básico al panel</li>
                         </ul>
-                        <a href="#" class="plan-btn" onclick="alert('Regístrate gratis y empieza a usar FacilitoTools ahora.')">Comenzar gratis</a>
+                        <button class="plan-btn" onclick="alert('Regístrate gratis y empieza a usar FacilitoTools ahora.')">Comenzar gratis</button>
                         <p class="plan-note">Ideal para probar el servicio</p>
                     </div>
 
@@ -1140,7 +1137,7 @@
                             <li><i class="fas fa-check-circle"></i> Plantillas: <strong>Moderna, Elegante, Corporativa, Premium</strong></li>
                             <li><i class="fas fa-check-circle"></i> <strong>Sube tu logo</strong> para personalizar</li>
                         </ul>
-                        <a href="https://wa.me/51944950234?text=Hola%2C%20quiero%20activar%20el%20plan%20Prueba%20Corta%20Semanal" class="plan-btn" target="_blank" rel="noopener noreferrer">Comenzar prueba</a>
+                        <button class="plan-btn" onclick="handlePlanSelection('semanal')">Elegir plan</button>
                         <p class="plan-note">Ideal para probar el servicio</p>
                     </div>
 
@@ -1165,7 +1162,7 @@
                             <li><i class="fas fa-check-circle"></i> <strong>Sube tu logo</strong> y personaliza colores</li>
                             <li><i class="fas fa-check-circle"></i> Soporte prioritario</li>
                         </ul>
-                        <a href="https://wa.me/51944950234?text=Hola%2C%20quiero%20activar%20el%20plan%20Emprendedor%20Digital%20Mensual" class="plan-btn" target="_blank" rel="noopener noreferrer">Elegir plan</a>
+                        <button class="plan-btn" onclick="handlePlanSelection('mensual')">Elegir plan</button>
                         <p class="plan-note">La opción favorita de emprendedores</p>
                     </div>
 
@@ -1189,7 +1186,7 @@
                             <li><i class="fas fa-check-circle"></i> <strong>Sube tu logo</strong> y personaliza colores</li>
                             <li><i class="fas fa-check-circle"></i> Ahorro por volumen</li>
                         </ul>
-                        <a href="https://wa.me/51944950234?text=Hola%2C%20quiero%20activar%20el%20plan%20Negocio%20Estable%20Bimestral" class="plan-btn" target="_blank" rel="noopener noreferrer">Elegir plan</a>
+                        <button class="plan-btn" onclick="handlePlanSelection('bimestral')">Elegir plan</button>
                         <p class="plan-note">Mayor rendimiento para negocios en crecimiento</p>
                     </div>
 
@@ -1213,7 +1210,7 @@
                             <li><i class="fas fa-check-circle"></i> <strong>Sube tu logo</strong> y personaliza colores</li>
                             <li><i class="fas fa-check-circle"></i> Máximo ahorro</li>
                         </ul>
-                        <a href="https://wa.me/51944950234?text=Hola%2C%20quiero%20activar%20el%20plan%20Crecimiento%20Pro%20Semestral" class="plan-btn" target="_blank" rel="noopener noreferrer">Elegir plan</a>
+                        <button class="plan-btn" onclick="handlePlanSelection('semestral')">Elegir plan</button>
                         <p class="plan-note">Para empresas que buscan el mejor valor</p>
                     </div>
                 </div>
@@ -1316,7 +1313,6 @@
             <a href="https://m.facebook.com/61564349657272/" target="_blank" rel="noopener noreferrer"><i class="fab fa-facebook-f"></i></a>
             <a href="https://youtube.com/@eltiojota628?si=sZw2ZHHTUMdaR0nL" target="_blank" rel="noopener noreferrer"><i class="fab fa-youtube"></i></a>
         </div>
-        <!-- Texto del footer actualizado -->
         <p>FacilitoTools.com · Generación de comprobantes y validación de clientes © 2026</p>
         <p><a href="terminos-condiciones">Términos y condiciones</a> · <a href="politica-privacidad">Política de privacidad</a> · <a href="disclaimer-apis">Aviso legal APIs</a> · <a href="aviso-legal-peliprex">Aviso legal PeliPREX</a> · <a href="politica.compras.html">Política de compras</a></p>
     </footer>
@@ -1335,6 +1331,51 @@
 
     <!-- ═══ SCRIPTS ═══ -->
     <script>
+        // ========== FIREBASE CONFIGURACIÓN ==========
+        // (Se asume que returnConfig.js provee la configuración)
+        let auth;
+
+        async function initFirebase() {
+            try {
+                const response = await fetch('/api/config');
+                const config = await response.json();
+                if (!firebase.apps.length) {
+                    firebase.initializeApp(config.firebaseConfig);
+                }
+                auth = firebase.auth();
+            } catch (error) {
+                console.error('Error inicializando Firebase:', error);
+            }
+        }
+
+        // ========== FUNCIÓN PARA MANEJAR SELECCIÓN DE PLAN ==========
+        async function handlePlanSelection(planId) {
+            // Asegurar que Firebase esté listo
+            if (!auth) await initFirebase();
+
+            // Obtener usuario actual
+            const user = auth.currentUser;
+            if (!user) {
+                // Si no hay usuario, redirigir al login o mostrar mensaje
+                if (confirm('Debes iniciar sesión para contratar un plan. ¿Quieres ir a la página de inicio de sesión?')) {
+                    window.location.href = '/login.html';
+                }
+                return;
+            }
+
+            const uid = user.uid;
+            const email = user.email || '';
+            if (!email) {
+                alert('Tu cuenta no tiene un correo asociado. Por favor, verifica tu perfil.');
+                return;
+            }
+
+            // Redirigir a checkout con los parámetros
+            const url = `/checkout.html?planId=${encodeURIComponent(planId)}&uid=${encodeURIComponent(uid)}&email=${encodeURIComponent(email)}`;
+            window.location.href = url;
+        }
+
+        // ========== RESTO DE SCRIPTS (typewriter, slider, sidebar, etc.) ==========
         // Typewriter header
         (function() {
             const fullText = "Genera comprobantes y valida clientes";
@@ -1472,17 +1513,14 @@
             }
         })();
 
-        // ========== FAQ ACORDEÓN CORREGIDO ==========
-        // Función robusta que busca el contenedor .faq-item y el .faq-answer dentro
+        // FAQ acordeón
         window.toggleFaq = function(element) {
-            // Buscar el contenedor padre más cercano con clase .faq-item
             const item = element.closest('.faq-item');
             if (!item) return;
             const answer = item.querySelector('.faq-answer');
             const icon = element.querySelector('i');
             if (!answer) return;
 
-            // Alternar visibilidad
             if (answer.style.display === 'none' || answer.style.display === '') {
                 answer.style.display = 'block';
                 element.classList.add('active');
@@ -1523,7 +1561,8 @@
             window.open(`https://wa.me/51944950234?text=${encodeURIComponent('Hola, necesito información sobre los planes de FacilitoTools.')}`, '_blank');
         };
 
-        document.addEventListener("DOMContentLoaded", () => {
+        document.addEventListener("DOMContentLoaded", async () => {
+            await initFirebase();
             setTimeout(() => {
                 chatTextEl.classList.add('show');
                 typeWriterWhatsapp();
