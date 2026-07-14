@@ -9,7 +9,7 @@ export const corsAllowedOrigins = [
   'https://www.masitaprex.com',
   'https://consulta-pe-abf99.firebaseapp.com',
   'https://consulta-pe-abf99.firebasestorage.app',
-  'https://masitaprexv2.fly.dev'
+  'https://facilitotools.fly.dev'
 ];
 
 const appOrigins = [
