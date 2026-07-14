@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pago Seguro - Consulta PE</title>
+    <title>Pago Seguro - FacilitoTools</title>
     <script src="https://sdk.mercadopago.com/js/v2"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -135,7 +135,6 @@
             overflow: hidden;
             cursor: grab;
             touch-action: pan-y;
-            /* Quitamos márgenes negativos y padding lateral para igualar el ancho del contenido */
             margin: 0;
             padding: 8px 0 16px 0;
             user-select: none;
@@ -154,14 +153,12 @@
 
         .carousel-item {
             flex-shrink: 0;
-            /* Cada item ocupa el 100% del ancho del contenedor del slider */
             width: 100%;
             margin-right: 0;
             border-radius: var(--radius-lg);
             transition: transform 0.25s ease, box-shadow 0.25s ease;
         }
 
-        /* Eliminamos los márgenes especiales del primer y último elemento */
         .carousel-item:first-child {
             margin-left: 0;
         }
@@ -709,7 +706,11 @@
     </div>
 
     <script>
+        // ================================================================
+        // MAPA DE PLANES (incluye los de Masitaprex y FacilitoTools)
+        // ================================================================
         const MAPA_PLANES = {
+            // Planes de créditos (Masitaprex)
             "60_creditos": { precio: 10, descripcion: "60 créditos + 3 bonus" },
             "125_creditos": { precio: 20, descripcion: "125 créditos + 5 bonus" },
             "330_creditos": { precio: 50, descripcion: "330 créditos + 20 bonus" },
@@ -718,9 +719,18 @@
             "plan_7_dias": { precio: 80, descripcion: "Plan Intensivo 7 días" },
             "plan_15_dias": { precio: 120, descripcion: "Plan Intensivo 15 días" },
             "plan_30_dias": { precio: 180, descripcion: "Plan Intensivo 30 días" },
-            "plan_60_dias": { precio: 320, descripcion: "Plan Intensivo 60 días" }
+            "plan_60_dias": { precio: 320, descripcion: "Plan Intensivo 60 días" },
+            
+            // Planes de FacilitoTools
+            "semanal":   { precio: 7,  descripcion: "Plan Semanal" },
+            "mensual":   { precio: 19, descripcion: "Plan Mensual" },
+            "bimestral": { precio: 32, descripcion: "Plan Bimestral" },
+            "semestral": { precio: 75, descripcion: "Plan Semestral" }
         };
 
+        // ================================================================
+        // OBTENER PARÁMETROS DE URL
+        // ================================================================
         const urlParams = new URLSearchParams(window.location.search);
         const planId = urlParams.get('planId');
         const uid = urlParams.get('uid');
@@ -852,7 +862,6 @@
 
         async function renderCardBrick() {
             showLoading('Cargando interfaz de pagos...');
-            // Configuración para pago de contado (sin cuotas)
             const cardBrickSettings = {
                 initialization: {
                     amount,
@@ -874,7 +883,7 @@
                         }
                     },
                     paymentMethods: {
-                        maxInstallments: 1,      // Solo 1 cuota
+                        maxInstallments: 1,
                         minInstallments: 1,
                         types: {
                             included: ['credit_card', 'debit_card']
@@ -894,13 +903,14 @@
                                 body: JSON.stringify({
                                     token: cardFormData.token,
                                     transaction_amount: amount,
-                                    installments: 1,               // Siempre 1
+                                    installments: 1,
                                     payment_method_id: cardFormData.payment_method_id,
                                     issuer_id: cardFormData.issuer_id || null,
                                     payer: cardFormData.payer,
                                     uid,
-                                    tipoPlan: planId,              // ← clave correcta para el backend
-                                    description: `Compra Consulta PE: ${description}`
+                                    tipoPlan: planId,
+                                    planId: planId,
+                                    description: `Compra FacilitoTools: ${description}`
                                 })
                             });
                             await handleBackendPaymentResponse(result, 'Tarjeta');
@@ -981,8 +991,9 @@
                         payment_method_id: 'yape',
                         payer: { email },
                         uid,
+                        planId: planId,
                         tipoPlan: planId,
-                        description: `Compra Consulta PE: ${description}`
+                        description: `Compra FacilitoTools: ${description}`
                     })
                 });
 
@@ -1159,7 +1170,7 @@
             };
         }
 
-        /* ========== Slider premium corregido para alineación izquierda y ancho completo ========== */
+        /* ========== Slider ========== */
         function initCarousel() {
             const scrollContainer = document.getElementById('imageScroll');
             const hintContainer = document.getElementById('scrollHint');
@@ -1167,7 +1178,6 @@
 
             if (items.length === 0) return;
 
-            // Crear track interno
             const track = document.createElement('div');
             track.classList.add('slider-track');
             items.forEach(item => track.appendChild(item));
@@ -1181,18 +1191,15 @@
             let isDragging = false;
             let animationID = null;
 
-            // El ancho del viewport del slider (sin márgenes internos ya que .horizontal-scroll no tiene padding lateral extra)
             function getContainerWidth() {
                 return scrollContainer.clientWidth;
             }
 
-            // Mueve el track para que el elemento en currentIndex esté alineado al borde izquierdo del contenedor
             function setPositionByIndex(index, withTransition = true) {
                 if (index < 0) index = 0;
                 if (index > items.length - 1) index = items.length - 1;
                 currentIndex = index;
                 const containerWidth = getContainerWidth();
-                // Desplazamos el track exactamente el ancho del contenedor por cada índice
                 const translateX = -index * containerWidth;
                 currentTranslate = translateX;
                 prevTranslate = translateX;
@@ -1217,7 +1224,7 @@
             function snapToNearest() {
                 const containerWidth = getContainerWidth();
                 const moveDistance = currentTranslate - prevTranslate;
-                const threshold = containerWidth / 4; // umbral para cambiar de página
+                const threshold = containerWidth / 4;
 
                 let newIndex = currentIndex;
                 if (moveDistance > threshold) {
@@ -1229,7 +1236,6 @@
                 if (newIndex !== currentIndex) {
                     setPositionByIndex(newIndex, true);
                 } else {
-                    // volver a la posición exacta del índice actual
                     setPositionByIndex(currentIndex, true);
                 }
                 updateHint();
