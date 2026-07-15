@@ -1429,8 +1429,26 @@
             window.open(`https://wa.me/51944950234?text=${encodeURIComponent('Hola, necesito información sobre los planes de FacilitoTools.')}`, '_blank');
         };
 
+        // ========== VERIFICACIÓN DE AUTENTICACIÓN AL CARGAR ==========
         document.addEventListener("DOMContentLoaded", async () => {
             await initFirebase();
+
+            // Redirigir al login si no hay usuario autenticado
+            if (auth) {
+                auth.onAuthStateChanged(user => {
+                    if (!user) {
+                        // Usamos ReturnConfig.redirectToLogin() que preserva returnTo
+                        if (typeof ReturnConfig !== 'undefined' && ReturnConfig.redirectToLogin) {
+                            ReturnConfig.redirectToLogin();
+                        } else {
+                            // Fallback por si returnConfig no está disponible
+                            window.location.href = 'login.html?returnTo=' + encodeURIComponent(window.location.pathname + window.location.search);
+                        }
+                    }
+                });
+            }
+
+            // Iniciar el efecto de escritura del WhatsApp después de 1.5s
             setTimeout(() => {
                 chatTextEl.classList.add('show');
                 typeWriterWhatsapp();
