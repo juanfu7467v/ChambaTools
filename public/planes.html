@@ -3,18 +3,79 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>FacilitoTools.com — Activa tu plan en segundos | Generación de comprobantes y validación</title>
-    <meta name="description" content="Genera boletas y comprobantes profesionales, valida DNI, RUC y teléfonos. Planes diseñados para emprendedores y empresas." />
-    <meta name="keywords" content="facilitotools, comprobantes, boletas, validacion dni, consulta ruc, consulta telefonica, planes empresariales" />
+    <title>Planes FacilitoTools – Generador de boletas, facturas y validación de clientes en Perú | DNI, RUC y teléfonos</title>
+    <meta name="description" content="Elige el plan ideal para tu negocio. Genera boletas y facturas profesionales, valida DNI, RUC y teléfonos al instante. Herramientas para emprendedores y empresas en Perú. Actívalo en segundos." />
+    <meta name="keywords" content="planes facilitotools, generador de boletas, generador de facturas, validación DNI, consulta RUC, consulta de teléfonos, herramientas para emprendedores, Perú, comprobantes profesionales, facturación, validación de clientes, planes empresariales" />
     <meta name="robots" content="index, follow" />
-    <meta property="og:title" content="FacilitoTools.com — Activa tu plan en segundos" />
-    <meta property="og:description" content="Genera comprobantes profesionales y valida la identidad de tus clientes con un solo clic." />
+    <link rel="canonical" href="https://facilitotools.com/planes" />
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Planes FacilitoTools – Genera boletas, facturas y valida clientes en Perú" />
+    <meta property="og:description" content="Planes desde S/0. Genera comprobantes profesionales, valida DNI, RUC y teléfonos. La herramienta integral para emprendedores y empresas peruanas." />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://facilitotools.com/planes" />
     <meta property="og:image" content="https://i.postimg.cc/fLYYD0Bb/1000153255-preview-rev-1.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content="es_PE" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Planes FacilitoTools – Genera boletas, facturas y valida clientes" />
+    <meta name="twitter:description" content="Elige tu plan y empieza a generar comprobantes profesionales, validar DNI, RUC y teléfonos. Ideal para emprendedores y empresas en Perú." />
+    <meta name="twitter:image" content="https://i.postimg.cc/fLYYD0Bb/1000153255-preview-rev-1.png" />
+
+    <!-- Iconos -->
     <link rel="icon" type="image/png" href="https://i.postimg.cc/fLYYD0Bb/1000153255-preview-rev-1.png" />
     <link rel="shortcut icon" type="image/png" href="https://i.postimg.cc/fLYYD0Bb/1000153255-preview-rev-1.png" />
     <link rel="apple-touch-icon" href="https://i.postimg.cc/fLYYD0Bb/1000153255-preview-rev-1.png" />
+
+    <!-- Datos estructurados Schema.org -->
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "WebApplication",
+            "name": "FacilitoTools",
+            "url": "https://facilitotools.com/planes",
+            "description": "Planes para generar boletas, facturas y validación de clientes (DNI, RUC, teléfonos) para emprendedores y empresas en Perú.",
+            "applicationCategory": "BusinessApplication",
+            "operatingSystem": "All",
+            "offers": [
+                {
+                    "@type": "Offer",
+                    "name": "Gratuito",
+                    "price": "0",
+                    "priceCurrency": "PEN"
+                },
+                {
+                    "@type": "Offer",
+                    "name": "Emprendedor Digital",
+                    "price": "19",
+                    "priceCurrency": "PEN",
+                    "description": "Plan mensual con 800 comprobantes y 60 consultas"
+                },
+                {
+                    "@type": "Offer",
+                    "name": "Negocio Estable",
+                    "price": "32",
+                    "priceCurrency": "PEN",
+                    "description": "Plan bimestral con 1,800 comprobantes y 140 consultas"
+                }
+            ],
+            "publisher": {
+                "@type": "Organization",
+                "name": "FacilitoTools",
+                "url": "https://facilitotools.com/",
+                "logo": "https://i.postimg.cc/fLYYD0Bb/1000153255-preview-rev-1.png"
+            },
+            "about": {
+                "@type": "Thing",
+                "name": "Validación de clientes y generación de comprobantes",
+                "description": "Herramientas para generar boletas y facturas, validar DNI, RUC y teléfonos en Perú"
+            },
+            "browserRequirements": "Requiere JavaScript y un navegador moderno"
+        }
+    </script>
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -286,153 +347,9 @@
         }
         #menu-toggle i { color: var(--emerald); font-size: 1.3rem; }
 
-        /* ═══ HEADER TYPEWRITER ═══ */
-        #typewriterHeader {
-            position: fixed;
-            top: 0; left: 0; right: 0;
-            z-index: 90;
-            display: flex; align-items: center; justify-content: center;
-            background: rgba(10, 22, 40, 0.96);
-            border-bottom: 1px solid var(--border-gold);
-            backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
-            box-shadow: 0 2px 24px rgba(255, 215, 0, 0.08);
-            gap: 8px;
-            padding: 6px 16px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            letter-spacing: 0.18em;
-            text-transform: uppercase;
-            color: var(--gold);
-            font-family: var(--font-mono);
-            min-height: 48px;
-        }
-        #typewriterHeader .dot {
-            width: 6px; height: 6px;
-            border-radius: 50%;
-            background: var(--emerald);
-            animation: pulse-dot 1.5s ease-in-out infinite;
-            flex-shrink: 0;
-        }
-        @keyframes pulse-dot {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(0.7); }
-        }
-        .typewriter-cursor {
-            display: inline-block;
-            width: 2px;
-            margin-left: 2px;
-            background-color: var(--gold);
-            animation: blink 1s step-end infinite;
-        }
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0; }
-        }
-
         /* ═══ MAIN ═══ */
         main {
             position: relative; z-index: 1; width: 100%;
-            padding-top: 48px;
-        }
-
-        /* ═══ HERO ═══ */
-        .hero {
-            width: 100%;
-            min-height: 100svh;
-            display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            padding: 56px 16px 48px;
-            text-align: center;
-            position: relative; overflow: hidden;
-        }
-        .hero-line {
-            position: absolute;
-            top: 0; left: 0; right: 0; height: 1px;
-            background: linear-gradient(90deg, transparent 0%, var(--emerald) 50%, transparent 100%);
-        }
-        .hero-eyebrow {
-            font-family: var(--font-mono);
-            font-size: 0.7rem; letter-spacing: 0.3em;
-            text-transform: uppercase; color: var(--text-muted);
-            margin-bottom: 16px;
-            animation: fadeUp 0.8s 0.1s ease forwards; opacity: 0;
-        }
-        .hero-title {
-            font-family: var(--font-serif);
-            font-size: clamp(3.5rem, 12vw, 8rem);
-            font-weight: 300; line-height: 0.9;
-            letter-spacing: -0.02em; color: var(--white);
-            margin-bottom: 8px;
-            animation: fadeUp 0.9s 0.2s ease forwards; opacity: 0;
-        }
-        .hero-title em { font-style: italic; color: var(--emerald); }
-        .hero-divider {
-            width: 60px; height: 2px;
-            background: var(--emerald);
-            margin: 24px auto;
-            animation: expandLine 0.8s 0.4s ease forwards;
-            transform: scaleX(0);
-        }
-        @keyframes expandLine { to { transform: scaleX(1); } }
-        .hero-tagline {
-            font-family: var(--font-serif);
-            font-size: clamp(1.3rem, 3vw, 2rem);
-            font-weight: 300; font-style: italic;
-            color: var(--text-primary); max-width: 600px;
-            line-height: 1.5; margin-bottom: 16px;
-            animation: fadeUp 0.9s 0.5s ease forwards; opacity: 0;
-        }
-        .hero-sub {
-            font-size: 0.88rem; color: var(--text-muted);
-            max-width: 520px; line-height: 1.7;
-            margin-bottom: 40px; font-weight: 300;
-            animation: fadeUp 0.9s 0.6s ease forwards; opacity: 0;
-        }
-        .hero-cta {
-            display: inline-flex; align-items: center; gap: 10px;
-            background: linear-gradient(135deg, var(--emerald), var(--emerald-dark));
-            color: #000;
-            font-weight: 700; font-size: 0.85rem;
-            letter-spacing: 0.12em; text-transform: uppercase;
-            padding: 16px 36px; border-radius: 60px;
-            text-decoration: none;
-            transition: all 0.25s ease;
-            animation: fadeUp 0.9s 0.7s ease forwards; opacity: 0;
-            cursor: pointer; border: none;
-            box-shadow: 0 8px 28px var(--emerald-glow-strong);
-            font-family: var(--font-display);
-        }
-        .hero-cta:hover {
-            background: linear-gradient(135deg, var(--emerald-light), var(--emerald));
-            transform: translateY(-3px);
-            box-shadow: 0 12px 36px var(--emerald-glow-strong);
-        }
-        .hero-stats {
-            display: flex; gap: 0;
-            width: 100%; margin-top: 60px;
-            border-top: 1px solid var(--border-subtle);
-            animation: fadeUp 0.9s 0.8s ease forwards; opacity: 0;
-        }
-        .stat-item {
-            flex: 1; padding: 24px 8px;
-            text-align: center;
-            border-right: 1px solid var(--border-subtle);
-        }
-        .stat-item:last-child { border-right: none; }
-        .stat-num {
-            font-family: var(--font-serif);
-            font-size: 2rem; font-weight: 600;
-            color: var(--emerald); display: block;
-        }
-        .stat-label {
-            font-size: 0.68rem; color: var(--text-muted);
-            letter-spacing: 0.08em; text-transform: uppercase;
-            margin-top: 4px; display: block;
-        }
-        @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(24px); }
-            to { opacity: 1; transform: translateY(0); }
         }
 
         /* ═══ SECTIONS ═══ */
@@ -938,11 +855,21 @@
             to { transform: translateX(0); opacity: 1; }
         }
 
+        /* Clase para ocultar visualmente pero mantener semántica (lectores de pantalla) */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0,0,0,0);
+            white-space: nowrap;
+            border: 0;
+        }
+
         /* Responsive */
         @media (max-width: 640px) {
-            .hero-stats { flex-wrap: wrap; }
-            .stat-item { min-width: 50%; border-right: none; border-bottom: 1px solid var(--border-subtle); }
-            .stat-item:nth-child(2n) { border-right: none; }
             .content-grid { padding: 0 12px; }
             .section { padding: 40px 0; }
             .slider-slide { width: 90%; }
@@ -959,19 +886,18 @@
             .slider-slide { width: 30%; }
             .advantage-grid { grid-template-columns: repeat(3, 1fr); }
         }
+
+        /* Animaciones */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(24px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body>
 
     <div class="ambient-1"></div>
     <div class="ambient-2"></div>
-
-    <!-- ═══ TYPEWRITER HEADER ═══ -->
-    <header id="typewriterHeader" role="banner">
-        <span class="dot"></span>
-        <span id="typewriterText"></span>
-        <span class="typewriter-cursor"></span>
-    </header>
 
     <!-- Botón hamburguesa -->
     <button id="menu-toggle" aria-label="Abrir menú de navegación">
@@ -1044,42 +970,8 @@
     </aside>
 
     <main>
-
-        <!-- ═══ HERO ═══ -->
-        <section class="hero" id="home">
-            <div class="hero-line"></div>
-            <span class="hero-eyebrow">Comprobantes profesionales · Validación de clientes · 2026</span>
-            <h1 class="hero-title"><em>FacilitoTools</em><br>Impulsa tu<br>negocio.</h1>
-            <div class="hero-divider"></div>
-            <p class="hero-tagline">⚡ Automatiza tu negocio en segundos</p>
-            <p class="hero-sub">Con FacilitoTools.com puedes validar la identidad de tus clientes y generar comprobantes profesionales desde un solo lugar.</p>
-            <button class="hero-cta" onclick="document.getElementById('planes-cards').scrollIntoView({behavior:'smooth'})">
-                <i class="fas fa-bolt"></i> Ver planes ahora
-            </button>
-            <div class="hero-stats">
-                <div class="stat-item"><span class="stat-num">+2,400</span><span class="stat-label">Usuarios Activos</span></div>
-                <div class="stat-item"><span class="stat-num">6</span><span class="stat-label">Servicios</span></div>
-                <div class="stat-item"><span class="stat-num">24/7</span><span class="stat-label">Disponibilidad</span></div>
-                <div class="stat-item"><span class="stat-num">100%</span><span class="stat-label">Seguridad</span></div>
-            </div>
-        </section>
-
-        <!-- ═══ BENEFICIOS ═══ -->
-        <section class="section">
-            <div class="content-grid">
-                <span class="section-label">Beneficios principales</span>
-                <h2 class="section-title">Todo lo que <em>obtienes</em></h2>
-                <div class="advantage-grid">
-                    <div class="advantage-item"><div class="adv-icon"><i class="fas fa-search"></i></div><span>Consulta DNI, RUC y teléfonos desde un único panel</span></div>
-                    <div class="advantage-item"><div class="adv-icon"><i class="fas fa-file-invoice"></i></div><span>Genera comprobantes con diseños modernos y profesionales</span></div>
-                    <div class="advantage-item"><div class="adv-icon"><i class="fas fa-download"></i></div><span>Descarga o comparte tus documentos al instante</span></div>
-                    <div class="advantage-item"><div class="adv-icon"><i class="fas fa-mobile-alt"></i></div><span>Accede desde cualquier dispositivo</span></div>
-                    <div class="advantage-item"><div class="adv-icon"><i class="fas fa-briefcase"></i></div><span>Diseñado para emprendedores, negocios y empresas</span></div>
-                </div>
-            </div>
-        </section>
-
-        <div class="section-divider"></div>
+        <!-- H1 semántico para SEO (oculto visualmente) -->
+        <h1 class="sr-only">Planes FacilitoTools – Generador de boletas, facturas y validación de clientes en Perú</h1>
 
         <!-- ═══ MENSAJE DE CONFIANZA ═══ -->
         <section class="elite-statement">
@@ -1332,7 +1224,6 @@
     <!-- ═══ SCRIPTS ═══ -->
     <script>
         // ========== FIREBASE CONFIGURACIÓN ==========
-        // (Se asume que returnConfig.js provee la configuración)
         let auth;
 
         async function initFirebase() {
@@ -1350,13 +1241,10 @@
 
         // ========== FUNCIÓN PARA MANEJAR SELECCIÓN DE PLAN ==========
         async function handlePlanSelection(planId) {
-            // Asegurar que Firebase esté listo
             if (!auth) await initFirebase();
 
-            // Obtener usuario actual
             const user = auth.currentUser;
             if (!user) {
-                // Si no hay usuario, redirigir al login o mostrar mensaje
                 if (confirm('Debes iniciar sesión para contratar un plan. ¿Quieres ir a la página de inicio de sesión?')) {
                     window.location.href = '/login.html';
                 }
@@ -1370,31 +1258,11 @@
                 return;
             }
 
-            // Redirigir a checkout con los parámetros
             const url = `/checkout.html?planId=${encodeURIComponent(planId)}&uid=${encodeURIComponent(uid)}&email=${encodeURIComponent(email)}`;
             window.location.href = url;
         }
 
-        // ========== RESTO DE SCRIPTS (typewriter, slider, sidebar, etc.) ==========
-        // Typewriter header
-        (function() {
-            const fullText = "Genera comprobantes y valida clientes";
-            const textElement = document.getElementById("typewriterText");
-            let currentIndex = 0, isDeleting = false, isWaiting = false;
-            function typeEffect() {
-                if (isWaiting) return;
-                if (!isDeleting) {
-                    if (currentIndex <= fullText.length) { textElement.textContent = fullText.substring(0, currentIndex); currentIndex++; setTimeout(typeEffect, 70); }
-                    else { isDeleting = true; isWaiting = true; setTimeout(() => { isWaiting = false; typeEffect(); }, 2500); }
-                } else {
-                    if (currentIndex >= 0) { textElement.textContent = fullText.substring(0, currentIndex); currentIndex--; setTimeout(typeEffect, 50); }
-                    else { isDeleting = false; currentIndex = 0; isWaiting = true; setTimeout(() => { isWaiting = false; typeEffect(); }, 800); }
-                }
-            }
-            typeEffect();
-        })();
-
-        // Slider con dots mejorado
+        // ========== SLIDER ==========
         (function() {
             const track = document.getElementById('sliderTrack');
             const indicatorsContainer = document.getElementById('sliderIndicators');
@@ -1438,7 +1306,7 @@
             });
         })();
 
-        // Sidebar
+        // ========== SIDEBAR ==========
         const menuToggle = document.getElementById('menu-toggle');
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('sidebar-overlay');
@@ -1481,7 +1349,7 @@
             });
         });
 
-        // Compartir y banner
+        // ========== COMPARTIR Y BANNER ==========
         function sharePage() {
             const url = "https://facilitotools.com/";
             if (navigator.share) {
@@ -1513,7 +1381,7 @@
             }
         })();
 
-        // FAQ acordeón
+        // ========== FAQ ACORDEÓN ==========
         window.toggleFaq = function(element) {
             const item = element.closest('.faq-item');
             if (!item) return;
@@ -1532,7 +1400,7 @@
             }
         };
 
-        // WhatsApp flotante
+        // ========== WHATSAPP FLOTANTE ==========
         const chatTextEl = document.getElementById("chatText");
         const whatsappMessage = "¡Cotiza tu plan por Whatsapp!";
         let idx = 0;
