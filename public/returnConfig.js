@@ -1,35 +1,9 @@
 /**
  * returnConfig.js
  * Centraliza la lógica para el manejo de redirecciones y parámetros returnTo.
- * Configuración de rutas protegidas.
  */
 
 const ReturnConfig = {
-    /**
-     * Lista de rutas que requieren autenticación para ser accedidas.
-     * - api-key.html ha sido eliminada de la protección.
-     * - Se han asegurado las rutas: generar-boletas.html, validar-clientes.html,
-     *   planes.html, checkout.html, verificacion.html.
-     */
-    PROTECTED_PAGES: [
-        'generar-boletas.html',
-        'validar-clientes.html',
-        'planes.html',
-        'checkout.html',
-        'verificacion.html'
-    ],
-
-    /**
-     * Verifica si una ruta pertenece a las páginas protegidas.
-     * @param {string} path - Ruta (absoluta o relativa, con o sin parámetros).
-     * @returns {boolean} true si la página está en la lista de protección.
-     */
-    isProtectedPage: function(path) {
-        // Normaliza la ruta: elimina barra inicial y query string
-        const normalizedPath = path.replace(/^\//, '').split('?')[0];
-        return this.PROTECTED_PAGES.includes(normalizedPath);
-    },
-
     /**
      * Obtiene un parámetro de la URL por su nombre.
      * @param {string} name - Nombre del parámetro.
