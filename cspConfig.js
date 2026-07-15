@@ -5,30 +5,26 @@
 const unique = (values) => [...new Set(values.filter(Boolean))];
 
 export const corsAllowedOrigins = [
-  'https://masitaprex.com',
-  'https://www.masitaprex.com',
-  'https://consulta-pe-abf99.firebaseapp.com',
-  'https://consulta-pe-abf99.firebasestorage.app',
+  'https://facilitoTools.com',
+  'https://www.facilitoTools.com',
+  'https://facilitotools.firebaseapp.com',
+  'https://facilitotools.firebasestorage.app',
   'https://facilitotools.fly.dev'
 ];
 
 const appOrigins = [
-  'https://masitaprex.com',
-  'https://www.masitaprex.com',
-  'https://auth.masitaprex.com',
-  'https://api.masitaprex.com',
-  'https://peliprex.masitaprex.com',
-  'https://peliprex-31wrsa.fly.dev',
-  'https://peliprex.fly.dev',
-  'https://masitaprexv2.fly.dev',
-  'https://consulta-pe-abf99.firebaseapp.com',
-  'https://consulta-pe-abf99.firebasestorage.app'
+  'https://facilitoTools.com',
+  'https://www.facilitoTools.com',
+  'https://auth.facilitoTools.com',
+  'https://api.facilitoTools.com',
+  'https://facilitotools.fly.dev',
+  'https://facilitotools.firebaseapp.com',
+  'https://facilitotools.firebasestorage.app'
 ];
 
 const googleAndFirebaseOrigins = [
   'https://accounts.google.com',
   'https://apis.google.com',
-  'https://drive.google.com',
   'https://firestore.googleapis.com',
   'https://firebase.googleapis.com',
   'https://fonts.googleapis.com',
@@ -49,8 +45,6 @@ const googleAndFirebaseOrigins = [
 ];
 
 const cdnAndUiOrigins = [
-  'https://archive.org',
-  'https://blogger.googleusercontent.com',
   'https://cdn-icons-png.flaticon.com',
   'https://cdnjs.cloudflare.com',
   'https://cdn.jsdelivr.net',
@@ -90,14 +84,9 @@ const externalServiceOrigins = [
   'https://github.com',
   'https://www.github.com',
   'https://api.github.com',
-  'https://www.appcreator24.com',
   'https://img.utdstc.com',
-  'https://com-masitaorex.uptodown.com',
   'https://stc.utdstc.com',
-  'https://apk.e-droid.net',
-  'https://apkpure.com',
   'https://*.effectivegatecpm.com',
-  'https://*.adsterra.com'
 ];
 
 export const cspDomains = unique([
