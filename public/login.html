@@ -24,10 +24,6 @@
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"></script>
-  
   <script src="https://www.google.com/recaptcha/api.js?render=explicit&onload=recaptchaOnLoad" async defer></script>
 
   <script src="https://cdn.tailwindcss.com"></script>
@@ -1568,21 +1564,31 @@
           await validateRecaptchaWithBackend(recaptchaResponse);
           const userCredential = await createUserWithEmailAndPassword(auth, email, password);
           await saveUserProfile(userCredential.user, name);
-          
+
+          // ✅ CORRECCIÓN: enviar el correo de verificación real vía Firebase Auth
+          // (antes se importaba sendEmailVerification pero nunca se invocaba, por lo
+          // que el usuario jamás recibía el enlace y quedaba bloqueado en "verificacion.html")
+          try {
+              await sendEmailVerification(userCredential.user, {
+                  url: `${window.location.origin}/login`,
+                  handleCodeInApp: false
+              });
+          } catch (verificationError) {
+              console.error('Error enviando correo de verificación:', verificationError);
+          }
+
           const returnTo = getUrlParameter('returnTo');
           if (returnTo) {
               sessionStorage.setItem('returnTo', returnTo);
           }
-          
-          fetch('/api/send-verification-email', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ 
-                  email: userCredential.user.email,
-                  name: name || userCredential.user.displayName || userCredential.user.email.split('@')[0]
-              })
-          }).catch(err => console.error('Error fetch email:', err));
-          
+
+          // ✅ CORRECCIÓN: se reemplaza el fetch a '/api/send-verification-email'
+          // (endpoint inexistente en el backend, siempre devolvía 404) por la función
+          // notifyBackendWelcomeEmail ya definida en este archivo, que sí llama a un
+          // endpoint real ('/api/notify-verification') para enviar el correo de
+          // bienvenida y crear el token/empresa del usuario.
+          await notifyBackendWelcomeEmail(userCredential.user);
+
           showMessageModal('Cuenta creada exitosamente. Revisa tu correo para verificar tu cuenta.', 'success');
           setTimeout(() => {
               window.location.href = "verificacion.html";
@@ -1604,7 +1610,14 @@
         
         showLoadingOverlay();
         try {
-            await sendPasswordResetEmail(auth, email);
+            // ✅ CORRECCIÓN: se especifica actionCodeSettings para que el enlace del
+            // correo regrese a la página propia de recuperación (/reset-password) en
+            // vez de a la página genérica de Firebase. Antes el enlace no completaba
+            // el flujo dentro de la app.
+            await sendPasswordResetEmail(auth, email, {
+                url: `${window.location.origin}/reset-password`,
+                handleCodeInApp: false
+            });
             hideLoadingOverlay();
             showMessageModal('Hemos enviado un enlace de recuperación a tu correo. Revisa tu bandeja de entrada.', 'success');
             setTimeout(() => showLoginForm(), 3000);
