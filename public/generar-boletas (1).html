@@ -1,0 +1,2753 @@
+<!DOCTYPE  html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FacilitoTools – Generador de boletas, facturas y validación de clientes en Perú | DNI, RUC y teléfonos</title>
+    <meta name="description" content="Genera boletas y facturas profesionales, valida DNI, RUC y teléfonos de tus clientes al instante. Herramienta integral para emprendedores y empresas en Perú. Prueba gratis." />
+    <meta name="keywords" content="generador de boletas, generador de facturas, validación de clientes, consulta DNI, consulta RUC, consulta de teléfonos, herramientas para emprendedores, Perú, facilitotools, comprobantes profesionales, validación de identidad, facturación electrónica, empresas peruanas" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://facilitotools.com/" />
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="FacilitoTools – Generador de boletas, facturas y validación de clientes en Perú" />
+    <meta property="og:description" content="Genera boletas y facturas profesionales, valida DNI, RUC y teléfonos. La herramienta integral para emprendedores y empresas en Perú. ¡Prueba gratis ahora!" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://facilitotools.com/" />
+    <meta property="og:image" content="https://i.postimg.cc/fLYYD0Bb/1000153255-preview-rev-1.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content="es_PE" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="FacilitoTools – Generador de boletas, facturas y validación de clientes en Perú" />
+    <meta name="twitter:description" content="Genera boletas y facturas, valida DNI, RUC y teléfonos. Herramienta integral para emprendedores y empresas peruanas. ¡Prueba gratis!" />
+    <meta name="twitter:image" content="https://i.postimg.cc/fLYYD0Bb/1000153255-preview-rev-1.png" />
+
+    <!-- Iconos -->
+    <link rel="icon" type="image/png" href="https://i.postimg.cc/fLYYD0Bb/1000153255-preview-rev-1.png" />
+    <link rel="shortcut icon" type="image/png" href="https://i.postimg.cc/fLYYD0Bb/1000153255-preview-rev-1.png" />
+    <link rel="apple-touch-icon" href="https://i.postimg.cc/fLYYD0Bb/1000153255-preview-rev-1.png" />
+
+    <!-- Datos estructurados Schema.org -->
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "WebApplication",
+            "name": "FacilitoTools",
+            "url": "https://facilitotools.com/",
+            "description": "Generador de boletas, facturas y validación de clientes (DNI, RUC, teléfonos) para emprendedores y empresas en Perú. Prueba gratis.",
+            "applicationCategory": "BusinessApplication",
+            "operatingSystem": "All",
+            "offers": [
+                {
+                    "@type": "Offer",
+                    "name": "Gratuito",
+                    "price": "0",
+                    "priceCurrency": "PEN"
+                },
+                {
+                    "@type": "Offer",
+                    "name": "Emprendedor Digital",
+                    "price": "19",
+                    "priceCurrency": "PEN",
+                    "description": "Plan mensual con 800 comprobantes y 60 consultas"
+                },
+                {
+                    "@type": "Offer",
+                    "name": "Negocio Estable",
+                    "price": "32",
+                    "priceCurrency": "PEN",
+                    "description": "Plan bimestral con 1,800 comprobantes y 140 consultas"
+                }
+            ],
+            "publisher": {
+                "@type": "Organization",
+                "name": "FacilitoTools",
+                "url": "https://facilitotools.com/",
+                "logo": "https://i.postimg.cc/fLYYD0Bb/1000153255-preview-rev-1.png"
+            },
+            "about": {
+                "@type": "Thing",
+                "name": "Validación de clientes y generación de comprobantes",
+                "description": "Herramientas para generar boletas y facturas, validar DNI, RUC y teléfonos en Perú"
+            },
+            "browserRequirements": "Requiere JavaScript y un navegador moderno"
+        }
+    </script>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <!-- Remixicon -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" />
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700;800&family=DM+Mono:wght@400;500&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&display=swap" rel="stylesheet" />
+
+    <!-- Firebase (se mantiene) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="returnConfig.js"></script>
+
+    <style>
+        /* ========== ESTILOS COMPLETOS (heredados y mejorados) ========== */
+        :root {
+            --navy-deep: #0A1628;
+            --navy-surface: #0F1F3D;
+            --navy-card: #15294A;
+            --navy-border: #1E3A5F;
+            --emerald: #00C853;
+            --emerald-light: #69F0AE;
+            --emerald-dark: #00A844;
+            --emerald-glow: rgba(0, 200, 83, 0.2);
+            --emerald-glow-strong: rgba(0, 200, 83, 0.35);
+            --gold: #FFD700;
+            --gold-light: #FFED4A;
+            --gold-dim: #B8960F;
+            --gold-glow: rgba(255, 215, 0, 0.15);
+            --ruby: #E53935;
+            --ruby-light: #FF5252;
+            --ruby-glow: rgba(229, 57, 53, 0.2);
+            --white: #F8FAFC;
+            --text-primary: #E2E8F0;
+            --text-muted: #94A3B8;
+            --text-subtle: #64748B;
+            --border-subtle: rgba(255,255,255,0.06);
+            --border-active: rgba(0,200,83,0.25);
+            --border-gold: rgba(255,215,0,0.25);
+            --shadow-card: 0 8px 32px rgba(0,0,0,0.4);
+            --shadow-emerald: 0 4px 20px rgba(0,200,83,0.2);
+            --sh-hov: 0 24px 64px rgba(0,0,0,0.5), 0 6px 24px rgba(0,200,83,0.18);
+            --radius: 20px;
+            --radius-sm: 10px;
+            --font-family: 'Outfit', 'Inter', sans-serif;
+            --font-display: 'Space Grotesk', 'Outfit', sans-serif;
+            --font-serif: 'Cormorant Garamond', serif;
+            --font-mono: 'DM Mono', monospace;
+            --tech-blue: #00BFFF;
+            --tech-blue-light: #66D9FF;
+            --tech-blue-glow: rgba(0,191,255,0.2);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html { font-size: 106.25%; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; }
+
+        body {
+            font-family: var(--font-family);
+            background: var(--navy-deep);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            -webkit-font-smoothing: antialiased;
+            user-select: none;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0.6;
+        }
+
+        .ambient-1 {
+            position: fixed; top: -20%; left: -10%;
+            width: 60vw; height: 60vw;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(0,200,83,0.03) 0%, transparent 65%);
+            pointer-events: none; z-index: -1;
+            animation: floatAmbient 10s ease-in-out infinite;
+        }
+        .ambient-2 {
+            position: fixed; bottom: -20%; right: -10%;
+            width: 50vw; height: 50vw;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255,215,0,0.04) 0%, transparent 65%);
+            pointer-events: none; z-index: -1;
+            animation: floatAmbient 12s ease-in-out infinite reverse;
+        }
+
+        @keyframes floatAmbient {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(20px, -20px) scale(1.05); }
+            66% { transform: translate(-15px, 15px) scale(0.95); }
+        }
+
+        /* ═══ SIDEBAR ═══ */
+        #sidebar-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 50; opacity: 0;
+            transition: opacity 0.3s ease;
+            display: none;
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+        }
+        #sidebar-overlay.opacity-100 { opacity: 1; }
+        #sidebar-overlay.hidden { display: none; }
+
+        #sidebar {
+            position: fixed;
+            top: 0; left: 0;
+            height: 100%; width: 290px;
+            background: linear-gradient(180deg, #0A1628 0%, #0F1F3D 100%) !important;
+            border-right: 1px solid var(--border-active);
+            z-index: 60;
+            overflow: hidden;
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateX(-100%);
+            display: flex; flex-direction: column;
+            box-shadow: 8px 0 40px rgba(0,0,0,0.5);
+        }
+        #sidebar.open { transform: translateX(0); }
+
+        .sb-header {
+            padding: 32px 20px 20px;
+            background: linear-gradient(160deg, #0A1628 0%, #0F1F3D 100%);
+            border-bottom: 1px solid var(--border-active);
+            text-align: center;
+            position: relative; overflow: hidden;
+            flex-shrink: 0;
+        }
+        .sb-header::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--emerald), var(--gold), transparent);
+            animation: shimmerHeader 3s infinite;
+        }
+        @keyframes shimmerHeader {
+            0%, 100% { transform: translateX(-100%); }
+            50% { transform: translateX(100%); }
+        }
+        .sb-logo-box {
+            width: 68px; height: 68px;
+            margin: 0 auto 12px;
+            border-radius: 18px; overflow: hidden;
+            border: 2px solid var(--border-active);
+            box-shadow: 0 0 25px var(--emerald-glow);
+            transition: transform 0.3s ease;
+            background: rgba(0,200,83,0.05);
+        }
+        .sb-logo-box:hover { transform: scale(1.1) rotate(5deg); }
+        .sb-logo-box img { width: 100%; height: 100%; object-fit: cover; }
+        .sb-brand {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800; font-size: 1.3rem;
+            color: var(--gold) !important;
+            letter-spacing: 0.2em; text-transform: uppercase;
+            text-shadow: 0 0 20px rgba(255,215,0,0.4);
+        }
+        .sb-tagline {
+            font-size: 0.7rem; font-weight: 500;
+            color: var(--text-muted);
+            letter-spacing: 0.15em; margin-top: 6px;
+            text-transform: uppercase;
+        }
+        .sb-scroll-area { flex: 1; overflow-y: auto; padding: 8px 0; }
+        .sb-scroll-area::-webkit-scrollbar { width: 3px; }
+        .sb-scroll-area::-webkit-scrollbar-track { background: transparent; }
+        .sb-scroll-area::-webkit-scrollbar-thumb { background: var(--emerald-dark); border-radius: 3px; }
+        .sb-cat {
+            padding: 14px 24px 8px;
+            font-size: 0.7rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.2em;
+            color: var(--emerald);
+        }
+        #sidebar nav a {
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px 24px;
+            color: var(--text-primary) !important;
+            transition: all 0.25s ease;
+            text-decoration: none;
+            font-size: 0.9rem; font-weight: 500;
+            position: relative; overflow: hidden;
+            cursor: pointer;
+        }
+        #sidebar nav a::before {
+            content: '';
+            position: absolute; left: 0; top: 0; bottom: 0;
+            width: 3px; background: var(--emerald);
+            transform: scaleY(0);
+            transition: transform 0.25s ease;
+        }
+        #sidebar nav a:hover {
+            background: rgba(0,200,83,0.08);
+            color: var(--emerald-light) !important;
+            transform: translateX(4px);
+        }
+        #sidebar nav a:hover::before { transform: scaleY(1); }
+        #sidebar nav a.active {
+            background: linear-gradient(90deg, rgba(0,200,83,0.12) 0%, transparent 100%);
+            color: var(--emerald) !important;
+            font-weight: 700;
+        }
+        #sidebar nav a.active::before { transform: scaleY(1); }
+        .sb-icon {
+            width: 20px; height: 20px;
+            flex-shrink: 0; font-size: 1.1rem;
+            text-align: center; color: var(--text-muted);
+            transition: color 0.25s ease;
+        }
+        #sidebar nav a:hover .sb-icon,
+        #sidebar nav a.active .sb-icon { color: var(--emerald); }
+        .sb-badge {
+            font-size: 0.65rem; padding: 2px 8px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--emerald-dark), var(--emerald));
+            color: #000; font-weight: 800;
+            letter-spacing: 0.05em;
+            animation: pulse 2s infinite;
+            margin-left: auto;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        .sb-footer {
+            padding: 16px 20px;
+            border-top: 1px solid var(--border-subtle);
+            display: flex; gap: 16px;
+            justify-content: center;
+            background: rgba(0,0,0,0.2);
+            flex-shrink: 0;
+        }
+        .sb-footer a {
+            color: var(--text-muted) !important;
+            font-size: 1.3rem;
+            transition: all 0.25s ease;
+        }
+        .sb-footer a:hover { color: var(--emerald) !important; transform: translateY(-3px); }
+
+        /* Botón hamburguesa */
+        #menu-toggle {
+            position: fixed;
+            top: 16px; left: 16px;
+            z-index: 100;
+            background: rgba(15, 31, 61, 0.9);
+            color: var(--emerald);
+            border: 1px solid var(--border-active);
+            width: 44px; height: 44px;
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        #menu-toggle:hover {
+            transform: scale(1.08);
+            background: rgba(0,200,83,0.1);
+            box-shadow: 0 6px 20px var(--emerald-glow);
+        }
+        #menu-toggle i { color: var(--emerald); font-size: 1.3rem; }
+
+        /* ═══ MAIN ═══ */
+        main {
+            position: relative; z-index: 1; width: 100%;
+        }
+
+        /* ═══ HERO (con imagen de fondo) ═══ */
+        .hero {
+            width: 100%;
+            min-height: 100svh;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            padding: 56px 16px 48px;
+            text-align: center;
+            position: relative; overflow: hidden;
+            /* Imagen de fondo de alta calidad (tecnología, automatización, negocios) */
+            background: url('https://i.postimg.cc/CKMnXqCk/file-000000006e84722fb36db8d32ac9792e.png') center/cover no-repeat;
+            background-attachment: fixed; /* Efecto parallax sutil */
+        }
+        /* Overlay oscuro para legibilidad */
+        .hero::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(10, 22, 40, 0.92) 0%, rgba(15, 31, 61, 0.85) 50%, rgba(10, 22, 40, 0.9) 100%);
+            z-index: 0;
+        }
+        /* Asegurar que todo el contenido esté por encima del overlay */
+        .hero > * {
+            position: relative;
+            z-index: 1;
+        }
+        .hero-line {
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent 0%, var(--emerald) 50%, transparent 100%);
+            z-index: 2;
+        }
+        .hero-eyebrow {
+            font-family: var(--font-mono);
+            font-size: 0.7rem; letter-spacing: 0.3em;
+            text-transform: uppercase; color: var(--text-muted);
+            margin-bottom: 16px;
+            animation: fadeUp 0.8s 0.1s ease forwards; opacity: 0;
+        }
+        .hero-title {
+            font-family: var(--font-serif);
+            font-size: clamp(3.5rem, 12vw, 8rem);
+            font-weight: 300; line-height: 0.9;
+            letter-spacing: -0.02em; color: var(--white);
+            margin-bottom: 8px;
+            animation: fadeUp 0.9s 0.2s ease forwards; opacity: 0;
+        }
+        .hero-title em { font-style: italic; color: var(--emerald); }
+        .hero-divider {
+            width: 60px; height: 2px;
+            background: var(--emerald);
+            margin: 24px auto;
+            animation: expandLine 0.8s 0.4s ease forwards;
+            transform: scaleX(0);
+        }
+        @keyframes expandLine { to { transform: scaleX(1); } }
+        .hero-tagline {
+            font-family: var(--font-serif);
+            font-size: clamp(1.3rem, 3vw, 2rem);
+            font-weight: 300; font-style: italic;
+            color: var(--text-primary); max-width: 600px;
+            line-height: 1.5; margin-bottom: 16px;
+            animation: fadeUp 0.9s 0.5s ease forwards; opacity: 0;
+        }
+        .hero-sub {
+            font-size: 0.88rem; color: var(--text-muted);
+            max-width: 520px; line-height: 1.7;
+            margin-bottom: 20px; font-weight: 300;
+            animation: fadeUp 0.9s 0.6s ease forwards; opacity: 0;
+        }
+
+        /* Contenedor principal de los dos botones (Hero) */
+        .hero-buttons-main {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: stretch;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto 16px;
+            gap: 16px;
+            animation: fadeUp 0.9s 0.65s ease forwards; opacity: 0;
+        }
+
+        /* Botones outline transparentes */
+        .hero-outline-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: transparent;
+            font-weight: 600;
+            font-size: 0.85rem;
+            letter-spacing: 0.1em;
+            padding: 14px 28px;
+            border-radius: 60px;
+            text-decoration: none;
+            cursor: pointer;
+            border: 2px solid var(--emerald);
+            color: var(--emerald);
+            font-family: var(--font-display);
+            text-transform: uppercase;
+            transition: all 0.25s ease;
+            white-space: nowrap;
+            flex: 1 1 200px;
+        }
+        .hero-outline-btn i {
+            font-size: 1.1rem;
+        }
+        .hero-outline-btn:hover {
+            background: rgba(0,200,83,0.1);
+            color: var(--emerald-light);
+            border-color: var(--emerald-light);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px var(--emerald-glow);
+        }
+        .hero-outline-btn:active {
+            transform: translateY(1px);
+        }
+
+        /* Botón azul tecnológico (Validar Clientes) */
+        .hero-outline-btn.hero-outline-btn-blue {
+            border-color: var(--tech-blue);
+            color: var(--tech-blue);
+        }
+        .hero-outline-btn.hero-outline-btn-blue:hover {
+            background: rgba(0,191,255,0.1);
+            color: var(--tech-blue-light);
+            border-color: var(--tech-blue-light);
+            box-shadow: 0 6px 20px var(--tech-blue-glow);
+        }
+
+        /* Los estilos originales de hero-cta y hero-cta-secondary se mantienen intactos
+           (pueden usarse en CTA final u otros lugares) */
+        .hero-cta {
+            display: inline-flex; align-items: center; gap: 10px;
+            background: linear-gradient(135deg, var(--emerald), var(--emerald-dark));
+            color: #000;
+            font-weight: 700; font-size: 0.85rem;
+            letter-spacing: 0.12em; text-transform: uppercase;
+            padding: 16px 36px; border-radius: 60px;
+            text-decoration: none;
+            transition: all 0.25s ease;
+            cursor: pointer; border: none;
+            box-shadow: 0 8px 28px var(--emerald-glow-strong);
+            font-family: var(--font-display);
+        }
+        .hero-cta:hover {
+            background: linear-gradient(135deg, var(--emerald-light), var(--emerald));
+            transform: translateY(-3px);
+            box-shadow: 0 12px 36px var(--emerald-glow-strong);
+        }
+        .hero-cta:active {
+            transform: translateY(1px);
+            box-shadow: 0 4px 16px var(--emerald-glow-strong);
+        }
+        .hero-cta-secondary {
+            display: inline-flex; align-items: center; gap: 10px;
+            background: transparent;
+            color: var(--text-primary);
+            font-weight: 600; font-size: 0.85rem;
+            letter-spacing: 0.1em;
+            padding: 16px 28px; border-radius: 60px;
+            text-decoration: none;
+            border: 1px solid var(--border-subtle);
+            transition: all 0.25s ease;
+            cursor: pointer;
+            font-family: var(--font-display);
+        }
+        .hero-cta-secondary:hover {
+            border-color: var(--emerald);
+            color: var(--emerald);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px var(--emerald-glow);
+        }
+        .hero-cta-secondary:active {
+            transform: translateY(1px);
+        }
+
+        .hero-stats {
+            display: flex; gap: 0;
+            width: 100%; margin-top: 60px;
+            border-top: 1px solid var(--border-subtle);
+            animation: fadeUp 0.9s 0.8s ease forwards; opacity: 0;
+            z-index: 1;
+        }
+        .stat-item {
+            flex: 1; padding: 24px 8px;
+            text-align: center;
+            border-right: 1px solid var(--border-subtle);
+        }
+        .stat-item:last-child { border-right: none; }
+        .stat-num {
+            font-family: var(--font-serif);
+            font-size: 2rem; font-weight: 600;
+            color: var(--emerald); display: block;
+        }
+        .stat-label {
+            font-size: 0.68rem; color: var(--text-muted);
+            letter-spacing: 0.08em; text-transform: uppercase;
+            margin-top: 4px; display: block;
+        }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(24px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ═══ NUEVA SECCIÓN TECH BENEFITS (fondo 3D tecnológico) ═══ */
+        .tech-benefits-section {
+            position: relative;
+            width: 100%;
+            padding: 80px 0;
+            background: var(--navy-deep);
+            overflow: hidden;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(0,200,83,0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(255,215,0,0.04) 0%, transparent 50%),
+                linear-gradient(135deg, var(--navy-surface) 0%, var(--navy-deep) 100%);
+            z-index: 1;
+        }
+        .tech-benefits-section::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: 
+                linear-gradient(rgba(0,200,83,0.08) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,200,83,0.08) 1px, transparent 1px);
+            background-size: 60px 60px;
+            transform: perspective(800px) rotateX(25deg) scale(1.8);
+            transform-origin: center top;
+            opacity: 0.25;
+            pointer-events: none;
+            animation: gridShift 12s ease-in-out infinite;
+        }
+        @keyframes gridShift {
+            0%, 100% { background-position: 0 0; opacity: 0.25; }
+            50% { background-position: 10px 10px; opacity: 0.4; }
+        }
+        .tech-benefits-section::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at center, transparent 0%, rgba(10,22,40,0.7) 100%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        .tech-benefits-section .content-grid {
+            position: relative;
+            z-index: 2;
+        }
+
+        /* ═══ CARRUSEL DE BENEFICIOS (imágenes) ═══ */
+        .benefits-carousel {
+            position: relative;
+            width: 100%;
+            max-width: 460px;
+            margin: 32px auto 0;
+            aspect-ratio: 784 / 1168;
+            border-radius: var(--radius);
+            overflow: hidden;
+            border: 1px solid rgba(0,200,83,0.2);
+            background: var(--navy-card);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.45), 0 0 40px rgba(0,200,83,0.06);
+        }
+        .benefits-carousel-track {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s cubic-bezier(0.65, 0, 0.35, 1);
+        }
+        .benefits-carousel-slide {
+            flex: 0 0 100%;
+            width: 100%;
+            height: 100%;
+        }
+        .benefits-carousel-slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .benefits-carousel-progress {
+            position: absolute;
+            left: 0; right: 0; bottom: 0;
+            height: 4px;
+            background: rgba(255,255,255,0.08);
+            z-index: 3;
+        }
+        .benefits-carousel-progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--emerald-dark), var(--emerald));
+            box-shadow: 0 0 12px var(--emerald-glow-strong);
+        }
+        .benefits-carousel-progress-bar.animating {
+            transition: width linear;
+        }
+
+        /* ═══ SECTIONS (genéricas) ═══ */
+        .section {
+            width: 100%; padding: 48px 0;
+            position: relative;
+        }
+        .section-label {
+            font-family: var(--font-mono);
+            font-size: 0.7rem; letter-spacing: 0.3em;
+            text-transform: uppercase; color: var(--emerald);
+            margin-bottom: 14px; display: block;
+        }
+        .section-title {
+            font-family: var(--font-serif);
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 300; color: var(--white);
+            line-height: 1.1; margin-bottom: 14px;
+        }
+        .section-title em { font-style: italic; color: var(--emerald); }
+        .section-body {
+            font-size: 0.95rem; color: var(--text-muted);
+            line-height: 1.8;
+        }
+
+        .content-grid {
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 16px;
+            box-sizing: border-box;
+        }
+        .content-grid > * { margin-bottom: 32px; }
+        .content-grid > *:last-child { margin-bottom: 0; }
+
+        /* ═══ SERVICIOS (grid) ═══ */
+        .services-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-top: 16px;
+        }
+        @media (min-width: 640px) {
+            .services-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (min-width: 768px) {
+            .services-grid { grid-template-columns: repeat(4, 1fr); }
+        }
+        .service-card {
+            background: var(--navy-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            padding: 20px 16px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        .service-card:hover {
+            border-color: var(--border-active);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+        }
+        .service-card .icon {
+            font-size: 2rem; color: var(--emerald);
+            margin-bottom: 12px;
+            display: block;
+        }
+        .service-card h4 {
+            font-size: 0.95rem; font-weight: 700;
+            color: var(--white); margin-bottom: 6px;
+        }
+        .service-card p {
+            font-size: 0.8rem; color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        /* ═══ CÓMO FUNCIONA ═══ */
+        .steps-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            margin-top: 16px;
+        }
+        @media (min-width: 640px) {
+            .steps-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+        .step-item {
+            background: var(--navy-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            padding: 24px 20px;
+            text-align: center;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        .step-item:hover {
+            border-color: var(--border-active);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+        }
+        .step-number {
+            display: inline-block;
+            width: 36px; height: 36px;
+            line-height: 36px;
+            border-radius: 50%;
+            background: var(--emerald);
+            color: #000;
+            font-weight: 800; font-size: 0.9rem;
+            margin-bottom: 12px;
+        }
+        .step-item h4 {
+            font-size: 1rem; font-weight: 700;
+            color: var(--white); margin-bottom: 6px;
+        }
+        .step-item p {
+            font-size: 0.85rem; color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        /* ═══ NUEVO DISEÑO: MAPA MENTAL VENTAJAS ═══ */
+        .mindmap-grid {
+            position: relative;
+            padding: 20px 0;
+            margin-top: 24px;
+        }
+
+        /* Línea central vertical */
+        .mindmap-line {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            width: 2px;
+            background: linear-gradient(180deg, 
+                transparent 0%, 
+                var(--emerald) 8%, 
+                var(--emerald) 92%, 
+                transparent 100%);
+            transform: translateX(-50%);
+            z-index: 0;
+            box-shadow: 0 0 16px var(--emerald-glow);
+            border-radius: 2px;
+        }
+
+        /* Cada ítem del mapa mental */
+        .mindmap-item {
+            display: flex;
+            align-items: center;
+            position: relative;
+            margin-bottom: 48px;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1), 
+                        transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .mindmap-item:last-child {
+            margin-bottom: 0;
+        }
+        .mindmap-item.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Nodo circular con número e icono */
+        .mindmap-node {
+            width: 74px;
+            height: 74px;
+            border-radius: 50%;
+            background: var(--navy-card);
+            border: 2px solid var(--emerald);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 28px var(--emerald-glow-strong), 0 8px 24px rgba(0,0,0,0.4);
+            position: relative;
+            z-index: 2;
+            flex-shrink: 0;
+            transition: transform 0.35s ease, box-shadow 0.35s ease;
+        }
+        .mindmap-node .node-number {
+            font-family: var(--font-display);
+            font-weight: 800;
+            font-size: 1.4rem;
+            color: var(--emerald);
+            line-height: 1;
+            margin-bottom: 1px;
+        }
+        .mindmap-node .node-icon {
+            font-size: 1.1rem;
+            color: var(--emerald-light);
+            line-height: 1;
+        }
+        .mindmap-item:hover .mindmap-node {
+            transform: scale(1.08);
+            box-shadow: 0 0 40px var(--emerald-glow-strong), 0 12px 32px rgba(0,0,0,0.5);
+            border-color: var(--emerald-light);
+        }
+
+        /* Contenido de texto */
+        .mindmap-content {
+            background: var(--navy-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius);
+            padding: 20px 22px;
+            box-shadow: var(--shadow-card);
+            transition: all 0.35s ease;
+            max-width: 320px;
+            position: relative;
+            z-index: 1;
+        }
+        .mindmap-item:hover .mindmap-content {
+            border-color: var(--border-active);
+            box-shadow: 0 16px 40px rgba(0,0,0,0.5), 0 0 24px rgba(0,200,83,0.1);
+            transform: translateY(-3px);
+        }
+        .mindmap-content h4 {
+            font-family: var(--font-display);
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--white);
+            margin-bottom: 6px;
+            letter-spacing: -0.01em;
+        }
+        .mindmap-content p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.55;
+            margin: 0;
+        }
+
+        /* Posicionamiento izquierda / derecha (escritorio) */
+        .mindmap-item.left {
+            flex-direction: row;
+            justify-content: flex-start;
+            padding-right: calc(50% + 20px);
+        }
+        .mindmap-item.left .mindmap-node {
+            margin-right: 24px;
+        }
+        .mindmap-item.right {
+            flex-direction: row-reverse;
+            justify-content: flex-start;
+            padding-left: calc(50% + 20px);
+        }
+        .mindmap-item.right .mindmap-node {
+            margin-left: 24px;
+        }
+
+        /* Conectores horizontales desde el nodo hasta la línea (efecto visual opcional) */
+        .mindmap-item.left::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            right: calc(50% - 1px);
+            width: 24px;
+            height: 2px;
+            background: var(--emerald);
+            transform: translateY(-50%);
+            z-index: 0;
+            opacity: 0.5;
+        }
+        .mindmap-item.right::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: calc(50% - 1px);
+            width: 24px;
+            height: 2px;
+            background: var(--emerald);
+            transform: translateY(-50%);
+            z-index: 0;
+            opacity: 0.5;
+        }
+
+        /* Responsive: en móvil todo a la izquierda */
+        @media (max-width: 768px) {
+            .mindmap-line {
+                left: 29px;
+                transform: none;
+            }
+            .mindmap-item,
+            .mindmap-item.left,
+            .mindmap-item.right {
+                flex-direction: row;
+                justify-content: flex-start;
+                padding-left: 0;
+                padding-right: 0;
+                margin-bottom: 36px;
+            }
+            .mindmap-item .mindmap-node {
+                margin-right: 20px;
+                margin-left: 0;
+                width: 58px;
+                height: 58px;
+            }
+            .mindmap-item .mindmap-node .node-number {
+                font-size: 1.1rem;
+            }
+            .mindmap-item .mindmap-node .node-icon {
+                font-size: 0.9rem;
+            }
+            .mindmap-content {
+                max-width: 100%;
+                flex: 1;
+            }
+            /* Quitar conectores horizontales */
+            .mindmap-item.left::after,
+            .mindmap-item.right::before {
+                display: none;
+            }
+            /* Ajustar posición de línea para que coincida con centro de nodos */
+            .mindmap-line {
+                left: 29px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .mindmap-item .mindmap-node {
+                width: 52px;
+                height: 52px;
+                margin-right: 14px;
+            }
+            .mindmap-line {
+                left: 26px;
+            }
+            .mindmap-content {
+                padding: 14px 16px;
+            }
+            .mindmap-content h4 {
+                font-size: 0.9rem;
+            }
+            .mindmap-content p {
+                font-size: 0.78rem;
+            }
+        }
+
+        /* ═══ PLANES DESTACADOS ═══ */
+        .plans-grid-home {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
+            margin-top: 16px;
+        }
+        @media (min-width: 640px) {
+            .plans-grid-home { grid-template-columns: repeat(3, 1fr); }
+        }
+        .plan-card-home {
+            background: var(--navy-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius);
+            padding: 24px 20px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        .plan-card-home:hover {
+            transform: translateY(-6px);
+            border-color: var(--border-active);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+        }
+        .plan-card-home.popular {
+            border-color: var(--emerald);
+            box-shadow: 0 0 30px var(--emerald-glow);
+            background: linear-gradient(135deg, rgba(0,200,83,0.08) 0%, var(--navy-card) 100%);
+            transform: scale(1.02);
+            z-index: 2;
+        }
+        .plan-card-home.popular:hover {
+            transform: scale(1.05) translateY(-8px);
+            box-shadow: 0 20px 50px var(--emerald-glow-strong);
+        }
+        .popular-badge-home {
+            position: absolute;
+            top: -12px;
+            right: 20px;
+            background: linear-gradient(135deg, var(--emerald), var(--emerald-dark));
+            color: #000;
+            font-size: 0.7rem;
+            font-weight: 800;
+            padding: 4px 14px;
+            border-radius: 20px;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            box-shadow: 0 4px 12px var(--emerald-glow);
+        }
+        .plan-card-home .plan-name {
+            font-size: 1.1rem; font-weight: 700;
+            color: var(--white); margin-bottom: 4px;
+        }
+        .plan-card-home .plan-price {
+            font-size: 2rem; font-weight: 800;
+            color: var(--emerald);
+            margin: 8px 0;
+        }
+        .plan-card-home .plan-price.free { color: var(--gold); }
+        .plan-card-home .plan-period {
+            font-size: 0.75rem; color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+        .plan-card-home ul {
+            list-style: none; padding: 0; margin: 0 0 20px 0;
+            flex-grow: 1;
+        }
+        .plan-card-home ul li {
+            display: flex; align-items: center; gap: 8px;
+            font-size: 0.82rem; color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+        .plan-card-home ul li i {
+            color: var(--emerald); font-size: 0.8rem;
+            flex-shrink: 0;
+        }
+        .plan-btn-home {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background: transparent;
+            border: 1px solid var(--border-active);
+            color: var(--emerald);
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            text-align: center;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: var(--font-display);
+            letter-spacing: 0.03em;
+            margin-top: auto;
+        }
+        .plan-card-home.popular .plan-btn-home {
+            background: linear-gradient(135deg, var(--emerald), var(--emerald-dark));
+            color: #000;
+            border: none;
+            box-shadow: 0 4px 16px var(--emerald-glow);
+        }
+        .plan-btn-home:hover {
+            background: var(--emerald);
+            color: #000;
+            border-color: var(--emerald);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px var(--emerald-glow);
+        }
+        .plan-card-home.popular .plan-btn-home:hover {
+            background: linear-gradient(135deg, var(--emerald-light), var(--emerald));
+            box-shadow: 0 8px 28px var(--emerald-glow-strong);
+        }
+        .see-all-plans {
+            text-align: center; margin-top: 20px;
+        }
+        .see-all-plans a {
+            color: var(--emerald);
+            font-weight: 600; text-decoration: none;
+            border-bottom: 1px solid transparent;
+            transition: all 0.2s;
+            font-size: 0.95rem;
+        }
+        .see-all-plans a:hover {
+            border-bottom-color: var(--emerald);
+            color: var(--emerald-light);
+        }
+
+        /* ═══ FAQ (acordeón) ═══ */
+        .faq-container-home { text-align: left; width: 100%; }
+        .faq-item-home { border-bottom: 1px solid var(--border-subtle); }
+        .faq-question-home {
+            display: flex; align-items: center; gap: 12px;
+            cursor: pointer; padding: 16px 4px;
+            font-weight: 600; font-size: 0.9rem;
+            color: var(--text-primary); transition: color 0.2s; user-select: none;
+        }
+        .faq-question-home:hover { color: var(--emerald); }
+        .faq-question-home.active { color: var(--emerald); }
+        .faq-question-home i {
+            color: var(--emerald); font-size: 0.75rem;
+            flex-shrink: 0; transition: transform 0.3s ease;
+        }
+        .faq-question-home.active i { transform: rotate(90deg); }
+        .faq-answer-home {
+            padding: 0 4px 18px 28px; color: var(--text-muted);
+            font-size: 0.88rem; line-height: 1.75;
+        }
+
+        /* ═══ CTA FINAL ═══ */
+        .cta-final {
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(160deg, var(--navy-surface), var(--navy-deep));
+            border-top: 1px solid var(--border-active);
+            border-bottom: 1px solid var(--border-active);
+            padding: 72px 16px;
+            text-align: center;
+        }
+        .cta-final canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+        .cta-final > * {
+            position: relative;
+            z-index: 1;
+        }
+        .cta-final h2 {
+            font-family: var(--font-serif);
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 300; color: var(--white);
+            line-height: 1.2; margin-bottom: 16px;
+        }
+        .cta-final h2 em { color: var(--emerald); font-style: italic; }
+        .cta-final p {
+            font-size: 0.95rem; color: var(--text-muted);
+            max-width: 500px; margin: 0 auto 28px;
+            line-height: 1.7;
+        }
+        .cta-final .hero-cta {
+            margin: 0 auto;
+        }
+
+        /* ═══ FOOTER ═══ */
+        .footer-content {
+            width: 100%; padding: 48px 16px 32px;
+            background: var(--navy-surface);
+            border-top: 1px solid var(--border-active);
+            text-align: center; position: relative; z-index: 1;
+        }
+        .footer-content::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--emerald), transparent);
+        }
+        .footer-content h3 {
+            font-size: 0.85rem; font-weight: 600; color: var(--text-muted);
+            letter-spacing: 0.1em; text-transform: uppercase;
+            margin-bottom: 16px;
+        }
+        .footer-content .social-icons { margin-bottom: 24px; }
+        .footer-content .social-icons a {
+            color: var(--text-muted); font-size: 1.6rem;
+            margin: 0 12px; transition: all 0.2s;
+        }
+        .footer-content .social-icons a:hover { color: var(--emerald); transform: translateY(-3px); }
+        .footer-content p {
+            font-size: 0.78rem; color: var(--text-subtle);
+            line-height: 1.6; margin-bottom: 8px;
+        }
+        .footer-content a { color: var(--emerald-light); text-decoration: none; transition: color 0.2s; font-weight: 600; }
+        .footer-content a:hover { color: var(--emerald); }
+
+        /* ═══ WHATSAPP ═══ */
+        .chat-bubble {
+            position: fixed; bottom: 24px; right: 24px;
+            width: 60px; height: 60px;
+            background: linear-gradient(135deg, #25D366, #128C7E);
+            color: white; border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 28px; cursor: pointer;
+            box-shadow: 0 6px 25px rgba(37,211,102,0.4);
+            z-index: 1000;
+            animation: slideIn 1s ease-out forwards;
+            transition: all 0.3s ease;
+            border: none;
+        }
+        .chat-bubble:hover { transform: scale(1.1); }
+        .chat-text {
+            position: fixed; bottom: 94px; right: 24px;
+            background: linear-gradient(135deg, #25D366, #128C7E);
+            color: white;
+            padding: 12px 18px;
+            border-radius: 14px;
+            font-size: 14px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+            white-space: nowrap;
+            opacity: 0; transform: scale(0.9);
+            transition: opacity 0.4s, transform 0.4s;
+            z-index: 1001; cursor: pointer;
+            font-family: var(--font-family); font-weight: 600;
+        }
+        .chat-text.show { opacity: 1; transform: scale(1); }
+        .chat-text.hide { opacity: 0; transform: scale(0.9); }
+        @keyframes slideIn {
+            from { transform: translateX(80px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            .hero-stats { flex-wrap: wrap; }
+            .stat-item { min-width: 50%; border-right: none; border-bottom: 1px solid var(--border-subtle); }
+            .stat-item:nth-child(2n) { border-right: none; }
+            .content-grid { padding: 0 12px; }
+            .section { padding: 40px 0; }
+            #sidebar { width: 100%; max-width: 300px; }
+            .services-grid { grid-template-columns: 1fr 1fr; }
+            .benefits-carousel { max-width: 100%; }
+            /* Ajuste responsivo para los botones outline del Hero */
+            .hero-buttons-main {
+                max-width: 100%;
+                gap: 12px;
+            }
+            .hero-outline-btn {
+                padding: 12px 16px;
+                font-size: 0.75rem;
+                flex: 1 1 140px;
+            }
+        }
+        @media (min-width: 768px) {
+            .content-grid { padding: 0 20px; }
+        }
+        @media (min-width: 1024px) {
+            .content-grid { max-width: 960px; }
+        }
+
+        /* ═══════════════════════════════════════════════════════
+           ═══ NUEVO DISEÑO: SECCIÓN DE TESTIMONIOS (rediseño) ═══
+           ═══════════════════════════════════════════════════════ */
+        .testimonials-intro-note {
+            font-size: 0.78rem;
+            color: var(--text-subtle);
+            font-style: italic;
+            margin-top: -8px;
+        }
+
+        .testimonials-carousel-wrap {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 28px;
+        }
+
+        .testimonials-viewport {
+            flex: 1;
+            overflow: hidden;
+            padding: 30px 4px 10px;
+        }
+
+        .testimonials-track {
+            display: flex;
+            align-items: stretch;
+            transition: transform 0.55s cubic-bezier(0.65, 0, 0.35, 1);
+            will-change: transform;
+        }
+
+        .test-card {
+            flex: 0 0 100%;
+            max-width: 100%;
+            padding: 0 10px;
+            box-sizing: border-box;
+            display: flex;
+            justify-content: center;
+        }
+
+        @media (min-width: 720px) {
+            .test-card { flex: 0 0 50%; max-width: 50%; }
+        }
+        @media (min-width: 1024px) {
+            .test-card { flex: 0 0 33.3333%; max-width: 33.3333%; }
+        }
+
+        .test-card-inner {
+            width: 100%;
+            max-width: 300px;
+            background: #ffffff;
+            border-radius: 18px;
+            overflow: visible;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+            transform: scale(0.88);
+            opacity: 0.55;
+            transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), 
+                        opacity 0.45s ease,
+                        box-shadow 0.45s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .test-card.is-active .test-card-inner {
+            transform: scale(1);
+            opacity: 1;
+            box-shadow: 0 22px 50px rgba(0,0,0,0.5), 0 0 0 1px rgba(0,200,83,0.15);
+        }
+
+        .test-avatar-wrap {
+            position: relative;
+            background: #ffffff;
+            border-top-left-radius: 18px;
+            border-top-right-radius: 18px;
+            height: 54px;
+            flex-shrink: 0;
+        }
+
+        .test-avatar {
+            position: absolute;
+            top: -18px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 76px;
+            height: 76px;
+            border-radius: 50%;
+            background: #cfd6dd;
+            border: 4px solid #ffffff;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .test-avatar i {
+            font-size: 2.2rem;
+            color: #2b2f36;
+        }
+
+        .test-card-body {
+            background: linear-gradient(160deg, var(--emerald) 0%, var(--emerald-dark) 100%);
+            border-radius: 18px 18px 18px 18px;
+            margin-top: -14px;
+            padding: 30px 20px 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .test-quote-icon {
+            color: rgba(255,255,255,0.85);
+            font-size: 1.3rem;
+            margin-bottom: 8px;
+        }
+
+        .test-text {
+            color: #ffffff;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            flex-grow: 1;
+            font-style: normal;
+        }
+
+        .test-close-quote {
+            align-self: flex-end;
+            color: rgba(255,255,255,0.85);
+            font-size: 1.3rem;
+            margin-top: 6px;
+        }
+
+        .test-footer {
+            margin-top: 14px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255,255,255,0.25);
+        }
+
+        .test-name {
+            display: block;
+            color: #ffffff;
+            font-weight: 800;
+            font-size: 0.85rem;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+        }
+
+        .test-role {
+            display: block;
+            color: rgba(255,255,255,0.85);
+            font-size: 0.75rem;
+            margin-top: 2px;
+        }
+
+        .test-meta {
+            display: block;
+            color: rgba(255,255,255,0.65);
+            font-size: 0.68rem;
+            margin-top: 6px;
+            letter-spacing: 0.03em;
+        }
+
+        .test-nav {
+            flex-shrink: 0;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: var(--emerald);
+            color: #000;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1rem;
+            box-shadow: 0 6px 18px var(--emerald-glow);
+            transition: all 0.25s ease;
+        }
+        .test-nav:hover {
+            background: var(--emerald-light);
+            transform: scale(1.08);
+        }
+        .test-nav:active { transform: scale(0.95); }
+
+        .testimonials-dots {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 22px;
+        }
+        .test-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: var(--navy-border);
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            transition: all 0.3s ease;
+        }
+        .test-dot.active {
+            background: var(--emerald);
+            width: 24px;
+            border-radius: 6px;
+        }
+
+        @media (max-width: 480px) {
+            .testimonials-carousel-wrap { gap: 4px; }
+            .test-nav { width: 36px; height: 36px; font-size: 0.85rem; }
+            .test-card-inner { max-width: 260px; }
+        }
+        /* ═══════════════════════════════════════════════════════════
+           GENERADOR DE BOLETAS — estilos propios (sin colisión con
+           las clases .hero / .section usadas en el resto del sitio)
+           ═══════════════════════════════════════════════════════════ */
+        .gb-hero {
+            width: 100%;
+            padding: 64px 20px 40px;
+            text-align: center;
+            background: linear-gradient(160deg, var(--navy-deep) 0%, var(--navy-surface) 100%);
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        .gb-hero h1 {
+            font-family: var(--font-display);
+            font-size: clamp(1.8rem, 5vw, 2.75rem);
+            font-weight: 700;
+            color: var(--white);
+            margin-bottom: 14px;
+            letter-spacing: -0.01em;
+        }
+        .gb-hero p {
+            font-size: 1rem;
+            color: var(--text-muted);
+            max-width: 680px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .layout {
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 32px 20px 80px;
+            display: grid;
+            grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+            gap: 24px;
+            align-items: start;
+        }
+        @media (max-width: 980px) {
+            .layout { grid-template-columns: 1fr; }
+        }
+
+        .panel {
+            background: var(--navy-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-card);
+            overflow: hidden;
+        }
+        .panel-header {
+            padding: 26px 28px 18px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        .panel-title {
+            font-family: var(--font-display);
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: var(--white);
+        }
+        .panel-subtitle {
+            margin-top: 6px;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+        .form-wrap { padding: 24px 28px 32px; }
+
+        .notice {
+            background: rgba(0, 191, 255, 0.08);
+            border: 1px solid rgba(0, 191, 255, 0.25);
+            color: var(--tech-blue-light);
+            border-radius: var(--radius-sm);
+            padding: 12px 16px;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            margin-bottom: 18px;
+        }
+
+        .error, .success {
+            display: none;
+            border-radius: var(--radius-sm);
+            padding: 12px 16px;
+            font-size: 0.88rem;
+            line-height: 1.5;
+            margin-bottom: 16px;
+            font-weight: 500;
+        }
+        .error {
+            background: var(--ruby-glow);
+            border: 1px solid rgba(229, 57, 53, 0.35);
+            color: var(--ruby-light);
+        }
+        .success {
+            background: var(--emerald-glow);
+            border: 1px solid var(--border-active);
+            color: var(--emerald-light);
+        }
+
+        /* ── Banner de plan activo ── */
+        #planInfo {
+            background: linear-gradient(135deg, rgba(0,200,83,0.08), rgba(0,191,255,0.05)) !important;
+            border: 1px solid var(--border-subtle) !important;
+            border-left: 4px solid var(--emerald) !important;
+            border-radius: var(--radius-sm) !important;
+            color: var(--text-primary);
+            font-size: 0.88rem;
+        }
+        #planInfo strong { color: var(--white); }
+        #planNombre { color: var(--emerald-light); font-weight: 700; }
+        #comprobantesDisponibles { color: var(--gold-light); font-weight: 700; }
+        #planLink {
+            color: var(--tech-blue-light) !important;
+            font-size: 0.85rem;
+        }
+
+        /* ── Mensaje comercial / upsell ── */
+        .upsell-banner {
+            display: none;
+            margin-bottom: 20px;
+            padding: 16px 18px;
+            border-radius: var(--radius-sm);
+            background: linear-gradient(135deg, rgba(255,215,0,0.1), rgba(255,215,0,0.02));
+            border: 1px solid var(--border-gold);
+        }
+        .upsell-banner.visible { display: block; }
+        .upsell-banner strong {
+            color: var(--gold-light);
+            display: block;
+            margin-bottom: 4px;
+            font-size: 0.92rem;
+        }
+        .upsell-banner p {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+        .upsell-banner a {
+            display: inline-block;
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--navy-deep);
+            background: linear-gradient(135deg, var(--gold), var(--gold-light));
+            padding: 8px 16px;
+            border-radius: 999px;
+            text-decoration: none;
+        }
+
+        /* ── Secciones del formulario ── */
+        .gb-block { margin-bottom: 28px; }
+        .gb-block h3 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--white);
+            margin-bottom: 14px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        label {
+            display: block;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+        input, select, textarea {
+            width: 100%;
+            background: var(--navy-surface);
+            border: 1px solid var(--navy-border);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            padding: 11px 14px;
+            font-size: 0.92rem;
+            font-family: inherit;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--emerald);
+            box-shadow: 0 0 0 3px var(--emerald-glow);
+        }
+        input::placeholder, textarea::placeholder { color: var(--text-subtle); }
+        textarea { min-height: 90px; resize: vertical; }
+        select { cursor: pointer; }
+        .helper { font-size: 0.76rem; color: var(--text-subtle); margin-top: 5px; }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        .grid > div:last-child:not(.grid-2):not(.grid-3) { margin-bottom: 0; }
+        .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+        @media (max-width: 640px) {
+            .grid, .grid-2, .grid-3 { grid-template-columns: 1fr; }
+        }
+
+        .inline-toggle {
+            display: flex !important;
+            align-items: center;
+            gap: 10px;
+            text-transform: none;
+            font-size: 0.88rem;
+            color: var(--text-primary);
+            margin-top: 30px;
+            cursor: pointer;
+        }
+        .inline-toggle input { width: auto; accent-color: var(--emerald); cursor: pointer; }
+
+        /* ── Galería de plantillas ── */
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 14px;
+        }
+        .template-card {
+            position: relative;
+            background: var(--navy-surface);
+            border: 2px solid var(--navy-border);
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            text-align: left;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s ease;
+            color: var(--text-primary);
+        }
+        .template-card:hover {
+            border-color: var(--border-active);
+            transform: translateY(-2px);
+        }
+        .template-card.active {
+            border-color: var(--emerald);
+            box-shadow: 0 0 0 3px var(--emerald-glow);
+            background: rgba(0,200,83,0.06);
+        }
+        .template-card.locked {
+            cursor: pointer;
+            opacity: 0.72;
+        }
+        .template-card.locked:hover { border-color: var(--border-gold); }
+        .template-swatch {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+        .template-swatch span {
+            width: 22px; height: 22px;
+            border-radius: 6px;
+            display: inline-block;
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+        .template-card h4 {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--white);
+            margin-bottom: 4px;
+        }
+        .template-card p {
+            font-size: 0.76rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+        .template-lock-badge {
+            position: absolute;
+            top: 10px; right: 10px;
+            background: rgba(255,215,0,0.14);
+            border: 1px solid var(--border-gold);
+            color: var(--gold-light);
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 999px;
+            letter-spacing: 0.02em;
+        }
+        .template-free-badge {
+            position: absolute;
+            top: 10px; right: 10px;
+            background: var(--emerald-glow);
+            border: 1px solid var(--border-active);
+            color: var(--emerald-light);
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 999px;
+        }
+        .template-watermark-note {
+            margin-top: 12px;
+            font-size: 0.78rem;
+            color: var(--gold-light);
+            background: rgba(255,215,0,0.06);
+            border: 1px solid var(--border-gold);
+            border-radius: var(--radius-sm);
+            padding: 10px 14px;
+            display: none;
+            line-height: 1.5;
+        }
+        .template-watermark-note.visible { display: block; }
+
+        /* ── Subida de logo ── */
+        .logo-uploader {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+        .logo-preview {
+            width: 64px; height: 64px;
+            border-radius: 12px;
+            border: 1px dashed var(--navy-border);
+            background: var(--navy-surface);
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .logo-preview img { width: 100%; height: 100%; object-fit: contain; }
+        .logo-preview span { font-size: 0.65rem; color: var(--text-subtle); text-align: center; padding: 4px; }
+        .logo-uploader-actions { display: flex; flex-direction: column; gap: 8px; }
+        .logo-locked-note {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            background: var(--navy-surface);
+            border: 1px solid var(--navy-border);
+            border-radius: var(--radius-sm);
+            padding: 12px 14px;
+            line-height: 1.5;
+        }
+        .logo-locked-note a { color: var(--gold-light); font-weight: 700; text-decoration: none; }
+
+        /* ── Ítems ── */
+        .item-list { display: flex; flex-direction: column; gap: 14px; }
+        .item-row {
+            background: var(--navy-surface);
+            border: 1px solid var(--navy-border);
+            border-radius: var(--radius-sm);
+            padding: 16px;
+        }
+        .item-row-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .item-row-title { font-size: 0.85rem; font-weight: 700; color: var(--text-primary); }
+
+        /* ── Botones ── */
+        .actions { display: flex; gap: 12px; flex-wrap: wrap; }
+        .btn, .btn-secondary, .btn-ghost, .btn-danger {
+            font-family: inherit;
+            font-size: 0.88rem;
+            font-weight: 700;
+            border-radius: 999px;
+            padding: 12px 24px;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+        }
+        .btn {
+            background: linear-gradient(135deg, var(--emerald), var(--emerald-dark));
+            color: var(--navy-deep);
+            box-shadow: var(--shadow-emerald);
+        }
+        .btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: var(--sh-hov); }
+        .btn-secondary {
+            background: var(--navy-surface);
+            color: var(--white);
+            border: 1px solid var(--border-active);
+        }
+        .btn-secondary:hover:not(:disabled) { border-color: var(--emerald); }
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-muted);
+            border: 1px solid var(--navy-border);
+        }
+        .btn-ghost:hover:not(:disabled) { color: var(--white); border-color: var(--text-muted); }
+        .btn-danger {
+            background: transparent;
+            color: var(--ruby-light);
+            border: 1px solid rgba(229,57,53,0.3);
+            padding: 6px 12px;
+            font-size: 0.76rem;
+        }
+        .btn-danger:hover { background: var(--ruby-glow); }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* ── Panel de vista previa ── */
+        .preview-panel { position: sticky; top: 20px; }
+        .preview-top {
+            padding: 22px 28px;
+            border-bottom: 1px solid var(--border-subtle);
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 14px;
+        }
+        .status {
+            display: inline-block;
+            margin-top: 6px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            background: var(--navy-surface);
+            border: 1px solid var(--navy-border);
+            padding: 5px 12px;
+            border-radius: 999px;
+        }
+        .preview-actions { display: flex; gap: 10px; }
+        .summary-boxes {
+            width: 100%;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+        .summary-boxes.hidden { display: none; }
+        .summary-card {
+            background: var(--navy-surface);
+            border: 1px solid var(--navy-border);
+            border-radius: var(--radius-sm);
+            padding: 10px 12px;
+            text-align: center;
+        }
+        .summary-card small { display: block; color: var(--text-subtle); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 4px; }
+        .summary-card strong { color: var(--emerald-light); font-size: 1rem; }
+        .preview-body { padding: 20px 28px 28px; }
+        .preview-frame {
+            width: 100%;
+            min-height: 760px;
+            border: 1px solid var(--navy-border);
+            border-radius: var(--radius-sm);
+            background: #fff;
+        }
+        @media (max-width: 640px) {
+            .summary-boxes { grid-template-columns: 1fr; }
+            .preview-frame { min-height: 480px; }
+        }
+    </style>
+</head>
+<body>
+  <div class="page">
+    <section class="gb-hero">
+      <h1>Boletas y facturas listas en segundos</h1>
+      <p>
+        Elige una plantilla profesional, completa un formulario simple y genera un comprobante listo para vista previa,
+        descarga en PDF o compartir por WhatsApp, Instagram o cualquier canal compatible con Web Share.
+      </p>
+    </section>
+
+    <div class="layout">
+      <section class="panel">
+        <div class="panel-header">
+          <h2 class="panel-title">Configuración del comprobante</h2>
+          <p class="panel-subtitle">Todo está preparado para que puedas añadir más plantillas sin tocar el flujo del formulario.</p>
+        </div>
+
+        <div class="form-wrap">
+          <div id="errorBox" class="error"></div>
+          <div id="successBox" class="success"></div>
+          <div class="notice">
+            Consejo: si vendes por redes sociales, deja plantillas, datos del negocio y textos frecuentes preconfigurados para emitir más rápido.
+          </div>
+
+          <!-- INFO DEL PLAN -->
+          <div id="planInfo" style="margin-bottom: 16px; padding: 14px 16px; border-radius: 16px;">
+            <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+              <span><strong>Plan:</strong> <span id="planNombre">Cargando...</span></span>
+              <span><strong>Comprobantes disponibles:</strong> <span id="comprobantesDisponibles">-</span></span>
+            </div>
+            <div style="margin-top: 8px;">
+              <a href="/planes" id="planLink">Ver planes y actualizar</a>
+            </div>
+          </div>
+
+          <!-- MENSAJE COMERCIAL / UPSELL -->
+          <div id="upsellBanner" class="upsell-banner">
+            <strong>No te veas igual que el resto ✨</strong>
+            <p>Desbloquea las plantillas Elegante, Corporativa y Premium, sube el logo de tu negocio y haz que tus comprobantes destaquen frente a tus competidores.</p>
+            <a href="/planes">Ver planes desde S/7</a>
+          </div>
+
+          <form id="voucherForm">
+            <section class="gb-block">
+              <h3>Plantilla</h3>
+              <div id="templateGrid" class="template-grid"></div>
+              <div id="watermarkNote" class="template-watermark-note">
+                Tu plan gratuito incluye la plantilla <strong>Moderna Azul</strong> con una marca de agua "FacilitoTools" en el comprobante. Actualiza tu plan para generar comprobantes sin marca de agua.
+              </div>
+              <input type="hidden" id="templateId" name="templateId" value="moderna" />
+            </section>
+
+            <section class="gb-block">
+              <h3>Tipo de comprobante</h3>
+              <div class="grid-2">
+                <div>
+                  <label for="documentType">Documento</label>
+                  <select id="documentType" name="documentType">
+                    <option value="boleta">Boleta de venta</option>
+                    <option value="factura">Factura</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="paymentMethod">Forma de pago</label>
+                  <input id="paymentMethod" name="paymentMethod" value="Yape / Transferencia / Efectivo" />
+                </div>
+              </div>
+            </section>
+
+            <section class="gb-block">
+              <h3>Datos del emisor</h3>
+              <div class="grid">
+                <div>
+                  <label for="issuerBusinessName">Razón social o nombre comercial</label>
+                  <input id="issuerBusinessName" name="issuerBusinessName" placeholder="Mi Tienda Online" required />
+                </div>
+                <div class="grid-2">
+                  <div>
+                    <label for="issuerDocumentNumber">RUC / DNI</label>
+                    <input id="issuerDocumentNumber" name="issuerDocumentNumber" placeholder="20123456789" />
+                  </div>
+                  <div>
+                    <label for="issuerPhone">Teléfono</label>
+                    <input id="issuerPhone" name="issuerPhone" placeholder="987654321" />
+                  </div>
+                </div>
+                <div>
+                  <label for="issuerAddress">Dirección</label>
+                  <input id="issuerAddress" name="issuerAddress" placeholder="Av. Principal 123" />
+                </div>
+                <div class="grid-2">
+                  <div>
+                    <label for="issuerEmail">Email</label>
+                    <input id="issuerEmail" name="issuerEmail" placeholder="ventas@mitienda.com" />
+                  </div>
+                  <div>
+                    <label for="issuerWebsite">Web o Instagram</label>
+                    <input id="issuerWebsite" name="issuerWebsite" placeholder="instagram.com/mitienda" />
+                  </div>
+                </div>
+                <div id="logoField">
+                  <label>Logo del negocio</label>
+                  <div id="logoUploaderUnlocked" class="logo-uploader" style="display:none;">
+                    <div class="logo-preview" id="logoPreview"><span>Sin logo</span></div>
+                    <div class="logo-uploader-actions">
+                      <input type="file" id="logoInput" accept="image/png,image/jpeg,image/webp" style="max-width:220px;" />
+                      <button type="button" class="btn-danger" id="logoRemoveButton" style="align-self:flex-start;">Quitar logo</button>
+                      <div class="helper">PNG, JPG o WEBP. Se recomienda fondo transparente, máx. 2MB.</div>
+                    </div>
+                  </div>
+                  <div id="logoLockedNote" class="logo-locked-note" style="display:none;">
+                    Subir tu propio logo está disponible desde el plan <strong>Prueba Corta</strong>. <a href="/planes">Actualiza tu plan</a> para personalizar tus comprobantes.
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section class="gb-block">
+              <h3>Datos del cliente</h3>
+              <div class="grid">
+                <div>
+                  <label for="customerName">Nombre o razón social</label>
+                  <input id="customerName" name="customerName" placeholder="Cliente final" required />
+                </div>
+                <div class="grid-3">
+                  <div>
+                    <label for="customerDocumentType">Tipo de documento</label>
+                    <select id="customerDocumentType" name="customerDocumentType">
+                      <option value="DNI">DNI</option>
+                      <option value="RUC">RUC</option>
+                      <option value="CE">CE</option>
+                      <option value="PAS">Pasaporte</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label for="customerDocumentNumber">Número</label>
+                    <input id="customerDocumentNumber" name="customerDocumentNumber" placeholder="12345678" />
+                  </div>
+                  <div>
+                    <label for="issueDate">Fecha</label>
+                    <input id="issueDate" name="issueDate" type="datetime-local" />
+                  </div>
+                </div>
+                <div class="grid-2">
+                  <div>
+                    <label for="customerEmail">Email</label>
+                    <input id="customerEmail" name="customerEmail" placeholder="cliente@email.com" />
+                  </div>
+                  <div>
+                    <label for="customerPhone">Teléfono</label>
+                    <input id="customerPhone" name="customerPhone" placeholder="999888777" />
+                  </div>
+                </div>
+                <div>
+                  <label for="customerAddress">Dirección</label>
+                  <input id="customerAddress" name="customerAddress" placeholder="Dirección del cliente" />
+                </div>
+              </div>
+            </section>
+
+            <section class="gb-block">
+              <h3>Productos o servicios</h3>
+              <div id="itemList" class="item-list"></div>
+              <div class="actions" style="margin-top: 14px;">
+                <button type="button" class="btn-ghost" id="addItemButton">+ Añadir otro ítem</button>
+              </div>
+            </section>
+
+            <section class="gb-block">
+              <h3>Impuestos y notas</h3>
+              <div class="grid-2">
+                <div>
+                  <label for="taxRate">IGV</label>
+                  <input id="taxRate" name="taxRate" type="number" step="0.01" min="0" value="0.18" />
+                  <div class="helper">Usa 0.18 para 18%.</div>
+                </div>
+                <div>
+                  <label class="inline-toggle">
+                    <input id="pricesIncludeTax" name="pricesIncludeTax" type="checkbox" checked />
+                    El precio ingresado ya incluye IGV
+                  </label>
+                </div>
+              </div>
+              <div style="margin-top: 14px;">
+                <label for="notes">Observaciones</label>
+                <textarea id="notes" name="notes" placeholder="Entrega inmediata por WhatsApp. Gracias por tu compra."></textarea>
+              </div>
+            </section>
+
+            <section class="gb-block">
+              <div class="actions">
+                <button class="btn" type="submit" id="generateButton">Generar vista previa</button>
+                <button class="btn-ghost" type="button" id="resetButton">Limpiar formulario</button>
+              </div>
+            </section>
+          </form>
+        </div>
+      </section>
+
+      <section class="panel preview-panel">
+        <div class="preview-top">
+          <div>
+            <h2 class="panel-title" style="margin-bottom: 6px;">Vista previa en vivo</h2>
+            <div id="statusBadge" class="status">Esperando datos para generar</div>
+          </div>
+          <div class="preview-actions">
+            <button class="btn-secondary" type="button" id="downloadButton" disabled>Descargar PDF</button>
+            <button class="btn-ghost" type="button" id="shareButton" disabled>Compartir</button>
+          </div>
+          <div id="summaryBoxes" class="summary-boxes hidden">
+            <div class="summary-card">
+              <small>Subtotal</small>
+              <strong id="summarySubtotal">S/ 0.00</strong>
+            </div>
+            <div class="summary-card">
+              <small>IGV</small>
+              <strong id="summaryTax">S/ 0.00</strong>
+            </div>
+            <div class="summary-card">
+              <small>Total</small>
+              <strong id="summaryTotal">S/ 0.00</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="preview-body">
+          <iframe id="previewFrame" class="preview-frame" title="Vista previa del comprobante"></iframe>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <template id="itemRowTemplate">
+    <div class="item-row">
+      <div class="item-row-header">
+        <div class="item-row-title">Ítem <span class="item-index"></span></div>
+        <button type="button" class="btn-danger remove-item">Eliminar</button>
+      </div>
+      <div class="grid">
+        <div>
+          <label>Descripción</label>
+          <input class="item-description" placeholder="Producto o servicio" required />
+        </div>
+        <div class="grid-3">
+          <div>
+            <label>Unidad</label>
+            <input class="item-unit-label" value="UND" />
+          </div>
+          <div>
+            <label>Cantidad</label>
+            <input class="item-quantity" type="number" min="0.01" step="0.01" value="1" required />
+          </div>
+          <div>
+            <label>Precio unitario</label>
+            <input class="item-unit-price" type="number" min="0" step="0.01" value="0" required />
+          </div>
+        </div>
+        <div>
+          <label>SKU o referencia</label>
+          <input class="item-sku" placeholder="Opcional" />
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <script>
+    // Importar Firebase (usando CDN o módulos, aquí se usará la versión compat con importmap)
+    // Se asume que el proyecto ya tiene Firebase configurado en el cliente.
+    // Para simplificar, usaremos la API de Firebase Auth mediante la importación.
+    // Si no se usa módulos, se puede usar el SDK de Firebase global.
+    // En este ejemplo, se obtiene el uid de la cookie 'user_uid' establecida por el backend.
+    // También se puede leer desde localStorage o Firebase Auth.
+
+    const API_BASE = '/api/comprobantes';
+    const templateGrid = document.getElementById('templateGrid');
+    const templateIdInput = document.getElementById('templateId');
+    const itemList = document.getElementById('itemList');
+    const itemRowTemplate = document.getElementById('itemRowTemplate');
+    const voucherForm = document.getElementById('voucherForm');
+    const previewFrame = document.getElementById('previewFrame');
+    const summaryBoxes = document.getElementById('summaryBoxes');
+    const summarySubtotal = document.getElementById('summarySubtotal');
+    const summaryTax = document.getElementById('summaryTax');
+    const summaryTotal = document.getElementById('summaryTotal');
+    const downloadButton = document.getElementById('downloadButton');
+    const shareButton = document.getElementById('shareButton');
+    const statusBadge = document.getElementById('statusBadge');
+    const errorBox = document.getElementById('errorBox');
+    const successBox = document.getElementById('successBox');
+    const addItemButton = document.getElementById('addItemButton');
+    const resetButton = document.getElementById('resetButton');
+    const documentTypeSelect = document.getElementById('documentType');
+    const customerDocumentTypeSelect = document.getElementById('customerDocumentType');
+    const issueDateInput = document.getElementById('issueDate');
+    const planNombre = document.getElementById('planNombre');
+    const comprobantesDisponibles = document.getElementById('comprobantesDisponibles');
+    const planLink = document.getElementById('planLink');
+    const upsellBanner = document.getElementById('upsellBanner');
+    const watermarkNote = document.getElementById('watermarkNote');
+    const logoField = document.getElementById('logoField');
+    const logoUploaderUnlocked = document.getElementById('logoUploaderUnlocked');
+    const logoLockedNote = document.getElementById('logoLockedNote');
+    const logoInput = document.getElementById('logoInput');
+    const logoPreview = document.getElementById('logoPreview');
+    const logoRemoveButton = document.getElementById('logoRemoveButton');
+    const generateButton = document.getElementById('generateButton');
+
+    let currentTemplates = [];
+    let lastPayload = null;
+    let lastDocumentName = 'comprobante.pdf';
+    let lastShareText = 'Comprobante generado';
+    let uid = null;
+    let logoDataUrl = '';
+
+    // Plan por defecto: el más restrictivo, hasta que se confirme el real.
+    // Así nunca se ofrece por error algo que el usuario no tiene desbloqueado.
+    let planState = {
+      plan: 'gratis',
+      planNombre: 'Gratuito',
+      disponibles: 0,
+      permiteLogo: false,
+      plantillasPermitidas: ['moderna']
+    };
+
+    // Obtener uid desde cookie o localStorage (según como se maneje la autenticación)
+    function getUid() {
+      // Intentar desde cookie
+      const cookies = document.cookie.split(';').reduce((acc, c) => {
+        const [key, val] = c.trim().split('=');
+        acc[key] = decodeURIComponent(val);
+        return acc;
+      }, {});
+      if (cookies.user_uid) return cookies.user_uid;
+
+      // Fallback: desde localStorage (si se guarda)
+      return localStorage.getItem('user_uid') || null;
+    }
+
+    // Cargar información del plan y aplicar las restricciones correspondientes en la UI
+    async function loadPlanInfo() {
+      uid = getUid();
+      if (!uid) {
+        planNombre.textContent = 'No autenticado';
+        comprobantesDisponibles.textContent = '—';
+        applyPlanRestrictions();
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/user/plan?uid=${encodeURIComponent(uid)}`);
+        if (!response.ok) {
+          throw new Error('Error al obtener plan');
+        }
+        const data = await response.json();
+        planState = {
+          plan: data.plan || 'gratis',
+          planNombre: data.planNombre || data.plan || 'Gratuito',
+          disponibles: data.disponibles !== undefined ? data.disponibles : '—',
+          permiteLogo: !!data.permiteLogo,
+          plantillasPermitidas: Array.isArray(data.plantillasPermitidas) && data.plantillasPermitidas.length
+            ? data.plantillasPermitidas
+            : ['moderna']
+        };
+        planNombre.textContent = planState.planNombre;
+        comprobantesDisponibles.textContent = planState.disponibles;
+      } catch (error) {
+        console.error('Error cargando plan:', error);
+        planNombre.textContent = 'Error';
+        comprobantesDisponibles.textContent = 'Error';
+      }
+
+      applyPlanRestrictions();
+    }
+
+    // Aplica el estado del plan a: candados de plantillas, banner de upsell,
+    // nota de marca de agua y disponibilidad del campo de logo.
+    function applyPlanRestrictions() {
+      const esGratis = planState.plan === 'gratis';
+
+      upsellBanner.classList.toggle('visible', esGratis);
+      watermarkNote.classList.toggle('visible', esGratis);
+
+      if (planState.permiteLogo) {
+        logoUploaderUnlocked.style.display = 'flex';
+        logoLockedNote.style.display = 'none';
+      } else {
+        logoUploaderUnlocked.style.display = 'none';
+        logoLockedNote.style.display = 'block';
+        // Si el usuario perdió acceso al logo (p.ej. venció su plan), lo removemos.
+        clearLogo();
+      }
+
+      // Repintar tarjetas de plantillas con el estado de bloqueo correcto
+      renderTemplateCards();
+
+      // Si la plantilla actualmente seleccionada ya no está permitida, forzar a "moderna"
+      if (!planState.plantillasPermitidas.includes(templateIdInput.value)) {
+        selectTemplate('moderna');
+      }
+    }
+
+    // Actualizar plan después de descargar un comprobante (o después de cualquier acción que pueda cambiar el contador)
+    async function refreshPlanInfo() {
+      await loadPlanInfo();
+    }
+
+    function showError(message) {
+      errorBox.textContent = message;
+      errorBox.style.display = 'block';
+      successBox.style.display = 'none';
+    }
+
+    function showSuccess(message) {
+      successBox.textContent = message;
+      successBox.style.display = 'block';
+      errorBox.style.display = 'none';
+    }
+
+    function clearMessages() {
+      errorBox.style.display = 'none';
+      successBox.style.display = 'none';
+      errorBox.textContent = '';
+      successBox.textContent = '';
+    }
+
+    function formatMoney(value, currency = 'PEN') {
+      return new Intl.NumberFormat('es-PE', {
+        style: 'currency',
+        currency,
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }).format(Number(value || 0));
+    }
+
+    function setStatus(text) {
+      statusBadge.textContent = text;
+    }
+
+    function setDefaultDateTime() {
+      const now = new Date();
+      now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+      issueDateInput.value = now.toISOString().slice(0, 16);
+    }
+
+    function addItemRow(data = {}) {
+      const fragment = itemRowTemplate.content.cloneNode(true);
+      const row = fragment.querySelector('.item-row');
+      row.querySelector('.item-description').value = data.description || '';
+      row.querySelector('.item-unit-label').value = data.unitLabel || 'UND';
+      row.querySelector('.item-quantity').value = data.quantity ?? 1;
+      row.querySelector('.item-unit-price').value = data.unitPrice ?? 0;
+      row.querySelector('.item-sku').value = data.sku || '';
+
+      row.querySelector('.remove-item').addEventListener('click', () => {
+        if (itemList.children.length === 1) {
+          showError('Debe existir al menos un ítem.');
+          return;
+        }
+        row.remove();
+        refreshItemIndexes();
+      });
+
+      itemList.appendChild(row);
+      refreshItemIndexes();
+    }
+
+    function refreshItemIndexes() {
+      Array.from(itemList.children).forEach((row, index) => {
+        row.querySelector('.item-index').textContent = index + 1;
+      });
+    }
+
+    function createTemplateCard(template) {
+      const locked = !planState.plantillasPermitidas.includes(template.id);
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'template-card' + (locked ? ' locked' : '');
+      button.dataset.templateId = template.id;
+      button.innerHTML = `
+        ${locked ? '<span class="template-lock-badge">🔒 Plan superior</span>' : (template.id === 'moderna' ? '<span class="template-free-badge">Gratis</span>' : '')}
+        <div class="template-swatch">
+          <span style="background:${template.accent};"></span>
+          <span style="background:${template.accentSoft};"></span>
+        </div>
+        <h4>${template.name}</h4>
+        <p>${template.description}</p>
+      `;
+
+      button.addEventListener('click', () => {
+        if (locked) {
+          showError(`La plantilla "${template.name}" está disponible desde el plan Prueba Corta. Ve a la sección Planes para desbloquearla.`);
+          return;
+        }
+        selectTemplate(template.id);
+      });
+      return button;
+    }
+
+    // Vuelve a pintar la galería de plantillas respetando el plan activo
+    function renderTemplateCards() {
+      if (!currentTemplates.length) return;
+      const selectedId = templateIdInput.value;
+      templateGrid.innerHTML = '';
+      currentTemplates.forEach((template) => {
+        templateGrid.appendChild(createTemplateCard(template));
+      });
+      document.querySelectorAll('.template-card').forEach((card) => {
+        card.classList.toggle('active', card.dataset.templateId === selectedId);
+      });
+    }
+
+    function selectTemplate(templateId) {
+      if (!planState.plantillasPermitidas.includes(templateId)) {
+        templateId = 'moderna';
+      }
+      templateIdInput.value = templateId;
+      document.querySelectorAll('.template-card').forEach((card) => {
+        card.classList.toggle('active', card.dataset.templateId === templateId);
+      });
+      watermarkNote.classList.toggle('visible', planState.plan === 'gratis');
+    }
+
+    async function loadTemplates() {
+      const response = await fetch(`${API_BASE}/templates`);
+      if (!response.ok) throw new Error('No se pudieron cargar las plantillas.');
+      const data = await response.json();
+      currentTemplates = data.templates || [];
+      templateGrid.innerHTML = '';
+      currentTemplates.forEach((template) => {
+        templateGrid.appendChild(createTemplateCard(template));
+      });
+      // Seleccionar por defecto la primera o la que esté en el input
+      const defaultId = templateIdInput.value || (currentTemplates[0] && currentTemplates[0].id) || 'moderna';
+      selectTemplate(defaultId);
+    }
+
+    function buildPayload() {
+      const items = Array.from(itemList.querySelectorAll('.item-row')).map((row) => ({
+        description: row.querySelector('.item-description').value.trim(),
+        unitLabel: row.querySelector('.item-unit-label').value.trim() || 'UND',
+        quantity: Number(row.querySelector('.item-quantity').value),
+        unitPrice: Number(row.querySelector('.item-unit-price').value),
+        sku: row.querySelector('.item-sku').value.trim()
+      }));
+
+      return {
+        uid: uid, // incluir uid
+        templateId: templateIdInput.value,
+        documentType: document.getElementById('documentType').value,
+        paymentMethod: document.getElementById('paymentMethod').value.trim(),
+        issueDate: document.getElementById('issueDate').value ? new Date(document.getElementById('issueDate').value).toISOString() : new Date().toISOString(),
+        taxRate: Number(document.getElementById('taxRate').value || 0.18),
+        pricesIncludeTax: document.getElementById('pricesIncludeTax').checked,
+        notes: document.getElementById('notes').value.trim(),
+        issuer: {
+          businessName: document.getElementById('issuerBusinessName').value.trim(),
+          documentNumber: document.getElementById('issuerDocumentNumber').value.trim(),
+          address: document.getElementById('issuerAddress').value.trim(),
+          phone: document.getElementById('issuerPhone').value.trim(),
+          email: document.getElementById('issuerEmail').value.trim(),
+          website: document.getElementById('issuerWebsite').value.trim(),
+          logoDataUrl: planState.permiteLogo ? logoDataUrl : ''
+        },
+        customer: {
+          name: document.getElementById('customerName').value.trim(),
+          documentType: document.getElementById('customerDocumentType').value,
+          documentNumber: document.getElementById('customerDocumentNumber').value.trim(),
+          email: document.getElementById('customerEmail').value.trim(),
+          phone: document.getElementById('customerPhone').value.trim(),
+          address: document.getElementById('customerAddress').value.trim()
+        },
+        items
+      };
+    }
+
+    async function requestPreview(payload) {
+      const response = await fetch(`${API_BASE}/preview`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await response.json();
+      if (!response.ok || !data.ok) {
+        throw new Error(data.message || 'No se pudo generar la vista previa.');
+      }
+      return data;
+    }
+
+    async function requestPdfBlob(payload) {
+      const response = await fetch(`${API_BASE}/pdf`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        let message = 'No se pudo generar el PDF.';
+        try {
+          const data = await response.json();
+          message = data.message || message;
+        } catch (_) {}
+        throw new Error(message);
+      }
+
+      return response.blob();
+    }
+
+    function renderPreview(result) {
+      previewFrame.srcdoc = result.html;
+      previewFrame.addEventListener('load', () => {
+        const body = previewFrame.contentWindow?.document?.body;
+        if (body) {
+          previewFrame.style.height = `${Math.max(body.scrollHeight + 30, 760)}px`;
+        }
+      }, { once: true });
+
+      summarySubtotal.textContent = formatMoney(result.summary.subtotal, result.summary.currency);
+      summaryTax.textContent = formatMoney(result.summary.tax, result.summary.currency);
+      summaryTotal.textContent = formatMoney(result.summary.total, result.summary.currency);
+      summaryBoxes.classList.remove('hidden');
+      downloadButton.disabled = false;
+      shareButton.disabled = false;
+      lastDocumentName = `${result.summary.documentType}_${result.documentNumber}.pdf`;
+      lastShareText = result.shareText || 'Comprobante generado';
+      setStatus(`Vista previa lista · ${result.documentNumber}`);
+    }
+
+    async function generatePreview() {
+      clearMessages();
+      if (!uid) {
+        showError('Debes iniciar sesión para generar comprobantes.');
+        return;
+      }
+      if (!planState.plantillasPermitidas.includes(templateIdInput.value)) {
+        showError('La plantilla seleccionada no está disponible en tu plan actual. Elige otra o actualiza tu plan.');
+        return;
+      }
+      if (planState.disponibles !== 'Ilimitados' && Number(planState.disponibles) <= 0) {
+        showError('Has alcanzado el límite de comprobantes de tu plan. Actualiza tu plan para seguir generando.');
+        return;
+      }
+      setStatus('Generando vista previa...');
+      const payload = buildPayload();
+      const result = await requestPreview(payload);
+      lastPayload = payload;
+      renderPreview(result);
+      showSuccess('Vista previa generada correctamente. Ya puedes descargar o compartir.');
+    }
+
+    async function downloadPdf() {
+      if (!lastPayload) {
+        showError('Primero genera la vista previa del comprobante.');
+        return;
+      }
+      if (!uid) {
+        showError('Debes iniciar sesión.');
+        return;
+      }
+      clearMessages();
+      setStatus('Generando PDF...');
+      try {
+        const blob = await requestPdfBlob(lastPayload);
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = lastDocumentName;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+        setStatus('PDF generado y descargado');
+        showSuccess('PDF descargado correctamente.');
+        // Actualizar contador de comprobantes
+        await refreshPlanInfo();
+      } catch (error) {
+        setStatus('Error al generar PDF');
+        showError(error.message || 'No se pudo generar el PDF.');
+      }
+    }
+
+    async function sharePdf() {
+      if (!lastPayload) {
+        showError('Primero genera la vista previa del comprobante.');
+        return;
+      }
+      if (!uid) {
+        showError('Debes iniciar sesión.');
+        return;
+      }
+      clearMessages();
+      setStatus('Preparando archivo para compartir...');
+      try {
+        const blob = await requestPdfBlob(lastPayload);
+        const file = new File([blob], lastDocumentName, { type: 'application/pdf' });
+
+        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            files: [file],
+            title: 'Comprobante listo',
+            text: lastShareText
+          });
+          setStatus('Comprobante compartido');
+          showSuccess('Comprobante compartido correctamente.');
+          await refreshPlanInfo();
+          return;
+        }
+
+        if (navigator.clipboard) {
+          await navigator.clipboard.writeText(lastShareText);
+        }
+
+        const url = URL.createObjectURL(blob);
+        window.open(url, '_blank');
+        setStatus('Archivo abierto para compartir');
+        showSuccess('Tu navegador no soporta compartir archivos directamente. Se abrió el PDF en otra pestaña y se copió un texto base al portapapeles si estaba disponible.');
+        setTimeout(() => URL.revokeObjectURL(url), 30000);
+        await refreshPlanInfo();
+      } catch (error) {
+        setStatus('Error al compartir');
+        showError(error.message || 'No se pudo compartir el comprobante.');
+      }
+    }
+
+    const MAX_LOGO_BYTES = 2 * 1024 * 1024; // 2MB
+
+    function clearLogo() {
+      logoDataUrl = '';
+      if (logoInput) logoInput.value = '';
+      if (logoPreview) logoPreview.innerHTML = '<span>Sin logo</span>';
+    }
+
+    function handleLogoFile(file) {
+      if (!file) return;
+      if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
+        showError('El logo debe ser una imagen PNG, JPG o WEBP.');
+        clearLogo();
+        return;
+      }
+      if (file.size > MAX_LOGO_BYTES) {
+        showError('El logo es demasiado pesado. El límite es 2MB.');
+        clearLogo();
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => {
+        logoDataUrl = reader.result;
+        logoPreview.innerHTML = `<img src="${logoDataUrl}" alt="Logo del negocio" />`;
+      };
+      reader.onerror = () => {
+        showError('No se pudo leer el archivo del logo. Intenta con otra imagen.');
+        clearLogo();
+      };
+      reader.readAsDataURL(file);
+    }
+
+    if (logoInput) {
+      logoInput.addEventListener('change', (event) => {
+        handleLogoFile(event.target.files && event.target.files[0]);
+      });
+    }
+    if (logoRemoveButton) {
+      logoRemoveButton.addEventListener('click', clearLogo);
+    }
+
+    function resetForm() {
+      voucherForm.reset();
+      itemList.innerHTML = '';
+      addItemRow({ description: 'Producto principal', quantity: 1, unitPrice: 0, unitLabel: 'UND' });
+      templateIdInput.value = 'moderna';
+      selectTemplate('moderna');
+      clearLogo();
+      setDefaultDateTime();
+      previewFrame.srcdoc = '<html><body style="font-family:Inter,Arial,sans-serif;padding:40px;background:#f8fafc;color:#475569;"><h2 style="margin-top:0;color:#0f172a;">Aquí verás la vista previa</h2><p>Completa el formulario de la izquierda y pulsa <strong>Generar vista previa</strong>.</p></body></html>';
+      summaryBoxes.classList.add('hidden');
+      downloadButton.disabled = true;
+      shareButton.disabled = true;
+      lastPayload = null;
+      lastDocumentName = 'comprobante.pdf';
+      lastShareText = 'Comprobante generado';
+      setStatus('Formulario reiniciado');
+      clearMessages();
+    }
+
+    addItemButton.addEventListener('click', () => addItemRow());
+    resetButton.addEventListener('click', resetForm);
+
+    voucherForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      try {
+        await generatePreview();
+      } catch (error) {
+        setStatus('Error al generar');
+        showError(error.message || 'Ocurrió un error inesperado.');
+      }
+    });
+
+    downloadButton.addEventListener('click', async () => {
+      await downloadPdf();
+    });
+
+    shareButton.addEventListener('click', async () => {
+      await sharePdf();
+    });
+
+    documentTypeSelect.addEventListener('change', () => {
+      customerDocumentTypeSelect.value = documentTypeSelect.value === 'factura' ? 'RUC' : 'DNI';
+    });
+
+    (async function init() {
+      try {
+        setDefaultDateTime();
+        addItemRow({ description: 'Servicio / producto principal', quantity: 1, unitPrice: 0, unitLabel: 'UND' });
+        uid = getUid();
+
+        // Cargamos plantillas y plan del usuario en paralelo; el plan gobierna
+        // qué plantillas se muestran desbloqueadas y si se permite subir logo.
+        await Promise.all([loadTemplates(), loadPlanInfo()]);
+
+        resetForm();
+        applyPlanRestrictions();
+
+        if (!uid) {
+          showError('Debes iniciar sesión para generar comprobantes. Mientras tanto puedes explorar las plantillas disponibles.');
+          if (generateButton) generateButton.disabled = true;
+        }
+      } catch (error) {
+        showError(error.message || 'No se pudo iniciar la página.');
+      }
+    })();
+  </script>
+</body>
+</html>
