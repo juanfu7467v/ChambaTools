@@ -190,6 +190,96 @@ app.get('/api/user/plan', async (req, res) => {
   }
 });
 
+// Endpoint: perfil completo del usuario autenticado (usado por perfil.html)
+// Lee la sesión desde la cookie httpOnly y devuelve todos los datos del usuario.
+app.get('/api/user/profile', async (req, res) => {
+  const context = 'USER_PROFILE_API';
+  try {
+    // Leer uid desde cookie httpOnly (mismo mecanismo que /api/session)
+    const uid = req.cookies?.user_uid || null;
+    if (!uid) {
+      return res.status(401).json({ success: false, error: 'No autenticado.' });
+    }
+    if (!db) {
+      return res.status(503).json({ success: false, error: 'Servicio no disponible.' });
+    }
+
+    // Leer documento principal del usuario
+    const userDoc = await db.collection('usuarios').doc(uid).get();
+    if (!userDoc.exists) {
+      return res.status(404).json({ success: false, error: 'Usuario no encontrado.' });
+    }
+    const data = userDoc.data();
+
+    // Leer documento de empresa (tiene nombre del negocio y token)
+    let empresaData = null;
+    try {
+      const empresaDoc = await db.collection('empresas').doc(uid).get();
+      if (empresaDoc.exists) empresaData = empresaDoc.data();
+    } catch (_) { /* si no existe empresa, continuar sin error */ }
+
+    const tipoPlan = data.tipoPlan || 'gratis';
+    const gratisConfig = PLANES_CONFIG?.gratis || {};
+
+    const comprobantesLimite = Number.isFinite(Number(data.comprobantesLimite))
+      ? Number(data.comprobantesLimite)
+      : Number(gratisConfig.comprobantesLimite || 0);
+    const comprobantesEmitidos = Number(data.comprobantesEmitidos || 0);
+    const disponibles = comprobantesLimite === -1
+      ? 'Ilimitados'
+      : Math.max(comprobantesLimite - comprobantesEmitidos, 0);
+
+    const consultasLimite = data.consultasLimite ?? null;
+    const consultasConsumidas = Number(data.consultasConsumidas || 0);
+    const consultasTelefonosLimite = data.consultasTelefonosLimite ?? null;
+    const consultasTelefonosConsumidas = Number(data.consultasTelefonosConsumidas || 0);
+
+    // Serializar timestamps de Firestore a ISO string
+    const toISO = (ts) => {
+      if (!ts) return null;
+      if (typeof ts.toDate === 'function') return ts.toDate().toISOString();
+      if (ts instanceof Date) return ts.toISOString();
+      return null;
+    };
+
+    res.json({
+      success: true,
+      uid,
+      // Datos de identidad
+      email: data.email || req.cookies?.user_email || null,
+      nombre: data.nombre || data.name || data.displayName || null,
+      nombreNegocio: empresaData?.nombre || null,
+      // Plan
+      plan: tipoPlan,
+      planNombre: PLAN_NOMBRES[tipoPlan] || tipoPlan,
+      planStatus: data.planStatus || 'active',
+      planExpiration: toISO(data.planExpiration),
+      planActivationDate: toISO(data.planActivationDate),
+      // Comprobantes
+      comprobantesLimite,
+      comprobantesEmitidos,
+      disponibles,
+      // Consultas DNI/RUC
+      consultasLimite,
+      consultasConsumidas,
+      // Consultas Teléfonos
+      consultasTelefonosLimite,
+      consultasTelefonosConsumidas,
+      // Permisos
+      permiteLogo: tipoPlan !== 'gratis',
+      plantillasPermitidas: tipoPlan === 'gratis'
+        ? PLANTILLAS_PLAN_GRATIS
+        : ['moderna', 'elegante', 'corporativa', 'premium'],
+      // Metadatos de cuenta
+      createdAt: toISO(data.createdAt),
+      lastLoginAt: toISO(data.lastLoginAt),
+    });
+  } catch (error) {
+    logger.error(context, 'Error obteniendo perfil del usuario', error);
+    res.status(500).json({ success: false, error: 'Error interno del servidor.' });
+  }
+});
+
 // Endpoint de login exitoso
 app.post("/api/login-success", async (req, res) => {
   const context = 'LOGIN_SUCCESS_API';
