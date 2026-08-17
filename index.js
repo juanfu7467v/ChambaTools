@@ -122,6 +122,22 @@ const PLAN_NOMBRES = {
 // Plantillas exclusivas del plan gratuito (deben coincidir con plantillas.js)
 const PLANTILLAS_PLAN_GRATIS = ['moderna'];
 
+// Endpoint: expone la sesión activa del usuario al frontend.
+// Las cookies 'user_uid' y 'user_email' se crean como httpOnly (ver /api/login-success),
+// por lo que el frontend NO puede leerlas directamente con document.cookie.
+// Este endpoint permite que el navegador confirme la sesión sin exponer las cookies como httpOnly=false,
+// manteniendo la protección contra robo de sesión vía XSS.
+app.get('/api/session', (req, res) => {
+  const uid = req.cookies?.user_uid || null;
+  const email = req.cookies?.user_email || null;
+
+  if (!uid) {
+    return res.status(200).json({ authenticated: false, uid: null, email: null });
+  }
+
+  res.status(200).json({ authenticated: true, uid, email });
+});
+
 // Endpoint: información del plan activo del usuario (usado por generar-boletas.html)
 app.get('/api/user/plan', async (req, res) => {
   const context = 'USER_PLAN_API';
