@@ -2188,8 +2188,9 @@
     // Se asume que el proyecto ya tiene Firebase configurado en el cliente.
     // Para simplificar, usaremos la API de Firebase Auth mediante la importación.
     // Si no se usa módulos, se puede usar el SDK de Firebase global.
-    // En este ejemplo, se obtiene el uid de la cookie 'user_uid' establecida por el backend.
-    // También se puede leer desde localStorage o Firebase Auth.
+    // El uid de la sesión activa se obtiene consultando /api/session en el backend,
+    // ya que la cookie 'user_uid' establecida por el backend es httpOnly y no puede
+    // leerse directamente desde el navegador. Ver función getUid() más abajo.
 
     const API_BASE = '/api/comprobantes';
     const templateGrid = document.getElementById('templateGrid');
@@ -2242,23 +2243,32 @@
       plantillasPermitidas: ['moderna']
     };
 
-    // Obtener uid desde cookie o localStorage (según como se maneje la autenticación)
-    function getUid() {
-      // Intentar desde cookie
-      const cookies = document.cookie.split(';').reduce((acc, c) => {
-        const [key, val] = c.trim().split('=');
-        acc[key] = decodeURIComponent(val);
-        return acc;
-      }, {});
-      if (cookies.user_uid) return cookies.user_uid;
+    // Obtener el uid de la sesión activa consultando al backend.
+    // Nota: las cookies 'user_uid'/'user_email' son httpOnly (ver /api/login-success en el
+    // servidor), por lo que NO pueden leerse desde document.cookie en el navegador. Por eso
+    // se consulta /api/session, que lee esas cookies en el servidor y confirma la sesión.
+    async function getUid() {
+      try {
+        const response = await fetch('/api/session', { credentials: 'same-origin' });
+        if (response.ok) {
+          const data = await response.json();
+          if (data && data.authenticated && data.uid) {
+            // Respaldo local por si /api/session no estuviera disponible momentáneamente
+            localStorage.setItem('user_uid', data.uid);
+            return data.uid;
+          }
+        }
+      } catch (error) {
+        console.error('Error verificando la sesión activa:', error);
+      }
 
-      // Fallback: desde localStorage (si se guarda)
+      // Fallback: desde localStorage (si se guarda de una verificación previa)
       return localStorage.getItem('user_uid') || null;
     }
 
     // Cargar información del plan y aplicar las restricciones correspondientes en la UI
     async function loadPlanInfo() {
-      uid = getUid();
+      uid = await getUid();
       if (!uid) {
         planNombre.textContent = 'No autenticado';
         comprobantesDisponibles.textContent = '—';
@@ -2731,7 +2741,7 @@
       try {
         setDefaultDateTime();
         addItemRow({ description: 'Servicio / producto principal', quantity: 1, unitPrice: 0, unitLabel: 'UND' });
-        uid = getUid();
+        uid = await getUid();
 
         // Cargamos plantillas y plan del usuario en paralelo; el plan gobierna
         // qué plantillas se muestran desbloqueadas y si se permite subir logo.
