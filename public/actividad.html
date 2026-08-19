@@ -235,12 +235,12 @@
         .info-row{
             display:flex; align-items:center; justify-content:space-between;
             padding:12px 0; border-bottom:1px solid var(--border-subtle);
-            gap:12px;
+            gap:12px; flex-wrap:wrap;
         }
         .info-row:last-child{border-bottom:none; padding-bottom:0;}
         .info-row:first-child{padding-top:0;}
         .info-label{font-size:.8rem; color:var(--text-muted); font-weight:500; flex-shrink:0;}
-        .info-value{font-size:.88rem; color:var(--text-primary); font-weight:600; text-align:right; word-break:break-all;}
+        .info-value{font-size:.88rem; color:var(--text-primary); font-weight:600; text-align:right; overflow-wrap:break-word; word-break:normal; min-width:0; flex:1 1 auto; max-width:100%;}
         .info-value.mono{font-family:var(--font-mono); font-size:.8rem;}
         .info-value.green{color:var(--emerald);}
         .info-value.gold{color:var(--gold);}
@@ -280,12 +280,22 @@
         .stat-chip .chip-label{font-size:.72rem; color:var(--text-muted); margin-top:4px; font-weight:500; text-transform:uppercase; letter-spacing:.05em;}
 
         /* ═══ PLANTILLAS PERMITIDAS ═══ */
-        .templates-row{display:flex; flex-wrap:wrap; gap:8px;}
+        .templates-row{
+            display:flex; flex-wrap:nowrap; gap:8px;
+            overflow-x:auto; overflow-y:hidden; width:100%;
+            -webkit-overflow-scrolling:touch; scroll-behavior:smooth;
+            padding-bottom:8px; scrollbar-width:thin; scrollbar-color:var(--emerald-dark) transparent;
+        }
+        .templates-row::-webkit-scrollbar{height:5px;}
+        .templates-row::-webkit-scrollbar-track{background:transparent;}
+        .templates-row::-webkit-scrollbar-thumb{background:var(--emerald-dark); border-radius:10px;}
+        .templates-row::-webkit-scrollbar-thumb:hover{background:var(--emerald);}
         .template-tag{
             padding:5px 14px; border-radius:20px; font-size:.78rem; font-weight:600;
             background:rgba(0,200,83,.08); border:1px solid var(--border-active);
             color:var(--emerald); text-transform:capitalize;
             display:inline-flex; align-items:center; gap:6px;
+            flex-shrink:0; white-space:nowrap;
         }
         .template-tag.locked{
             background:rgba(255,255,255,.03); border-color:var(--border-subtle);
@@ -295,17 +305,34 @@
 
         /* ═══ BOTONES ═══ */
         .btn-primary{
+            position:relative; overflow:hidden;
             display:flex; align-items:center; justify-content:center; gap:10px;
-            width:100%; padding:14px; border-radius:30px; font-weight:700; font-size:.9rem;
+            width:100%; padding:14px; border-radius:10px; font-weight:700; font-size:.9rem;
             background:linear-gradient(135deg,var(--emerald),var(--emerald-dark));
             color:#000; border:none; cursor:pointer; transition:all .3s ease;
             font-family:var(--font-display); letter-spacing:.03em;
             text-decoration:none;
         }
         .btn-primary:hover{transform:translateY(-2px); box-shadow:0 8px 24px var(--emerald-glow);}
+        .btn-primary-content{
+            position:relative; z-index:2;
+            display:flex; align-items:center; justify-content:center; gap:10px;
+        }
+        .btn-shine{
+            position:absolute; top:0; left:-60%; width:45%; height:100%; z-index:1;
+            pointer-events:none;
+            background:linear-gradient(115deg,transparent 0%,rgba(255,255,255,.45) 50%,transparent 100%);
+            transform:skewX(-20deg);
+            animation:btnShineSlide 4.5s ease-in-out infinite;
+        }
+        @keyframes btnShineSlide{
+            0%{left:-60%;}
+            45%{left:130%;}
+            100%{left:130%;}
+        }
         .btn-outline{
             display:flex; align-items:center; justify-content:center; gap:10px;
-            width:100%; padding:13px; border-radius:30px; font-weight:700; font-size:.9rem;
+            width:100%; padding:13px; border-radius:10px; font-weight:700; font-size:.9rem;
             background:transparent; color:var(--emerald);
             border:1px solid var(--border-active); cursor:pointer; transition:all .3s ease;
             font-family:var(--font-display); letter-spacing:.03em;
@@ -547,7 +574,8 @@
                     <!-- Botones de plan -->
                     <div class="btn-row" style="margin-top:20px;">
                         <a href="planes.html" class="btn-primary">
-                            <i class="fas fa-bolt"></i> Renovar / Cambiar plan
+                            <span class="btn-shine" aria-hidden="true"></span>
+                            <span class="btn-primary-content"><i class="fas fa-bolt"></i> Renovar / Cambiar plan</span>
                         </a>
                         <a href="generar-boletas.html" class="btn-outline">
                             <i class="fas fa-file-invoice"></i> Ir a Generar Boletas
@@ -595,24 +623,6 @@
                             <div class="progress-bar-fill" id="barTelefonos" style="width:0%"></div>
                         </div>
                         <div style="font-size:.73rem;color:var(--text-subtle);margin-top:5px;" id="dispTelefonos"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 4. Acciones de cuenta -->
-            <div class="profile-card" style="animation-delay:.2s;">
-                <div class="card-header ruby-bg">
-                    <div class="card-icon ruby"><i class="fas fa-sliders"></i></div>
-                    <div><div class="card-title">Opciones de cuenta</div><div class="card-sub">Gestiona tu sesión y preferencias</div></div>
-                </div>
-                <div class="card-body">
-                    <div class="btn-row">
-                        <a href="ayuda.html" class="btn-outline">
-                            <i class="fas fa-headset"></i> Contactar soporte
-                        </a>
-                        <button class="btn-danger" id="btnLogout">
-                            <i class="fas fa-right-from-bracket"></i> Cerrar sesión
-                        </button>
                     </div>
                 </div>
             </div>
@@ -875,21 +885,24 @@
         } catch (e) { console.error('Firebase init error:', e); }
     }
 
-    document.getElementById('btnLogout').addEventListener('click', async () => {
-        if (!confirm('¿Estás seguro de que deseas cerrar sesión?')) return;
-        try {
-            if (!auth) await initFirebase();
-            if (auth) await auth.signOut();
-            // Limpiar localStorage y redirigir
-            localStorage.removeItem('user_uid');
-            window.location.href = 'login.html';
-        } catch (e) {
-            console.error('Logout error:', e);
-            // Forzar redirección de todas formas
-            localStorage.removeItem('user_uid');
-            window.location.href = 'login.html';
-        }
-    });
+    const btnLogoutEl = document.getElementById('btnLogout');
+    if (btnLogoutEl) {
+        btnLogoutEl.addEventListener('click', async () => {
+            if (!confirm('¿Estás seguro de que deseas cerrar sesión?')) return;
+            try {
+                if (!auth) await initFirebase();
+                if (auth) await auth.signOut();
+                // Limpiar localStorage y redirigir
+                localStorage.removeItem('user_uid');
+                window.location.href = 'login.html';
+            } catch (e) {
+                console.error('Logout error:', e);
+                // Forzar redirección de todas formas
+                localStorage.removeItem('user_uid');
+                window.location.href = 'login.html';
+            }
+        });
+    }
 
     // ════════════════════════════════════════════════════
     //  SIDEBAR
