@@ -631,6 +631,51 @@ app.post("/api/pay", async (req, res) => {
         resend
       ).catch(err => logger.error(context, 'Error enviando correo de rechazo', err));
     }
+
+    // ────────────────────────────────────────────────────────────────
+    // ⚡ ACTIVACIÓN INMEDIATA (sin esperar al webhook de Mercado Pago)
+    // ────────────────────────────────────────────────────────────────
+    // Mercado Pago suele resolver pagos con Yape/Tarjeta de forma SÍNCRONA
+    // en esta misma respuesta (result.status === 'approved'). Antes, el
+    // otorgamiento del plan se dejaba únicamente al webhook asíncrono
+    // ("/api/webhook/mercadopago"), cuya entrega puede demorar desde unos
+    // segundos hasta varios minutos (reintentos, colas de MP, cold-start
+    // de la máquina). Esto provocaba que el usuario esperara mucho tiempo
+    // sin necesidad, aunque el pago YA estaba confirmado como aprobado.
+    //
+    // Ahora, si Mercado Pago confirma el pago como aprobado en esta misma
+    // llamada, otorgamos el beneficio de inmediato (en segundo plano, sin
+    // bloquear la respuesta al cliente). otorgarBeneficio() es IDEMPOTENTE
+    // (usa lock + caché + verificación en Firestore), por lo que si el
+    // webhook llega después para el mismo pago, simplemente detecta que
+    // ya fue procesado y no lo duplica. No se reemplaza ni se debilita
+    // ninguna validación de seguridad: seguimos confiando exclusivamente
+    // en el estado real devuelto por la API de Mercado Pago.
+    if (result.status === 'approved') {
+      otorgarBeneficio(
+        uid,
+        payer.email,
+        transaction_amount,
+        'MercadoPago_API_Sync',
+        result.id.toString(),
+        resend,
+        planId,
+        payment_method_id || null
+      ).then(activationResult => {
+        logger.info(context, 'Beneficio otorgado de forma inmediata tras pago aprobado', {
+          paymentId: result.id,
+          uid,
+          planId,
+          activationResult: activationResult?.status
+        });
+      }).catch(err => {
+        // Si por algún motivo falla la activación inmediata (ej. picos de
+        // carga en Firestore), el webhook de Mercado Pago seguirá
+        // funcionando como respaldo automático gracias a la idempotencia.
+        logger.error(context, 'Error en activación inmediata, el webhook actuará como respaldo', err);
+      });
+    }
+
     res.json(result);
   } catch (error) {
     logger.error(context, 'Error en pago', error);
