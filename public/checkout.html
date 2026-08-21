@@ -1145,10 +1145,22 @@
         async function pollPaymentResolution({ paymentId = null, externalReference = null, loadingText = 'Confirmando tu pago...' }) {
             showLoading(loadingText);
 
-            const maxAttempts = 24;
-            const delayMs = 2500;
+            // El backend ahora otorga el beneficio de forma INMEDIATA en cuanto
+            // Mercado Pago confirma el pago como aprobado (ver /api/pay), sin
+            // depender únicamente del webhook asíncrono. Por eso este polling
+            // ya no necesita ser lento: sirve como confirmación rápida del
+            // estado real (nunca como una espera artificial). Se consulta con
+            // mayor frecuencia al inicio -momento en que la activación ya casi
+            // seguro habrá terminado- y se mantiene un margen de seguridad
+            // razonable por si la confirmación (vía webhook) tarda más de lo
+            // usual en llegar.
+            const fastAttempts = 6;      // primeros intentos: consulta rápida
+            const fastDelayMs = 800;
+            const slowAttempts = 18;     // intentos restantes: respaldo
+            const slowDelayMs = 2000;
+            const totalAttempts = fastAttempts + slowAttempts; // ~ 6*0.8s + 18*2s ≈ 41s de margen máximo
 
-            for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+            for (let attempt = 0; attempt < totalAttempts; attempt += 1) {
                 try {
                     let statusData = null;
 
@@ -1172,6 +1184,10 @@
                             return;
                         }
 
+                        // Se exige SIEMPRE la confirmación real: processed=true
+                        // y status='approved' vienen directamente de Firestore,
+                        // reflejando el resultado real de otorgarBeneficio(),
+                        // nunca una activación simulada.
                         if (statusData.processed && statusData.status === 'approved' && paymentId) {
                             await showSuccessScreen(paymentId);
                             cleanReturnState();
@@ -1182,6 +1198,7 @@
                     console.warn('Esperando confirmación del pago...', error.message);
                 }
 
+                const delayMs = attempt < fastAttempts ? fastDelayMs : slowDelayMs;
                 await new Promise(resolve => setTimeout(resolve, delayMs));
             }
 
