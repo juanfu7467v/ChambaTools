@@ -40,28 +40,24 @@
             "description": "Generador de boletas, facturas y validación de clientes (DNI, RUC, teléfonos) para emprendedores y empresas en Perú. Prueba gratis.",
             "applicationCategory": "BusinessApplication",
             "operatingSystem": "All",
-            "offers": [
-                {
-                    "@type": "Offer",
-                    "name": "Gratuito",
-                    "price": "0",
-                    "priceCurrency": "PEN"
-                },
-                {
-                    "@type": "Offer",
-                    "name": "Emprendedor Digital",
-                    "price": "19",
-                    "priceCurrency": "PEN",
-                    "description": "Plan mensual con 800 comprobantes y 60 consultas"
-                },
-                {
-                    "@type": "Offer",
-                    "name": "Negocio Estable",
-                    "price": "32",
-                    "priceCurrency": "PEN",
-                    "description": "Plan bimestral con 1,800 comprobantes y 140 consultas"
-                }
-            ],
+            "offers": [{
+                "@type": "Offer",
+                "name": "Gratuito",
+                "price": "0",
+                "priceCurrency": "PEN"
+            }, {
+                "@type": "Offer",
+                "name": "Emprendedor Digital",
+                "price": "19",
+                "priceCurrency": "PEN",
+                "description": "Plan mensual con 800 comprobantes y 60 consultas"
+            }, {
+                "@type": "Offer",
+                "name": "Negocio Estable",
+                "price": "32",
+                "priceCurrency": "PEN",
+                "description": "Plan bimestral con 1,800 comprobantes y 140 consultas"
+            }],
             "publisher": {
                 "@type": "Organization",
                 "name": "FacilitoTools",
@@ -78,7 +74,8 @@
     </script>
 
     <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com">
+    </script>
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <!-- Remixicon -->
@@ -87,10 +84,14 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700;800&family=DM+Mono:wght@400;500&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&display=swap" rel="stylesheet" />
 
     <!-- Firebase (se mantiene) -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-    <script src="returnConfig.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js">
+    </script>
+    <script src="returnConfig.js">
+    </script>
 
     <style>
         /* ========== ESTILOS COMPLETOS (heredados y mejorados) ========== */
@@ -115,12 +116,12 @@
             --text-primary: #E2E8F0;
             --text-muted: #94A3B8;
             --text-subtle: #64748B;
-            --border-subtle: rgba(255,255,255,0.06);
-            --border-active: rgba(0,200,83,0.25);
-            --border-gold: rgba(255,215,0,0.25);
-            --shadow-card: 0 8px 32px rgba(0,0,0,0.4);
-            --shadow-emerald: 0 4px 20px rgba(0,200,83,0.2);
-            --sh-hov: 0 24px 64px rgba(0,0,0,0.5), 0 6px 24px rgba(0,200,83,0.18);
+            --border-subtle: rgba(255, 255, 255, 0.06);
+            --border-active: rgba(0, 200, 83, 0.25);
+            --border-gold: rgba(255, 215, 0, 0.25);
+            --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.4);
+            --shadow-emerald: 0 4px 20px rgba(0, 200, 83, 0.2);
+            --sh-hov: 0 24px 64px rgba(0, 0, 0, 0.5), 0 6px 24px rgba(0, 200, 83, 0.18);
             --radius: 20px;
             --radius-sm: 10px;
             --font-family: 'Outfit', 'Inter', sans-serif;
@@ -129,12 +130,20 @@
             --font-mono: 'DM Mono', monospace;
             --tech-blue: #00BFFF;
             --tech-blue-light: #66D9FF;
-            --tech-blue-glow: rgba(0,191,255,0.2);
+            --tech-blue-glow: rgba(0, 191, 255, 0.2);
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-        html { font-size: 106.25%; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; }
+        html {
+            font-size: 106.25%;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+        }
 
         body {
             font-family: var(--font-family);
@@ -158,165 +167,250 @@
         }
 
         .ambient-1 {
-            position: fixed; top: -20%; left: -10%;
-            width: 60vw; height: 60vw;
+            position: fixed;
+            top: -20%;
+            left: -10%;
+            width: 60vw;
+            height: 60vw;
             border-radius: 50%;
-            background: radial-gradient(circle, rgba(0,200,83,0.03) 0%, transparent 65%);
-            pointer-events: none; z-index: -1;
+            background: radial-gradient(circle, rgba(0, 200, 83, 0.03) 0%, transparent 65%);
+            pointer-events: none;
+            z-index: -1;
             animation: floatAmbient 10s ease-in-out infinite;
         }
         .ambient-2 {
-            position: fixed; bottom: -20%; right: -10%;
-            width: 50vw; height: 50vw;
+            position: fixed;
+            bottom: -20%;
+            right: -10%;
+            width: 50vw;
+            height: 50vw;
             border-radius: 50%;
-            background: radial-gradient(circle, rgba(255,215,0,0.04) 0%, transparent 65%);
-            pointer-events: none; z-index: -1;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.04) 0%, transparent 65%);
+            pointer-events: none;
+            z-index: -1;
             animation: floatAmbient 12s ease-in-out infinite reverse;
         }
 
         @keyframes floatAmbient {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            33% { transform: translate(20px, -20px) scale(1.05); }
-            66% { transform: translate(-15px, 15px) scale(0.95); }
+            0%,
+            100% {
+                transform: translate(0, 0) scale(1);
+            }
+            33% {
+                transform: translate(20px, -20px) scale(1.05);
+            }
+            66% {
+                transform: translate(-15px, 15px) scale(0.95);
+            }
         }
 
         /* ═══ SIDEBAR ═══ */
         #sidebar-overlay {
-            position: fixed; inset: 0;
+            position: fixed;
+            inset: 0;
             background: rgba(0, 0, 0, 0.8);
-            z-index: 50; opacity: 0;
+            z-index: 50;
+            opacity: 0;
             transition: opacity 0.3s ease;
             display: none;
             backdrop-filter: blur(6px);
             -webkit-backdrop-filter: blur(6px);
         }
-        #sidebar-overlay.opacity-100 { opacity: 1; }
-        #sidebar-overlay.hidden { display: none; }
+        #sidebar-overlay.opacity-100 {
+            opacity: 1;
+        }
+        #sidebar-overlay.hidden {
+            display: none;
+        }
 
         #sidebar {
             position: fixed;
-            top: 0; left: 0;
-            height: 100%; width: 290px;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 290px;
             background: linear-gradient(180deg, #0A1628 0%, #0F1F3D 100%) !important;
             border-right: 1px solid var(--border-active);
             z-index: 60;
             overflow: hidden;
             transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
             transform: translateX(-100%);
-            display: flex; flex-direction: column;
-            box-shadow: 8px 0 40px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            box-shadow: 8px 0 40px rgba(0, 0, 0, 0.5);
         }
-        #sidebar.open { transform: translateX(0); }
+        #sidebar.open {
+            transform: translateX(0);
+        }
 
         .sb-header {
             padding: 32px 20px 20px;
             background: linear-gradient(160deg, #0A1628 0%, #0F1F3D 100%);
             border-bottom: 1px solid var(--border-active);
             text-align: center;
-            position: relative; overflow: hidden;
+            position: relative;
+            overflow: hidden;
             flex-shrink: 0;
         }
         .sb-header::before {
             content: '';
             position: absolute;
-            top: 0; left: 0; right: 0; height: 2px;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
             background: linear-gradient(90deg, transparent, var(--emerald), var(--gold), transparent);
             animation: shimmerHeader 3s infinite;
         }
         @keyframes shimmerHeader {
-            0%, 100% { transform: translateX(-100%); }
-            50% { transform: translateX(100%); }
+            0%,
+            100% {
+                transform: translateX(-100%);
+            }
+            50% {
+                transform: translateX(100%);
+            }
         }
         .sb-logo-box {
-            width: 68px; height: 68px;
+            width: 68px;
+            height: 68px;
             margin: 0 auto 12px;
-            border-radius: 18px; overflow: hidden;
+            border-radius: 18px;
+            overflow: hidden;
             border: 2px solid var(--border-active);
             box-shadow: 0 0 25px var(--emerald-glow);
             transition: transform 0.3s ease;
-            background: rgba(0,200,83,0.05);
+            background: rgba(0, 200, 83, 0.05);
         }
-        .sb-logo-box:hover { transform: scale(1.1) rotate(5deg); }
-        .sb-logo-box img { width: 100%; height: 100%; object-fit: cover; }
+        .sb-logo-box:hover {
+            transform: scale(1.1) rotate(5deg);
+        }
+        .sb-logo-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
         .sb-brand {
             font-family: 'Outfit', sans-serif;
-            font-weight: 800; font-size: 1.3rem;
+            font-weight: 800;
+            font-size: 1.3rem;
             color: var(--gold) !important;
-            letter-spacing: 0.2em; text-transform: uppercase;
-            text-shadow: 0 0 20px rgba(255,215,0,0.4);
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
         }
         .sb-tagline {
-            font-size: 0.7rem; font-weight: 500;
+            font-size: 0.7rem;
+            font-weight: 500;
             color: var(--text-muted);
-            letter-spacing: 0.15em; margin-top: 6px;
+            letter-spacing: 0.15em;
+            margin-top: 6px;
             text-transform: uppercase;
         }
-        .sb-scroll-area { flex: 1; overflow-y: auto; padding: 8px 0; }
-        .sb-scroll-area::-webkit-scrollbar { width: 3px; }
-        .sb-scroll-area::-webkit-scrollbar-track { background: transparent; }
-        .sb-scroll-area::-webkit-scrollbar-thumb { background: var(--emerald-dark); border-radius: 3px; }
+        .sb-scroll-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px 0;
+        }
+        .sb-scroll-area::-webkit-scrollbar {
+            width: 3px;
+        }
+        .sb-scroll-area::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .sb-scroll-area::-webkit-scrollbar-thumb {
+            background: var(--emerald-dark);
+            border-radius: 3px;
+        }
         .sb-cat {
             padding: 14px 24px 8px;
-            font-size: 0.7rem; font-weight: 700;
-            text-transform: uppercase; letter-spacing: 0.2em;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
             color: var(--emerald);
         }
         #sidebar nav a {
-            display: flex; align-items: center; gap: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
             padding: 12px 24px;
             color: var(--text-primary) !important;
             transition: all 0.25s ease;
             text-decoration: none;
-            font-size: 0.9rem; font-weight: 500;
-            position: relative; overflow: hidden;
+            font-size: 0.9rem;
+            font-weight: 500;
+            position: relative;
+            overflow: hidden;
             cursor: pointer;
         }
         #sidebar nav a::before {
             content: '';
-            position: absolute; left: 0; top: 0; bottom: 0;
-            width: 3px; background: var(--emerald);
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: var(--emerald);
             transform: scaleY(0);
             transition: transform 0.25s ease;
         }
         #sidebar nav a:hover {
-            background: rgba(0,200,83,0.08);
+            background: rgba(0, 200, 83, 0.08);
             color: var(--emerald-light) !important;
             transform: translateX(4px);
         }
-        #sidebar nav a:hover::before { transform: scaleY(1); }
+        #sidebar nav a:hover::before {
+            transform: scaleY(1);
+        }
         #sidebar nav a.active {
-            background: linear-gradient(90deg, rgba(0,200,83,0.12) 0%, transparent 100%);
+            background: linear-gradient(90deg, rgba(0, 200, 83, 0.12) 0%, transparent 100%);
             color: var(--emerald) !important;
             font-weight: 700;
         }
-        #sidebar nav a.active::before { transform: scaleY(1); }
+        #sidebar nav a.active::before {
+            transform: scaleY(1);
+        }
         .sb-icon {
-            width: 20px; height: 20px;
-            flex-shrink: 0; font-size: 1.1rem;
-            text-align: center; color: var(--text-muted);
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+            font-size: 1.1rem;
+            text-align: center;
+            color: var(--text-muted);
             transition: color 0.25s ease;
         }
         #sidebar nav a:hover .sb-icon,
-        #sidebar nav a.active .sb-icon { color: var(--emerald); }
+        #sidebar nav a.active .sb-icon {
+            color: var(--emerald);
+        }
         .sb-badge {
-            font-size: 0.65rem; padding: 2px 8px;
+            font-size: 0.65rem;
+            padding: 2px 8px;
             border-radius: 12px;
             background: linear-gradient(135deg, var(--emerald-dark), var(--emerald));
-            color: #000; font-weight: 800;
+            color: #000;
+            font-weight: 800;
             letter-spacing: 0.05em;
             animation: pulse 2s infinite;
             margin-left: auto;
         }
         @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
+            0%,
+            100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.7;
+            }
         }
         .sb-footer {
             padding: 16px 20px;
             border-top: 1px solid var(--border-subtle);
-            display: flex; gap: 16px;
+            display: flex;
+            gap: 16px;
             justify-content: center;
-            background: rgba(0,0,0,0.2);
+            background: rgba(0, 0, 0, 0.2);
             flex-shrink: 0;
         }
         .sb-footer a {
@@ -324,315 +418,521 @@
             font-size: 1.3rem;
             transition: all 0.25s ease;
         }
-        .sb-footer a:hover { color: var(--emerald) !important; transform: translateY(-3px); }
+        .sb-footer a:hover {
+            color: var(--emerald) !important;
+            transform: translateY(-3px);
+        }
 
         /* Botón hamburguesa */
         #menu-toggle {
             position: fixed;
-            top: 16px; left: 16px;
+            top: 16px;
+            left: 16px;
             z-index: 100;
             background: rgba(15, 31, 61, 0.9);
             color: var(--emerald);
             border: 1px solid var(--border-active);
-            width: 44px; height: 44px;
+            width: 44px;
+            height: 44px;
             border-radius: 12px;
-            display: flex; align-items: center; justify-content: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
             transition: all 0.3s ease;
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
         }
         #menu-toggle:hover {
             transform: scale(1.08);
-            background: rgba(0,200,83,0.1);
+            background: rgba(0, 200, 83, 0.1);
             box-shadow: 0 6px 20px var(--emerald-glow);
         }
-        #menu-toggle i { color: var(--emerald); font-size: 1.3rem; }
+        #menu-toggle i {
+            color: var(--emerald);
+            font-size: 1.3rem;
+        }
 
         /* ═══ MAIN ═══ */
         main {
-            position: relative; z-index: 1; width: 100%;
-        }
-
-        /* ═══ HERO (con imagen de fondo) ═══ */
-        .hero {
-            width: 100%;
-            min-height: 100svh;
-            display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            padding: 56px 16px 48px;
-            text-align: center;
-            position: relative; overflow: hidden;
-            background: url('https://i.postimg.cc/CKMnXqCk/file-000000006e84722fb36db8d32ac9792e.png') center/cover no-repeat;
-            background-attachment: fixed;
-        }
-        .hero::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, rgba(10, 22, 40, 0.92) 0%, rgba(15, 31, 61, 0.85) 50%, rgba(10, 22, 40, 0.9) 100%);
-            z-index: 0;
-        }
-        .hero > * {
             position: relative;
             z-index: 1;
-        }
-        .hero-line {
-            position: absolute;
-            top: 0; left: 0; right: 0; height: 1px;
-            background: linear-gradient(90deg, transparent 0%, var(--emerald) 50%, transparent 100%);
-            z-index: 2;
-        }
-        .hero-eyebrow {
-            font-family: var(--font-mono);
-            font-size: 0.7rem; letter-spacing: 0.3em;
-            text-transform: uppercase; color: var(--text-muted);
-            margin-bottom: 16px;
-            animation: fadeUp 0.8s 0.1s ease forwards; opacity: 0;
-        }
-        .hero-title {
-            font-family: var(--font-serif);
-            font-size: clamp(3.5rem, 12vw, 8rem);
-            font-weight: 300; line-height: 0.9;
-            letter-spacing: -0.02em; color: var(--white);
-            margin-bottom: 8px;
-            animation: fadeUp 0.9s 0.2s ease forwards; opacity: 0;
-        }
-        .hero-title em { font-style: italic; color: var(--emerald); }
-        .hero-divider {
-            width: 60px; height: 2px;
-            background: var(--emerald);
-            margin: 24px auto;
-            animation: expandLine 0.8s 0.4s ease forwards;
-            transform: scaleX(0);
-        }
-        @keyframes expandLine { to { transform: scaleX(1); } }
-        .hero-tagline {
-            font-family: var(--font-serif);
-            font-size: clamp(1.3rem, 3vw, 2rem);
-            font-weight: 300; font-style: italic;
-            color: var(--text-primary); max-width: 600px;
-            line-height: 1.5; margin-bottom: 16px;
-            animation: fadeUp 0.9s 0.5s ease forwards; opacity: 0;
-        }
-        .hero-sub {
-            font-size: 0.88rem; color: var(--text-muted);
-            max-width: 520px; line-height: 1.7;
-            margin-bottom: 20px; font-weight: 300;
-            animation: fadeUp 0.9s 0.6s ease forwards; opacity: 0;
-        }
-
-        /* Contenedor principal de los dos botones (Hero) */
-        .hero-buttons-main {
-            display: flex;
-            flex-direction: row;
-            flex-wrap: wrap;
-            justify-content: center;
-            align-items: stretch;
             width: 100%;
-            max-width: 500px;
-            margin: 0 auto 16px;
-            gap: 16px;
-            animation: fadeUp 0.9s 0.65s ease forwards; opacity: 0;
-        }
-
-        /* Botones outline transparentes */
-        .hero-outline-btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            background: transparent;
-            font-weight: 600;
-            font-size: 0.85rem;
-            letter-spacing: 0.1em;
-            padding: 14px 28px;
-            border-radius: 60px;
-            text-decoration: none;
-            cursor: pointer;
-            border: 2px solid var(--emerald);
-            color: var(--emerald);
-            font-family: var(--font-display);
-            text-transform: uppercase;
-            transition: all 0.25s ease;
-            white-space: nowrap;
-            flex: 1 1 200px;
-        }
-        .hero-outline-btn i {
-            font-size: 1.1rem;
-        }
-        .hero-outline-btn:hover {
-            background: rgba(0,200,83,0.1);
-            color: var(--emerald-light);
-            border-color: var(--emerald-light);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px var(--emerald-glow);
-        }
-        .hero-outline-btn:active {
-            transform: translateY(1px);
-        }
-
-        /* Botón azul tecnológico (Validar Clientes) */
-        .hero-outline-btn.hero-outline-btn-blue {
-            border-color: var(--tech-blue);
-            color: var(--tech-blue);
-        }
-        .hero-outline-btn.hero-outline-btn-blue:hover {
-            background: rgba(0,191,255,0.1);
-            color: var(--tech-blue-light);
-            border-color: var(--tech-blue-light);
-            box-shadow: 0 6px 20px var(--tech-blue-glow);
-        }
-
-        .hero-cta {
-            display: inline-flex; align-items: center; gap: 10px;
-            background: linear-gradient(135deg, var(--emerald), var(--emerald-dark));
-            color: #000;
-            font-weight: 700; font-size: 0.85rem;
-            letter-spacing: 0.12em; text-transform: uppercase;
-            padding: 16px 36px; border-radius: 60px;
-            text-decoration: none;
-            transition: all 0.25s ease;
-            cursor: pointer; border: none;
-            box-shadow: 0 8px 28px var(--emerald-glow-strong);
-            font-family: var(--font-display);
-        }
-        .hero-cta:hover {
-            background: linear-gradient(135deg, var(--emerald-light), var(--emerald));
-            transform: translateY(-3px);
-            box-shadow: 0 12px 36px var(--emerald-glow-strong);
-        }
-        .hero-cta:active {
-            transform: translateY(1px);
-            box-shadow: 0 4px 16px var(--emerald-glow-strong);
-        }
-
-        .hero-stats {
-            display: flex; gap: 0;
-            width: 100%; margin-top: 60px;
-            border-top: 1px solid var(--border-subtle);
-            animation: fadeUp 0.9s 0.8s ease forwards; opacity: 0;
-            z-index: 1;
-        }
-        .stat-item {
-            flex: 1; padding: 24px 8px;
-            text-align: center;
-            border-right: 1px solid var(--border-subtle);
-        }
-        .stat-item:last-child { border-right: none; }
-        .stat-num {
-            font-family: var(--font-serif);
-            font-size: 2rem; font-weight: 600;
-            color: var(--emerald); display: block;
-        }
-        .stat-label {
-            font-size: 0.68rem; color: var(--text-muted);
-            letter-spacing: 0.08em; text-transform: uppercase;
-            margin-top: 4px; display: block;
-        }
-        @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(24px); }
-            to { opacity: 1; transform: translateY(0); }
         }
 
         /* ═══ FOOTER ═══ */
         .footer-content {
-            width: 100%; padding: 48px 16px 32px;
+            width: 100%;
+            padding: 48px 16px 32px;
             background: var(--navy-surface);
             border-top: 1px solid var(--border-active);
-            text-align: center; position: relative; z-index: 1;
+            text-align: center;
+            position: relative;
+            z-index: 1;
         }
         .footer-content::before {
-            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
             background: linear-gradient(90deg, transparent, var(--emerald), transparent);
         }
         .footer-content h3 {
-            font-size: 0.85rem; font-weight: 600; color: var(--text-muted);
-            letter-spacing: 0.1em; text-transform: uppercase;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
             margin-bottom: 16px;
         }
-        .footer-content .social-icons { margin-bottom: 24px; }
+        .footer-content .social-icons {
+            margin-bottom: 24px;
+        }
         .footer-content .social-icons a {
-            color: var(--text-muted); font-size: 1.6rem;
-            margin: 0 12px; transition: all 0.2s;
+            color: var(--text-muted);
+            font-size: 1.6rem;
+            margin: 0 12px;
+            transition: all 0.2s;
         }
-        .footer-content .social-icons a:hover { color: var(--emerald); transform: translateY(-3px); }
+        .footer-content .social-icons a:hover {
+            color: var(--emerald);
+            transform: translateY(-3px);
+        }
         .footer-content p {
-            font-size: 0.78rem; color: var(--text-subtle);
-            line-height: 1.6; margin-bottom: 8px;
+            font-size: 0.78rem;
+            color: var(--text-subtle);
+            line-height: 1.6;
+            margin-bottom: 8px;
         }
-        .footer-content a { color: var(--emerald-light); text-decoration: none; transition: color 0.2s; font-weight: 600; }
-        .footer-content a:hover { color: var(--emerald); }
+        .footer-content a {
+            color: var(--emerald-light);
+            text-decoration: none;
+            transition: color 0.2s;
+            font-weight: 600;
+        }
+        .footer-content a:hover {
+            color: var(--emerald);
+        }
 
         /* ═══ WHATSAPP ═══ */
         .chat-bubble {
-            position: fixed; bottom: 24px; right: 24px;
-            width: 60px; height: 60px;
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 60px;
+            height: 60px;
             background: linear-gradient(135deg, #25D366, #128C7E);
-            color: white; border-radius: 50%;
-            display: flex; justify-content: center; align-items: center;
-            font-size: 28px; cursor: pointer;
-            box-shadow: 0 6px 25px rgba(37,211,102,0.4);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 28px;
+            cursor: pointer;
+            box-shadow: 0 6px 25px rgba(37, 211, 102, 0.4);
             z-index: 1000;
             animation: slideIn 1s ease-out forwards;
             transition: all 0.3s ease;
             border: none;
         }
-        .chat-bubble:hover { transform: scale(1.1); }
+        .chat-bubble:hover {
+            transform: scale(1.1);
+        }
         .chat-text {
-            position: fixed; bottom: 94px; right: 24px;
+            position: fixed;
+            bottom: 94px;
+            right: 24px;
             background: linear-gradient(135deg, #25D366, #128C7E);
             color: white;
             padding: 12px 18px;
             border-radius: 14px;
             font-size: 14px;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
             white-space: nowrap;
-            opacity: 0; transform: scale(0.9);
+            opacity: 0;
+            transform: scale(0.9);
             transition: opacity 0.4s, transform 0.4s;
-            z-index: 1001; cursor: pointer;
-            font-family: var(--font-family); font-weight: 600;
+            z-index: 1001;
+            cursor: pointer;
+            font-family: var(--font-family);
+            font-weight: 600;
         }
-        .chat-text.show { opacity: 1; transform: scale(1); }
-        .chat-text.hide { opacity: 0; transform: scale(0.9); }
+        .chat-text.show {
+            opacity: 1;
+            transform: scale(1);
+        }
+        .chat-text.hide {
+            opacity: 0;
+            transform: scale(0.9);
+        }
         @keyframes slideIn {
-            from { transform: translateX(80px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
+            from {
+                transform: translateX(80px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
         }
 
         /* Responsive */
         @media (max-width: 640px) {
-            .hero-stats { flex-wrap: wrap; }
-            .stat-item { min-width: 50%; border-right: none; border-bottom: 1px solid var(--border-subtle); }
-            .stat-item:nth-child(2n) { border-right: none; }
-            #sidebar { width: 100%; max-width: 300px; }
-            .hero-buttons-main {
-                max-width: 100%;
-                gap: 12px;
-            }
-            .hero-outline-btn {
-                padding: 12px 16px;
-                font-size: 0.75rem;
-                flex: 1 1 140px;
+            #sidebar {
+                width: 100%;
+                max-width: 300px;
             }
         }
-        @media (min-width: 768px) {
-            /* nada extra */
+
+        /* ============================================================
+           NUEVOS ESTILOS PARA EL INDICADOR DE PROGRESO Y PASOS
+           ============================================================ */
+        .step-progress {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0;
+            padding: 28px 16px 12px;
+            max-width: 500px;
+            margin: 0 auto;
+            position: relative;
         }
-        @media (min-width: 1024px) {
-            /* nada extra */
+        .step-progress .step-circle {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            position: relative;
+            z-index: 2;
+            cursor: default;
+            flex: 1;
+        }
+        .step-progress .step-circle .circle {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 1rem;
+            background: var(--navy-surface);
+            border: 2px solid var(--navy-border);
+            color: var(--text-muted);
+            transition: all 0.35s ease;
+            position: relative;
+        }
+        .step-progress .step-circle .circle .label {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            font-size: 0.5rem;
+            background: var(--navy-deep);
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--navy-border);
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+        .step-progress .step-circle.active .circle {
+            border-color: var(--emerald);
+            background: var(--emerald);
+            color: #000;
+            box-shadow: 0 0 24px var(--emerald-glow-strong);
+        }
+        .step-progress .step-circle.active .circle .label {
+            border-color: var(--emerald);
+            color: var(--emerald);
+            background: var(--navy-deep);
+        }
+        .step-progress .step-circle.done .circle {
+            border-color: var(--emerald);
+            background: rgba(0, 200, 83, 0.12);
+            color: var(--emerald);
+        }
+        .step-progress .step-circle.done .circle .label {
+            border-color: var(--emerald);
+            color: var(--emerald);
+            background: var(--navy-deep);
+        }
+        .step-progress .step-circle .step-label {
+            font-size: 0.6rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-subtle);
+            transition: color 0.3s ease;
+            white-space: nowrap;
+        }
+        .step-progress .step-circle.active .step-label {
+            color: var(--emerald-light);
+        }
+        .step-progress .step-circle.done .step-label {
+            color: var(--text-muted);
         }
 
-        /* ═══════════════════════════════════════════════════════════
-           GENERADOR DE BOLETAS — estilos propios (sin colisión con
-           las clases .hero / .section usadas en el resto del sitio)
-           ═══════════════════════════════════════════════════════════ */
+        .step-progress .step-line {
+            flex: 1;
+            height: 2px;
+            background: var(--navy-border);
+            position: relative;
+            z-index: 1;
+            margin: 0 -4px;
+            border-radius: 2px;
+            transition: background 0.5s ease;
+        }
+        .step-progress .step-line.done {
+            background: var(--emerald);
+        }
 
-        /* Sección hero específica del generador */
+        /* Contenedores de pasos */
+        .step-container {
+            display: none;
+            animation: fadeStep 0.45s ease forwards;
+        }
+        .step-container.active {
+            display: block;
+        }
+        @keyframes fadeStep {
+            from {
+                opacity: 0;
+                transform: translateY(18px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ============================================================
+           ESTILOS PARA LA PANTALLA DE BIENVENIDA (STEP 1)
+           ============================================================ */
+        .welcome-step {
+            width: 100%;
+            min-height: 70vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px 48px;
+            text-align: center;
+            position: relative;
+        }
+        .welcome-step .welcome-icon {
+            font-size: 4rem;
+            color: var(--emerald);
+            margin-bottom: 20px;
+            display: block;
+            animation: pulseIcon 2.5s ease-in-out infinite;
+        }
+        @keyframes pulseIcon {
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.08);
+                opacity: 0.85;
+            }
+        }
+        .welcome-step h1 {
+            font-family: var(--font-serif);
+            font-size: clamp(2.4rem, 7vw, 4.2rem);
+            font-weight: 300;
+            color: var(--white);
+            line-height: 1.1;
+            margin-bottom: 12px;
+        }
+        .welcome-step h1 em {
+            font-style: italic;
+            color: var(--emerald);
+        }
+        .welcome-step .welcome-desc {
+            font-size: 1.05rem;
+            color: var(--text-muted);
+            max-width: 560px;
+            line-height: 1.7;
+            margin: 0 auto 28px;
+        }
+        .welcome-step .welcome-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background: linear-gradient(135deg, var(--emerald), var(--emerald-dark));
+            color: #000;
+            font-weight: 700;
+            font-size: 0.95rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            padding: 16px 40px;
+            border-radius: 60px;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 8px 32px var(--emerald-glow-strong);
+            transition: all 0.25s ease;
+            font-family: var(--font-display);
+        }
+        .welcome-step .welcome-btn:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 12px 44px var(--emerald-glow-strong);
+        }
+        .welcome-step .welcome-features {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px 36px;
+            margin-top: 32px;
+        }
+        .welcome-step .welcome-features span {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+        .welcome-step .welcome-features i {
+            color: var(--emerald);
+            font-size: 1rem;
+        }
+
+        /* ============================================================
+           ESTILOS PARA EL MODAL DE CONSEJO (TIP)
+           ============================================================ */
+        .tip-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 200;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            padding: 20px;
+            animation: fadeInOverlay 0.3s ease forwards;
+        }
+        .tip-modal-overlay.open {
+            display: flex;
+        }
+        @keyframes fadeInOverlay {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        .tip-modal {
+            background: linear-gradient(160deg, var(--navy-card), var(--navy-surface));
+            border: 1px solid var(--border-active);
+            border-radius: var(--radius);
+            max-width: 500px;
+            width: 100%;
+            padding: 32px 28px 28px;
+            box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6), 0 0 40px var(--emerald-glow);
+            position: relative;
+            animation: slideUpModal 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            transform: translateY(30px);
+            opacity: 0;
+        }
+        .tip-modal.open {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        @keyframes slideUpModal {
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        .tip-modal .tip-avatar {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--emerald), var(--emerald-dark));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: -48px auto 16px;
+            font-size: 2rem;
+            color: #000;
+            box-shadow: 0 8px 24px var(--emerald-glow-strong);
+            border: 3px solid var(--navy-card);
+        }
+        .tip-modal h4 {
+            font-family: var(--font-display);
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--white);
+            text-align: center;
+            margin-bottom: 8px;
+        }
+        .tip-modal p {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            line-height: 1.7;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .tip-modal .tip-close {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, var(--emerald), var(--emerald-dark));
+            color: #000;
+            font-weight: 700;
+            border: none;
+            border-radius: 60px;
+            cursor: pointer;
+            font-family: var(--font-display);
+            font-size: 0.85rem;
+            transition: all 0.25s ease;
+            letter-spacing: 0.05em;
+        }
+        .tip-modal .tip-close:hover {
+            transform: scale(1.02);
+            box-shadow: 0 6px 20px var(--emerald-glow);
+        }
+        .tip-trigger-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0, 191, 255, 0.10);
+            border: 1px solid rgba(0, 191, 255, 0.20);
+            color: var(--tech-blue-light);
+            padding: 8px 16px;
+            border-radius: 60px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            font-family: var(--font-family);
+            margin-bottom: 12px;
+        }
+        .tip-trigger-btn:hover {
+            background: rgba(0, 191, 255, 0.18);
+            border-color: var(--tech-blue);
+            transform: translateY(-2px);
+        }
+        .tip-trigger-btn i {
+            font-size: 0.9rem;
+        }
+
+        /* ============================================================
+           GENERADOR DE BOLETAS — estilos propios (sin colisión)
+           ============================================================ */
         .gb-hero {
             width: 100%;
-            padding: 64px 20px 40px;
+            padding: 40px 20px 20px;
             text-align: center;
             background: transparent;
             border-bottom: 1px solid var(--border-subtle);
@@ -653,21 +953,21 @@
             line-height: 1.6;
         }
 
-        /* Layout de dos columnas */
         .layout {
             max-width: 1440px;
             margin: 0 auto;
-            padding: 32px 20px 80px;
+            padding: 20px 20px 80px;
             display: grid;
             grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
             gap: 24px;
             align-items: start;
         }
         @media (max-width: 980px) {
-            .layout { grid-template-columns: 1fr; }
+            .layout {
+                grid-template-columns: 1fr;
+            }
         }
 
-        /* Paneles: ahora sin fondo ni bordes pesados */
         .panel {
             background: transparent !important;
             border: none !important;
@@ -696,7 +996,6 @@
             padding: 0 0 20px 0;
         }
 
-        /* Preview panel sticky */
         .preview-panel {
             position: sticky;
             top: 20px;
@@ -715,7 +1014,6 @@
             padding: 16px 0 0 0;
         }
 
-        /* Resto de estilos del generador (sin cambios) */
         .notice {
             background: rgba(0, 191, 255, 0.08);
             border: 1px solid rgba(0, 191, 255, 0.25);
@@ -727,7 +1025,8 @@
             margin-bottom: 18px;
         }
 
-        .error, .success {
+        .error,
+        .success {
             display: none;
             border-radius: var(--radius-sm);
             padding: 12px 16px;
@@ -747,22 +1046,325 @@
             color: var(--emerald-light);
         }
 
+        /* ============================================================
+           MEJORA 1: TARJETA DEL PLAN (más profesional con aro indicador)
+           ============================================================ */
         #planInfo {
-            background: linear-gradient(135deg, rgba(0,200,83,0.08), rgba(0,191,255,0.05)) !important;
+            background: linear-gradient(135deg, rgba(0, 200, 83, 0.08), rgba(0, 191, 255, 0.05)) !important;
             border: 1px solid var(--border-subtle) !important;
             border-left: 4px solid var(--emerald) !important;
-            border-radius: var(--radius-sm) !important;
+            border-radius: 12px !important;
             color: var(--text-primary);
             font-size: 0.88rem;
             padding: 14px 16px;
             margin-bottom: 16px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0, 200, 83, 0.08);
         }
-        #planInfo strong { color: var(--white); }
-        #planNombre { color: var(--emerald-light); font-weight: 700; }
-        #comprobantesDisponibles { color: var(--gold-light); font-weight: 700; }
+        #planInfo::before {
+            content: '';
+            position: absolute;
+            top: -20px;
+            right: -20px;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            border: 2px solid rgba(0, 200, 83, 0.15);
+            pointer-events: none;
+            z-index: 0;
+        }
+        #planInfo::after {
+            content: '';
+            position: absolute;
+            bottom: -30px;
+            left: 30%;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 215, 0, 0.08);
+            pointer-events: none;
+            z-index: 0;
+        }
+        #planInfo .plan-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--emerald), var(--emerald-dark));
+            color: #000;
+            font-weight: 800;
+            font-size: 0.65rem;
+            padding: 2px 12px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-left: 8px;
+            vertical-align: middle;
+            box-shadow: 0 2px 8px rgba(0, 200, 83, 0.3);
+        }
+        #planInfo strong {
+            color: var(--white);
+        }
+        #planNombre {
+            color: var(--emerald-light);
+            font-weight: 700;
+            position: relative;
+            z-index: 1;
+        }
+        #comprobantesDisponibles {
+            color: var(--gold-light);
+            font-weight: 700;
+        }
         #planLink {
             color: var(--tech-blue-light) !important;
             font-size: 0.85rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ============================================================
+           MEJORA 2: FORMULARIOS (más bonitos, modernos, intuitivos)
+           ============================================================ */
+        input,
+        select,
+        textarea {
+            width: 100%;
+            background: var(--navy-surface);
+            border: 1px solid var(--navy-border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            padding: 12px 16px;
+            font-size: 0.92rem;
+            font-family: inherit;
+            transition: all 0.25s ease;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--emerald);
+            box-shadow: 0 0 0 3px var(--emerald-glow), inset 0 1px 3px rgba(0, 0, 0, 0.1);
+            background: var(--navy-card);
+        }
+        input::placeholder,
+        textarea::placeholder {
+            color: var(--text-subtle);
+            opacity: 0.7;
+        }
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2394A3B8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            padding-right: 40px;
+            cursor: pointer;
+        }
+        select:hover {
+            border-color: var(--border-active);
+        }
+        textarea {
+            min-height: 90px;
+            resize: vertical;
+            line-height: 1.6;
+        }
+        label {
+            display: block;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            transition: color 0.2s;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px;
+            margin-bottom: 18px;
+        }
+        .grid>div:last-child:not(.grid-2):not(.grid-3) {
+            margin-bottom: 0;
+        }
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px;
+        }
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 18px;
+        }
+        @media (max-width: 640px) {
+            .grid,
+            .grid-2,
+            .grid-3 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .inline-toggle {
+            display: flex !important;
+            align-items: center;
+            gap: 12px;
+            text-transform: none;
+            font-size: 0.88rem;
+            color: var(--text-primary);
+            margin-top: 30px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .inline-toggle input {
+            width: auto;
+            accent-color: var(--emerald);
+            cursor: pointer;
+            transform: scale(1.1);
+        }
+
+        .gb-block h3 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--white);
+            margin-bottom: 16px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-subtle);
+            letter-spacing: -0.01em;
+        }
+
+        /* ============================================================
+           MEJORA 3: BOTONES EN PASO 2 (full-width, bordes cuadrados, etc.)
+           ============================================================ */
+        .step-nav-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-subtle);
+        }
+        .step-nav-actions .btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+        }
+        .step-nav-actions .btn-back,
+        .step-nav-actions .btn-next,
+        .step-nav-actions .btn-ghost,
+        .step-nav-actions .btn {
+            width: 100%;
+            border-radius: 10px !important;
+            /* ligeramente cuadrado */
+            padding: 14px 20px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-align: center;
+            justify-content: center;
+            transition: all 0.25s ease;
+            border: none;
+            cursor: pointer;
+            font-family: var(--font-family);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .step-nav-actions .btn-back {
+            background: transparent;
+            color: var(--text-muted);
+            border: 1px solid var(--navy-border);
+        }
+        .step-nav-actions .btn-back:hover {
+            color: var(--white);
+            border-color: var(--text-muted);
+        }
+        .step-nav-actions .btn-next {
+            background: linear-gradient(135deg, var(--emerald), var(--emerald-dark));
+            color: #000;
+            box-shadow: 0 4px 16px var(--emerald-glow);
+            position: relative;
+            overflow: hidden;
+        }
+        .step-nav-actions .btn-next:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 28px var(--emerald-glow-strong);
+        }
+        .step-nav-actions .btn-next:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        /* Destello blanco lento */
+        .step-nav-actions .btn-next::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -60%;
+            width: 40%;
+            height: 200%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(25deg);
+            animation: shinePulse 4s infinite ease-in-out;
+            pointer-events: none;
+        }
+        @keyframes shinePulse {
+            0%,
+            100% {
+                left: -60%;
+                opacity: 0;
+            }
+            50% {
+                left: 120%;
+                opacity: 1;
+            }
+        }
+        /* Sacudida suave */
+        .step-nav-actions .btn-next {
+            animation: gentleShake 6s infinite ease-in-out;
+        }
+        @keyframes gentleShake {
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+            5% {
+                transform: translateX(-4px);
+            }
+            10% {
+                transform: translateX(4px);
+            }
+            15% {
+                transform: translateX(-2px);
+            }
+            20% {
+                transform: translateX(2px);
+            }
+            25% {
+                transform: translateX(0);
+            }
+        }
+        /* Botón Limpiar (rojo, transparente) */
+        .step-nav-actions .btn-clean {
+            background: transparent !important;
+            color: var(--ruby-light) !important;
+            border: 1px solid rgba(229, 57, 53, 0.4) !important;
+            border-radius: 10px !important;
+            padding: 14px 20px;
+            font-weight: 700;
+            transition: all 0.25s ease;
+        }
+        .step-nav-actions .btn-clean:hover {
+            background: var(--ruby-glow) !important;
+            border-color: var(--ruby-light) !important;
+        }
+
+        /* Ajustes para que los botones del paso 3 también sigan el mismo estilo */
+        #step3 .step-nav-actions .btn-secondary,
+        #step3 .step-nav-actions .btn-ghost {
+            width: 100%;
+            border-radius: 10px !important;
+            padding: 14px 20px;
+            justify-content: center;
         }
 
         .upsell-banner {
@@ -770,10 +1372,12 @@
             margin-bottom: 20px;
             padding: 16px 18px;
             border-radius: var(--radius-sm);
-            background: linear-gradient(135deg, rgba(255,215,0,0.1), rgba(255,215,0,0.02));
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 215, 0, 0.02));
             border: 1px solid var(--border-gold);
         }
-        .upsell-banner.visible { display: block; }
+        .upsell-banner.visible {
+            display: block;
+        }
         .upsell-banner strong {
             color: var(--gold-light);
             display: block;
@@ -797,70 +1401,9 @@
             text-decoration: none;
         }
 
-        .gb-block { margin-bottom: 28px; }
-        .gb-block h3 {
-            font-size: 0.95rem;
-            font-weight: 700;
-            color: var(--white);
-            margin-bottom: 14px;
-            padding-bottom: 8px;
-            border-bottom: 1px solid var(--border-subtle);
+        .gb-block {
+            margin-bottom: 28px;
         }
-
-        label {
-            display: block;
-            font-size: 0.78rem;
-            font-weight: 600;
-            color: var(--text-muted);
-            margin-bottom: 6px;
-            text-transform: uppercase;
-            letter-spacing: 0.03em;
-        }
-        input, select, textarea {
-            width: 100%;
-            background: var(--navy-surface);
-            border: 1px solid var(--navy-border);
-            border-radius: var(--radius-sm);
-            color: var(--text-primary);
-            padding: 11px 14px;
-            font-size: 0.92rem;
-            font-family: inherit;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
-        }
-        input:focus, select:focus, textarea:focus {
-            outline: none;
-            border-color: var(--emerald);
-            box-shadow: 0 0 0 3px var(--emerald-glow);
-        }
-        input::placeholder, textarea::placeholder { color: var(--text-subtle); }
-        textarea { min-height: 90px; resize: vertical; }
-        select { cursor: pointer; }
-        .helper { font-size: 0.76rem; color: var(--text-subtle); margin-top: 5px; }
-
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 16px;
-            margin-bottom: 16px;
-        }
-        .grid > div:last-child:not(.grid-2):not(.grid-3) { margin-bottom: 0; }
-        .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
-        .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
-        @media (max-width: 640px) {
-            .grid, .grid-2, .grid-3 { grid-template-columns: 1fr; }
-        }
-
-        .inline-toggle {
-            display: flex !important;
-            align-items: center;
-            gap: 10px;
-            text-transform: none;
-            font-size: 0.88rem;
-            color: var(--text-primary);
-            margin-top: 30px;
-            cursor: pointer;
-        }
-        .inline-toggle input { width: auto; accent-color: var(--emerald); cursor: pointer; }
 
         .template-grid {
             display: grid;
@@ -886,23 +1429,26 @@
         .template-card.active {
             border-color: var(--emerald);
             box-shadow: 0 0 0 3px var(--emerald-glow);
-            background: rgba(0,200,83,0.06);
+            background: rgba(0, 200, 83, 0.06);
         }
         .template-card.locked {
             cursor: pointer;
             opacity: 0.72;
         }
-        .template-card.locked:hover { border-color: var(--border-gold); }
+        .template-card.locked:hover {
+            border-color: var(--border-gold);
+        }
         .template-swatch {
             display: flex;
             gap: 6px;
             margin-bottom: 12px;
         }
         .template-swatch span {
-            width: 22px; height: 22px;
+            width: 22px;
+            height: 22px;
             border-radius: 6px;
             display: inline-block;
-            border: 1px solid rgba(255,255,255,0.15);
+            border: 1px solid rgba(255, 255, 255, 0.15);
         }
         .template-card h4 {
             font-size: 0.9rem;
@@ -917,8 +1463,9 @@
         }
         .template-lock-badge {
             position: absolute;
-            top: 10px; right: 10px;
-            background: rgba(255,215,0,0.14);
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 215, 0, 0.14);
             border: 1px solid var(--border-gold);
             color: var(--gold-light);
             font-size: 0.65rem;
@@ -929,7 +1476,8 @@
         }
         .template-free-badge {
             position: absolute;
-            top: 10px; right: 10px;
+            top: 10px;
+            right: 10px;
             background: var(--emerald-glow);
             border: 1px solid var(--border-active);
             color: var(--emerald-light);
@@ -942,14 +1490,16 @@
             margin-top: 12px;
             font-size: 0.78rem;
             color: var(--gold-light);
-            background: rgba(255,215,0,0.06);
+            background: rgba(255, 215, 0, 0.06);
             border: 1px solid var(--border-gold);
             border-radius: var(--radius-sm);
             padding: 10px 14px;
             display: none;
             line-height: 1.5;
         }
-        .template-watermark-note.visible { display: block; }
+        .template-watermark-note.visible {
+            display: block;
+        }
 
         .logo-uploader {
             display: flex;
@@ -958,17 +1508,33 @@
             flex-wrap: wrap;
         }
         .logo-preview {
-            width: 64px; height: 64px;
+            width: 64px;
+            height: 64px;
             border-radius: 12px;
             border: 1px dashed var(--navy-border);
             background: var(--navy-surface);
-            display: flex; align-items: center; justify-content: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             overflow: hidden;
             flex-shrink: 0;
         }
-        .logo-preview img { width: 100%; height: 100%; object-fit: contain; }
-        .logo-preview span { font-size: 0.65rem; color: var(--text-subtle); text-align: center; padding: 4px; }
-        .logo-uploader-actions { display: flex; flex-direction: column; gap: 8px; }
+        .logo-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        .logo-preview span {
+            font-size: 0.65rem;
+            color: var(--text-subtle);
+            text-align: center;
+            padding: 4px;
+        }
+        .logo-uploader-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
         .logo-locked-note {
             font-size: 0.82rem;
             color: var(--text-muted);
@@ -978,9 +1544,17 @@
             padding: 12px 14px;
             line-height: 1.5;
         }
-        .logo-locked-note a { color: var(--gold-light); font-weight: 700; text-decoration: none; }
+        .logo-locked-note a {
+            color: var(--gold-light);
+            font-weight: 700;
+            text-decoration: none;
+        }
 
-        .item-list { display: flex; flex-direction: column; gap: 14px; }
+        .item-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
         .item-row {
             background: var(--navy-surface);
             border: 1px solid var(--navy-border);
@@ -993,10 +1567,21 @@
             align-items: center;
             margin-bottom: 12px;
         }
-        .item-row-title { font-size: 0.85rem; font-weight: 700; color: var(--text-primary); }
+        .item-row-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
 
-        .actions { display: flex; gap: 12px; flex-wrap: wrap; }
-        .btn, .btn-secondary, .btn-ghost, .btn-danger {
+        .actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .btn,
+        .btn-secondary,
+        .btn-ghost,
+        .btn-danger {
             font-family: inherit;
             font-size: 0.88rem;
             font-weight: 700;
@@ -1011,28 +1596,41 @@
             color: var(--navy-deep);
             box-shadow: var(--shadow-emerald);
         }
-        .btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: var(--sh-hov); }
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: var(--sh-hov);
+        }
         .btn-secondary {
             background: var(--navy-surface);
             color: var(--white);
             border: 1px solid var(--border-active);
         }
-        .btn-secondary:hover:not(:disabled) { border-color: var(--emerald); }
+        .btn-secondary:hover:not(:disabled) {
+            border-color: var(--emerald);
+        }
         .btn-ghost {
             background: transparent;
             color: var(--text-muted);
             border: 1px solid var(--navy-border);
         }
-        .btn-ghost:hover:not(:disabled) { color: var(--white); border-color: var(--text-muted); }
+        .btn-ghost:hover:not(:disabled) {
+            color: var(--white);
+            border-color: var(--text-muted);
+        }
         .btn-danger {
             background: transparent;
             color: var(--ruby-light);
-            border: 1px solid rgba(229,57,53,0.3);
+            border: 1px solid rgba(229, 57, 53, 0.3);
             padding: 6px 12px;
             font-size: 0.76rem;
         }
-        .btn-danger:hover { background: var(--ruby-glow); }
-        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-danger:hover {
+            background: var(--ruby-glow);
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
 
         .summary-boxes {
             width: 100%;
@@ -1040,7 +1638,9 @@
             grid-template-columns: repeat(3, 1fr);
             gap: 10px;
         }
-        .summary-boxes.hidden { display: none; }
+        .summary-boxes.hidden {
+            display: none;
+        }
         .summary-card {
             background: var(--navy-surface);
             border: 1px solid var(--navy-border);
@@ -1048,8 +1648,18 @@
             padding: 10px 12px;
             text-align: center;
         }
-        .summary-card small { display: block; color: var(--text-subtle); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 4px; }
-        .summary-card strong { color: var(--emerald-light); font-size: 1rem; }
+        .summary-card small {
+            display: block;
+            color: var(--text-subtle);
+            font-size: 0.68rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-bottom: 4px;
+        }
+        .summary-card strong {
+            color: var(--emerald-light);
+            font-size: 1rem;
+        }
 
         .status {
             display: inline-block;
@@ -1070,8 +1680,17 @@
             background: #fff;
         }
         @media (max-width: 640px) {
-            .summary-boxes { grid-template-columns: 1fr; }
-            .preview-frame { min-height: 480px; }
+            .summary-boxes {
+                grid-template-columns: 1fr;
+            }
+            .preview-frame {
+                min-height: 480px;
+            }
+            .welcome-step .welcome-features {
+                flex-direction: column;
+                align-items: center;
+                gap: 10px;
+            }
         }
     </style>
 </head>
@@ -1138,234 +1757,294 @@
     <!-- ═══ MAIN CONTENT ═══ -->
     <main>
         <div class="page">
-            <section class="gb-hero">
-                <h1>Boletas y facturas listas en segundos</h1>
-                <p>
-                    Elige una plantilla profesional, completa un formulario simple y genera un comprobante listo para vista previa,
-                    descarga en PDF o compartir por WhatsApp, Instagram o cualquier canal compatible con Web Share.
-                </p>
-            </section>
 
-            <div class="layout">
-                <section class="panel">
-                    <div class="panel-header">
-                        <h2 class="panel-title">Configuración del comprobante</h2>
-                        <p class="panel-subtitle">Todo está preparado para que puedas añadir más plantillas sin tocar el flujo del formulario.</p>
-                    </div>
+            <!-- ============================================================
+            INDICADOR DE PROGRESO (① ② ③)
+            ============================================================ -->
+            <div class="step-progress" id="stepProgress">
+                <div class="step-circle active" data-step="1">
+                    <div class="circle">1<span class="label">①</span></div>
+                    <span class="step-label">Bienvenida</span>
+                </div>
+                <div class="step-line" id="line1"></div>
+                <div class="step-circle" data-step="2">
+                    <div class="circle">2<span class="label">②</span></div>
+                    <span class="step-label">Configuración</span>
+                </div>
+                <div class="step-line" id="line2"></div>
+                <div class="step-circle" data-step="3">
+                    <div class="circle">3<span class="label">③</span></div>
+                    <span class="step-label">Vista previa</span>
+                </div>
+            </div>
 
-                    <div class="form-wrap">
-                        <div id="errorBox" class="error"></div>
-                        <div id="successBox" class="success"></div>
-                        <div class="notice">
-                            Consejo: si vendes por redes sociales, deja plantillas, datos del negocio y textos frecuentes preconfigurados para emitir más rápido.
-                        </div>
-
-                        <!-- INFO DEL PLAN -->
-                        <div id="planInfo" style="margin-bottom: 16px; padding: 14px 16px; border-radius: 16px;">
-                            <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
-                                <span><strong>Plan:</strong> <span id="planNombre">Cargando...</span></span>
-                                <span><strong>Comprobantes disponibles:</strong> <span id="comprobantesDisponibles">-</span></span>
-                            </div>
-                            <div style="margin-top: 8px;">
-                                <a href="/planes" id="planLink">Ver planes y actualizar</a>
-                            </div>
-                        </div>
-
-                        <!-- MENSAJE COMERCIAL / UPSELL -->
-                        <div id="upsellBanner" class="upsell-banner">
-                            <strong>No te veas igual que el resto ✨</strong>
-                            <p>Desbloquea las plantillas Elegante, Corporativa y Premium, sube el logo de tu negocio y haz que tus comprobantes destaquen frente a tus competidores.</p>
-                            <a href="/planes">Ver planes desde S/7</a>
-                        </div>
-
-                        <form id="voucherForm">
-                            <section class="gb-block">
-                                <h3>Plantilla</h3>
-                                <div id="templateGrid" class="template-grid"></div>
-                                <div id="watermarkNote" class="template-watermark-note">
-                                    Tu plan gratuito incluye la plantilla <strong>Moderna Azul</strong> con una marca de agua "FacilitoTools" en el comprobante. Actualiza tu plan para generar comprobantes sin marca de agua.
-                                </div>
-                                <input type="hidden" id="templateId" name="templateId" value="moderna" />
-                            </section>
-
-                            <section class="gb-block">
-                                <h3>Tipo de comprobante</h3>
-                                <div class="grid-2">
-                                    <div>
-                                        <label for="documentType">Documento</label>
-                                        <select id="documentType" name="documentType">
-                                            <option value="boleta">Boleta de venta</option>
-                                            <option value="factura">Factura</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label for="paymentMethod">Forma de pago</label>
-                                        <input id="paymentMethod" name="paymentMethod" value="Yape / Transferencia / Efectivo" />
-                                    </div>
-                                </div>
-                            </section>
-
-                            <section class="gb-block">
-                                <h3>Datos del emisor</h3>
-                                <div class="grid">
-                                    <div>
-                                        <label for="issuerBusinessName">Razón social o nombre comercial</label>
-                                        <input id="issuerBusinessName" name="issuerBusinessName" placeholder="Mi Tienda Online" required />
-                                    </div>
-                                    <div class="grid-2">
-                                        <div>
-                                            <label for="issuerDocumentNumber">RUC / DNI</label>
-                                            <input id="issuerDocumentNumber" name="issuerDocumentNumber" placeholder="20123456789" />
-                                        </div>
-                                        <div>
-                                            <label for="issuerPhone">Teléfono</label>
-                                            <input id="issuerPhone" name="issuerPhone" placeholder="987654321" />
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label for="issuerAddress">Dirección</label>
-                                        <input id="issuerAddress" name="issuerAddress" placeholder="Av. Principal 123" />
-                                    </div>
-                                    <div class="grid-2">
-                                        <div>
-                                            <label for="issuerEmail">Email</label>
-                                            <input id="issuerEmail" name="issuerEmail" placeholder="ventas@mitienda.com" />
-                                        </div>
-                                        <div>
-                                            <label for="issuerWebsite">Web o Instagram</label>
-                                            <input id="issuerWebsite" name="issuerWebsite" placeholder="instagram.com/mitienda" />
-                                        </div>
-                                    </div>
-                                    <div id="logoField">
-                                        <label>Logo del negocio</label>
-                                        <div id="logoUploaderUnlocked" class="logo-uploader" style="display:none;">
-                                            <div class="logo-preview" id="logoPreview"><span>Sin logo</span></div>
-                                            <div class="logo-uploader-actions">
-                                                <input type="file" id="logoInput" accept="image/png,image/jpeg,image/webp" style="max-width:220px;" />
-                                                <button type="button" class="btn-danger" id="logoRemoveButton" style="align-self:flex-start;">Quitar logo</button>
-                                                <div class="helper">PNG, JPG o WEBP. Se recomienda fondo transparente, máx. 2MB.</div>
-                                            </div>
-                                        </div>
-                                        <div id="logoLockedNote" class="logo-locked-note" style="display:none;">
-                                            Subir tu propio logo está disponible desde el plan <strong>Prueba Corta</strong>. <a href="/planes">Actualiza tu plan</a> para personalizar tus comprobantes.
-                                        </div>
-                                    </div>
-                                </div>
-                            </section>
-
-                            <section class="gb-block">
-                                <h3>Datos del cliente</h3>
-                                <div class="grid">
-                                    <div>
-                                        <label for="customerName">Nombre o razón social</label>
-                                        <input id="customerName" name="customerName" placeholder="Cliente final" required />
-                                    </div>
-                                    <div class="grid-3">
-                                        <div>
-                                            <label for="customerDocumentType">Tipo de documento</label>
-                                            <select id="customerDocumentType" name="customerDocumentType">
-                                                <option value="DNI">DNI</option>
-                                                <option value="RUC">RUC</option>
-                                                <option value="CE">CE</option>
-                                                <option value="PAS">Pasaporte</option>
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label for="customerDocumentNumber">Número</label>
-                                            <input id="customerDocumentNumber" name="customerDocumentNumber" placeholder="12345678" />
-                                        </div>
-                                        <div>
-                                            <label for="issueDate">Fecha</label>
-                                            <input id="issueDate" name="issueDate" type="datetime-local" />
-                                        </div>
-                                    </div>
-                                    <div class="grid-2">
-                                        <div>
-                                            <label for="customerEmail">Email</label>
-                                            <input id="customerEmail" name="customerEmail" placeholder="cliente@email.com" />
-                                        </div>
-                                        <div>
-                                            <label for="customerPhone">Teléfono</label>
-                                            <input id="customerPhone" name="customerPhone" placeholder="999888777" />
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label for="customerAddress">Dirección</label>
-                                        <input id="customerAddress" name="customerAddress" placeholder="Dirección del cliente" />
-                                    </div>
-                                </div>
-                            </section>
-
-                            <section class="gb-block">
-                                <h3>Productos o servicios</h3>
-                                <div id="itemList" class="item-list"></div>
-                                <div class="actions" style="margin-top: 14px;">
-                                    <button type="button" class="btn-ghost" id="addItemButton">+ Añadir otro ítem</button>
-                                </div>
-                            </section>
-
-                            <section class="gb-block">
-                                <h3>Impuestos y notas</h3>
-                                <div class="grid-2">
-                                    <div>
-                                        <label for="taxRate">IGV</label>
-                                        <input id="taxRate" name="taxRate" type="number" step="0.01" min="0" value="0.18" />
-                                        <div class="helper">Usa 0.18 para 18%.</div>
-                                    </div>
-                                    <div>
-                                        <label class="inline-toggle">
-                                            <input id="pricesIncludeTax" name="pricesIncludeTax" type="checkbox" checked />
-                                            El precio ingresado ya incluye IGV
-                                        </label>
-                                    </div>
-                                </div>
-                                <div style="margin-top: 14px;">
-                                    <label for="notes">Observaciones</label>
-                                    <textarea id="notes" name="notes" placeholder="Entrega inmediata por WhatsApp. Gracias por tu compra."></textarea>
-                                </div>
-                            </section>
-
-                            <section class="gb-block">
-                                <div class="actions">
-                                    <button class="btn" type="submit" id="generateButton">Generar vista previa</button>
-                                    <button class="btn-ghost" type="button" id="resetButton">Limpiar formulario</button>
-                                </div>
-                            </section>
-                        </form>
-                    </div>
-                </section>
-
-                <section class="panel preview-panel">
-                    <div class="preview-top">
-                        <div>
-                            <h2 class="panel-title" style="margin-bottom: 6px;">Vista previa en vivo</h2>
-                            <div id="statusBadge" class="status">Esperando datos para generar</div>
-                        </div>
-                        <div class="preview-actions">
-                            <button class="btn-secondary" type="button" id="downloadButton" disabled>Descargar PDF</button>
-                            <button class="btn-ghost" type="button" id="shareButton" disabled>Compartir</button>
-                        </div>
-                        <div id="summaryBoxes" class="summary-boxes hidden">
-                            <div class="summary-card">
-                                <small>Subtotal</small>
-                                <strong id="summarySubtotal">S/ 0.00</strong>
-                            </div>
-                            <div class="summary-card">
-                                <small>IGV</small>
-                                <strong id="summaryTax">S/ 0.00</strong>
-                            </div>
-                            <div class="summary-card">
-                                <small>Total</small>
-                                <strong id="summaryTotal">S/ 0.00</strong>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="preview-body">
-                        <iframe id="previewFrame" class="preview-frame" title="Vista previa del comprobante"></iframe>
+            <!-- ============================================================
+            STEP 1 — BIENVENIDA
+            ============================================================ -->
+            <div class="step-container active" id="step1">
+                <section class="welcome-step">
+                    <span class="welcome-icon"><i class="fas fa-file-invoice"></i></span>
+                    <h1>Boletas y facturas <em>listas en segundos</em></h1>
+                    <p class="welcome-desc">
+                        Elige una plantilla profesional, completa un formulario simple y genera un comprobante listo para vista previa,
+                        descarga en PDF o compartir por WhatsApp, Instagram o cualquier canal compatible con Web Share.
+                    </p>
+                    <button class="welcome-btn" id="welcomeStartBtn">
+                        Comenzar ahora <i class="fas fa-arrow-right"></i>
+                    </button>
+                    <div class="welcome-features">
+                        <span><i class="fas fa-check-circle"></i> Sin registro previo</span>
+                        <span><i class="fas fa-check-circle"></i> Plantillas profesionales</span>
+                        <span><i class="fas fa-check-circle"></i> Descarga en PDF</span>
+                        <span><i class="fas fa-check-circle"></i> Comparte al instante</span>
                     </div>
                 </section>
             </div>
+
+            <!-- ============================================================
+            STEP 2 — FORMULARIO (Configuración)
+            ============================================================ -->
+            <div class="step-container" id="step2">
+                <div class="layout">
+                    <section class="panel">
+                        <div class="panel-header">
+                            <h2 class="panel-title">Configuración del comprobante</h2>
+                            <p class="panel-subtitle">Completa los datos y genera tu comprobante profesional.</p>
+                        </div>
+
+                        <div class="form-wrap">
+                            <!-- Botón para abrir el modal de consejo -->
+                            <button class="tip-trigger-btn" id="tipTriggerBtn">
+                                <i class="fas fa-lightbulb"></i> Ver consejo útil
+                            </button>
+
+                            <div id="errorBox" class="error"></div>
+                            <div id="successBox" class="success"></div>
+
+                            <!-- INFO DEL PLAN (MEJORADA) -->
+                            <div id="planInfo">
+                                <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; align-items: center;">
+                                    <span><strong>Plan:</strong> <span id="planNombre">Cargando...</span> <span class="plan-badge">Activo</span></span>
+                                    <span><strong>Comprobantes disponibles:</strong> <span id="comprobantesDisponibles">-</span></span>
+                                </div>
+                                <div style="margin-top: 8px;">
+                                    <a href="/planes" id="planLink">Ver planes y actualizar</a>
+                                </div>
+                            </div>
+
+                            <!-- MENSAJE COMERCIAL / UPSELL -->
+                            <div id="upsellBanner" class="upsell-banner">
+                                <strong>No te veas igual que el resto ✨</strong>
+                                <p>Desbloquea las plantillas Elegante, Corporativa y Premium, sube el logo de tu negocio y haz que tus comprobantes destaquen frente a tus competidores.</p>
+                                <a href="/planes">Ver planes desde S/7</a>
+                            </div>
+
+                            <form id="voucherForm">
+                                <section class="gb-block">
+                                    <h3>Plantilla</h3>
+                                    <div id="templateGrid" class="template-grid"></div>
+                                    <div id="watermarkNote" class="template-watermark-note">
+                                        Tu plan gratuito incluye la plantilla <strong>Moderna Azul</strong> con una marca de agua "FacilitoTools" en el comprobante. Actualiza tu plan para generar comprobantes sin marca de agua.
+                                    </div>
+                                    <input type="hidden" id="templateId" name="templateId" value="moderna" />
+                                </section>
+
+                                <section class="gb-block">
+                                    <h3>Tipo de comprobante</h3>
+                                    <div class="grid-2">
+                                        <div>
+                                            <label for="documentType">Documento</label>
+                                            <select id="documentType" name="documentType">
+                                                <option value="boleta">Boleta de venta</option>
+                                                <option value="factura">Factura</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label for="paymentMethod">Forma de pago</label>
+                                            <input id="paymentMethod" name="paymentMethod" value="Yape / Transferencia / Efectivo" />
+                                        </div>
+                                    </div>
+                                </section>
+
+                                <section class="gb-block">
+                                    <h3>Datos del emisor</h3>
+                                    <div class="grid">
+                                        <div>
+                                            <label for="issuerBusinessName">Razón social o nombre comercial</label>
+                                            <input id="issuerBusinessName" name="issuerBusinessName" placeholder="Mi Tienda Online" required />
+                                        </div>
+                                        <div class="grid-2">
+                                            <div>
+                                                <label for="issuerDocumentNumber">RUC / DNI</label>
+                                                <input id="issuerDocumentNumber" name="issuerDocumentNumber" placeholder="20123456789" />
+                                            </div>
+                                            <div>
+                                                <label for="issuerPhone">Teléfono</label>
+                                                <input id="issuerPhone" name="issuerPhone" placeholder="987654321" />
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label for="issuerAddress">Dirección</label>
+                                            <input id="issuerAddress" name="issuerAddress" placeholder="Av. Principal 123" />
+                                        </div>
+                                        <div class="grid-2">
+                                            <div>
+                                                <label for="issuerEmail">Email</label>
+                                                <input id="issuerEmail" name="issuerEmail" placeholder="ventas@mitienda.com" />
+                                            </div>
+                                            <div>
+                                                <label for="issuerWebsite">Web o Instagram</label>
+                                                <input id="issuerWebsite" name="issuerWebsite" placeholder="instagram.com/mitienda" />
+                                            </div>
+                                        </div>
+                                        <div id="logoField">
+                                            <label>Logo del negocio</label>
+                                            <div id="logoUploaderUnlocked" class="logo-uploader" style="display:none;">
+                                                <div class="logo-preview" id="logoPreview"><span>Sin logo</span></div>
+                                                <div class="logo-uploader-actions">
+                                                    <input type="file" id="logoInput" accept="image/png,image/jpeg,image/webp" style="max-width:220px;" />
+                                                    <button type="button" class="btn-danger" id="logoRemoveButton" style="align-self:flex-start;">Quitar logo</button>
+                                                    <div class="helper">PNG, JPG o WEBP. Se recomienda fondo transparente, máx. 2MB.</div>
+                                                </div>
+                                            </div>
+                                            <div id="logoLockedNote" class="logo-locked-note" style="display:none;">
+                                                Subir tu propio logo está disponible desde el plan <strong>Prueba Corta</strong>. <a href="/planes">Actualiza tu plan</a> para personalizar tus comprobantes.
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                <section class="gb-block">
+                                    <h3>Datos del cliente</h3>
+                                    <div class="grid">
+                                        <div>
+                                            <label for="customerName">Nombre o razón social</label>
+                                            <input id="customerName" name="customerName" placeholder="Cliente final" required />
+                                        </div>
+                                        <div class="grid-3">
+                                            <div>
+                                                <label for="customerDocumentType">Tipo de documento</label>
+                                                <select id="customerDocumentType" name="customerDocumentType">
+                                                    <option value="DNI">DNI</option>
+                                                    <option value="RUC">RUC</option>
+                                                    <option value="CE">CE</option>
+                                                    <option value="PAS">Pasaporte</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label for="customerDocumentNumber">Número</label>
+                                                <input id="customerDocumentNumber" name="customerDocumentNumber" placeholder="12345678" />
+                                            </div>
+                                            <div>
+                                                <label for="issueDate">Fecha</label>
+                                                <input id="issueDate" name="issueDate" type="datetime-local" />
+                                            </div>
+                                        </div>
+                                        <div class="grid-2">
+                                            <div>
+                                                <label for="customerEmail">Email</label>
+                                                <input id="customerEmail" name="customerEmail" placeholder="cliente@email.com" />
+                                            </div>
+                                            <div>
+                                                <label for="customerPhone">Teléfono</label>
+                                                <input id="customerPhone" name="customerPhone" placeholder="999888777" />
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label for="customerAddress">Dirección</label>
+                                            <input id="customerAddress" name="customerAddress" placeholder="Dirección del cliente" />
+                                        </div>
+                                    </div>
+                                </section>
+
+                                <section class="gb-block">
+                                    <h3>Productos o servicios</h3>
+                                    <div id="itemList" class="item-list"></div>
+                                    <div class="actions" style="margin-top: 14px;">
+                                        <button type="button" class="btn-ghost" id="addItemButton">+ Añadir otro ítem</button>
+                                    </div>
+                                </section>
+
+                                <section class="gb-block">
+                                    <h3>Impuestos y notas</h3>
+                                    <div class="grid-2">
+                                        <div>
+                                            <label for="taxRate">IGV</label>
+                                            <input id="taxRate" name="taxRate" type="number" step="0.01" min="0" value="0.18" />
+                                            <div class="helper">Usa 0.18 para 18%.</div>
+                                        </div>
+                                        <div>
+                                            <label class="inline-toggle">
+                                                <input id="pricesIncludeTax" name="pricesIncludeTax" type="checkbox" checked />
+                                                El precio ingresado ya incluye IGV
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div style="margin-top: 14px;">
+                                        <label for="notes">Observaciones</label>
+                                        <textarea id="notes" name="notes" placeholder="Entrega inmediata por WhatsApp. Gracias por tu compra."></textarea>
+                                    </div>
+                                </section>
+
+                                <!-- Navegación dentro del paso 2 (MEJORADA) -->
+                                <div class="step-nav-actions">
+                                    <button class="btn-back" id="step2BackBtn"><i class="fas fa-undo-alt"></i> Volver</button>
+                                    <button class="btn-next" type="submit" id="generateButton"><i class="fas fa-wand-magic-sparkles"></i> Generar vista previa</button>
+                                    <button class="btn-clean" type="button" id="resetButton">Limpiar formulario</button>
+                                </div>
+                            </form>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+            <!-- ============================================================
+            STEP 3 — VISTA PREVIA
+            ============================================================ -->
+            <div class="step-container" id="step3">
+                <div class="layout" style="grid-template-columns:1fr;">
+                    <section class="panel preview-panel" style="position:static;">
+                        <div class="preview-top">
+                            <div>
+                                <h2 class="panel-title" style="margin-bottom: 6px;">Vista previa en vivo</h2>
+                                <div id="statusBadge" class="status">Esperando datos para generar</div>
+                            </div>
+                            <div class="preview-actions">
+                                <button class="btn-secondary" type="button" id="downloadButton" disabled>Descargar PDF</button>
+                                <button class="btn-ghost" type="button" id="shareButton" disabled>Compartir</button>
+                            </div>
+                            <div id="summaryBoxes" class="summary-boxes hidden">
+                                <div class="summary-card">
+                                    <small>Subtotal</small>
+                                    <strong id="summarySubtotal">S/ 0.00</strong>
+                                </div>
+                                <div class="summary-card">
+                                    <small>IGV</small>
+                                    <strong id="summaryTax">S/ 0.00</strong>
+                                </div>
+                                <div class="summary-card">
+                                    <small>Total</small>
+                                    <strong id="summaryTotal">S/ 0.00</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="preview-body">
+                            <iframe id="previewFrame" class="preview-frame" title="Vista previa del comprobante"></iframe>
+                        </div>
+
+                        <!-- Navegación dentro del paso 3 (se mantiene) -->
+                        <div class="step-nav-actions" style="margin-top:24px;">
+                            <button class="btn-back" id="step3BackBtn"><i class="fas fa-undo-alt"></i> Editar datos</button>
+                            <div class="btn-group" style="display:flex; flex-direction:column; gap:12px; width:100%;">
+                                <button class="btn-secondary" type="button" id="downloadButton2" disabled style="width:100%; border-radius:10px; padding:14px 20px; justify-content:center;">Descargar PDF</button>
+                                <button class="btn-ghost" type="button" id="shareButton2" disabled style="width:100%; border-radius:10px; padding:14px 20px; justify-content:center;">Compartir</button>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
         </div>
     </main>
 
@@ -1383,6 +2062,20 @@
     <!-- ═══ WHATSAPP ═══ -->
     <button class="chat-bubble" onclick="goToWhatsApp()" aria-label="Contactar por WhatsApp"><i class="fab fa-whatsapp"></i></button>
     <div class="chat-text" id="chatText" onclick="goToWhatsApp()"></div>
+
+    <!-- ============================================================
+    MODAL DE CONSEJO (TIP)
+    ============================================================ -->
+    <div class="tip-modal-overlay" id="tipModalOverlay">
+        <div class="tip-modal" id="tipModal">
+            <div class="tip-avatar"><i class="fas fa-lightbulb"></i></div>
+            <h4>💡 Consejo rápido</h4>
+            <p>
+                Si vendes por redes sociales, deja plantillas, datos del negocio y textos frecuentes preconfigurados para emitir más rápido.
+            </p>
+            <button class="tip-close" id="tipModalCloseBtn">Entendido, ¡gracias!</button>
+        </div>
+    </div>
 
     <!-- ========== TEMPLATES Y SCRIPTS DEL GENERADOR ========== -->
     <template id="itemRowTemplate">
@@ -1462,12 +2155,10 @@
         menuToggle.addEventListener('click', toggleMenu);
         overlay.addEventListener('click', toggleMenu);
 
-        // Cerrar sidebar al hacer clic en un enlace (si es interno)
         sidebar.querySelectorAll('nav a').forEach(link => {
             link.addEventListener('click', (e) => {
                 const target = link.getAttribute('data-target');
                 if (target && target !== 'generar-boletas' && !target.startsWith('#')) {
-                    // Si es un enlace a otra página, dejamos navegar
                     return;
                 }
                 e.preventDefault();
@@ -1510,7 +2201,117 @@
         }
 
         window.goToWhatsApp = function() {
-            window.open(`https://wa.me/51944950234?text=${encodeURIComponent('Hola, necesito información sobre los planes de FacilitoTools.')}`, '_blank');
+            window.open(
+                `https://wa.me/51944950234?text=${encodeURIComponent('Hola, necesito información sobre los planes de FacilitoTools.')}`,
+                '_blank');
+        };
+
+        // ========== STEP NAVIGATION ==========
+        let currentStep = 1;
+        const totalSteps = 3;
+
+        const stepContainers = {
+            1: document.getElementById('step1'),
+            2: document.getElementById('step2'),
+            3: document.getElementById('step3')
+        };
+        const stepCircles = document.querySelectorAll('.step-circle');
+        const stepLines = {
+            1: document.getElementById('line1'),
+            2: document.getElementById('line2')
+        };
+
+        function goToStep(step) {
+            if (step < 1 || step > totalSteps) return;
+            currentStep = step;
+
+            // Ocultar todos los pasos
+            Object.values(stepContainers).forEach(el => el.classList.remove('active'));
+            // Mostrar el paso actual
+            stepContainers[step].classList.add('active');
+
+            // Actualizar círculos
+            stepCircles.forEach((circle, index) => {
+                const num = index + 1;
+                circle.classList.remove('active', 'done');
+                if (num === step) {
+                    circle.classList.add('active');
+                } else if (num < step) {
+                    circle.classList.add('done');
+                }
+            });
+
+            // Actualizar líneas
+            if (stepLines[1]) {
+                stepLines[1].classList.toggle('done', step > 1);
+            }
+            if (stepLines[2]) {
+                stepLines[2].classList.toggle('done', step > 2);
+            }
+
+            // Scroll al inicio de la página al cambiar de paso
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Eventos de navegación
+        document.getElementById('welcomeStartBtn').addEventListener('click', () => {
+            goToStep(2);
+        });
+
+        document.getElementById('step2BackBtn').addEventListener('click', () => {
+            goToStep(1);
+        });
+
+        document.getElementById('step3BackBtn').addEventListener('click', () => {
+            goToStep(2);
+        });
+
+        // ========== MODAL DE CONSEJO (TIP) ==========
+        const tipOverlay = document.getElementById('tipModalOverlay');
+        const tipModal = document.getElementById('tipModal');
+        const tipTrigger = document.getElementById('tipTriggerBtn');
+        const tipClose = document.getElementById('tipModalCloseBtn');
+
+        function openTipModal() {
+            tipOverlay.classList.add('open');
+            tipModal.classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeTipModal() {
+            tipOverlay.classList.remove('open');
+            tipModal.classList.remove('open');
+            document.body.style.overflow = '';
+        }
+
+        tipTrigger.addEventListener('click', openTipModal);
+        tipClose.addEventListener('click', closeTipModal);
+        tipOverlay.addEventListener('click', (e) => {
+            if (e.target === tipOverlay) closeTipModal();
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeTipModal();
+        });
+
+        // Mostrar el modal automáticamente al entrar al paso 2 por primera vez
+        let tipShown = false;
+
+        function maybeShowTip() {
+            if (currentStep === 2 && !tipShown) {
+                setTimeout(() => {
+                    openTipModal();
+                    tipShown = true;
+                }, 600);
+            }
+        }
+
+        // Sobrescribir goToStep para incluir la verificación del tip
+        const originalGoToStep = goToStep;
+        goToStep = function(step) {
+            originalGoToStep(step);
+            if (step === 2) {
+                maybeShowTip();
+            }
         };
 
         // ========== GENERADOR DE BOLETAS (funcionalidad original) ==========
@@ -1527,6 +2328,8 @@
         const summaryTotal = document.getElementById('summaryTotal');
         const downloadButton = document.getElementById('downloadButton');
         const shareButton = document.getElementById('shareButton');
+        const downloadButton2 = document.getElementById('downloadButton2');
+        const shareButton2 = document.getElementById('shareButton2');
         const statusBadge = document.getElementById('statusBadge');
         const errorBox = document.getElementById('errorBox');
         const successBox = document.getElementById('successBox');
@@ -1599,9 +2402,8 @@
                     planNombre: data.planNombre || data.plan || 'Gratuito',
                     disponibles: data.disponibles !== undefined ? data.disponibles : '—',
                     permiteLogo: !!data.permiteLogo,
-                    plantillasPermitidas: Array.isArray(data.plantillasPermitidas) && data.plantillasPermitidas.length
-                        ? data.plantillasPermitidas
-                        : ['moderna']
+                    plantillasPermitidas: Array.isArray(data.plantillasPermitidas) && data.plantillasPermitidas.length ?
+                        data.plantillasPermitidas : ['moderna']
                 };
                 planNombre.textContent = planState.planNombre;
                 comprobantesDisponibles.textContent = planState.disponibles;
@@ -1724,7 +2526,9 @@
 
             button.addEventListener('click', () => {
                 if (locked) {
-                    showError(`La plantilla "${template.name}" está disponible desde el plan Prueba Corta. Ve a la sección Planes para desbloquearla.`);
+                    showError(
+                        `La plantilla "${template.name}" está disponible desde el plan Prueba Corta. Ve a la sección Planes para desbloquearla.`
+                        );
                     return;
                 }
                 selectTemplate(template.id);
@@ -1782,7 +2586,8 @@
                 templateId: templateIdInput.value,
                 documentType: document.getElementById('documentType').value,
                 paymentMethod: document.getElementById('paymentMethod').value.trim(),
-                issueDate: document.getElementById('issueDate').value ? new Date(document.getElementById('issueDate').value).toISOString() : new Date().toISOString(),
+                issueDate: document.getElementById('issueDate').value ? new Date(document.getElementById('issueDate')
+                    .value).toISOString() : new Date().toISOString(),
                 taxRate: Number(document.getElementById('taxRate').value || 0.18),
                 pricesIncludeTax: document.getElementById('pricesIncludeTax').checked,
                 notes: document.getElementById('notes').value.trim(),
@@ -1855,6 +2660,8 @@
             summaryBoxes.classList.remove('hidden');
             downloadButton.disabled = false;
             shareButton.disabled = false;
+            downloadButton2.disabled = false;
+            shareButton2.disabled = false;
             lastDocumentName = `${result.summary.documentType}_${result.documentNumber}.pdf`;
             lastShareText = result.shareText || 'Comprobante generado';
             setStatus(`Vista previa lista · ${result.documentNumber}`);
@@ -1880,6 +2687,8 @@
             lastPayload = payload;
             renderPreview(result);
             showSuccess('Vista previa generada correctamente. Ya puedes descargar o compartir.');
+            // Ir al paso 3
+            goToStep(3);
         }
 
         async function downloadPdf() {
@@ -1946,7 +2755,9 @@
                 const url = URL.createObjectURL(blob);
                 window.open(url, '_blank');
                 setStatus('Archivo abierto para compartir');
-                showSuccess('Tu navegador no soporta compartir archivos directamente. Se abrió el PDF en otra pestaña y se copió un texto base al portapapeles si estaba disponible.');
+                showSuccess(
+                    'Tu navegador no soporta compartir archivos directamente. Se abrió el PDF en otra pestaña y se copió un texto base al portapapeles si estaba disponible.'
+                    );
                 setTimeout(() => URL.revokeObjectURL(url), 30000);
                 await refreshPlanInfo();
             } catch (error) {
@@ -2004,10 +2815,13 @@
             selectTemplate('moderna');
             clearLogo();
             setDefaultDateTime();
-            previewFrame.srcdoc = '<html><body style="font-family:Inter,Arial,sans-serif;padding:40px;background:#f8fafc;color:#475569;"><h2 style="margin-top:0;color:#0f172a;">Aquí verás la vista previa</h2><p>Completa el formulario de la izquierda y pulsa <strong>Generar vista previa</strong>.</p></body></html>';
+            previewFrame.srcdoc =
+                '<html><body style="font-family:Inter,Arial,sans-serif;padding:40px;background:#f8fafc;color:#475569;"><h2 style="margin-top:0;color:#0f172a;">Aquí verás la vista previa</h2><p>Completa el formulario de la izquierda y pulsa <strong>Generar vista previa</strong>.</p></body></html>';
             summaryBoxes.classList.add('hidden');
             downloadButton.disabled = true;
             shareButton.disabled = true;
+            downloadButton2.disabled = true;
+            shareButton2.disabled = true;
             lastPayload = null;
             lastDocumentName = 'comprobante.pdf';
             lastShareText = 'Comprobante generado';
@@ -2031,8 +2845,14 @@
         downloadButton.addEventListener('click', async () => {
             await downloadPdf();
         });
+        downloadButton2.addEventListener('click', async () => {
+            await downloadPdf();
+        });
 
         shareButton.addEventListener('click', async () => {
+            await sharePdf();
+        });
+        shareButton2.addEventListener('click', async () => {
             await sharePdf();
         });
 
@@ -2055,6 +2875,9 @@
                     showError('Debes iniciar sesión para generar comprobantes. Mientras tanto puedes explorar las plantillas disponibles.');
                     if (generateButton) generateButton.disabled = true;
                 }
+
+                // Inicializar en el paso 1
+                goToStep(1);
             } catch (error) {
                 showError(error.message || 'No se pudo iniciar la página.');
             }
