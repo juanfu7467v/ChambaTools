@@ -1012,6 +1012,7 @@
         }
         .preview-body {
             padding: 16px 0 0 0;
+            position: relative;
         }
 
         .notice {
@@ -1358,13 +1359,151 @@
             border-color: var(--ruby-light) !important;
         }
 
-        /* Ajustes para que los botones del paso 3 también sigan el mismo estilo */
-        #step3 .step-nav-actions .btn-secondary,
-        #step3 .step-nav-actions .btn-ghost {
+        /* ============================================================
+           MEJORA 4: SUBTOTAL, IGV, TOTAL EN UNA FILA (siempre)
+           ============================================================ */
+        .summary-boxes {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
             width: 100%;
-            border-radius: 10px !important;
-            padding: 14px 20px;
+            margin-top: 8px;
+        }
+        .summary-boxes.hidden {
+            display: none;
+        }
+        .summary-card {
+            background: var(--navy-surface);
+            border: 1px solid var(--navy-border);
+            border-radius: var(--radius-sm);
+            padding: 8px 6px;
+            text-align: center;
+        }
+        .summary-card small {
+            display: block;
+            color: var(--text-subtle);
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-bottom: 2px;
+        }
+        .summary-card strong {
+            color: var(--emerald-light);
+            font-size: 0.85rem;
+        }
+        /* En móviles mantener 3 columnas pero con fuente más pequeña */
+        @media (max-width: 480px) {
+            .summary-boxes {
+                gap: 6px;
+            }
+            .summary-card {
+                padding: 4px 2px;
+            }
+            .summary-card small {
+                font-size: 0.5rem;
+            }
+            .summary-card strong {
+                font-size: 0.7rem;
+            }
+        }
+
+        /* ============================================================
+           MEJORA 5: IFRAME RESPONSIVE Y BOTONES SUPERPUESTOS
+           ============================================================ */
+        .preview-frame-wrapper {
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--navy-border);
+            background: #fff;
+        }
+        .preview-frame-wrapper .preview-frame {
+            display: block;
+            width: 100%;
+            height: auto;
+            min-height: 480px;
+            border: none;
+            background: #fff;
+            transform-origin: top left;
+            transition: transform 0.2s ease;
+        }
+        /* Botones superpuestos */
+        .preview-actions-overlay {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 8px;
+            z-index: 10;
+        }
+        .preview-actions-overlay .action-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #fff;
+            display: flex;
+            align-items: center;
             justify-content: center;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            padding: 0;
+        }
+        .preview-actions-overlay .action-btn:hover {
+            background: rgba(0, 200, 83, 0.5);
+            transform: scale(1.08);
+        }
+        .preview-actions-overlay .action-btn:active {
+            transform: scale(0.95);
+        }
+        /* Ocultar los botones originales de descarga/compartir en el paso 3 */
+        #step3 .preview-actions .btn-secondary,
+        #step3 .preview-actions .btn-ghost {
+            display: none;
+        }
+        /* Eliminar el step-nav-actions del paso 3 */
+        #step3 .step-nav-actions {
+            display: none;
+        }
+
+        /* Ajustes para móviles */
+        @media (max-width: 640px) {
+            .preview-actions-overlay .action-btn {
+                width: 36px;
+                height: 36px;
+                font-size: 0.95rem;
+            }
+            .preview-frame-wrapper .preview-frame {
+                min-height: 320px;
+            }
+        }
+        @media (max-width: 480px) {
+            .preview-actions-overlay .action-btn {
+                width: 32px;
+                height: 32px;
+                font-size: 0.8rem;
+                border-radius: 6px;
+            }
+            .preview-frame-wrapper .preview-frame {
+                min-height: 240px;
+            }
+        }
+
+        .status {
+            display: inline-block;
+            margin-top: 6px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            background: var(--navy-surface);
+            border: 1px solid var(--navy-border);
+            padding: 5px 12px;
+            border-radius: 999px;
         }
 
         .upsell-banner {
@@ -1632,66 +1771,7 @@
             cursor: not-allowed;
         }
 
-        .summary-boxes {
-            width: 100%;
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-        }
-        .summary-boxes.hidden {
-            display: none;
-        }
-        .summary-card {
-            background: var(--navy-surface);
-            border: 1px solid var(--navy-border);
-            border-radius: var(--radius-sm);
-            padding: 10px 12px;
-            text-align: center;
-        }
-        .summary-card small {
-            display: block;
-            color: var(--text-subtle);
-            font-size: 0.68rem;
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
-            margin-bottom: 4px;
-        }
-        .summary-card strong {
-            color: var(--emerald-light);
-            font-size: 1rem;
-        }
-
-        .status {
-            display: inline-block;
-            margin-top: 6px;
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            background: var(--navy-surface);
-            border: 1px solid var(--navy-border);
-            padding: 5px 12px;
-            border-radius: 999px;
-        }
-
-        .preview-frame {
-            width: 100%;
-            min-height: 760px;
-            border: 1px solid var(--navy-border);
-            border-radius: var(--radius-sm);
-            background: #fff;
-        }
-        @media (max-width: 640px) {
-            .summary-boxes {
-                grid-template-columns: 1fr;
-            }
-            .preview-frame {
-                min-height: 480px;
-            }
-            .welcome-step .welcome-features {
-                flex-direction: column;
-                align-items: center;
-                gap: 10px;
-            }
-        }
+        /* se eliminó .summary-boxes duplicado */
     </style>
 </head>
 <body>
@@ -1999,7 +2079,7 @@
             </div>
 
             <!-- ============================================================
-            STEP 3 — VISTA PREVIA
+            STEP 3 — VISTA PREVIA (MEJORADA)
             ============================================================ -->
             <div class="step-container" id="step3">
                 <div class="layout" style="grid-template-columns:1fr;">
@@ -2009,10 +2089,12 @@
                                 <h2 class="panel-title" style="margin-bottom: 6px;">Vista previa en vivo</h2>
                                 <div id="statusBadge" class="status">Esperando datos para generar</div>
                             </div>
-                            <div class="preview-actions">
+                            <!-- Los botones originales de descarga y compartir se ocultan con CSS, los reemplazamos con los superpuestos -->
+                            <div class="preview-actions" style="display:none;">
                                 <button class="btn-secondary" type="button" id="downloadButton" disabled>Descargar PDF</button>
                                 <button class="btn-ghost" type="button" id="shareButton" disabled>Compartir</button>
                             </div>
+                            <!-- Summary boxes: Subtotal, IGV, Total en una fila -->
                             <div id="summaryBoxes" class="summary-boxes hidden">
                                 <div class="summary-card">
                                     <small>Subtotal</small>
@@ -2030,17 +2112,26 @@
                         </div>
 
                         <div class="preview-body">
-                            <iframe id="previewFrame" class="preview-frame" title="Vista previa del comprobante"></iframe>
-                        </div>
-
-                        <!-- Navegación dentro del paso 3 (se mantiene) -->
-                        <div class="step-nav-actions" style="margin-top:24px;">
-                            <button class="btn-back" id="step3BackBtn"><i class="fas fa-undo-alt"></i> Editar datos</button>
-                            <div class="btn-group" style="display:flex; flex-direction:column; gap:12px; width:100%;">
-                                <button class="btn-secondary" type="button" id="downloadButton2" disabled style="width:100%; border-radius:10px; padding:14px 20px; justify-content:center;">Descargar PDF</button>
-                                <button class="btn-ghost" type="button" id="shareButton2" disabled style="width:100%; border-radius:10px; padding:14px 20px; justify-content:center;">Compartir</button>
+                            <!-- Contenedor del iframe con los botones superpuestos -->
+                            <div class="preview-frame-wrapper">
+                                <iframe id="previewFrame" class="preview-frame" title="Vista previa del comprobante"></iframe>
+                                <!-- Botones superpuestos (solo iconos) -->
+                                <div class="preview-actions-overlay">
+                                    <button class="action-btn" id="step3BackBtn" title="Editar datos">
+                                        <i class="fas fa-pen"></i>
+                                    </button>
+                                    <button class="action-btn" id="downloadButton2" title="Descargar PDF" disabled>
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                    <button class="action-btn" id="shareButton2" title="Compartir" disabled>
+                                        <i class="fas fa-share-alt"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
+
+                        <!-- Eliminamos el step-nav-actions del paso 3 (oculto con CSS) -->
+                        <div class="step-nav-actions" style="display:none;"></div>
                     </section>
                 </div>
             </div>
@@ -2225,12 +2316,9 @@
             if (step < 1 || step > totalSteps) return;
             currentStep = step;
 
-            // Ocultar todos los pasos
             Object.values(stepContainers).forEach(el => el.classList.remove('active'));
-            // Mostrar el paso actual
             stepContainers[step].classList.add('active');
 
-            // Actualizar círculos
             stepCircles.forEach((circle, index) => {
                 const num = index + 1;
                 circle.classList.remove('active', 'done');
@@ -2241,7 +2329,6 @@
                 }
             });
 
-            // Actualizar líneas
             if (stepLines[1]) {
                 stepLines[1].classList.toggle('done', step > 1);
             }
@@ -2249,21 +2336,15 @@
                 stepLines[2].classList.toggle('done', step > 2);
             }
 
-            // Scroll al inicio de la página al cambiar de paso
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // Eventos de navegación
         document.getElementById('welcomeStartBtn').addEventListener('click', () => {
             goToStep(2);
         });
 
         document.getElementById('step2BackBtn').addEventListener('click', () => {
             goToStep(1);
-        });
-
-        document.getElementById('step3BackBtn').addEventListener('click', () => {
-            goToStep(2);
         });
 
         // ========== MODAL DE CONSEJO (TIP) ==========
@@ -2293,7 +2374,6 @@
             if (e.key === 'Escape') closeTipModal();
         });
 
-        // Mostrar el modal automáticamente al entrar al paso 2 por primera vez
         let tipShown = false;
 
         function maybeShowTip() {
@@ -2305,7 +2385,6 @@
             }
         }
 
-        // Sobrescribir goToStep para incluir la verificación del tip
         const originalGoToStep = goToStep;
         goToStep = function(step) {
             originalGoToStep(step);
@@ -2326,10 +2405,13 @@
         const summarySubtotal = document.getElementById('summarySubtotal');
         const summaryTax = document.getElementById('summaryTax');
         const summaryTotal = document.getElementById('summaryTotal');
+        // Botones originales (ocultos) pero con sus listeners
         const downloadButton = document.getElementById('downloadButton');
         const shareButton = document.getElementById('shareButton');
+        // Nuevos botones superpuestos
         const downloadButton2 = document.getElementById('downloadButton2');
         const shareButton2 = document.getElementById('shareButton2');
+        const step3BackBtn = document.getElementById('step3BackBtn');
         const statusBadge = document.getElementById('statusBadge');
         const errorBox = document.getElementById('errorBox');
         const successBox = document.getElementById('successBox');
@@ -2647,17 +2729,27 @@
 
         function renderPreview(result) {
             previewFrame.srcdoc = result.html;
-            previewFrame.addEventListener('load', () => {
-                const body = previewFrame.contentWindow?.document?.body;
-                if (body) {
-                    previewFrame.style.height = `${Math.max(body.scrollHeight + 30, 760)}px`;
-                }
-            }, { once: true });
+            // El escalado se hará en el evento load del iframe
+            previewFrame.addEventListener('load', function onLoad() {
+                // Ajustar altura dinámicamente
+                try {
+                    const body = this.contentWindow?.document?.body;
+                    if (body) {
+                        const height = Math.max(body.scrollHeight + 30, 480);
+                        this.style.height = height + 'px';
+                    }
+                } catch (e) {}
+                // Escalar para que quepa en el ancho del contenedor
+                scaleIframe();
+                // Eliminar el listener para que no se ejecute múltiples veces
+                this.removeEventListener('load', onLoad);
+            });
 
             summarySubtotal.textContent = formatMoney(result.summary.subtotal, result.summary.currency);
             summaryTax.textContent = formatMoney(result.summary.tax, result.summary.currency);
             summaryTotal.textContent = formatMoney(result.summary.total, result.summary.currency);
             summaryBoxes.classList.remove('hidden');
+            // Habilitar botones
             downloadButton.disabled = false;
             shareButton.disabled = false;
             downloadButton2.disabled = false;
@@ -2666,6 +2758,52 @@
             lastShareText = result.shareText || 'Comprobante generado';
             setStatus(`Vista previa lista · ${result.documentNumber}`);
         }
+
+        // Función para escalar el iframe en móviles
+        function scaleIframe() {
+            const wrapper = previewFrame.closest('.preview-frame-wrapper');
+            if (!wrapper) return;
+            const containerWidth = wrapper.clientWidth;
+            // Intentar obtener el ancho del contenido del iframe
+            let contentWidth = 800; // valor por defecto
+            try {
+                const doc = previewFrame.contentWindow?.document;
+                if (doc && doc.body) {
+                    // Obtener el ancho del contenido (scrollWidth)
+                    const scrollWidth = doc.body.scrollWidth;
+                    if (scrollWidth > 0) contentWidth = scrollWidth;
+                }
+            } catch (e) {}
+            // Si el contenido es más ancho que el contenedor, aplicar scale
+            if (contentWidth > containerWidth) {
+                const scale = containerWidth / contentWidth;
+                previewFrame.style.transform = `scale(${scale})`;
+                // Ajustar altura para compensar el scale
+                const height = parseFloat(previewFrame.style.height) || 480;
+                previewFrame.style.height = (height / scale) + 'px';
+                previewFrame.style.transformOrigin = 'top left';
+            } else {
+                previewFrame.style.transform = 'scale(1)';
+                previewFrame.style.transformOrigin = 'top left';
+                // Restaurar altura si es necesario
+                const body = previewFrame.contentWindow?.document?.body;
+                if (body) {
+                    const h = Math.max(body.scrollHeight + 30, 480);
+                    previewFrame.style.height = h + 'px';
+                }
+            }
+        }
+
+        // Escalar al redimensionar la ventana
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                if (currentStep === 3) {
+                    scaleIframe();
+                }
+            }, 200);
+        });
 
         async function generatePreview() {
             clearMessages();
@@ -2687,7 +2825,6 @@
             lastPayload = payload;
             renderPreview(result);
             showSuccess('Vista previa generada correctamente. Ya puedes descargar o compartir.');
-            // Ir al paso 3
             goToStep(3);
         }
 
@@ -2827,6 +2964,9 @@
             lastShareText = 'Comprobante generado';
             setStatus('Formulario reiniciado');
             clearMessages();
+            // Resetear transform del iframe
+            previewFrame.style.transform = 'scale(1)';
+            previewFrame.style.height = '';
         }
 
         addItemButton.addEventListener('click', () => addItemRow());
@@ -2842,6 +2982,7 @@
             }
         });
 
+        // Listeners para los botones de descarga y compartición (tanto los originales ocultos como los nuevos)
         downloadButton.addEventListener('click', async () => {
             await downloadPdf();
         });
@@ -2854,6 +2995,11 @@
         });
         shareButton2.addEventListener('click', async () => {
             await sharePdf();
+        });
+
+        // Botón "Editar datos" (volver al paso 2)
+        step3BackBtn.addEventListener('click', () => {
+            goToStep(2);
         });
 
         documentTypeSelect.addEventListener('change', () => {
@@ -2876,14 +3022,12 @@
                     if (generateButton) generateButton.disabled = true;
                 }
 
-                // Inicializar en el paso 1
                 goToStep(1);
             } catch (error) {
                 showError(error.message || 'No se pudo iniciar la página.');
             }
         })();
 
-        // Inicializar WhatsApp después de un pequeño retraso
         document.addEventListener("DOMContentLoaded", () => {
             setTimeout(() => {
                 chatTextEl.classList.add('show');
