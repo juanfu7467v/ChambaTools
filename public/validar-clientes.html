@@ -601,7 +601,11 @@
         }
 
         function renderSkeleton(container) {
-            container.innerHTML = `<div class="vc-skeleton">${Array(6).fill('<div class="bar"></div>').join('')}</div>`;
+            // Los proveedores externos (APISPERU/Masitaprex) pueden tardar hasta
+            // ~50 segundos en responder en horas de alta demanda, así que se
+            // avisa para que el usuario no piense que la consulta se colgó.
+            container.innerHTML = `<div class="vc-skeleton">${Array(6).fill('<div class="bar"></div>').join('')}</div>
+                <div class="vc-hint" style="text-align:center;margin-top:10px;">Consultando con el proveedor externo… esto puede tardar hasta 50 segundos.</div>`;
         }
 
         function renderError(container, message, isLimit = false) {
@@ -671,7 +675,13 @@
                             ${dataItem('Nombres', data.nombres)}
                             ${dataItem('Apellidos', data.apellidos)}
                             ${dataItem('Estado', data.estado)}
-                            ${dataItem('Nacionalidad', data.nacionalidad)}
+                            ${dataItem('Fecha de nacimiento', data.fecha_nacimiento)}
+                            ${dataItem('Estado civil', data.estado_civil)}
+                            ${dataItem('Lugar de nacimiento', data.lugar_nacimiento)}
+                            <div class="vc-data-item" style="grid-column:1/-1;">
+                                <div class="k">Dirección</div>
+                                <div class="v">${esc(data.direccion)}</div>
+                            </div>
                         </div>
                     </div>`;
             },
@@ -683,7 +693,7 @@
                 }
                 container.innerHTML = `<div class="vc-list-results">${items.map(p => `
                     <div class="vc-list-item">
-                        <span class="who">${esc(p.nombreCompleto || [p.nombres, p.apellidos].filter(Boolean).join(' '))}</span>
+                        <span class="who">${esc(p.nombres_completos || p.nombreCompleto || [p.nombres, p.apellidos].filter(Boolean).join(' '))}</span>
                         <span class="doc">${esc(p.cedula)}</span>
                     </div>`).join('')}</div>`;
             },
@@ -695,20 +705,30 @@
                 }
                 container.innerHTML = `<div class="vc-list-results">${items.map(p => `
                     <div class="vc-list-item">
-                        <span class="who">${esc(p.nombreCompleto || [p.nombres, p.apellidoPaterno, p.apellidoMaterno].filter(Boolean).join(' '))}</span>
+                        <span class="who">${esc(p.nombres_completos || p.nombreCompleto || [p.nombres, p.apellidoPaterno, p.apellidoMaterno].filter(Boolean).join(' '))}</span>
                         <span class="doc">${esc(p.dni)}</span>
                     </div>`).join('')}</div>`;
             },
             'telefonia-doc'(container, data) {
-                const items = Array.isArray(data) ? data : (data.telefonos || data.resultados || [data]);
+                // Masitaprex devuelve las líneas dentro de "lineas" (ver
+                // https://masitaprex.com/API-Docs.html). Se mantienen los
+                // fallbacks anteriores por compatibilidad con otras formas
+                // de respuesta.
+                const items = Array.isArray(data) ? data : (data.lineas || data.telefonos || data.resultados || [data]);
                 if (!items.length || !items[0]) {
                     container.innerHTML = `<div class="vc-empty"><i class="fas fa-phone-slash"></i>No se encontraron números asociados a este documento.</div>`;
                     return;
                 }
-                container.innerHTML = `<div class="vc-list-results">${items.map(t => `
+                const titularHtml = (!Array.isArray(data) && data.titular)
+                    ? `<div class="vc-result-head" style="margin-bottom:10px;">
+                            <span class="name">${esc(data.titular)}</span>
+                            ${data.documento ? `<span class="vc-status-pill ok">${esc(data.documento)}</span>` : ''}
+                       </div>`
+                    : '';
+                container.innerHTML = titularHtml + `<div class="vc-list-results">${items.map(t => `
                     <div class="vc-list-item">
                         <span class="doc"><i class="fas fa-phone" style="margin-right:8px;color:var(--emerald);"></i>${esc(t.numero || t.telefono)}</span>
-                        <span class="who">${esc(t.operador || t.tipo || '')}</span>
+                        <span class="who">${esc(t.operador || t.tipo || '')}${t.estado ? ' · ' + esc(t.estado) : ''}</span>
                     </div>`).join('')}</div>`;
             },
             'telefonia-numero'(container, data) {
@@ -720,9 +740,11 @@
                         </div>
                         <div class="vc-result-body">
                             ${dataItem('Número', data.numero, true)}
+                            ${dataItem('Documento titular', data.documento)}
                             ${dataItem('Operador', data.operador)}
                             ${dataItem('Tipo de línea', data.tipo || data.tipoLinea)}
-                            ${dataItem('Fecha de activación', data.fechaActivacion)}
+                            ${dataItem('Fecha de activación', data.fechaActivacion || data.fecha_activacion)}
+                            ${dataItem('Departamento', data.departamento)}
                         </div>
                     </div>`;
             }
@@ -776,17 +798,28 @@
                 btn.classList.add('loading');
                 renderSkeleton(resultEl);
 
+                // El backend puede tardar hasta ~60s esperando al proveedor externo
+                // (ver EXTERNAL_API_TIMEOUT_MS en validarClientes.js). Se da un margen
+                // extra en el cliente (65s) para no cortar la petición antes que el propio backend.
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 65000);
+
                 try {
                     const url = buildUrl(endpoint, payload);
-                    const options = { method, credentials: 'same-origin', headers: { 'Content-Type': 'application/json' } };
+                    const options = {
+                        method, credentials: 'same-origin',
+                        headers: { 'Content-Type': 'application/json' },
+                        signal: controller.signal
+                    };
                     if (method === 'POST') options.body = JSON.stringify(payload);
 
                     const res = await fetch(url, options);
-                    const json = await res.json();
+                    let json = null;
+                    try { json = await res.json(); } catch (_) { /* respuesta no-JSON del backend */ }
 
-                    if (!res.ok || !json.success) {
-                        const isLimit = json.code === 'LIMIT_REACHED' || res.status === 403;
-                        renderError(resultEl, json.error || 'No se pudo completar la consulta.', isLimit);
+                    if (!res.ok || !json || !json.success) {
+                        const isLimit = json?.code === 'LIMIT_REACHED' || res.status === 403;
+                        renderError(resultEl, json?.error || 'No se pudo completar la consulta.', isLimit);
                         if (isLimit) showToast('Límite de consultas alcanzado', 'fa-triangle-exclamation');
                         return;
                     }
@@ -797,8 +830,13 @@
                     loadCupo();
                 } catch (err) {
                     console.error(err);
-                    renderError(resultEl, 'Ocurrió un error de conexión. Intenta nuevamente.');
+                    if (err.name === 'AbortError') {
+                        renderError(resultEl, 'El proveedor está demorando más de lo normal. Intenta nuevamente en unos segundos.');
+                    } else {
+                        renderError(resultEl, 'Ocurrió un error de conexión. Intenta nuevamente.');
+                    }
                 } finally {
+                    clearTimeout(timeoutId);
                     btn.disabled = false;
                     btn.classList.remove('loading');
                 }
