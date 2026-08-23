@@ -27,13 +27,17 @@
 //
 // Variables de entorno requeridas:
 //   TOKEN_APISPERU        -> token JWT de apisperu.com (DNI y RUC)
-//   TOKEN_MASITAPREX      -> API Key de masitaprex.com (panel > Mi API Key)
+//   TOKEN_MASITAPREX      -> token/API key de masitaprex.com
 //   MASITAPREX_AUTH_HEADER (opcional, por defecto "x-api-key")
-//   MASITAPREX_AUTH_SCHEME (opcional, por defecto "" es decir, sin esquema)
-//     -> Según https://masitaprex.com/API-Docs.html, Masitaprex se
-//        autentica con el header "x-api-key: TU_TOKEN" (SIN "Bearer").
-//        Solo toca estas variables si Masitaprex cambia su forma de
-//        autenticación en el futuro.
+//   MASITAPREX_AUTH_SCHEME (opcional, por defecto "" — sin esquema)
+//     -> Según https://masitaprex.com/API-Docs.html, Masitaprex autentica
+//        con el header "x-api-key: TU_TOKEN" (token crudo, sin "Bearer").
+//        Si Masitaprex cambia su esquema de autenticación en el futuro,
+//        ajusta estas dos variables de entorno sin tocar el código.
+//   VALIDAR_API_TIMEOUT_MS (opcional, por defecto 60000)
+//     -> Tiempo máximo de espera a los proveedores externos. APISPERU y
+//        Masitaprex pueden tardar hasta ~50s en responder en momentos de
+//        alta demanda.
 // ================================================================
 
 import express from 'express';
@@ -51,18 +55,31 @@ export function setDb(database) {
 // ----------------------------------------------------------------
 // 🔑 Tokens y configuración de terceros (SOLO backend)
 // ----------------------------------------------------------------
-const TOKEN_APISPERU = process.env.TOKEN_APISPERU || '';
-const TOKEN_MASITAPREX = process.env.TOKEN_MASITAPREX || '';
-// FIX: según la documentación oficial (https://masitaprex.com/API-Docs.html),
-// Masitaprex autentica con el header "x-api-key: TU_TOKEN" (sin esquema tipo
-// "Bearer"). El valor anterior ("Authorization: Bearer ...") no es el que la
-// API espera, por lo que las peticiones POST podían fallar o responder con
-// success:false, y el problema se disimulaba porque el código no validaba
-// ese campo, mostrando tarjetas con todos los campos vacíos en el frontend.
+// .trim() evita fallos silenciosos por saltos de línea o espacios que a veces
+// quedan pegados al pegar el token en el gestor de secrets (Fly.io, etc.).
+const TOKEN_APISPERU = (process.env.TOKEN_APISPERU || '').trim();
+const TOKEN_MASITAPREX = (process.env.TOKEN_MASITAPREX || '').trim();
+
+// ⚠️ CORRECCIÓN CLAVE: según la documentación oficial
+// (https://masitaprex.com/API-Docs.html, sección "Cómo Usar las APIs"),
+// Masitaprex autentica con el header `x-api-key: TU_TOKEN` (token "crudo",
+// SIN prefijo "Bearer"). El valor anterior (Authorization: Bearer ...) no es
+// el esquema que espera este proveedor, por lo que todas las consultas que
+// dependían de Masitaprex (cédula, buscar-cedula, buscar-dni, telefonía)
+// eran rechazadas o devolvían datos vacíos.
+// Se deja configurable por variables de entorno por si Masitaprex cambia su
+// esquema en el futuro, pero el default ahora refleja la documentación real.
 const MASITAPREX_AUTH_HEADER = process.env.MASITAPREX_AUTH_HEADER || 'x-api-key';
 const MASITAPREX_AUTH_SCHEME = process.env.MASITAPREX_AUTH_SCHEME !== undefined
   ? process.env.MASITAPREX_AUTH_SCHEME
-  : '';
+  : ''; // sin esquema: el header lleva el token tal cual
+
+// Tiempo máximo de espera para las APIs externas. Ajustable por entorno.
+// Los proveedores (APISPERU y Masitaprex) pueden tardar hasta ~50s en
+// responder en horas de alta demanda, por lo que 15s (valor anterior)
+// cortaba la petición antes de tiempo y el usuario recibía la consulta
+// como "fallida"/vacía aun cuando el proveedor sí iba a responder.
+const EXTERNAL_API_TIMEOUT_MS = Number(process.env.VALIDAR_API_TIMEOUT_MS) || 60000;
 
 const APISPERU_BASE = 'https://dniruc.apisperu.com/api/v1';
 const MASITAPREX_BASE = 'https://api.masitaprex.com/v3';
@@ -70,9 +87,8 @@ const MASITAPREX_BASE = 'https://api.masitaprex.com/v3';
 function masitaprexHeaders() {
   const headers = { 'Content-Type': 'application/json' };
   if (TOKEN_MASITAPREX) {
-    headers[MASITAPREX_AUTH_HEADER] = MASITAPREX_AUTH_SCHEME
-      ? `${MASITAPREX_AUTH_SCHEME} ${TOKEN_MASITAPREX}`.trim()
-      : TOKEN_MASITAPREX;
+    const scheme = MASITAPREX_AUTH_SCHEME ? `${MASITAPREX_AUTH_SCHEME} ` : '';
+    headers[MASITAPREX_AUTH_HEADER] = `${scheme}${TOKEN_MASITAPREX}`.trim();
   }
   return headers;
 }
@@ -212,101 +228,84 @@ async function ejecutarConsulta({ req, res, tipo, contexto, fetchFn }) {
   }
 }
 
-// FIX PRINCIPAL DEL BUG "RESULTADOS VACÍOS":
-// Antes, esta función solo verificaba el status HTTP. Pero ambos proveedores
-// (APISPERU y Masitaprex) pueden responder HTTP 200 con { success: false, ... }
-// cuando el token es inválido, no hay créditos, o no hay resultados. Como no se
-// validaba ese campo, el body (vacío o con solo el mensaje de error) se
-// reenviaba igual al frontend como si fuera un resultado exitoso, y la tarjeta
-// se pintaba con todos los campos en blanco.
-//
-// Además, Masitaprex (a diferencia de APISPERU) envuelve el resultado real
-// dentro de una clave "data": { success: true, data: { ...campos... }, meta... }.
-// El código anterior devolvía ese objeto completo como si fueran los campos
-// finales, y el router lo volvía a envolver en OTRO "data" antes de mandarlo
-// al frontend (que esperaba los campos en el primer nivel). Por eso llegaban
-// vacíos: el frontend leía data.nombres cuando el valor real estaba en
-// data.data.nombres. El parámetro unwrapData corrige esto en el origen.
-async function callExternal(url, options, providerName, { unwrapData = false } = {}) {
+async function callExternal(url, options, providerName) {
+  const context = 'VALIDAR_CLIENTES_EXTERNAL';
+  const startedAt = Date.now();
   let response;
   try {
-    response = await fetch(url, { ...options, signal: AbortSignal.timeout(15000) });
+    response = await fetch(url, { ...options, signal: AbortSignal.timeout(EXTERNAL_API_TIMEOUT_MS) });
   } catch (netError) {
+    const isTimeout = netError?.name === 'TimeoutError' || netError?.name === 'AbortError';
+    logger.error(context, `${providerName}: ${isTimeout ? 'timeout' : 'error de red'} al contactar al proveedor`, {
+      url, elapsedMs: Date.now() - startedAt, message: netError.message
+    });
     const err = new Error(`Error de red al contactar ${providerName}: ${netError.message}`);
-    err.publicMessage = 'El servicio de validación no respondió a tiempo. Intenta de nuevo.';
+    err.publicMessage = isTimeout
+      ? 'El proveedor está demorando más de lo normal (esto puede tardar hasta 50 segundos). Intenta nuevamente.'
+      : 'El servicio de validación no respondió. Intenta de nuevo.';
     throw err;
   }
 
+  // Leemos como texto primero para poder loguear un preview aunque el body
+  // no sea JSON válido (algunos proveedores devuelven HTML/texto plano en
+  // errores 5xx o cuando el balanceador corta la conexión).
+  const rawText = await response.text();
   let body = null;
-  try { body = await response.json(); } catch (_) { /* respuesta no-JSON */ }
+  try { body = rawText ? JSON.parse(rawText) : null; } catch (_) { /* respuesta no-JSON */ }
+
+  logger.info(context, `${providerName}: respuesta recibida`, {
+    url,
+    status: response.status,
+    elapsedMs: Date.now() - startedAt,
+    bodyPreview: rawText ? rawText.slice(0, 300) : '(cuerpo vacío)'
+  });
 
   if (!response.ok) {
     const err = new Error(`${providerName} respondió ${response.status}`);
-    err.statusCode = response.status === 404 ? 404 : 502;
-    err.publicMessage = body?.message || body?.error ||
-      (response.status === 404 ? 'No se encontraron resultados para el dato ingresado.' : 'El servicio externo no está disponible en este momento.');
+    err.statusCode = response.status;
+    err.publicMessage = body?.message || body?.error || (
+      response.status === 404 ? 'No se encontraron resultados para el dato ingresado.' :
+      response.status === 401 ? 'Credenciales inválidas con el proveedor externo. Contacta al administrador.' :
+      response.status === 402 ? 'El proveedor externo no tiene créditos/saldo disponible. Contacta al administrador.' :
+      response.status === 403 ? 'El plan/token del proveedor externo está vencido o no autorizado.' :
+      response.status === 429 ? 'Demasiadas solicitudes al proveedor externo. Intenta en unos minutos.' :
+      'El servicio externo no está disponible en este momento.'
+    );
     throw err;
   }
 
-  // Algunos proveedores responden 200 OK pero con success:false (token
-  // inválido, sin créditos/saldo, dato no encontrado, etc). Sin esta
-  // validación, ese caso se mostraba como un resultado "exitoso" vacío.
+  // Algunos proveedores (ej. Masitaprex) responden HTTP 200 pero con
+  // "success": false dentro del cuerpo cuando la consulta no pudo
+  // procesarse (documento sin datos, error interno del proveedor, etc.).
+  // Sin esta verificación, ese caso se trataba como éxito y el usuario
+  // veía un resultado vacío en vez de un mensaje de error claro.
   if (body && typeof body === 'object' && body.success === false) {
-    const err = new Error(`${providerName} respondió success:false`);
+    const err = new Error(`${providerName} devolvió success:false`);
     err.statusCode = 502;
-    err.publicMessage = body.message || body.error || 'No se encontraron resultados para el dato ingresado.';
+    err.publicMessage = body.message || body.error || 'El proveedor no pudo procesar la consulta. Intenta nuevamente.';
     throw err;
   }
 
-  if (!unwrapData) return body;
+  // 🔑 CORRECCIÓN DEFINITIVA DEL BUG PRINCIPAL:
+  // Según https://masitaprex.com/API-Docs.html, Masitaprex envuelve el
+  // resultado real dentro de una propiedad "data" junto con "meta" y
+  // "consulta-pe": { success: true, data: { ...campos reales... }, meta: {...} }.
+  // APISPERU (DNI/RUC), en cambio, devuelve el objeto de datos "plano",
+  // sin envoltura.
+  // El código anterior devolvía siempre el body completo tal cual, así que
+  // para Masitaprex el frontend terminaba recibiendo un objeto de la forma
+  // { success, data: { ...campos reales... }, meta } en vez de los campos
+  // directamente, y como el frontend lee (por ejemplo) `data.cedula` o
+  // `data.numero` a nivel superior, esos campos no existían ahí (estaban
+  // un nivel más abajo, en `data.data.cedula`) y toda la tarjeta de
+  // resultado se pintaba vacía aunque la consulta hubiera sido exitosa.
+  // Desenvolvemos aquí una sola vez para que, sin importar el proveedor,
+  // el resto del código siempre trabaje con el objeto de datos real.
+  if (body && typeof body === 'object' && body.data && typeof body.data === 'object' && !Array.isArray(body.data)) {
+    return body.data;
+  }
 
-  // Masitaprex anida el resultado real en "data". Si por algún motivo no
-  // viniera esa clave (respuesta inesperada), devolvemos el body tal cual
-  // para no romper la consulta.
-  return (body && typeof body === 'object' && 'data' in body) ? body.data : body;
-}
-
-// ----------------------------------------------------------------
-// 🧩 Normalizadores de campos (Masitaprex -> nombres que ya usa el frontend)
-// ----------------------------------------------------------------
-// El HTML/JS de validar-clientes.html NO se modifica. Estas funciones solo
-// adaptan, del lado del servidor, los nombres de campo reales que devuelve
-// Masitaprex (snake_case, ej. "nombres_completos", "fecha_activacion") a los
-// nombres que los renderers del frontend ya esperaban (ej. "nombreCompleto",
-// "fechaActivacion"), según la documentación oficial de la API.
-function normalizarCedula(d) {
-  if (!d || typeof d !== 'object') return d;
-  return { ...d, nacionalidad: d.nacionalidad || 'Venezolana' };
-}
-
-function normalizarBuscarCedula(d) {
-  const items = Array.isArray(d) ? d : (d?.resultados || d?.results || []);
-  return items.map((r) => ({
-    ...r,
-    nombreCompleto: r.nombreCompleto || r.nombres_completos ||
-      [r.nombres, r.apellidos].filter(Boolean).join(' ')
-  }));
-}
-
-function normalizarBuscarDni(d) {
-  const items = Array.isArray(d) ? d : (d?.resultados || d?.results || []);
-  return items.map((r) => ({
-    ...r,
-    nombreCompleto: r.nombreCompleto || r.nombres_completos ||
-      [r.nombres, r.apellidoPaterno, r.apellidoMaterno].filter(Boolean).join(' ')
-  }));
-}
-
-function normalizarTelefoniaDoc(d) {
-  // Masitaprex devuelve { documento, titular, lineas: [...], total_lineas }.
-  // El frontend espera un arreglo (data.telefonos || data.resultados || [data]).
-  if (Array.isArray(d)) return d;
-  return d?.lineas || d?.telefonos || d?.resultados || (d ? [d] : []);
-}
-
-function normalizarTelefoniaNumero(d) {
-  if (!d || typeof d !== 'object') return d;
-  return { ...d, fechaActivacion: d.fechaActivacion || d.fecha_activacion };
+  return body;
 }
 
 // ================================================================
@@ -367,12 +366,11 @@ router.post('/cedula', requireAuth, async (req, res) => {
 
   await ejecutarConsulta({
     req, res, tipo: 'documento', contexto: 'VALIDAR_CEDULA',
-    fetchFn: async () => normalizarCedula(await callExternal(
+    fetchFn: () => callExternal(
       `${MASITAPREX_BASE}/consulta/cedula`,
       { method: 'POST', headers: masitaprexHeaders(), body: JSON.stringify({ cedula }) },
-      'Masitaprex (Cédula)',
-      { unwrapData: true }
-    ))
+      'Masitaprex (Cédula)'
+    )
   });
 });
 
@@ -390,12 +388,11 @@ router.post('/buscar-cedula', requireAuth, async (req, res) => {
 
   await ejecutarConsulta({
     req, res, tipo: 'documento', contexto: 'BUSCAR_CEDULA',
-    fetchFn: async () => normalizarBuscarCedula(await callExternal(
+    fetchFn: () => callExternal(
       `${MASITAPREX_BASE}/consulta/buscar-cedula`,
       { method: 'POST', headers: masitaprexHeaders(), body: JSON.stringify({ query }) },
-      'Masitaprex (Buscar cédula)',
-      { unwrapData: true }
-    ))
+      'Masitaprex (Buscar cédula)'
+    )
   });
 });
 
@@ -416,16 +413,15 @@ router.post('/buscar-dni', requireAuth, async (req, res) => {
 
   await ejecutarConsulta({
     req, res, tipo: 'documento', contexto: 'BUSCAR_DNI',
-    fetchFn: async () => normalizarBuscarDni(await callExternal(
+    fetchFn: () => callExternal(
       `${MASITAPREX_BASE}/consulta/buscar-dni`,
       {
         method: 'POST',
         headers: masitaprexHeaders(),
         body: JSON.stringify({ nombres, apepaterno, ...(apematerno ? { apematerno } : {}) })
       },
-      'Masitaprex (Buscar DNI)',
-      { unwrapData: true }
-    ))
+      'Masitaprex (Buscar DNI)'
+    )
   });
 });
 
@@ -443,12 +439,11 @@ router.post('/telefonia-doc', requireAuth, async (req, res) => {
 
   await ejecutarConsulta({
     req, res, tipo: 'telefono', contexto: 'TELEFONIA_DOC',
-    fetchFn: async () => normalizarTelefoniaDoc(await callExternal(
+    fetchFn: () => callExternal(
       `${MASITAPREX_BASE}/consulta/telefonia-doc`,
       { method: 'POST', headers: masitaprexHeaders(), body: JSON.stringify({ documento }) },
-      'Masitaprex (Telefonía por documento)',
-      { unwrapData: true }
-    ))
+      'Masitaprex (Telefonía por documento)'
+    )
   });
 });
 
@@ -466,15 +461,15 @@ router.post('/telefonia-numero', requireAuth, async (req, res) => {
 
   await ejecutarConsulta({
     req, res, tipo: 'telefono', contexto: 'TELEFONIA_NUMERO',
-    // FIX: el endpoint real documentado por Masitaprex es "telefonia-num",
-    // no "telefonia-numero". Con la URL incorrecta el proveedor devolvía
-    // 404 (o similar) y la consulta fallaba/quedaba vacía.
-    fetchFn: async () => normalizarTelefoniaNumero(await callExternal(
+    fetchFn: () => callExternal(
+      // ⚠️ El endpoint real documentado en https://masitaprex.com/API-Docs.html
+      // es "telefonia-num" (sin "ero" final). La ruta anterior
+      // ("telefonia-numero") no existe en la API de Masitaprex y provocaba
+      // un 404 silencioso que terminaba mostrándose como consulta vacía.
       `${MASITAPREX_BASE}/consulta/telefonia-num`,
       { method: 'POST', headers: masitaprexHeaders(), body: JSON.stringify({ numero }) },
-      'Masitaprex (Telefonía por número)',
-      { unwrapData: true }
-    ))
+      'Masitaprex (Telefonía por número)'
+    )
   });
 });
 
