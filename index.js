@@ -11,6 +11,7 @@ import { Resend } from "resend";
 import helmet from "helmet";
 import { helmetConfig, corsAllowedOrigins } from './cspConfig.js';
 import plantillasRouter, { setDb as setPlantillasDb } from './plantillas.js';
+import validarClientesRouter, { setDb as setValidarClientesDb } from './validarClientes.js';
 
 // Importar módulos de seguridad y negocios
 import { 
@@ -84,6 +85,10 @@ if (serviceAccount) {
   initFirebase(serviceAccount).then(() => {
     // Conectamos la instancia de Firestore al router de plantillas/comprobantes
     setPlantillasDb(db);
+    // Conectamos la instancia de Firestore al router de validación de clientes
+    // (DNI, RUC, cédula, teléfonos y cupo). Sin esta línea el router queda
+    // "vivo" pero sin base de datos, y sus rutas responderían 503.
+    setValidarClientesDb(db);
   }).catch(err => {
     logger.error('FIREBASE', 'Error crítico en inicialización asíncrona', err);
   });
@@ -109,6 +114,16 @@ const mpClient = MERCADOPAGO_ACCESS_TOKEN ? new MercadoPagoConfig({
 
 // Rutas del generador de boletas/facturas (plantillas, vista previa y PDF)
 app.use('/api/comprobantes', plantillasRouter);
+
+// Rutas de validación de clientes: DNI/RUC (APISPERU), cédula venezolana y
+// telefonía (MASITAPREX), además del endpoint de cupo (/api/validar/cupo)
+// que alimenta la barra de "consultas disponibles" en validar-clientes.html.
+// IMPORTANTE: debe montarse ANTES de app.use(serveHtmlWithGA) / express.static,
+// de lo contrario las peticiones a /api/validar/* caen en el catch-all de
+// archivos estáticos y el servidor responde 404 en HTML en vez de JSON
+// (esto es lo que producía el "Ocurrió un error de conexión. Intenta
+// nuevamente." al validar DNI/RUC, y el cupo vacío en pantalla).
+app.use('/api/validar', validarClientesRouter);
 
 // Nombres comerciales de cada plan, usados solo para mostrarlos en la UI
 const PLAN_NOMBRES = {
