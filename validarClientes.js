@@ -67,6 +67,27 @@
 //    devolviendo error justo cuando la respuesta real venía en camino.
 //    Se sube a 60s (configurable) + 1 reintento automático ante fallos de
 //    red/timeout.
+//
+// 5) Tokens sin "trim()": TOKEN_APISPERU y TOKEN_MASITAPREX se usaban tal
+//    cual llegaban de las variables de entorno. Un espacio o salto de línea
+//    de más en el secret (común al copiar/pegar o al setearlo con
+//    "fly secrets set" desde archivo) invalida el token silenciosamente:
+//    la API responde HTTP 200 con success:false en vez de un 401 explícito.
+//    Esto coincide exactamente con el log real observado en producción:
+//    "[ERROR] [VALIDAR_DNI] Error consultando proveedor externo Error:
+//    APISPERU (DNI) devolvió success:false - Stack: undefined". Se corrige
+//    aplicando .trim() a ambos tokens (igual que ya se hacía con el token de
+//    Mercado Pago en index.js) y se agrega un log de arranque que confirma
+//    si el token quedó cargado y con qué longitud (nunca su valor).
+//
+// 6) Logging insuficiente ante success:false: el mensaje real devuelto por
+//    el proveedor (ej. "Token inválido o vencido") se descartaba y solo se
+//    logueaba el texto genérico "devolvió success:false", haciendo
+//    imposible diagnosticar la causa real desde los logs de Fly.io. Ahora
+//    ese mensaje se propaga (providerMessage) y se registra explícitamente
+//    en cada error, además de distinguir automáticamente un problema de
+//    configuración/token (HTTP 502 + aviso a soporte) de un simple
+//    "documento no encontrado" (HTTP 404).
 // ================================================================
 
 import express from 'express';
@@ -84,8 +105,35 @@ export function setDb(database) {
 // ----------------------------------------------------------------
 // 🔑 Tokens y configuración de terceros (SOLO backend)
 // ----------------------------------------------------------------
-const TOKEN_APISPERU = process.env.TOKEN_APISPERU || '';
-const TOKEN_MASITAPREX = process.env.TOKEN_MASITAPREX || '';
+// 🐞 BUG ADICIONAL CORREGIDO (causaba "success:false" en TODAS las consultas
+// de DNI/RUC, ver log [ERROR] [VALIDAR_DNI] ... devolvió success:false):
+//
+// 5) Tokens sin "trim()": si el secret TOKEN_APISPERU (o TOKEN_MASITAPREX) se
+//    configuró en Fly.io con un espacio, tabulador o salto de línea de más al
+//    final (algo muy común al copiar/pegar el valor o al setearlo desde un
+//    archivo con "fly secrets set"), el token enviado a la API externa deja
+//    de coincidir con el registrado en su plataforma. La API responde
+//    HTTP 200 con { success:false, message:'Token inválido' } en vez de un
+//    401 claro, por lo que el síntoma visible es justamente el que aparece
+//    en los logs: la consulta "falla" sin más explicación. index.js ya
+//    aplicaba .trim() al token de Mercado Pago por esta misma razón; aquí no
+//    se estaba haciendo. Se corrige para ambos proveedores.
+const TOKEN_APISPERU = (process.env.TOKEN_APISPERU || '').trim();
+const TOKEN_MASITAPREX = (process.env.TOKEN_MASITAPREX || '').trim();
+
+// Diagnóstico de arranque (NUNCA se loguea el valor del token, solo si está
+// presente y su longitud, para poder detectar en los logs de Fly.io casos
+// como "el secret quedó vacío" o "el secret trae espacios" sin exponerlo).
+if (!TOKEN_APISPERU) {
+  logger.warn('VALIDAR_CLIENTES_CONFIG', 'TOKEN_APISPERU no está configurado: las consultas de DNI/RUC fallarán con 500.');
+} else {
+  logger.info('VALIDAR_CLIENTES_CONFIG', 'TOKEN_APISPERU cargado', { length: TOKEN_APISPERU.length });
+}
+if (!TOKEN_MASITAPREX) {
+  logger.warn('VALIDAR_CLIENTES_CONFIG', 'TOKEN_MASITAPREX no está configurado: cédula/telefonía fallarán con 500.');
+} else {
+  logger.info('VALIDAR_CLIENTES_CONFIG', 'TOKEN_MASITAPREX cargado', { length: TOKEN_MASITAPREX.length });
+}
 // Según la documentación oficial (masitaprex.com/API-Docs.html), el token
 // se envía SIEMPRE como header "x-api-key", sin esquema/prefijo.
 const MASITAPREX_AUTH_HEADER = process.env.MASITAPREX_AUTH_HEADER || 'x-api-key';
@@ -237,7 +285,16 @@ async function ejecutarConsulta({ req, res, tipo, contexto, fetchFn }) {
   } catch (error) {
     // La consulta al proveedor externo falló: devolvemos el cupo consumido
     await revertirCupo(req.userRef, tipo);
-    logger.error(contexto, 'Error consultando proveedor externo', { uid: req.uid, message: error.message });
+    // Se registra el mensaje real devuelto por el proveedor (providerMessage)
+    // además del error.message genérico, para poder diagnosticar en Fly.io
+    // logs sin tener que reproducir el problema manualmente.
+    logger.error(contexto, 'Error consultando proveedor externo', {
+      uid: req.uid,
+      message: error.message,
+      providerMessage: error.providerMessage || null,
+      httpStatus: error.httpStatus || null,
+      isConfigError: !!error.isConfigError
+    });
     const status = error.statusCode || 502;
     return res.status(status).json({
       success: false,
@@ -287,6 +344,9 @@ async function attemptFetch(url, options, providerName) {
   if (!response.ok) {
     const err = new Error(`${providerName} respondió ${response.status}`);
     err.statusCode = response.status === 404 ? 404 : (response.status === 401 || response.status === 402) ? 502 : 502;
+    err.httpStatus = response.status;
+    err.providerMessage = rawBody?.message || rawBody?.error || null;
+    err.isConfigError = response.status === 401 || response.status === 402;
     err.publicMessage = rawBody?.message || rawBody?.error ||
       (response.status === 404 ? 'No se encontraron resultados para el dato ingresado.' :
        response.status === 401 ? 'El servicio externo rechazó la autenticación. Contacta al soporte.' :
@@ -296,11 +356,31 @@ async function attemptFetch(url, options, providerName) {
   }
 
   // Algunos proveedores devuelven HTTP 200 pero success:false en el body
-  // (por ejemplo, "no encontrado" o parámetros no válidos aceptados a medias).
+  // (por ejemplo, "no encontrado", token inválido/vencido, o sin créditos).
+  // IMPORTANTE: antes esto se logueaba solo como "devolvió success:false",
+  // sin el motivo real (rawBody.message), lo que hacía imposible diagnosticar
+  // el problema desde los logs de producción. Ahora el mensaje/código real
+  // del proveedor queda adjunto al error (providerMessage/providerRaw) para
+  // que ejecutarConsulta() lo registre con logger.error.
   if (rawBody && typeof rawBody === 'object' && rawBody.success === false) {
-    const err = new Error(`${providerName} devolvió success:false`);
+    const providerMessage = rawBody.message || rawBody.error || rawBody.msg || null;
+    const err = new Error(`${providerName} devolvió success:false${providerMessage ? `: ${providerMessage}` : ''}`);
     err.statusCode = 404;
-    err.publicMessage = rawBody.message || rawBody.error || 'No se encontraron resultados para el dato ingresado.';
+    err.providerMessage = providerMessage;
+    err.providerRaw = rawBody;
+    // Mensajes típicos de APISPERU que indican un problema de CONFIGURACIÓN
+    // (token inválido/vencido o sin créditos) en vez de "dato no encontrado".
+    // Distinguirlos evita decirle al usuario "no se encontraron resultados"
+    // cuando en realidad el servicio está mal configurado.
+    const msgLower = (providerMessage || '').toString().toLowerCase();
+    const esProblemaDeToken = /token|autoriza|credit|plan|limite|límite/.test(msgLower);
+    if (esProblemaDeToken) {
+      err.statusCode = 502;
+      err.publicMessage = 'El servicio de validación no está disponible en este momento. Contacta al soporte.';
+      err.isConfigError = true;
+    } else {
+      err.publicMessage = providerMessage || 'No se encontraron resultados para el dato ingresado.';
+    }
     throw err;
   }
 
@@ -345,7 +425,7 @@ router.get('/dni/:dni', requireAuth, async (req, res) => {
     req, res, tipo: 'documento', contexto: 'VALIDAR_DNI',
     fetchFn: () => callExternal(
       `${APISPERU_BASE}/dni/${dni}?token=${encodeURIComponent(TOKEN_APISPERU)}`,
-      { method: 'GET' },
+      { method: 'GET', headers: { 'Accept': 'application/json' } },
       'APISPERU (DNI)'
     )
   });
@@ -367,7 +447,7 @@ router.get('/ruc/:ruc', requireAuth, async (req, res) => {
     req, res, tipo: 'documento', contexto: 'VALIDAR_RUC',
     fetchFn: () => callExternal(
       `${APISPERU_BASE}/ruc/${ruc}?token=${encodeURIComponent(TOKEN_APISPERU)}`,
-      { method: 'GET' },
+      { method: 'GET', headers: { 'Accept': 'application/json' } },
       'APISPERU (RUC)'
     )
   });
