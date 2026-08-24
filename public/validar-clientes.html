@@ -601,11 +601,8 @@
         }
 
         function renderSkeleton(container) {
-            // Los proveedores externos (APISPERU/Masitaprex) pueden tardar hasta
-            // ~50 segundos en responder en horas de alta demanda, así que se
-            // avisa para que el usuario no piense que la consulta se colgó.
             container.innerHTML = `<div class="vc-skeleton">${Array(6).fill('<div class="bar"></div>').join('')}</div>
-                <div class="vc-hint" style="text-align:center;margin-top:10px;">Consultando con el proveedor externo… esto puede tardar hasta 50 segundos.</div>`;
+                <div class="vc-hint" style="text-align:center;margin-top:10px;"><i class="fas fa-circle-info"></i> Esta consulta puede tardar hasta 50 segundos. Por favor espera, no cierres ni recargues la página.</div>`;
         }
 
         function renderError(container, message, isLimit = false) {
@@ -663,6 +660,8 @@
                     </div>`;
             },
             cedula(container, data) {
+                // Masitaprex (POST /consulta/cedula) responde: cedula, nombres, apellidos,
+                // fecha_nacimiento, sexo, estado_civil, lugar_nacimiento, direccion, estado, fecha_expedicion
                 const nombreCompleto = data.nombreCompleto || [data.nombres, data.apellidos].filter(Boolean).join(' ') || 'Persona encontrada';
                 container.innerHTML = `
                     <div class="vc-result-card">
@@ -675,9 +674,11 @@
                             ${dataItem('Nombres', data.nombres)}
                             ${dataItem('Apellidos', data.apellidos)}
                             ${dataItem('Estado', data.estado)}
-                            ${dataItem('Fecha de nacimiento', data.fecha_nacimiento)}
                             ${dataItem('Estado civil', data.estado_civil)}
+                            ${dataItem('Sexo', data.sexo)}
+                            ${dataItem('Fecha de nacimiento', data.fecha_nacimiento)}
                             ${dataItem('Lugar de nacimiento', data.lugar_nacimiento)}
+                            ${dataItem('Fecha de expedición', data.fecha_expedicion)}
                             <div class="vc-data-item" style="grid-column:1/-1;">
                                 <div class="k">Dirección</div>
                                 <div class="v">${esc(data.direccion)}</div>
@@ -686,6 +687,8 @@
                     </div>`;
             },
             'buscar-cedula'(container, data) {
+                // Masitaprex (POST /consulta/buscar-cedula) responde:
+                // { busqueda, resultados: [{ cedula, nombres_completos, fecha_nacimiento, sexo, estado }], total }
                 const items = Array.isArray(data) ? data : (data.resultados || data.results || []);
                 if (!items.length) {
                     container.innerHTML = `<div class="vc-empty"><i class="fas fa-user-slash"></i>No se encontraron coincidencias para ese nombre.</div>`;
@@ -693,11 +696,13 @@
                 }
                 container.innerHTML = `<div class="vc-list-results">${items.map(p => `
                     <div class="vc-list-item">
-                        <span class="who">${esc(p.nombres_completos || p.nombreCompleto || [p.nombres, p.apellidos].filter(Boolean).join(' '))}</span>
+                        <span class="who">${esc(p.nombreCompleto || p.nombres_completos || [p.nombres, p.apellidos].filter(Boolean).join(' '))}</span>
                         <span class="doc">${esc(p.cedula)}</span>
                     </div>`).join('')}</div>`;
             },
             'buscar-dni'(container, data) {
+                // Masitaprex (POST /consulta/buscar-dni) responde:
+                // { busqueda, resultados: [{ dni, nombres_completos, fecha_nacimiento, departamento, exactitud }], total }
                 const items = Array.isArray(data) ? data : (data.resultados || data.results || [data]);
                 if (!items.length || !items[0]) {
                     container.innerHTML = `<div class="vc-empty"><i class="fas fa-user-slash"></i>No se encontraron coincidencias para ese nombre.</div>`;
@@ -705,33 +710,30 @@
                 }
                 container.innerHTML = `<div class="vc-list-results">${items.map(p => `
                     <div class="vc-list-item">
-                        <span class="who">${esc(p.nombres_completos || p.nombreCompleto || [p.nombres, p.apellidoPaterno, p.apellidoMaterno].filter(Boolean).join(' '))}</span>
-                        <span class="doc">${esc(p.dni)}</span>
+                        <span class="who">${esc(p.nombreCompleto || p.nombres_completos || [p.nombres, p.apellidoPaterno, p.apellidoMaterno].filter(Boolean).join(' '))}</span>
+                        <span class="doc">${esc(p.dni)}${p.departamento ? ' · ' + esc(p.departamento) : ''}</span>
                     </div>`).join('')}</div>`;
             },
             'telefonia-doc'(container, data) {
-                // Masitaprex devuelve las líneas dentro de "lineas" (ver
-                // https://masitaprex.com/API-Docs.html). Se mantienen los
-                // fallbacks anteriores por compatibilidad con otras formas
-                // de respuesta.
+                // Masitaprex (POST /consulta/telefonia-doc) responde:
+                // { documento, titular, lineas: [{ numero, operador, tipo, estado, fecha_activacion, portabilidad }], total_lineas }
                 const items = Array.isArray(data) ? data : (data.lineas || data.telefonos || data.resultados || [data]);
                 if (!items.length || !items[0]) {
                     container.innerHTML = `<div class="vc-empty"><i class="fas fa-phone-slash"></i>No se encontraron números asociados a este documento.</div>`;
                     return;
                 }
-                const titularHtml = (!Array.isArray(data) && data.titular)
-                    ? `<div class="vc-result-head" style="margin-bottom:10px;">
-                            <span class="name">${esc(data.titular)}</span>
-                            ${data.documento ? `<span class="vc-status-pill ok">${esc(data.documento)}</span>` : ''}
-                       </div>`
+                const titularHtml = data.titular
+                    ? `<div class="vc-data-item" style="grid-column:1/-1;margin-bottom:10px;"><div class="k">Titular</div><div class="v">${esc(data.titular)}</div></div>`
                     : '';
-                container.innerHTML = titularHtml + `<div class="vc-list-results">${items.map(t => `
+                container.innerHTML = `${titularHtml}<div class="vc-list-results">${items.map(t => `
                     <div class="vc-list-item">
                         <span class="doc"><i class="fas fa-phone" style="margin-right:8px;color:var(--emerald);"></i>${esc(t.numero || t.telefono)}</span>
-                        <span class="who">${esc(t.operador || t.tipo || '')}${t.estado ? ' · ' + esc(t.estado) : ''}</span>
+                        <span class="who">${esc(t.operador || '')}${t.tipo ? ' · ' + esc(t.tipo) : ''}${t.estado ? ' · ' + esc(t.estado) : ''}</span>
                     </div>`).join('')}</div>`;
             },
             'telefonia-numero'(container, data) {
+                // Masitaprex (POST /consulta/telefonia-num) responde:
+                // { numero, titular, documento, operador, tipo, estado, fecha_activacion, portabilidad, departamento }
                 container.innerHTML = `
                     <div class="vc-result-card">
                         <div class="vc-result-head">
@@ -740,11 +742,11 @@
                         </div>
                         <div class="vc-result-body">
                             ${dataItem('Número', data.numero, true)}
-                            ${dataItem('Documento titular', data.documento)}
+                            ${dataItem('Documento titular', data.documento, true)}
                             ${dataItem('Operador', data.operador)}
                             ${dataItem('Tipo de línea', data.tipo || data.tipoLinea)}
-                            ${dataItem('Fecha de activación', data.fechaActivacion || data.fecha_activacion)}
                             ${dataItem('Departamento', data.departamento)}
+                            ${dataItem('Fecha de activación', data.fecha_activacion || data.fechaActivacion)}
                         </div>
                     </div>`;
             }
@@ -798,28 +800,17 @@
                 btn.classList.add('loading');
                 renderSkeleton(resultEl);
 
-                // El backend puede tardar hasta ~60s esperando al proveedor externo
-                // (ver EXTERNAL_API_TIMEOUT_MS en validarClientes.js). Se da un margen
-                // extra en el cliente (65s) para no cortar la petición antes que el propio backend.
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 65000);
-
                 try {
                     const url = buildUrl(endpoint, payload);
-                    const options = {
-                        method, credentials: 'same-origin',
-                        headers: { 'Content-Type': 'application/json' },
-                        signal: controller.signal
-                    };
+                    const options = { method, credentials: 'same-origin', headers: { 'Content-Type': 'application/json' } };
                     if (method === 'POST') options.body = JSON.stringify(payload);
 
                     const res = await fetch(url, options);
-                    let json = null;
-                    try { json = await res.json(); } catch (_) { /* respuesta no-JSON del backend */ }
+                    const json = await res.json();
 
-                    if (!res.ok || !json || !json.success) {
-                        const isLimit = json?.code === 'LIMIT_REACHED' || res.status === 403;
-                        renderError(resultEl, json?.error || 'No se pudo completar la consulta.', isLimit);
+                    if (!res.ok || !json.success) {
+                        const isLimit = json.code === 'LIMIT_REACHED' || res.status === 403;
+                        renderError(resultEl, json.error || 'No se pudo completar la consulta.', isLimit);
                         if (isLimit) showToast('Límite de consultas alcanzado', 'fa-triangle-exclamation');
                         return;
                     }
@@ -830,13 +821,8 @@
                     loadCupo();
                 } catch (err) {
                     console.error(err);
-                    if (err.name === 'AbortError') {
-                        renderError(resultEl, 'El proveedor está demorando más de lo normal. Intenta nuevamente en unos segundos.');
-                    } else {
-                        renderError(resultEl, 'Ocurrió un error de conexión. Intenta nuevamente.');
-                    }
+                    renderError(resultEl, 'Ocurrió un error de conexión. Intenta nuevamente.');
                 } finally {
-                    clearTimeout(timeoutId);
                     btn.disabled = false;
                     btn.classList.remove('loading');
                 }
