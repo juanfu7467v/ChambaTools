@@ -1010,9 +1010,19 @@ async function arrancarServidor() {
       await new Promise(resolve => setTimeout(resolve, 1500));
     }
 
-    app.listen(PORT, "0.0.0.0", () => {
+    const server = app.listen(PORT, "0.0.0.0", () => {
       logger.info('SERVER', `🚀 Servidor iniciado con base de datos vinculada en puerto ${PORT}`, { version: '3.6.1' });
     });
+
+    // Las consultas de /api/validar/* (DNI, RUC, cédula, telefonía) pueden
+    // tardar hasta ~50-60s en proveedores externos (APISPERU/Masitaprex).
+    // Se amplían los timeouts del servidor HTTP para no cortar esas
+    // respuestas antes de tiempo (los valores por defecto de Node ya son
+    // generosos, pero se fijan explícitamente para evitar sorpresas según
+    // el entorno de despliegue).
+    server.requestTimeout = 120000;   // 120s máximo por request completa
+    server.headersTimeout = 125000;   // debe ser mayor que requestTimeout
+    server.keepAliveTimeout = 65000;  // > timeout típico de proxies (fly.dev, etc.)
   } catch (error) {
     logger.error('SERVER', '❌ Fallo crítico: No se pudo arrancar el servidor por error en Firebase', error);
     process.exit(1);
