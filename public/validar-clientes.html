@@ -359,9 +359,131 @@
         .footer-content p { font-size: .78rem; color: var(--text-subtle); line-height: 1.6; margin-bottom: 8px; margin-top: 20px; }
         .footer-content a { color: var(--emerald-light); text-decoration: none; font-weight: 600; }
         .footer-content a:hover { color: var(--emerald); }
+
+        /* ═══════════════════════════════════════════
+           PANTALLA 1 — BIENVENIDA
+        ═══════════════════════════════════════════ */
+        #welcome-screen {
+            position: fixed; inset: 0; z-index: 500;
+            display: flex; align-items: center; justify-content: center;
+            min-height: 100vh; min-height: 100dvh;
+            overflow-y: auto; overflow-x: hidden;
+            background: var(--navy-deep);
+            padding: 32px 20px;
+            transition: opacity .4s ease, visibility .4s ease;
+        }
+        #welcome-screen.fade-out { opacity: 0; pointer-events: none; }
+
+        .welcome-3d-scene { position: absolute; inset: 0; overflow: hidden; z-index: 0; perspective: 1000px; }
+        .welcome-3d-scene .bg-radial {
+            position: absolute; inset: 0;
+            background: radial-gradient(ellipse 70% 55% at 50% 8%, rgba(0,200,83,.14) 0%, transparent 60%),
+                        radial-gradient(ellipse 60% 50% at 85% 90%, rgba(255,215,0,.08) 0%, transparent 65%),
+                        var(--navy-deep);
+        }
+        .grid-floor {
+            position: absolute; left: -60%; right: -60%; bottom: -8%; height: 65%;
+            background-image:
+                linear-gradient(rgba(0,200,83,.4) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,200,83,.4) 1px, transparent 1px);
+            background-size: 64px 64px;
+            transform: rotateX(78deg);
+            transform-origin: bottom center;
+            -webkit-mask-image: linear-gradient(to top, black, transparent 88%);
+            mask-image: linear-gradient(to top, black, transparent 88%);
+            opacity: .55;
+            animation: floorMove 7s linear infinite;
+        }
+        @keyframes floorMove { from { background-position: 0 0, 0 0; } to { background-position: 0 64px, 64px 0; } }
+        .w-orb { position: absolute; border-radius: 50%; filter: blur(70px); pointer-events: none; }
+        .w-orb.o1 { width: 46vw; height: 46vw; max-width: 480px; max-height: 480px; top: -14%; left: -10%; background: radial-gradient(circle, rgba(0,200,83,.4) 0%, transparent 70%); animation: floatAmbient 9s ease-in-out infinite; }
+        .w-orb.o2 { width: 40vw; height: 40vw; max-width: 420px; max-height: 420px; bottom: -16%; right: -10%; background: radial-gradient(circle, rgba(255,215,0,.24) 0%, transparent 70%); animation: floatAmbient 11s ease-in-out infinite reverse; }
+        .w-shape { position: absolute; border-radius: 22px; border: 1px solid rgba(255,255,255,.09); background: linear-gradient(145deg, rgba(255,255,255,.05), rgba(255,255,255,.01)); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); box-shadow: 0 20px 40px rgba(0,0,0,.35); animation: floatShape 7s ease-in-out infinite; }
+        .w-shape.s1 { width: 92px; height: 92px; top: 16%; right: 12%; transform: rotate(20deg); animation-delay: 0s; }
+        .w-shape.s2 { width: 60px; height: 60px; bottom: 22%; left: 8%; transform: rotate(-14deg); border-radius: 16px; animation-delay: 1.4s; }
+        .w-shape.s3 { width: 46px; height: 46px; top: 62%; right: 20%; border-radius: 50%; animation-delay: 2.6s; }
+        @keyframes floatShape { 0%,100% { transform: translateY(0) rotate(var(--r,0deg)); } 50% { transform: translateY(-18px) rotate(var(--r,0deg)); } }
+        @media (max-width: 640px) { .w-shape { display: none; } }
+
+        .welcome-content { position: relative; z-index: 2; max-width: 720px; width: 100%; text-align: center; display: flex; flex-direction: column; align-items: center; }
+        .welcome-badge { display: inline-flex; align-items: center; gap: 8px; padding: 8px 18px; border-radius: 999px; background: rgba(0,200,83,0.1); border: 1px solid var(--border-active); color: var(--emerald-light); font-size: .78rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; margin-bottom: 22px; }
+        .welcome-content h1 { font-family: var(--font-display); font-weight: 800; font-size: clamp(2rem, 6vw, 3.2rem); color: var(--white); line-height: 1.15; letter-spacing: -0.02em; }
+        .welcome-content h1 em { font-style: normal; color: var(--emerald); text-shadow: 0 0 40px var(--emerald-glow); }
+        .welcome-content > p { margin-top: 18px; font-size: clamp(.95rem, 2vw, 1.1rem); color: var(--text-muted); line-height: 1.65; max-width: 560px; }
+        .welcome-cta {
+            margin-top: 34px; display: inline-flex; align-items: center; gap: 12px;
+            background: linear-gradient(135deg, var(--emerald-light), var(--emerald-dark));
+            color: var(--navy-deep); font-family: inherit; font-weight: 800; font-size: 1.02rem;
+            padding: 16px 34px; border: none; border-radius: 999px; cursor: pointer;
+            box-shadow: 0 10px 34px var(--emerald-glow); transition: all .25s ease;
+        }
+        .welcome-cta i { transition: transform .25s ease; }
+        .welcome-cta:hover { transform: translateY(-3px); box-shadow: 0 16px 44px rgba(0,200,83,.32); }
+        .welcome-cta:hover i { transform: translateX(4px); }
+
+        .welcome-logos { margin-top: 52px; display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap; }
+        .welcome-logos .logos-caption { width: 100%; font-size: .72rem; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--text-subtle); margin-bottom: 16px; }
+        .logo-chip {
+            display: flex; align-items: center; gap: 10px; padding: 12px 20px;
+            background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle);
+            border-radius: 14px; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+            transition: all .25s ease;
+        }
+        .logo-chip:hover { border-color: var(--border-active); background: rgba(0,200,83,0.05); transform: translateY(-3px); }
+        .logo-chip img { height: 26px; width: auto; max-width: 84px; object-fit: contain; filter: brightness(0) invert(1) opacity(0.92); }
+        .logo-chip span { font-size: .78rem; font-weight: 700; color: var(--text-muted); letter-spacing: .04em; }
+        @media (max-width: 480px) { .logo-chip { padding: 10px 14px; } .logo-chip span { display: none; } }
+
+        #app-screen { display: none; }
+        #app-screen.show { display: block; animation: fadeIn .4s ease; }
+
+        /* ═══ TARJETA UNIFICADA: PERFIL + CONSULTAS DISPONIBLES ═══ */
+        .account-card { max-width: 980px; margin: 88px auto 0; padding: 20px 22px; background: var(--navy-card); border: 1px solid var(--border-subtle); border-radius: var(--radius); box-shadow: var(--shadow-card); }
+        @media (max-width: 640px) { .account-card { margin-top: 76px; padding: 18px 16px; border-radius: 16px; } }
+        .account-row { display: flex; align-items: center; gap: 14px; padding-bottom: 16px; margin-bottom: 16px; border-bottom: 1px solid var(--border-subtle); }
+        .account-avatar { width: 46px; height: 46px; flex-shrink: 0; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: var(--navy-deep); background: linear-gradient(135deg, var(--emerald-light), var(--emerald-dark)); box-shadow: 0 4px 16px var(--emerald-glow); }
+        .account-info { flex: 1; min-width: 0; }
+        .account-name { font-family: var(--font-display); font-weight: 700; font-size: 1.02rem; color: var(--white); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .account-sub { font-size: .78rem; color: var(--text-muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .account-plan-btn { flex-shrink: 0; display: inline-flex; align-items: center; gap: 7px; padding: 9px 16px; border-radius: 999px; background: rgba(255,215,0,0.08); border: 1px solid rgba(255,215,0,0.25); color: var(--gold); font-size: .8rem; font-weight: 700; text-decoration: none; transition: all .2s ease; }
+        .account-plan-btn:hover { background: rgba(255,215,0,0.14); transform: translateY(-2px); }
+        .account-quotas { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        @media (max-width: 560px) { .account-quotas { grid-template-columns: 1fr; } }
+        .quota-item .quota-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+        .quota-label { font-size: .78rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: .05em; display: flex; align-items: center; gap: 6px; }
+        .quota-value { font-family: var(--font-mono); font-size: .85rem; font-weight: 700; color: var(--white); transition: color .25s ease; }
+        .quota-value.low { color: var(--ruby-light); }
+        .quota-value.low::before { content: '\f071'; font-family: 'Font Awesome 6 Free'; font-weight: 900; margin-right: 5px; font-size: .72rem; }
     </style>
 </head>
 <body>
+    <!-- ═══════════════ PANTALLA 1: BIENVENIDA ═══════════════ -->
+    <div id="welcome-screen">
+        <div class="welcome-3d-scene">
+            <div class="bg-radial"></div>
+            <div class="grid-floor"></div>
+            <div class="w-orb o1"></div>
+            <div class="w-orb o2"></div>
+            <div class="w-shape s1"></div>
+            <div class="w-shape s2"></div>
+            <div class="w-shape s3"></div>
+        </div>
+        <div class="welcome-content">
+            <span class="welcome-badge"><i class="fas fa-shield-halved"></i> Plataforma segura de validación</span>
+            <h1>Validar <em>clientes</em> en segundos</h1>
+            <p>Consulta DNI, RUC, cédula venezolana y números de teléfono de forma segura, sin exponer credenciales ni saltar los límites de tu plan.</p>
+            <button id="startAppBtn" class="welcome-cta"><span>Empezar ahora</span><i class="fas fa-arrow-right"></i></button>
+            <div class="welcome-logos">
+                <span class="logos-caption">Datos verificados contra fuentes oficiales</span>
+                <div class="logo-chip"><img src="https://www.lederdata.net/assets/logos/reniec.png" alt="RENIEC" loading="lazy"><span>RENIEC</span></div>
+                <div class="logo-chip"><img src="https://www.lederdata.net/assets/logos/suna.png" alt="SUNAT" loading="lazy"><span>SUNAT</span></div>
+                <div class="logo-chip"><img src="https://www.lederdata.net/assets/logos/sunat.png" alt="SUNARP" loading="lazy"><span>SUNARP</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════ PANTALLA 2: VALIDACIÓN DE CLIENTES ═══════════════ -->
+    <div id="app-screen">
     <div class="ambient-1"></div>
     <div class="ambient-2"></div>
 
@@ -395,28 +517,30 @@
     </aside>
 
     <main>
-        <div class="vc-hero">
-            <div class="vc-hero-icon"><i class="fas fa-user-shield"></i></div>
-            <h1>Validar <em>clientes</em> en segundos</h1>
-            <p>Consulta DNI, RUC, cédula venezolana y números de teléfono de forma segura, sin exponer credenciales ni saltar los límites de tu plan.</p>
-        </div>
-
-        <div class="cupo-wrap">
-            <div class="cupo-card">
-                <div class="cupo-top">
-                    <span class="cupo-label"><i class="fas fa-id-card"></i> Consultas de identidad</span>
-                    <span class="cupo-value" id="cupoDocsValue">—</span>
+        <div class="account-card" id="accountCard">
+            <div class="account-row">
+                <div class="account-avatar"><i class="fas fa-user"></i></div>
+                <div class="account-info">
+                    <div class="account-name" id="accountName">Mi cuenta</div>
+                    <div class="account-sub" id="accountSub">Verificando sesión…</div>
                 </div>
-                <div class="cupo-bar-track"><div class="cupo-bar-fill" id="cupoDocsBar" style="width:0%"></div></div>
-                <div class="cupo-note">DNI, RUC, cédula y búsquedas por nombre</div>
+                <a href="/planes" class="account-plan-btn"><i class="fas fa-bolt"></i> Mi plan</a>
             </div>
-            <div class="cupo-card">
-                <div class="cupo-top">
-                    <span class="cupo-label"><i class="fas fa-phone"></i> Consultas de teléfono</span>
-                    <span class="cupo-value" id="cupoTelValue">—</span>
+            <div class="account-quotas">
+                <div class="quota-item">
+                    <div class="quota-top">
+                        <span class="quota-label"><i class="fas fa-id-card"></i> Identidad</span>
+                        <span class="quota-value" id="cupoDocsValue">—</span>
+                    </div>
+                    <div class="cupo-bar-track"><div class="cupo-bar-fill" id="cupoDocsBar" style="width:0%"></div></div>
                 </div>
-                <div class="cupo-bar-track"><div class="cupo-bar-fill" id="cupoTelBar" style="width:0%"></div></div>
-                <div class="cupo-note">Telefonía por documento o por número</div>
+                <div class="quota-item">
+                    <div class="quota-top">
+                        <span class="quota-label"><i class="fas fa-phone"></i> Teléfono</span>
+                        <span class="quota-value" id="cupoTelValue">—</span>
+                    </div>
+                    <div class="cupo-bar-track"><div class="cupo-bar-fill" id="cupoTelBar" style="width:0%"></div></div>
+                </div>
             </div>
         </div>
 
@@ -666,10 +790,30 @@
             <p><a href="/terminos-condiciones">Términos y condiciones</a> · <a href="/politica-privacidad">Política de privacidad</a> · <a href="/disclaimer-apis">Aviso legal APIs</a></p>
         </footer>
     </main>
+    </div><!-- /#app-screen -->
 
     <div class="vc-toast-wrap" id="toastWrap"></div>
 
     <script>
+        // ========== TRANSICIÓN BIENVENIDA → APP ==========
+        const welcomeScreen = document.getElementById('welcome-screen');
+        const appScreen = document.getElementById('app-screen');
+        const startAppBtn = document.getElementById('startAppBtn');
+        let appInitialized = false;
+
+        function launchApp() {
+            welcomeScreen.classList.add('fade-out');
+            setTimeout(() => {
+                welcomeScreen.style.display = 'none';
+                appScreen.classList.add('show');
+                if (!appInitialized) {
+                    appInitialized = true;
+                    initApp();
+                }
+            }, 400);
+        }
+        startAppBtn.addEventListener('click', launchApp);
+
         // ========== SIDEBAR ==========
         const menuToggle = document.getElementById('menu-toggle');
         const sidebar = document.getElementById('sidebar');
@@ -718,6 +862,8 @@
         // ========== SESIÓN ==========
         let currentUid = null;
         async function checkSession() {
+            const nameEl = document.getElementById('accountName');
+            const subEl = document.getElementById('accountSub');
             try {
                 const res = await fetch('/api/session', { credentials: 'same-origin' });
                 if (res.ok) {
@@ -725,30 +871,38 @@
                     if (data && data.authenticated && data.uid) {
                         currentUid = data.uid;
                         document.getElementById('authGate').classList.remove('show');
+                        if (nameEl) nameEl.textContent = data.nombre || data.name || data.email || 'Mi cuenta';
+                        if (subEl) subEl.textContent = (data.nombre || data.name) && data.email ? data.email : (data.plan ? `Plan ${data.plan}` : `ID de cuenta: ${data.uid}`);
                         return true;
                     }
                 }
             } catch (e) { console.error('Error verificando sesión', e); }
             document.getElementById('authGate').classList.add('show');
+            if (nameEl) nameEl.textContent = 'Invitado';
+            if (subEl) subEl.textContent = 'Inicia sesión para consultar';
             document.querySelectorAll('.vc-btn').forEach(b => b.disabled = true);
             return false;
         }
 
         // ========== CUPO ==========
+        const CUPO_UMBRAL_BAJO = 8; // por debajo de este número de consultas restantes, se marca en rojo
         function paintCupo(elValueId, elBarId, limite, consumidas) {
             const valueEl = document.getElementById(elValueId);
             const barEl = document.getElementById(elBarId);
             if (limite === -1 || limite === undefined || limite === null) {
                 valueEl.textContent = 'Ilimitadas';
+                valueEl.classList.remove('low');
                 barEl.style.width = '100%';
                 barEl.className = 'cupo-bar-fill';
                 return;
             }
             const disponibles = Math.max(limite - consumidas, 0);
             const pct = limite > 0 ? Math.min((consumidas / limite) * 100, 100) : 100;
+            const esBajo = disponibles <= CUPO_UMBRAL_BAJO;
             valueEl.textContent = `${disponibles} / ${limite} disponibles`;
+            valueEl.classList.toggle('low', esBajo);
             barEl.style.width = pct + '%';
-            barEl.className = 'cupo-bar-fill' + (pct >= 100 ? ' danger' : pct >= 75 ? ' warn' : '');
+            barEl.className = 'cupo-bar-fill' + (esBajo ? ' danger' : pct >= 75 ? ' warn' : '');
         }
 
         async function loadCupo() {
@@ -1156,15 +1310,15 @@
             el && el.addEventListener('input', () => { el.value = el.value.replace(/\D/g, ''); });
         });
 
-        // ========== INIT ==========
-        (async function init() {
+        // ========== INIT (se ejecuta al pulsar "Empezar ahora") ==========
+        async function initApp() {
             await checkSession();
             await loadCupo();
             // Cargar historial para todos los tipos
             ['dni', 'ruc', 'cedula', 'buscar-cedula', 'buscar-dni', 'telefonia-doc', 'telefonia-numero'].forEach(tipo => {
                 renderHistory(tipo);
             });
-        })();
+        }
     </script>
 </body>
 </html>
