@@ -70,7 +70,7 @@
         .ambient-2 { position: fixed; bottom: -20%; right: -10%; width: 50vw; height: 50vw; border-radius: 50%; background: radial-gradient(circle, rgba(255,215,0,0.04) 0%, transparent 65%); pointer-events: none; z-index: -1; animation: floatAmbient 12s ease-in-out infinite reverse; }
         @keyframes floatAmbient { 0%,100%{transform:translate(0,0) scale(1);} 33%{transform:translate(20px,-20px) scale(1.05);} 66%{transform:translate(-15px,15px) scale(0.95);} }
 
-        /* ═══ SIDEBAR (idéntico al resto del sitio) ═══ */
+        /* ═══ SIDEBAR ═══ */
         #sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 50; opacity: 0; transition: opacity .3s ease; display: none; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
         #sidebar-overlay.opacity-100 { opacity: 1; }
         #sidebar-overlay.hidden { display: none; }
@@ -164,22 +164,59 @@
         .vc-field input.invalid { border-color: var(--ruby); box-shadow: 0 0 0 3px var(--ruby-glow); }
         .vc-hint { font-size: .74rem; color: var(--text-subtle); margin-top: 6px; }
 
-        .vc-submit-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
-        .vc-btn {
-            font-family: inherit; font-size: .92rem; font-weight: 700; border-radius: 999px; padding: 13px 28px; cursor: pointer;
-            border: none; background: linear-gradient(135deg, var(--emerald), var(--emerald-dark)); color: var(--navy-deep);
-            box-shadow: var(--shadow-emerald); transition: all .2s ease; display: inline-flex; align-items: center; gap: 9px;
+        /* --- Botones en columna --- */
+        .vc-submit-row, .vc-clear-row {
+            width: 100%;
+            margin-bottom: 8px;
         }
-        .vc-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: var(--sh-hov); }
-        .vc-btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+        .vc-submit-row:last-child, .vc-clear-row:last-child {
+            margin-bottom: 0;
+        }
+        .vc-btn, .vc-clear-btn {
+            width: 100%;
+            border-radius: 8px;
+            justify-content: center;
+            font-family: inherit;
+            font-size: .92rem;
+            font-weight: 700;
+            padding: 13px 28px;
+            cursor: pointer;
+            border: none;
+            transition: all .2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+        }
+        .vc-btn {
+            background: linear-gradient(135deg, var(--emerald), var(--emerald-dark));
+            color: var(--navy-deep);
+            box-shadow: var(--shadow-emerald);
+        }
+        .vc-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: var(--sh-hov);
+        }
+        .vc-btn:disabled {
+            opacity: .5;
+            cursor: not-allowed;
+            transform: none;
+        }
         .vc-btn .spin { display: none; }
         .vc-btn.loading .spin { display: inline-block; }
         .vc-btn.loading .label-icon { display: none; }
         @keyframes spin { to { transform: rotate(360deg); } }
         .spin { animation: spin .8s linear infinite; }
 
-        .vc-clear-btn { background: transparent; border: 1px solid var(--navy-border); color: var(--text-muted); border-radius: 999px; padding: 12px 20px; font-size: .85rem; font-weight: 600; cursor: pointer; transition: all .2s ease; }
-        .vc-clear-btn:hover { color: var(--white); border-color: var(--text-muted); }
+        .vc-clear-btn {
+            background: transparent;
+            border: 1px solid var(--ruby);
+            color: var(--ruby);
+        }
+        .vc-clear-btn:hover {
+            background: rgba(229,57,53,0.08);
+            color: var(--ruby-light);
+            border-color: var(--ruby-light);
+        }
 
         /* ═══ RESULT AREA ═══ */
         .vc-result { margin-top: 22px; }
@@ -194,22 +231,117 @@
         .vc-alert.limit i { color: var(--amber); }
 
         .vc-result-card { background: rgba(0,200,83,0.05); border: 1px solid var(--border-active); border-radius: var(--radius-sm); overflow: hidden; }
-        .vc-result-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 14px 18px; background: rgba(0,200,83,0.08); border-bottom: 1px solid var(--border-active); }
+        .vc-result-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 14px 18px;
+            background: rgba(0,200,83,0.08);
+            border-bottom: 1px solid var(--border-active);
+        }
         .vc-result-head .name { font-family: var(--font-display); font-weight: 700; color: var(--white); font-size: 1.02rem; }
+
+        /* Botones de acción (magia, copiar, guardar) */
+        .vc-result-actions {
+            display: flex;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+        .vc-action-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-muted);
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all .2s ease;
+            font-size: .95rem;
+        }
+        .vc-action-btn:hover {
+            background: rgba(0,200,83,0.1);
+            border-color: var(--border-active);
+            color: var(--emerald-light);
+        }
+        .vc-action-btn:active { transform: scale(0.92); }
+
         .vc-status-pill { font-size: .7rem; font-weight: 800; padding: 4px 12px; border-radius: 999px; text-transform: uppercase; letter-spacing: .04em; }
         .vc-status-pill.ok { background: rgba(0,200,83,0.18); color: var(--emerald-light); }
         .vc-status-pill.warn { background: rgba(255,167,38,0.18); color: var(--amber); }
+
         .vc-result-body { padding: 16px 18px; display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 14px 20px; }
         .vc-data-item .k { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--text-subtle); margin-bottom: 4px; }
         .vc-data-item .v { font-size: .92rem; color: var(--text-primary); font-weight: 500; word-break: break-word; }
         .vc-data-item .v.mono { font-family: var(--font-mono); }
-        .vc-copy-btn { background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: .85rem; padding: 6px 8px; border-radius: 8px; transition: all .15s ease; }
-        .vc-copy-btn:hover { color: var(--emerald); background: rgba(0,200,83,0.08); }
 
-        .vc-list-results { display: flex; flex-direction: column; gap: 10px; }
-        .vc-list-item { display: flex; align-items: center; justify-content: space-between; gap: 12px; background: rgba(255,255,255,0.02); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 12px 16px; flex-wrap: wrap; }
-        .vc-list-item .who { font-weight: 600; color: var(--white); font-size: .92rem; }
-        .vc-list-item .doc { font-family: var(--font-mono); font-size: .85rem; color: var(--emerald-light); }
+        /* ═══ HISTORIAL ═══ */
+        .vc-history-wrap {
+            margin-top: 20px;
+            border-top: 1px solid var(--border-subtle);
+            padding-top: 18px;
+        }
+        .vc-history-title {
+            font-size: .85rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .vc-history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .vc-history-item {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            padding: 10px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            font-size: .85rem;
+        }
+        .vc-history-item .h-doc {
+            font-family: var(--font-mono);
+            color: var(--emerald-light);
+        }
+        .vc-history-item .h-name {
+            color: var(--white);
+            font-weight: 500;
+        }
+        .vc-history-item .h-time {
+            color: var(--text-subtle);
+            font-size: .7rem;
+        }
+        .vc-history-item .h-del {
+            background: transparent;
+            border: none;
+            color: var(--text-subtle);
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 6px;
+            transition: all .2s ease;
+        }
+        .vc-history-item .h-del:hover {
+            color: var(--ruby);
+            background: rgba(229,57,53,0.08);
+        }
+        .vc-history-empty {
+            text-align: center;
+            color: var(--text-subtle);
+            font-size: .85rem;
+            padding: 12px 0;
+        }
 
         .vc-skeleton { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 14px 20px; padding: 4px 2px; }
         .vc-skeleton .bar { height: 38px; border-radius: 8px; background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.07) 37%, rgba(255,255,255,0.03) 63%); background-size: 400% 100%; animation: shimmer 1.4s ease infinite; }
@@ -323,10 +455,16 @@
                         </div>
                         <div class="vc-submit-row">
                             <button type="submit" class="vc-btn"><i class="fas fa-search label-icon"></i><i class="fas fa-circle-notch spin"></i> Validar DNI</button>
+                        </div>
+                        <div class="vc-clear-row">
                             <button type="button" class="vc-clear-btn" data-clear="dni">Limpiar</button>
                         </div>
                     </form>
                     <div class="vc-result" id="result-dni"><div class="vc-empty"><i class="fas fa-id-card"></i>Ingresa un DNI para ver el resultado aquí.</div></div>
+                    <div class="vc-history-wrap" id="history-dni">
+                        <div class="vc-history-title">Historial <span class="h-count"></span></div>
+                        <div class="vc-history-list" id="historyList-dni"></div>
+                    </div>
                 </div>
             </section>
 
@@ -347,10 +485,16 @@
                         </div>
                         <div class="vc-submit-row">
                             <button type="submit" class="vc-btn"><i class="fas fa-search label-icon"></i><i class="fas fa-circle-notch spin"></i> Validar RUC</button>
+                        </div>
+                        <div class="vc-clear-row">
                             <button type="button" class="vc-clear-btn" data-clear="ruc">Limpiar</button>
                         </div>
                     </form>
                     <div class="vc-result" id="result-ruc"><div class="vc-empty"><i class="fas fa-building"></i>Ingresa un RUC para ver el resultado aquí.</div></div>
+                    <div class="vc-history-wrap" id="history-ruc">
+                        <div class="vc-history-title">Historial <span class="h-count"></span></div>
+                        <div class="vc-history-list" id="historyList-ruc"></div>
+                    </div>
                 </div>
             </section>
 
@@ -371,10 +515,16 @@
                         </div>
                         <div class="vc-submit-row">
                             <button type="submit" class="vc-btn"><i class="fas fa-search label-icon"></i><i class="fas fa-circle-notch spin"></i> Validar cédula</button>
+                        </div>
+                        <div class="vc-clear-row">
                             <button type="button" class="vc-clear-btn" data-clear="cedula">Limpiar</button>
                         </div>
                     </form>
                     <div class="vc-result" id="result-cedula"><div class="vc-empty"><i class="fas fa-passport"></i>Ingresa una cédula para ver el resultado aquí.</div></div>
+                    <div class="vc-history-wrap" id="history-cedula">
+                        <div class="vc-history-title">Historial <span class="h-count"></span></div>
+                        <div class="vc-history-list" id="historyList-cedula"></div>
+                    </div>
                 </div>
             </section>
 
@@ -395,10 +545,16 @@
                         </div>
                         <div class="vc-submit-row">
                             <button type="submit" class="vc-btn"><i class="fas fa-search label-icon"></i><i class="fas fa-circle-notch spin"></i> Buscar</button>
+                        </div>
+                        <div class="vc-clear-row">
                             <button type="button" class="vc-clear-btn" data-clear="buscar-cedula">Limpiar</button>
                         </div>
                     </form>
                     <div class="vc-result" id="result-buscar-cedula"><div class="vc-empty"><i class="fas fa-search"></i>Ingresa un nombre para buscar coincidencias.</div></div>
+                    <div class="vc-history-wrap" id="history-buscar-cedula">
+                        <div class="vc-history-title">Historial <span class="h-count"></span></div>
+                        <div class="vc-history-list" id="historyList-buscar-cedula"></div>
+                    </div>
                 </div>
             </section>
 
@@ -426,10 +582,16 @@
                         </div>
                         <div class="vc-submit-row">
                             <button type="submit" class="vc-btn"><i class="fas fa-search label-icon"></i><i class="fas fa-circle-notch spin"></i> Buscar</button>
+                        </div>
+                        <div class="vc-clear-row">
                             <button type="button" class="vc-clear-btn" data-clear="buscar-dni">Limpiar</button>
                         </div>
                     </form>
                     <div class="vc-result" id="result-buscar-dni"><div class="vc-empty"><i class="fas fa-search"></i>Completa nombres y apellido paterno para buscar.</div></div>
+                    <div class="vc-history-wrap" id="history-buscar-dni">
+                        <div class="vc-history-title">Historial <span class="h-count"></span></div>
+                        <div class="vc-history-list" id="historyList-buscar-dni"></div>
+                    </div>
                 </div>
             </section>
 
@@ -450,10 +612,16 @@
                         </div>
                         <div class="vc-submit-row">
                             <button type="submit" class="vc-btn"><i class="fas fa-search label-icon"></i><i class="fas fa-circle-notch spin"></i> Consultar</button>
+                        </div>
+                        <div class="vc-clear-row">
                             <button type="button" class="vc-clear-btn" data-clear="telefonia-doc">Limpiar</button>
                         </div>
                     </form>
                     <div class="vc-result" id="result-telefonia-doc"><div class="vc-empty"><i class="fas fa-phone-volume"></i>Ingresa un DNI o RUC para ver los teléfonos asociados.</div></div>
+                    <div class="vc-history-wrap" id="history-telefonia-doc">
+                        <div class="vc-history-title">Historial <span class="h-count"></span></div>
+                        <div class="vc-history-list" id="historyList-telefonia-doc"></div>
+                    </div>
                 </div>
             </section>
 
@@ -474,10 +642,16 @@
                         </div>
                         <div class="vc-submit-row">
                             <button type="submit" class="vc-btn"><i class="fas fa-search label-icon"></i><i class="fas fa-circle-notch spin"></i> Consultar</button>
+                        </div>
+                        <div class="vc-clear-row">
                             <button type="button" class="vc-clear-btn" data-clear="telefonia-numero">Limpiar</button>
                         </div>
                     </form>
                     <div class="vc-result" id="result-telefonia-numero"><div class="vc-empty"><i class="fas fa-mobile-alt"></i>Ingresa un número para ver su titularidad.</div></div>
+                    <div class="vc-history-wrap" id="history-telefonia-numero">
+                        <div class="vc-history-title">Historial <span class="h-count"></span></div>
+                        <div class="vc-history-list" id="historyList-telefonia-numero"></div>
+                    </div>
                 </div>
             </section>
         </div>
@@ -609,148 +783,278 @@
             container.innerHTML = `<div class="vc-alert ${isLimit ? 'limit' : 'error'}"><i class="fas ${isLimit ? 'fa-triangle-exclamation' : 'fa-circle-exclamation'}"></i><span>${esc(message)}</span></div>`;
         }
 
-        function copyToClipboard(text, btn) {
-            navigator.clipboard?.writeText(text).then(() => {
-                showToast('Copiado al portapapeles');
-            }).catch(() => {});
-        }
-        window.copyToClipboard = copyToClipboard;
+        // ========== HISTORIAL (LocalStorage) ==========
+        const HISTORY_KEY = 'validation_history';
 
-        // ========== RENDERERS POR TIPO ==========
+        function getHistory() {
+            try {
+                const raw = localStorage.getItem(HISTORY_KEY);
+                return raw ? JSON.parse(raw) : [];
+            } catch { return []; }
+        }
+
+        function saveHistoryItem(tipo, data) {
+            const history = getHistory();
+            const item = {
+                id: Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+                tipo: tipo,
+                fecha: new Date().toISOString(),
+                data: data
+            };
+            history.unshift(item);
+            localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+            return item;
+        }
+
+        function deleteHistoryItem(id) {
+            let history = getHistory();
+            history = history.filter(item => item.id !== id);
+            localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+        }
+
+        function renderHistory(tipo) {
+            const listEl = document.getElementById('historyList-' + tipo);
+            const wrapEl = document.getElementById('history-' + tipo);
+            if (!listEl) return;
+            const history = getHistory().filter(item => item.tipo === tipo);
+            const countEl = wrapEl?.querySelector('.h-count');
+            if (countEl) countEl.textContent = history.length ? `(${history.length})` : '';
+
+            if (!history.length) {
+                listEl.innerHTML = `<div class="vc-history-empty">No hay registros guardados.</div>`;
+                return;
+            }
+
+            let html = '';
+            history.forEach(item => {
+                const d = item.data;
+                let nombre = d.nombres || d.razonSocial || d.titular || d.nombreCompleto || 'Sin nombre';
+                if (typeof nombre === 'object') nombre = JSON.stringify(nombre);
+                let doc = d.dni || d.ruc || d.cedula || d.documento || d.numero || d.busqueda || '—';
+                if (typeof doc === 'object') doc = JSON.stringify(doc);
+                const fecha = new Date(item.fecha);
+                const tiempo = fecha.toLocaleString('es-ES', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
+                html += `
+                    <div class="vc-history-item" data-id="${esc(item.id)}">
+                        <span class="h-name">${esc(nombre)}</span>
+                        <span class="h-doc">${esc(doc)}</span>
+                        <span class="h-time">${esc(tiempo)}</span>
+                        <button class="h-del" data-id="${esc(item.id)}" title="Eliminar"><i class="fas fa-trash-alt"></i></button>
+                    </div>
+                `;
+            });
+            listEl.innerHTML = html;
+
+            // Eventos para eliminar
+            listEl.querySelectorAll('.h-del').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const id = btn.dataset.id;
+                    if (confirm('¿Eliminar este registro del historial?')) {
+                        deleteHistoryItem(id);
+                        renderHistory(tipo);
+                        showToast('Registro eliminado', 'fa-trash-alt');
+                    }
+                });
+            });
+        }
+
+        // ========== RENDERERS CON BOTONES DE ACCIÓN ==========
+        // Guardamos referencia al último resultado para poder guardar/copiar
+        let lastResultData = null;
+        let lastResultType = null;
+        let lastResultContainer = null;
+
+        function buildResultCard(bodyHtml, statusText, statusClass = 'ok') {
+            return `
+                <div class="vc-result-card">
+                    <div class="vc-result-head">
+                        <span class="name">${esc(statusText)}</span>
+                        <div class="vc-result-actions">
+                            <button class="vc-action-btn" data-action="magic" title="Magia (próximamente)"><i class="fas fa-wand-magic-sparkles"></i></button>
+                            <button class="vc-action-btn" data-action="copy" title="Copiar resultado"><i class="fas fa-copy"></i></button>
+                            <button class="vc-action-btn" data-action="save" title="Guardar en historial"><i class="fas fa-save"></i></button>
+                        </div>
+                    </div>
+                    <div class="vc-result-body">
+                        ${bodyHtml}
+                    </div>
+                </div>
+            `;
+        }
+
         const renderers = {
             dni(container, data) {
                 const nombreCompleto = [data.nombres, data.apellidoPaterno, data.apellidoMaterno].filter(Boolean).join(' ');
-                container.innerHTML = `
-                    <div class="vc-result-card">
-                        <div class="vc-result-head">
-                            <span class="name">${esc(nombreCompleto || 'Persona encontrada')}</span>
-                            <span class="vc-status-pill ok">RENIEC</span>
-                        </div>
-                        <div class="vc-result-body">
-                            ${dataItem('DNI', data.dni, true)}
-                            ${dataItem('Nombres', data.nombres)}
-                            ${dataItem('Apellido paterno', data.apellidoPaterno)}
-                            ${dataItem('Apellido materno', data.apellidoMaterno)}
-                            ${dataItem('Dígito verificador', data.codVerificaLetra || data.codVerifica, true)}
-                        </div>
-                    </div>`;
+                const body = `
+                    ${dataItem('DNI', data.dni, true)}
+                    ${dataItem('Nombres', data.nombres)}
+                    ${dataItem('Apellido paterno', data.apellidoPaterno)}
+                    ${dataItem('Apellido materno', data.apellidoMaterno)}
+                    ${dataItem('Dígito verificador', data.codVerificaLetra || data.codVerifica, true)}
+                `;
+                container.innerHTML = buildResultCard(body, nombreCompleto || 'Persona encontrada', 'ok');
+                attachResultActions(container, 'dni', data);
             },
             ruc(container, data) {
                 const estado = (data.estado || '').toUpperCase();
                 const pillClass = estado === 'ACTIVO' ? 'ok' : 'warn';
-                container.innerHTML = `
-                    <div class="vc-result-card">
-                        <div class="vc-result-head">
-                            <span class="name">${esc(data.razonSocial || 'Empresa encontrada')}</span>
-                            <span class="vc-status-pill ${pillClass}">${esc(estado || 'SUNAT')}</span>
-                        </div>
-                        <div class="vc-result-body">
-                            ${dataItem('RUC', data.ruc, true)}
-                            ${dataItem('Nombre comercial', data.nombreComercial)}
-                            ${dataItem('Condición', data.condicion)}
-                            ${dataItem('Departamento', data.departamento)}
-                            ${dataItem('Provincia', data.provincia)}
-                            ${dataItem('Distrito', data.distrito)}
-                            ${dataItem('Ubigeo', data.ubigeo, true)}
-                            <div class="vc-data-item" style="grid-column:1/-1;">
-                                <div class="k">Dirección</div>
-                                <div class="v">${esc(data.direccion)}</div>
-                            </div>
-                        </div>
-                    </div>`;
+                const body = `
+                    ${dataItem('RUC', data.ruc, true)}
+                    ${dataItem('Nombre comercial', data.nombreComercial)}
+                    ${dataItem('Condición', data.condicion)}
+                    ${dataItem('Departamento', data.departamento)}
+                    ${dataItem('Provincia', data.provincia)}
+                    ${dataItem('Distrito', data.distrito)}
+                    ${dataItem('Ubigeo', data.ubigeo, true)}
+                    <div class="vc-data-item" style="grid-column:1/-1;">
+                        <div class="k">Dirección</div>
+                        <div class="v">${esc(data.direccion)}</div>
+                    </div>
+                `;
+                container.innerHTML = buildResultCard(body, data.razonSocial || 'Empresa encontrada', pillClass);
+                attachResultActions(container, 'ruc', data);
             },
             cedula(container, data) {
-                // Masitaprex (POST /consulta/cedula) responde: cedula, nombres, apellidos,
-                // fecha_nacimiento, sexo, estado_civil, lugar_nacimiento, direccion, estado, fecha_expedicion
                 const nombreCompleto = data.nombreCompleto || [data.nombres, data.apellidos].filter(Boolean).join(' ') || 'Persona encontrada';
-                container.innerHTML = `
-                    <div class="vc-result-card">
-                        <div class="vc-result-head">
-                            <span class="name">${esc(nombreCompleto)}</span>
-                            <span class="vc-status-pill ok">Venezuela</span>
-                        </div>
-                        <div class="vc-result-body">
-                            ${dataItem('Cédula', data.cedula, true)}
-                            ${dataItem('Nombres', data.nombres)}
-                            ${dataItem('Apellidos', data.apellidos)}
-                            ${dataItem('Estado', data.estado)}
-                            ${dataItem('Estado civil', data.estado_civil)}
-                            ${dataItem('Sexo', data.sexo)}
-                            ${dataItem('Fecha de nacimiento', data.fecha_nacimiento)}
-                            ${dataItem('Lugar de nacimiento', data.lugar_nacimiento)}
-                            ${dataItem('Fecha de expedición', data.fecha_expedicion)}
-                            <div class="vc-data-item" style="grid-column:1/-1;">
-                                <div class="k">Dirección</div>
-                                <div class="v">${esc(data.direccion)}</div>
-                            </div>
-                        </div>
-                    </div>`;
+                const body = `
+                    ${dataItem('Cédula', data.cedula, true)}
+                    ${dataItem('Nombres', data.nombres)}
+                    ${dataItem('Apellidos', data.apellidos)}
+                    ${dataItem('Estado', data.estado)}
+                    ${dataItem('Estado civil', data.estado_civil)}
+                    ${dataItem('Sexo', data.sexo)}
+                    ${dataItem('Fecha de nacimiento', data.fecha_nacimiento)}
+                    ${dataItem('Lugar de nacimiento', data.lugar_nacimiento)}
+                    ${dataItem('Fecha de expedición', data.fecha_expedicion)}
+                    <div class="vc-data-item" style="grid-column:1/-1;">
+                        <div class="k">Dirección</div>
+                        <div class="v">${esc(data.direccion)}</div>
+                    </div>
+                `;
+                container.innerHTML = buildResultCard(body, nombreCompleto, 'ok');
+                attachResultActions(container, 'cedula', data);
             },
             'buscar-cedula'(container, data) {
-                // Masitaprex (POST /consulta/buscar-cedula) responde:
-                // { busqueda, resultados: [{ cedula, nombres_completos, fecha_nacimiento, sexo, estado }], total }
                 const items = Array.isArray(data) ? data : (data.resultados || data.results || []);
                 if (!items.length) {
                     container.innerHTML = `<div class="vc-empty"><i class="fas fa-user-slash"></i>No se encontraron coincidencias para ese nombre.</div>`;
                     return;
                 }
-                container.innerHTML = `<div class="vc-list-results">${items.map(p => `
+                let body = `<div class="vc-list-results">${items.map(p => `
                     <div class="vc-list-item">
                         <span class="who">${esc(p.nombreCompleto || p.nombres_completos || [p.nombres, p.apellidos].filter(Boolean).join(' '))}</span>
                         <span class="doc">${esc(p.cedula)}</span>
                     </div>`).join('')}</div>`;
+                container.innerHTML = buildResultCard(body, `${items.length} coincidencia${items.length > 1 ? 's' : ''}`, 'ok');
+                attachResultActions(container, 'buscar-cedula', data);
             },
             'buscar-dni'(container, data) {
-                // Masitaprex (POST /consulta/buscar-dni) responde:
-                // { busqueda, resultados: [{ dni, nombres_completos, fecha_nacimiento, departamento, exactitud }], total }
                 const items = Array.isArray(data) ? data : (data.resultados || data.results || [data]);
                 if (!items.length || !items[0]) {
                     container.innerHTML = `<div class="vc-empty"><i class="fas fa-user-slash"></i>No se encontraron coincidencias para ese nombre.</div>`;
                     return;
                 }
-                container.innerHTML = `<div class="vc-list-results">${items.map(p => `
+                let body = `<div class="vc-list-results">${items.map(p => `
                     <div class="vc-list-item">
                         <span class="who">${esc(p.nombreCompleto || p.nombres_completos || [p.nombres, p.apellidoPaterno, p.apellidoMaterno].filter(Boolean).join(' '))}</span>
                         <span class="doc">${esc(p.dni)}${p.departamento ? ' · ' + esc(p.departamento) : ''}</span>
                     </div>`).join('')}</div>`;
+                container.innerHTML = buildResultCard(body, `${items.length} coincidencia${items.length > 1 ? 's' : ''}`, 'ok');
+                attachResultActions(container, 'buscar-dni', data);
             },
             'telefonia-doc'(container, data) {
-                // Masitaprex (POST /consulta/telefonia-doc) responde:
-                // { documento, titular, lineas: [{ numero, operador, tipo, estado, fecha_activacion, portabilidad }], total_lineas }
                 const items = Array.isArray(data) ? data : (data.lineas || data.telefonos || data.resultados || [data]);
                 if (!items.length || !items[0]) {
                     container.innerHTML = `<div class="vc-empty"><i class="fas fa-phone-slash"></i>No se encontraron números asociados a este documento.</div>`;
                     return;
                 }
-                const titularHtml = data.titular
-                    ? `<div class="vc-data-item" style="grid-column:1/-1;margin-bottom:10px;"><div class="k">Titular</div><div class="v">${esc(data.titular)}</div></div>`
-                    : '';
-                container.innerHTML = `${titularHtml}<div class="vc-list-results">${items.map(t => `
+                let body = '';
+                if (data.titular) {
+                    body += `<div class="vc-data-item" style="grid-column:1/-1;margin-bottom:10px;"><div class="k">Titular</div><div class="v">${esc(data.titular)}</div></div>`;
+                }
+                body += `<div class="vc-list-results">${items.map(t => `
                     <div class="vc-list-item">
                         <span class="doc"><i class="fas fa-phone" style="margin-right:8px;color:var(--emerald);"></i>${esc(t.numero || t.telefono)}</span>
                         <span class="who">${esc(t.operador || '')}${t.tipo ? ' · ' + esc(t.tipo) : ''}${t.estado ? ' · ' + esc(t.estado) : ''}</span>
                     </div>`).join('')}</div>`;
+                container.innerHTML = buildResultCard(body, `${items.length} número${items.length > 1 ? 's' : ''}`, 'ok');
+                attachResultActions(container, 'telefonia-doc', data);
             },
             'telefonia-numero'(container, data) {
-                // Masitaprex (POST /consulta/telefonia-num) responde:
-                // { numero, titular, documento, operador, tipo, estado, fecha_activacion, portabilidad, departamento }
-                container.innerHTML = `
-                    <div class="vc-result-card">
-                        <div class="vc-result-head">
-                            <span class="name">${esc(data.titular || data.nombre || 'Número consultado')}</span>
-                            <span class="vc-status-pill ${(data.estado || '').toUpperCase() === 'ACTIVO' ? 'ok' : 'warn'}">${esc(data.estado || 'Consultado')}</span>
-                        </div>
-                        <div class="vc-result-body">
-                            ${dataItem('Número', data.numero, true)}
-                            ${dataItem('Documento titular', data.documento, true)}
-                            ${dataItem('Operador', data.operador)}
-                            ${dataItem('Tipo de línea', data.tipo || data.tipoLinea)}
-                            ${dataItem('Departamento', data.departamento)}
-                            ${dataItem('Fecha de activación', data.fecha_activacion || data.fechaActivacion)}
-                        </div>
-                    </div>`;
+                const body = `
+                    ${dataItem('Número', data.numero, true)}
+                    ${dataItem('Documento titular', data.documento, true)}
+                    ${dataItem('Operador', data.operador)}
+                    ${dataItem('Tipo de línea', data.tipo || data.tipoLinea)}
+                    ${dataItem('Departamento', data.departamento)}
+                    ${dataItem('Fecha de activación', data.fecha_activacion || data.fechaActivacion)}
+                `;
+                const status = (data.estado || '').toUpperCase() === 'ACTIVO' ? 'ok' : 'warn';
+                container.innerHTML = buildResultCard(body, data.titular || data.nombre || 'Número consultado', status);
+                attachResultActions(container, 'telefonia-numero', data);
             }
         };
+
+        // ========== FUNCIONES PARA COPIAR Y GUARDAR ==========
+        function attachResultActions(container, tipo, data) {
+            // Guardar referencia para acciones
+            lastResultData = data;
+            lastResultType = tipo;
+            lastResultContainer = container;
+
+            // Botón copiar
+            const copyBtn = container.querySelector('[data-action="copy"]');
+            if (copyBtn) {
+                copyBtn.addEventListener('click', () => {
+                    const card = container.querySelector('.vc-result-card');
+                    if (!card) return;
+                    // Extraer texto legible del resultado
+                    const bodyEl = card.querySelector('.vc-result-body');
+                    const items = bodyEl.querySelectorAll('.vc-data-item');
+                    let text = '';
+                    items.forEach(item => {
+                        const k = item.querySelector('.k')?.textContent?.trim() || '';
+                        const v = item.querySelector('.v')?.textContent?.trim() || '';
+                        if (k && v) text += `${k}: ${v}\n`;
+                    });
+                    if (!text) {
+                        // fallback: todo el texto
+                        text = bodyEl.textContent.trim();
+                    }
+                    navigator.clipboard?.writeText(text).then(() => {
+                        showToast('Resultado copiado al portapapeles', 'fa-copy');
+                    }).catch(() => {
+                        // fallback
+                        const area = document.createElement('textarea');
+                        area.value = text;
+                        document.body.appendChild(area);
+                        area.select();
+                        try { document.execCommand('copy'); showToast('Resultado copiado', 'fa-copy'); } catch {}
+                        document.body.removeChild(area);
+                    });
+                });
+            }
+
+            // Botón guardar
+            const saveBtn = container.querySelector('[data-action="save"]');
+            if (saveBtn) {
+                saveBtn.addEventListener('click', () => {
+                    if (!data) { showToast('No hay datos para guardar', 'fa-triangle-exclamation'); return; }
+                    saveHistoryItem(tipo, data);
+                    renderHistory(tipo);
+                    showToast('Guardado en historial', 'fa-save');
+                });
+            }
+
+            // Botón magia (sin funcionalidad aún)
+            const magicBtn = container.querySelector('[data-action="magic"]');
+            if (magicBtn) {
+                magicBtn.addEventListener('click', () => {
+                    showToast('Funcionalidad mágica próxima', 'fa-wand-magic-sparkles');
+                });
+            }
+        }
 
         // ========== ENVÍO DE FORMULARIOS ==========
         function buildUrl(endpoint, payload) {
@@ -780,7 +1084,6 @@
                     payload[key] = value.trim();
                 }
 
-                // Validaciones mínimas en cliente (además de las del backend)
                 const requiredMap = {
                     dni: ['dni'], ruc: ['ruc'], cedula: ['cedula'], 'buscar-cedula': ['query'],
                     'buscar-dni': ['nombres', 'apepaterno'], 'telefonia-doc': ['documento'], 'telefonia-numero': ['numero']
@@ -816,7 +1119,11 @@
                     }
 
                     const renderer = renderers[endpoint];
-                    if (renderer) renderer(resultEl, json.data);
+                    if (renderer) {
+                        renderer(resultEl, json.data);
+                        // Cargar historial para este tipo
+                        renderHistory(endpoint);
+                    }
                     showToast('Consulta realizada con éxito');
                     loadCupo();
                 } catch (err) {
@@ -833,9 +1140,13 @@
             btn.addEventListener('click', () => {
                 const endpoint = btn.dataset.clear;
                 const form = document.querySelector(`.vc-form[data-endpoint="${endpoint}"]`);
-                form.reset();
-                form.querySelectorAll('input').forEach(i => i.classList.remove('invalid'));
-                document.getElementById('result-' + endpoint).innerHTML = `<div class="vc-empty"><i class="fas fa-inbox"></i>Sin resultados aún.</div>`;
+                if (form) form.reset();
+                form?.querySelectorAll('input').forEach(i => i.classList.remove('invalid'));
+                const resultEl = document.getElementById('result-' + endpoint);
+                if (resultEl) {
+                    resultEl.innerHTML = `<div class="vc-empty"><i class="fas fa-inbox"></i>Sin resultados aún.</div>`;
+                }
+                // No limpiar historial
             });
         });
 
@@ -849,6 +1160,10 @@
         (async function init() {
             await checkSession();
             await loadCupo();
+            // Cargar historial para todos los tipos
+            ['dni', 'ruc', 'cedula', 'buscar-cedula', 'buscar-dni', 'telefonia-doc', 'telefonia-numero'].forEach(tipo => {
+                renderHistory(tipo);
+            });
         })();
     </script>
 </body>
