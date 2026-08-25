@@ -176,24 +176,10 @@
             margin-bottom: 8px;
             position: relative;
         }
-        .vc-submit-row::before {
-            content: '';
-            position: absolute;
-            top: -10px;
-            left: 5%;
-            width: 90%;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, rgba(105, 240, 174, 0.8), rgba(255, 215, 0, 0.9), rgba(105, 240, 174, 0.8), transparent);
-            border-radius: 999px;
-            filter: blur(1px);
-            opacity: 0.2;
-            animation: slowGlowShimmer 4s ease-in-out infinite;
-            pointer-events: none;
-        }
 
-        @keyframes slowGlowShimmer {
-            0%, 100% { opacity: 0.2; transform: scaleX(0.8); }
-            50% { opacity: 1; transform: scaleX(1.05); filter: blur(0px); box-shadow: 0 0 14px rgba(0, 200, 83, 0.8); }
+        @keyframes btnShineSweep {
+            0% { left: -45%; }
+            35%, 100% { left: 130%; }
         }
 
         .vc-clear-row {
@@ -219,8 +205,23 @@
             color: var(--navy-deep);
             box-shadow: var(--shadow-emerald);
             animation: periodicShake 6s cubic-bezier(0.36, 0.07, 0.19, 0.97) infinite;
+            position: relative;
+            overflow: hidden;
         }
-        
+        .vc-btn::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -45%;
+            width: 35%;
+            height: 100%;
+            background: linear-gradient(115deg, transparent 0%, rgba(255,255,255,0.7) 50%, transparent 100%);
+            transform: skewX(-22deg);
+            animation: btnShineSweep 4s ease-in-out infinite;
+            pointer-events: none;
+        }
+        .vc-btn:disabled::after { animation: none; opacity: 0; }
+
         @keyframes periodicShake {
             0%, 82%, 100% { transform: translateY(0) rotate(0deg); }
             84% { transform: translateY(-3px) rotate(-1.5deg); }
@@ -321,12 +322,12 @@
         .vc-data-item .v { font-size: .92rem; color: var(--text-primary); font-weight: 500; word-break: break-word; }
         .vc-data-item .v.mono { font-family: var(--font-mono); }
 
-        /* ═══ HISTORIAL SEPARADO EN SU PROPIO CONTENEDOR CARD ═══ */
+        /* ═══ HISTORIAL: CONTENEDOR PROPIO, SEPARADO DE LA TARJETA DE CONSULTA ═══ */
         .vc-history-wrap {
-            margin-top: 24px;
+            margin-top: 20px;
             background: rgba(10, 22, 40, 0.6);
             border: 1px solid var(--border-subtle);
-            border-radius: var(--radius-sm);
+            border-radius: var(--radius);
             padding: 18px;
             box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.2);
         }
@@ -341,43 +342,83 @@
             align-items: center;
             justify-content: space-between;
         }
-        .vc-history-list {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
+
+        /* Buscador propio del historial */
+        .vc-history-search { position: relative; margin-bottom: 14px; }
+        .vc-history-search i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-subtle); font-size: .82rem; }
+        .vc-history-search input {
+            width: 100%; background: rgba(255,255,255,0.03); border: 1px solid var(--navy-border); border-radius: var(--radius-sm);
+            padding: 10px 14px 10px 34px; color: var(--white); font-family: var(--font-family); font-size: .84rem; transition: all .2s ease;
         }
+        .vc-history-search input::placeholder { color: var(--text-subtle); }
+        .vc-history-search input:focus { outline: none; border-color: var(--emerald); box-shadow: 0 0 0 3px var(--emerald-glow); background: rgba(0,200,83,0.03); }
+
+        .vc-history-list { display: flex; flex-direction: column; gap: 16px; }
+
+        /* Categorías del historial (Hoy, Ayer, Esta semana, Anteriores) */
+        .vc-history-group { display: flex; flex-direction: column; gap: 8px; }
+        .vc-history-group-title {
+            font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--emerald); padding-left: 2px;
+        }
+
         .vc-history-item {
             background: rgba(255,255,255,0.02);
             border: 1px solid var(--border-subtle);
             border-radius: var(--radius-sm);
-            padding: 10px 14px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
-            font-size: .85rem;
+            padding: 12px 14px;
             transition: all .2s ease;
         }
         .vc-history-item:hover {
             border-color: var(--navy-border);
             background: rgba(255,255,255,0.04);
         }
-        .vc-history-item .h-doc { font-family: var(--font-mono); color: var(--emerald-light); }
-        .vc-history-item .h-name { color: var(--white); font-weight: 500; }
-        .vc-history-item .h-time { color: var(--text-subtle); font-size: .7rem; }
-        .vc-history-item .h-del {
+        .vc-history-row-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: .85rem; }
+        .vc-history-row-top .h-doc { font-family: var(--font-mono); color: var(--emerald-light); flex-shrink: 0; }
+        .vc-history-row-top .h-name { color: var(--white); font-weight: 500; }
+
+        /* Fila inferior: fecha/hora a la izquierda, flecha de expandir a la derecha */
+        .vc-history-row-bottom { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; }
+        .vc-history-row-bottom .h-time { color: var(--text-subtle); font-size: .72rem; display: inline-flex; align-items: center; gap: 6px; }
+
+        .h-toggle {
             background: transparent;
-            border: none;
-            color: var(--text-subtle);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-muted);
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
-            padding: 4px 8px;
-            border-radius: 6px;
+            transition: all .2s ease;
+            flex-shrink: 0;
+        }
+        .h-toggle i { transition: transform .25s ease; }
+        .h-toggle:hover { color: var(--emerald-light); border-color: var(--border-active); background: rgba(0,200,83,0.08); }
+        .h-toggle.open { color: var(--emerald); border-color: var(--border-active); }
+        .h-toggle.open i { transform: rotate(180deg); }
+
+        /* Detalle expandible con el resultado completo de la consulta */
+        .vc-history-details { max-height: 0; overflow: hidden; transition: max-height .35s ease; }
+        .vc-history-details.open { max-height: 900px; margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border-subtle); }
+        .vc-history-fields { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px 16px; margin-bottom: 12px; }
+
+        .h-del-full {
+            background: transparent;
+            border: 1px solid var(--ruby);
+            color: var(--ruby);
+            font-size: .78rem;
+            font-weight: 700;
+            padding: 8px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
             transition: all .2s ease;
         }
-        .vc-history-item .h-del:hover {
-            color: var(--ruby);
-            background: rgba(229,57,53,0.08);
-        }
+        .h-del-full:hover { background: rgba(229,57,53,0.08); color: var(--ruby-light); border-color: var(--ruby-light); }
 
         .vc-history-empty {
             text-align: center;
@@ -886,10 +927,14 @@
                             </div>
                         </form>
                         <div class="vc-result" id="result-dni"><div class="vc-empty"><i class="fas fa-id-card"></i>Ingresa un DNI para ver el resultado aquí.</div></div>
-                        <div class="vc-history-wrap" id="history-dni">
-                            <div class="vc-history-title">Historial <span class="h-count"></span></div>
-                            <div class="vc-history-list" id="historyList-dni"></div>
+                    </div>
+                    <div class="vc-history-wrap" id="history-dni">
+                        <div class="vc-history-title">Historial <span class="h-count"></span></div>
+                        <div class="vc-history-search">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="historySearch-dni" placeholder="Buscar por nombre o DNI..." autocomplete="off" />
                         </div>
+                        <div class="vc-history-list" id="historyList-dni"></div>
                     </div>
                 </section>
 
@@ -916,10 +961,14 @@
                             </div>
                         </form>
                         <div class="vc-result" id="result-ruc"><div class="vc-empty"><i class="fas fa-building"></i>Ingresa un RUC para ver el resultado aquí.</div></div>
-                        <div class="vc-history-wrap" id="history-ruc">
-                            <div class="vc-history-title">Historial <span class="h-count"></span></div>
-                            <div class="vc-history-list" id="historyList-ruc"></div>
+                    </div>
+                    <div class="vc-history-wrap" id="history-ruc">
+                        <div class="vc-history-title">Historial <span class="h-count"></span></div>
+                        <div class="vc-history-search">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="historySearch-ruc" placeholder="Buscar por razón social o RUC..." autocomplete="off" />
                         </div>
+                        <div class="vc-history-list" id="historyList-ruc"></div>
                     </div>
                 </section>
 
@@ -946,10 +995,14 @@
                             </div>
                         </form>
                         <div class="vc-result" id="result-cedula"><div class="vc-empty"><i class="fas fa-passport"></i>Ingresa una cédula para ver el resultado aquí.</div></div>
-                        <div class="vc-history-wrap" id="history-cedula">
-                            <div class="vc-history-title">Historial <span class="h-count"></span></div>
-                            <div class="vc-history-list" id="historyList-cedula"></div>
+                    </div>
+                    <div class="vc-history-wrap" id="history-cedula">
+                        <div class="vc-history-title">Historial <span class="h-count"></span></div>
+                        <div class="vc-history-search">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="historySearch-cedula" placeholder="Buscar por nombre o cédula..." autocomplete="off" />
                         </div>
+                        <div class="vc-history-list" id="historyList-cedula"></div>
                     </div>
                 </section>
 
@@ -976,10 +1029,14 @@
                             </div>
                         </form>
                         <div class="vc-result" id="result-buscar-cedula"><div class="vc-empty"><i class="fas fa-search"></i>Ingresa un nombre para buscar coincidencias.</div></div>
-                        <div class="vc-history-wrap" id="history-buscar-cedula">
-                            <div class="vc-history-title">Historial <span class="h-count"></span></div>
-                            <div class="vc-history-list" id="historyList-buscar-cedula"></div>
+                    </div>
+                    <div class="vc-history-wrap" id="history-buscar-cedula">
+                        <div class="vc-history-title">Historial <span class="h-count"></span></div>
+                        <div class="vc-history-search">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="historySearch-buscar-cedula" placeholder="Buscar en el historial..." autocomplete="off" />
                         </div>
+                        <div class="vc-history-list" id="historyList-buscar-cedula"></div>
                     </div>
                 </section>
 
@@ -1013,10 +1070,14 @@
                             </div>
                         </form>
                         <div class="vc-result" id="result-buscar-dni"><div class="vc-empty"><i class="fas fa-search"></i>Completa nombres y apellido paterno para buscar.</div></div>
-                        <div class="vc-history-wrap" id="history-buscar-dni">
-                            <div class="vc-history-title">Historial <span class="h-count"></span></div>
-                            <div class="vc-history-list" id="historyList-buscar-dni"></div>
+                    </div>
+                    <div class="vc-history-wrap" id="history-buscar-dni">
+                        <div class="vc-history-title">Historial <span class="h-count"></span></div>
+                        <div class="vc-history-search">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="historySearch-buscar-dni" placeholder="Buscar en el historial..." autocomplete="off" />
                         </div>
+                        <div class="vc-history-list" id="historyList-buscar-dni"></div>
                     </div>
                 </section>
 
@@ -1043,10 +1104,14 @@
                             </div>
                         </form>
                         <div class="vc-result" id="result-telefonia-doc"><div class="vc-empty"><i class="fas fa-phone-volume"></i>Ingresa un DNI o RUC para ver los teléfonos asociados.</div></div>
-                        <div class="vc-history-wrap" id="history-telefonia-doc">
-                            <div class="vc-history-title">Historial <span class="h-count"></span></div>
-                            <div class="vc-history-list" id="historyList-telefonia-doc"></div>
+                    </div>
+                    <div class="vc-history-wrap" id="history-telefonia-doc">
+                        <div class="vc-history-title">Historial <span class="h-count"></span></div>
+                        <div class="vc-history-search">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="historySearch-telefonia-doc" placeholder="Buscar por documento..." autocomplete="off" />
                         </div>
+                        <div class="vc-history-list" id="historyList-telefonia-doc"></div>
                     </div>
                 </section>
 
@@ -1073,10 +1138,14 @@
                             </div>
                         </form>
                         <div class="vc-result" id="result-telefonia-numero"><div class="vc-empty"><i class="fas fa-mobile-alt"></i>Ingresa un número para ver su titularidad.</div></div>
-                        <div class="vc-history-wrap" id="history-telefonia-numero">
-                            <div class="vc-history-title">Historial <span class="h-count"></span></div>
-                            <div class="vc-history-list" id="historyList-telefonia-numero"></div>
+                    </div>
+                    <div class="vc-history-wrap" id="history-telefonia-numero">
+                        <div class="vc-history-title">Historial <span class="h-count"></span></div>
+                        <div class="vc-history-search">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="historySearch-telefonia-numero" placeholder="Buscar por número..." autocomplete="off" />
                         </div>
+                        <div class="vc-history-list" id="historyList-telefonia-numero"></div>
                     </div>
                 </section>
             </div>
@@ -1286,15 +1355,64 @@
             localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
         }
 
+        // Devuelve nombre y documento representativos de un registro, para el resumen del historial y el buscador
+        function getHistorySummary(d) {
+            let nombre = d.nombres || d.razonSocial || d.titular || d.nombreCompleto || 'Sin nombre';
+            if (typeof nombre === 'object') nombre = JSON.stringify(nombre);
+            let doc = d.dni || d.ruc || d.cedula || d.documento || d.numero || d.busqueda || '—';
+            if (typeof doc === 'object') doc = JSON.stringify(doc);
+            return { nombre, doc };
+        }
+
+        // Agrupa por categoría de fecha para organizar el historial (Hoy, Ayer, Esta semana, Anteriores)
+        function getHistoryCategory(fechaISO) {
+            const d = new Date(fechaISO);
+            const now = new Date();
+            const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const startOfYesterday = new Date(startOfToday); startOfYesterday.setDate(startOfYesterday.getDate() - 1);
+            const startOfWeek = new Date(startOfToday); startOfWeek.setDate(startOfWeek.getDate() - 7);
+            if (d >= startOfToday) return 'Hoy';
+            if (d >= startOfYesterday) return 'Ayer';
+            if (d >= startOfWeek) return 'Esta semana';
+            return 'Anteriores';
+        }
+
+        // Construye el registro del historial: fecha/hora abajo a la izquierda y flecha de expandir a la derecha
+        function tplHistoryItem(item, tipo) {
+            const { nombre, doc } = getHistorySummary(item.data);
+            const fecha = new Date(item.fecha);
+            const tiempo = fecha.toLocaleString('es-ES', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+            const builder = fieldsBuilders[tipo];
+            const detailHtml = builder ? builder(item.data) : '<div class="vc-empty">Sin datos disponibles.</div>';
+            return `
+                <div class="vc-history-item" data-id="${esc(item.id)}">
+                    <div class="vc-history-row-top">
+                        <span class="h-name">${esc(nombre)}</span>
+                        <span class="h-doc">${esc(doc)}</span>
+                    </div>
+                    <div class="vc-history-row-bottom">
+                        <span class="h-time"><i class="fas fa-clock"></i> ${esc(tiempo)}</span>
+                        <button class="h-toggle" data-id="${esc(item.id)}" aria-label="Ver resultado completo">
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                    </div>
+                    <div class="vc-history-details" id="details-${esc(item.id)}">
+                        <div class="vc-history-fields">${detailHtml}</div>
+                        <button class="h-del-full" data-id="${esc(item.id)}"><i class="fas fa-trash-alt"></i> Eliminar este registro</button>
+                    </div>
+                </div>
+            `;
+        }
+
         function renderHistory(tipo) {
             const listEl = document.getElementById('historyList-' + tipo);
             const wrapEl = document.getElementById('history-' + tipo);
             if (!listEl) return;
-            const history = getHistory().filter(item => item.tipo === tipo);
+            const fullHistory = getHistory().filter(item => item.tipo === tipo);
             const countEl = wrapEl?.querySelector('.h-count');
-            if (countEl) countEl.textContent = history.length ? `(${history.length})` : '';
+            if (countEl) countEl.textContent = fullHistory.length ? `(${fullHistory.length})` : '';
 
-            if (!history.length) {
+            if (!fullHistory.length) {
                 listEl.innerHTML = `
                     <div class="vc-history-empty">
                         <div class="empty-avatar"><i class="fas fa-folder-open"></i></div>
@@ -1303,27 +1421,51 @@
                 return;
             }
 
+            const searchInput = document.getElementById('historySearch-' + tipo);
+            const term = searchInput ? searchInput.value.trim().toLowerCase() : '';
+            const filtered = term ? fullHistory.filter(item => {
+                const { nombre, doc } = getHistorySummary(item.data);
+                return String(nombre).toLowerCase().includes(term) || String(doc).toLowerCase().includes(term);
+            }) : fullHistory;
+
+            if (!filtered.length) {
+                listEl.innerHTML = `
+                    <div class="vc-history-empty">
+                        <div class="empty-avatar"><i class="fas fa-search"></i></div>
+                        <span>No se encontraron consultas para "${esc(term)}"</span>
+                    </div>`;
+                return;
+            }
+
+            const categoryOrder = ['Hoy', 'Ayer', 'Esta semana', 'Anteriores'];
+            const groups = {};
+            filtered.forEach(item => {
+                const cat = getHistoryCategory(item.fecha);
+                (groups[cat] = groups[cat] || []).push(item);
+            });
+
             let html = '';
-            history.forEach(item => {
-                const d = item.data;
-                let nombre = d.nombres || d.razonSocial || d.titular || d.nombreCompleto || 'Sin nombre';
-                if (typeof nombre === 'object') nombre = JSON.stringify(nombre);
-                let doc = d.dni || d.ruc || d.cedula || d.documento || d.numero || d.busqueda || '—';
-                if (typeof doc === 'object') doc = JSON.stringify(doc);
-                const fecha = new Date(item.fecha);
-                const tiempo = fecha.toLocaleString('es-ES', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
+            categoryOrder.forEach(cat => {
+                if (!groups[cat] || !groups[cat].length) return;
                 html += `
-                    <div class="vc-history-item" data-id="${esc(item.id)}">
-                        <span class="h-name">${esc(nombre)}</span>
-                        <span class="h-doc">${esc(doc)}</span>
-                        <span class="h-time">${esc(tiempo)}</span>
-                        <button class="h-del" data-id="${esc(item.id)}" title="Eliminar"><i class="fas fa-trash-alt"></i></button>
-                    </div>
-                `;
+                    <div class="vc-history-group">
+                        <div class="vc-history-group-title">${esc(cat)}</div>
+                        ${groups[cat].map(item => tplHistoryItem(item, tipo)).join('')}
+                    </div>`;
             });
             listEl.innerHTML = html;
 
-            listEl.querySelectorAll('.h-del').forEach(btn => {
+            listEl.querySelectorAll('.h-toggle').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const id = btn.dataset.id;
+                    const details = document.getElementById('details-' + id);
+                    if (!details) return;
+                    const isOpen = details.classList.toggle('open');
+                    btn.classList.toggle('open', isOpen);
+                });
+            });
+
+            listEl.querySelectorAll('.h-del-full').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     const id = btn.dataset.id;
@@ -1359,23 +1501,20 @@
             `;
         }
 
-        const renderers = {
-            dni(container, data) {
-                const nombreCompleto = [data.nombres, data.apellidoPaterno, data.apellidoMaterno].filter(Boolean).join(' ');
-                const body = `
+        // Campos de cada tipo de consulta. Se usan tanto para el resultado principal como para
+        // el detalle expandible del historial, así ambos siempre muestran exactamente lo mismo.
+        const fieldsBuilders = {
+            dni(data) {
+                return `
                     ${dataItem('DNI', data.dni, true)}
                     ${dataItem('Nombres', data.nombres)}
                     ${dataItem('Apellido paterno', data.apellidoPaterno)}
                     ${dataItem('Apellido materno', data.apellidoMaterno)}
                     ${dataItem('Dígito verificador', data.codVerificaLetra || data.codVerifica, true)}
                 `;
-                container.innerHTML = buildResultCard(body, nombreCompleto || 'Persona encontrada', 'ok');
-                attachResultActions(container, 'dni', data);
             },
-            ruc(container, data) {
-                const estado = (data.estado || '').toUpperCase();
-                const pillClass = estado === 'ACTIVO' ? 'ok' : 'warn';
-                const body = `
+            ruc(data) {
+                return `
                     ${dataItem('RUC', data.ruc, true)}
                     ${dataItem('Nombre comercial', data.nombreComercial)}
                     ${dataItem('Condición', data.condicion)}
@@ -1388,12 +1527,9 @@
                         <div class="v">${esc(data.direccion)}</div>
                     </div>
                 `;
-                container.innerHTML = buildResultCard(body, data.razonSocial || 'Empresa encontrada', pillClass);
-                attachResultActions(container, 'ruc', data);
             },
-            cedula(container, data) {
-                const nombreCompleto = data.nombreCompleto || [data.nombres, data.apellidos].filter(Boolean).join(' ') || 'Persona encontrada';
-                const body = `
+            cedula(data) {
+                return `
                     ${dataItem('Cédula', data.cedula, true)}
                     ${dataItem('Nombres', data.nombres)}
                     ${dataItem('Apellidos', data.apellidos)}
@@ -1408,42 +1544,33 @@
                         <div class="v">${esc(data.direccion)}</div>
                     </div>
                 `;
-                container.innerHTML = buildResultCard(body, nombreCompleto, 'ok');
-                attachResultActions(container, 'cedula', data);
             },
-            'buscar-cedula'(container, data) {
+            'buscar-cedula'(data) {
                 const items = Array.isArray(data) ? data : (data.resultados || data.results || []);
                 if (!items.length) {
-                    container.innerHTML = `<div class="vc-empty"><i class="fas fa-user-slash"></i>No se encontraron coincidencias para ese nombre.</div>`;
-                    return;
+                    return `<div class="vc-empty"><i class="fas fa-user-slash"></i>No se encontraron coincidencias para ese nombre.</div>`;
                 }
-                let body = `<div class="vc-list-results">${items.map(p => `
+                return `<div class="vc-list-results">${items.map(p => `
                     <div class="vc-list-item">
                         <span class="who">${esc(p.nombreCompleto || p.nombres_completos || [p.nombres, p.apellidos].filter(Boolean).join(' '))}</span>
                         <span class="doc">${esc(p.cedula)}</span>
                     </div>`).join('')}</div>`;
-                container.innerHTML = buildResultCard(body, `${items.length} coincidencia${items.length > 1 ? 's' : ''}`, 'ok');
-                attachResultActions(container, 'buscar-cedula', data);
             },
-            'buscar-dni'(container, data) {
+            'buscar-dni'(data) {
                 const items = Array.isArray(data) ? data : (data.resultados || data.results || [data]);
                 if (!items.length || !items[0]) {
-                    container.innerHTML = `<div class="vc-empty"><i class="fas fa-user-slash"></i>No se encontraron coincidencias para ese nombre.</div>`;
-                    return;
+                    return `<div class="vc-empty"><i class="fas fa-user-slash"></i>No se encontraron coincidencias para ese nombre.</div>`;
                 }
-                let body = `<div class="vc-list-results">${items.map(p => `
+                return `<div class="vc-list-results">${items.map(p => `
                     <div class="vc-list-item">
                         <span class="who">${esc(p.nombreCompleto || p.nombres_completos || [p.nombres, p.apellidoPaterno, p.apellidoMaterno].filter(Boolean).join(' '))}</span>
                         <span class="doc">${esc(p.dni)}${p.departamento ? ' · ' + esc(p.departamento) : ''}</span>
                     </div>`).join('')}</div>`;
-                container.innerHTML = buildResultCard(body, `${items.length} coincidencia${items.length > 1 ? 's' : ''}`, 'ok');
-                attachResultActions(container, 'buscar-dni', data);
             },
-            'telefonia-doc'(container, data) {
+            'telefonia-doc'(data) {
                 const items = Array.isArray(data) ? data : (data.lineas || data.telefonos || data.resultados || [data]);
                 if (!items.length || !items[0]) {
-                    container.innerHTML = `<div class="vc-empty"><i class="fas fa-phone-slash"></i>No se encontraron números asociados a este documento.</div>`;
-                    return;
+                    return `<div class="vc-empty"><i class="fas fa-phone-slash"></i>No se encontraron números asociados a este documento.</div>`;
                 }
                 let body = '';
                 if (data.titular) {
@@ -1454,11 +1581,10 @@
                         <span class="doc"><i class="fas fa-phone" style="margin-right:8px;color:var(--emerald);"></i>${esc(t.numero || t.telefono)}</span>
                         <span class="who">${esc(t.operador || '')}${t.tipo ? ' · ' + esc(t.tipo) : ''}${t.estado ? ' · ' + esc(t.estado) : ''}</span>
                     </div>`).join('')}</div>`;
-                container.innerHTML = buildResultCard(body, `${items.length} número${items.length > 1 ? 's' : ''}`, 'ok');
-                attachResultActions(container, 'telefonia-doc', data);
+                return body;
             },
-            'telefonia-numero'(container, data) {
-                const body = `
+            'telefonia-numero'(data) {
+                return `
                     ${dataItem('Número', data.numero, true)}
                     ${dataItem('Documento titular', data.documento, true)}
                     ${dataItem('Operador', data.operador)}
@@ -1466,8 +1592,56 @@
                     ${dataItem('Departamento', data.departamento)}
                     ${dataItem('Fecha de activación', data.fecha_activacion || data.fechaActivacion)}
                 `;
+            }
+        };
+
+        const renderers = {
+            dni(container, data) {
+                const nombreCompleto = [data.nombres, data.apellidoPaterno, data.apellidoMaterno].filter(Boolean).join(' ');
+                container.innerHTML = buildResultCard(fieldsBuilders.dni(data), nombreCompleto || 'Persona encontrada', 'ok');
+                attachResultActions(container, 'dni', data);
+            },
+            ruc(container, data) {
+                const estado = (data.estado || '').toUpperCase();
+                const pillClass = estado === 'ACTIVO' ? 'ok' : 'warn';
+                container.innerHTML = buildResultCard(fieldsBuilders.ruc(data), data.razonSocial || 'Empresa encontrada', pillClass);
+                attachResultActions(container, 'ruc', data);
+            },
+            cedula(container, data) {
+                const nombreCompleto = data.nombreCompleto || [data.nombres, data.apellidos].filter(Boolean).join(' ') || 'Persona encontrada';
+                container.innerHTML = buildResultCard(fieldsBuilders.cedula(data), nombreCompleto, 'ok');
+                attachResultActions(container, 'cedula', data);
+            },
+            'buscar-cedula'(container, data) {
+                const items = Array.isArray(data) ? data : (data.resultados || data.results || []);
+                if (!items.length) {
+                    container.innerHTML = `<div class="vc-empty"><i class="fas fa-user-slash"></i>No se encontraron coincidencias para ese nombre.</div>`;
+                    return;
+                }
+                container.innerHTML = buildResultCard(fieldsBuilders['buscar-cedula'](data), `${items.length} coincidencia${items.length > 1 ? 's' : ''}`, 'ok');
+                attachResultActions(container, 'buscar-cedula', data);
+            },
+            'buscar-dni'(container, data) {
+                const items = Array.isArray(data) ? data : (data.resultados || data.results || [data]);
+                if (!items.length || !items[0]) {
+                    container.innerHTML = `<div class="vc-empty"><i class="fas fa-user-slash"></i>No se encontraron coincidencias para ese nombre.</div>`;
+                    return;
+                }
+                container.innerHTML = buildResultCard(fieldsBuilders['buscar-dni'](data), `${items.length} coincidencia${items.length > 1 ? 's' : ''}`, 'ok');
+                attachResultActions(container, 'buscar-dni', data);
+            },
+            'telefonia-doc'(container, data) {
+                const items = Array.isArray(data) ? data : (data.lineas || data.telefonos || data.resultados || [data]);
+                if (!items.length || !items[0]) {
+                    container.innerHTML = `<div class="vc-empty"><i class="fas fa-phone-slash"></i>No se encontraron números asociados a este documento.</div>`;
+                    return;
+                }
+                container.innerHTML = buildResultCard(fieldsBuilders['telefonia-doc'](data), `${items.length} número${items.length > 1 ? 's' : ''}`, 'ok');
+                attachResultActions(container, 'telefonia-doc', data);
+            },
+            'telefonia-numero'(container, data) {
                 const status = (data.estado || '').toUpperCase() === 'ACTIVO' ? 'ok' : 'warn';
-                container.innerHTML = buildResultCard(body, data.titular || data.nombre || 'Número consultado', status);
+                container.innerHTML = buildResultCard(fieldsBuilders['telefonia-numero'](data), data.titular || data.nombre || 'Número consultado', status);
                 attachResultActions(container, 'telefonia-numero', data);
             }
         };
@@ -1622,6 +1796,10 @@
             await loadCupo();
             ['dni', 'ruc', 'cedula', 'buscar-cedula', 'buscar-dni', 'telefonia-doc', 'telefonia-numero'].forEach(tipo => {
                 renderHistory(tipo);
+                const searchInput = document.getElementById('historySearch-' + tipo);
+                if (searchInput) {
+                    searchInput.addEventListener('input', () => renderHistory(tipo));
+                }
             });
         }
     </script>
