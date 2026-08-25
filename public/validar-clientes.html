@@ -44,7 +44,7 @@
             --shadow-emerald: 0 4px 20px rgba(0, 200, 83, 0.2);
             --sh-hov: 0 24px 64px rgba(0, 0, 0, 0.5), 0 6px 24px rgba(0, 200, 83, 0.18);
             --radius: 20px;
-            --radius-sm: 10px;
+            --radius-sm: 12px;
             --font-family: 'Outfit', 'Inter', sans-serif;
             --font-display: 'Space Grotesk', 'Outfit', sans-serif;
             --font-mono: 'DM Mono', monospace;
@@ -104,36 +104,16 @@
         #menu-toggle i { color: var(--emerald); font-size: 1.3rem; }
         main { position: relative; z-index: 1; width: 100%; }
 
-        /* ═══ HERO ═══ */
-        .vc-hero { max-width: 980px; margin: 0 auto; padding: 88px 20px 24px; text-align: center; }
-        .vc-hero-icon { width: 68px; height: 68px; margin: 0 auto 18px; border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 1.7rem; color: var(--navy-deep); background: linear-gradient(135deg, var(--emerald-light), var(--emerald-dark)); box-shadow: 0 8px 28px var(--emerald-glow); }
-        .vc-hero h1 { font-family: var(--font-display); font-size: clamp(1.6rem, 4vw, 2.4rem); font-weight: 800; color: var(--white); letter-spacing: -0.01em; }
-        .vc-hero h1 em { font-style: normal; color: var(--emerald); }
-        .vc-hero p { margin-top: 10px; color: var(--text-muted); font-size: 1rem; line-height: 1.6; max-width: 640px; margin-left: auto; margin-right: auto; }
-
-        /* ═══ CUPO BAR ═══ */
-        .cupo-wrap { max-width: 980px; margin: 0 auto; padding: 0 20px 8px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-        @media (max-width: 640px) { .cupo-wrap { grid-template-columns: 1fr; } }
-        .cupo-card { background: var(--navy-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 14px 16px; }
-        .cupo-card .cupo-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-        .cupo-card .cupo-label { font-size: .78rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: .06em; display: flex; align-items: center; gap: 6px; }
-        .cupo-card .cupo-value { font-family: var(--font-mono); font-size: .85rem; font-weight: 600; color: var(--white); }
-        .cupo-bar-track { height: 7px; border-radius: 99px; background: rgba(255,255,255,0.06); overflow: hidden; }
-        .cupo-bar-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--emerald-dark), var(--emerald-light)); transition: width .4s ease; }
-        .cupo-bar-fill.warn { background: linear-gradient(90deg, var(--gold-dim), var(--amber)); }
-        .cupo-bar-fill.danger { background: linear-gradient(90deg, var(--ruby), var(--ruby-light)); }
-        .cupo-note { margin-top: 8px; font-size: .72rem; color: var(--text-subtle); }
-
         /* ═══ LOGIN GATE ═══ */
-        .auth-gate { max-width: 980px; margin: 16px auto 0; padding: 0 20px; }
+        .auth-gate { max-width: 980px; margin: 16px auto 0; padding: 0 20px; width: 100%; }
         .auth-gate-inner { display: none; align-items: center; gap: 14px; background: rgba(255,167,38,0.08); border: 1px solid var(--amber-glow); border-radius: var(--radius-sm); padding: 16px 18px; }
         .auth-gate-inner.show { display: flex; }
         .auth-gate-inner i { font-size: 1.4rem; color: var(--amber); flex-shrink: 0; }
         .auth-gate-inner p { font-size: .88rem; color: var(--text-primary); line-height: 1.5; }
         .auth-gate-inner a { color: var(--emerald-light); font-weight: 700; text-decoration: none; }
 
-        /* ═══ TABS ═══ */
-        .vc-shell { max-width: 980px; margin: 22px auto 0; padding: 0 20px 64px; }
+        /* ═══ TABS & MAIN LAYOUT (UNIFORM MAX-WIDTH 980PX) ═══ */
+        .vc-shell { max-width: 980px; margin: 22px auto 0; padding: 0 20px 64px; width: 100%; }
         .vc-tabs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 22px; scrollbar-width: thin; }
         .vc-tabs::-webkit-scrollbar { height: 4px; }
         .vc-tabs::-webkit-scrollbar-thumb { background: var(--emerald-dark); border-radius: 4px; }
@@ -146,7 +126,7 @@
         .vc-panel.active { display: block; animation: fadeIn .25s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 
-        .vc-card { background: var(--navy-card); border: 1px solid var(--border-subtle); border-radius: var(--radius); box-shadow: var(--shadow-card); padding: 26px; }
+        .vc-card { background: var(--navy-card); border: 1px solid var(--border-subtle); border-radius: var(--radius); box-shadow: var(--shadow-card); padding: 26px; width: 100%; }
         @media (max-width: 640px) { .vc-card { padding: 20px 16px; } }
         .vc-card-head { margin-bottom: 18px; }
         .vc-card-head h2 { font-family: var(--font-display); font-size: 1.2rem; font-weight: 700; color: var(--white); display: flex; align-items: center; gap: 10px; }
@@ -164,42 +144,76 @@
         .vc-field input.invalid { border-color: var(--ruby); box-shadow: 0 0 0 3px var(--ruby-glow); }
         .vc-hint { font-size: .74rem; color: var(--text-subtle); margin-top: 6px; }
 
-        /* --- Botones en columna --- */
-        .vc-submit-row, .vc-clear-row {
+        /* ═══ BOTONES CON EFECTO DE DESTELLO LENTO Y SACUDIDA ═══ */
+        .vc-submit-row {
             width: 100%;
             margin-bottom: 8px;
+            position: relative;
         }
-        .vc-submit-row:last-child, .vc-clear-row:last-child {
+        .vc-submit-row::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 5%;
+            width: 90%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(105, 240, 174, 0.8), rgba(255, 215, 0, 0.9), rgba(105, 240, 174, 0.8), transparent);
+            border-radius: 999px;
+            filter: blur(1px);
+            opacity: 0.2;
+            animation: slowGlowShimmer 4s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes slowGlowShimmer {
+            0%, 100% { opacity: 0.2; transform: scaleX(0.8); }
+            50% { opacity: 1; transform: scaleX(1.05); filter: blur(0px); box-shadow: 0 0 14px rgba(0, 200, 83, 0.8); }
+        }
+
+        .vc-clear-row {
+            width: 100%;
             margin-bottom: 0;
         }
-        .vc-btn, .vc-clear-btn {
+
+        .vc-btn {
             width: 100%;
-            border-radius: 8px;
+            border-radius: 10px;
             justify-content: center;
             font-family: inherit;
-            font-size: .92rem;
-            font-weight: 700;
-            padding: 13px 28px;
+            font-size: .95rem;
+            font-weight: 800;
+            padding: 14px 28px;
             cursor: pointer;
             border: none;
-            transition: all .2s ease;
+            transition: all .25s ease;
             display: inline-flex;
             align-items: center;
             gap: 9px;
-        }
-        .vc-btn {
             background: linear-gradient(135deg, var(--emerald), var(--emerald-dark));
             color: var(--navy-deep);
             box-shadow: var(--shadow-emerald);
+            animation: periodicShake 6s cubic-bezier(0.36, 0.07, 0.19, 0.97) infinite;
         }
+        
+        @keyframes periodicShake {
+            0%, 82%, 100% { transform: translateY(0) rotate(0deg); }
+            84% { transform: translateY(-3px) rotate(-1.5deg); }
+            86% { transform: translateY(2px) rotate(1.5deg); }
+            88% { transform: translateY(-2px) rotate(-1deg); }
+            90% { transform: translateY(1px) rotate(1deg); }
+            92% { transform: translateY(-1px) rotate(-0.5deg); }
+        }
+
         .vc-btn:hover:not(:disabled) {
-            transform: translateY(-2px);
+            transform: translateY(-2px) scale(1.01);
             box-shadow: var(--sh-hov);
+            animation-play-state: paused;
         }
         .vc-btn:disabled {
             opacity: .5;
             cursor: not-allowed;
             transform: none;
+            animation: none;
         }
         .vc-btn .spin { display: none; }
         .vc-btn.loading .spin { display: inline-block; }
@@ -208,6 +222,18 @@
         .spin { animation: spin .8s linear infinite; }
 
         .vc-clear-btn {
+            width: 100%;
+            border-radius: 10px;
+            justify-content: center;
+            font-family: inherit;
+            font-size: .92rem;
+            font-weight: 700;
+            padding: 12px 28px;
+            cursor: pointer;
+            transition: all .2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
             background: transparent;
             border: 1px solid var(--ruby);
             color: var(--ruby);
@@ -242,12 +268,7 @@
         }
         .vc-result-head .name { font-family: var(--font-display); font-weight: 700; color: var(--white); font-size: 1.02rem; }
 
-        /* Botones de acción (magia, copiar, guardar) */
-        .vc-result-actions {
-            display: flex;
-            gap: 6px;
-            flex-shrink: 0;
-        }
+        .vc-result-actions { display: flex; gap: 6px; flex-shrink: 0; }
         .vc-action-btn {
             background: rgba(255,255,255,0.05);
             border: 1px solid var(--border-subtle);
@@ -269,20 +290,19 @@
         }
         .vc-action-btn:active { transform: scale(0.92); }
 
-        .vc-status-pill { font-size: .7rem; font-weight: 800; padding: 4px 12px; border-radius: 999px; text-transform: uppercase; letter-spacing: .04em; }
-        .vc-status-pill.ok { background: rgba(0,200,83,0.18); color: var(--emerald-light); }
-        .vc-status-pill.warn { background: rgba(255,167,38,0.18); color: var(--amber); }
-
         .vc-result-body { padding: 16px 18px; display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 14px 20px; }
         .vc-data-item .k { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--text-subtle); margin-bottom: 4px; }
         .vc-data-item .v { font-size: .92rem; color: var(--text-primary); font-weight: 500; word-break: break-word; }
         .vc-data-item .v.mono { font-family: var(--font-mono); }
 
-        /* ═══ HISTORIAL ═══ */
+        /* ═══ HISTORIAL SEPARADO EN SU PROPIO CONTENEDOR CARD ═══ */
         .vc-history-wrap {
-            margin-top: 20px;
-            border-top: 1px solid var(--border-subtle);
-            padding-top: 18px;
+            margin-top: 24px;
+            background: rgba(10, 22, 40, 0.6);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            padding: 18px;
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.2);
         }
         .vc-history-title {
             font-size: .85rem;
@@ -290,7 +310,7 @@
             color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: .06em;
-            margin-bottom: 12px;
+            margin-bottom: 14px;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -310,19 +330,15 @@
             justify-content: space-between;
             gap: 10px;
             font-size: .85rem;
+            transition: all .2s ease;
         }
-        .vc-history-item .h-doc {
-            font-family: var(--font-mono);
-            color: var(--emerald-light);
+        .vc-history-item:hover {
+            border-color: var(--navy-border);
+            background: rgba(255,255,255,0.04);
         }
-        .vc-history-item .h-name {
-            color: var(--white);
-            font-weight: 500;
-        }
-        .vc-history-item .h-time {
-            color: var(--text-subtle);
-            font-size: .7rem;
-        }
+        .vc-history-item .h-doc { font-family: var(--font-mono); color: var(--emerald-light); }
+        .vc-history-item .h-name { color: var(--white); font-weight: 500; }
+        .vc-history-item .h-time { color: var(--text-subtle); font-size: .7rem; }
         .vc-history-item .h-del {
             background: transparent;
             border: none;
@@ -336,11 +352,32 @@
             color: var(--ruby);
             background: rgba(229,57,53,0.08);
         }
+
         .vc-history-empty {
             text-align: center;
+            padding: 24px 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .vc-history-empty .empty-avatar {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.03);
+            border: 1px dashed var(--navy-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-subtle);
+            font-size: 1.4rem;
+            margin-bottom: 4px;
+        }
+        .vc-history-empty span {
             color: var(--text-subtle);
             font-size: .85rem;
-            padding: 12px 0;
         }
 
         .vc-skeleton { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 14px 20px; padding: 4px 2px; }
@@ -406,12 +443,12 @@
         @media (max-width: 640px) { .w-shape { display: none; } }
 
         .welcome-content { position: relative; z-index: 2; max-width: 720px; width: 100%; text-align: center; display: flex; flex-direction: column; align-items: center; }
-        .welcome-badge { display: inline-flex; align-items: center; gap: 8px; padding: 8px 18px; border-radius: 999px; background: rgba(0,200,83,0.1); border: 1px solid var(--border-active); color: var(--emerald-light); font-size: .78rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; margin-bottom: 22px; }
         .welcome-content h1 { font-family: var(--font-display); font-weight: 800; font-size: clamp(2rem, 6vw, 3.2rem); color: var(--white); line-height: 1.15; letter-spacing: -0.02em; }
         .welcome-content h1 em { font-style: normal; color: var(--emerald); text-shadow: 0 0 40px var(--emerald-glow); }
-        .welcome-content > p { margin-top: 18px; font-size: clamp(.95rem, 2vw, 1.1rem); color: var(--text-muted); line-height: 1.65; max-width: 560px; }
+        .welcome-content > p { margin-top: 14px; font-size: clamp(.95rem, 2vw, 1.1rem); color: var(--text-muted); line-height: 1.65; max-width: 560px; }
+
         .welcome-cta {
-            margin-top: 34px; display: inline-flex; align-items: center; gap: 12px;
+            margin-top: 28px; display: inline-flex; align-items: center; gap: 12px;
             background: linear-gradient(135deg, var(--emerald-light), var(--emerald-dark));
             color: var(--navy-deep); font-family: inherit; font-weight: 800; font-size: 1.02rem;
             padding: 16px 34px; border: none; border-radius: 999px; cursor: pointer;
@@ -421,8 +458,8 @@
         .welcome-cta:hover { transform: translateY(-3px); box-shadow: 0 16px 44px rgba(0,200,83,.32); }
         .welcome-cta:hover i { transform: translateX(4px); }
 
-        .welcome-logos { margin-top: 52px; display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap; }
-        .welcome-logos .logos-caption { width: 100%; font-size: .72rem; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--text-subtle); margin-bottom: 16px; }
+        .welcome-logos { margin-top: 36px; display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap; }
+        .welcome-logos .logos-caption { width: 100%; font-size: .72rem; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--text-subtle); margin-bottom: 14px; }
         .logo-chip {
             display: flex; align-items: center; gap: 10px; padding: 12px 20px;
             background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle);
@@ -437,23 +474,132 @@
         #app-screen { display: none; }
         #app-screen.show { display: block; animation: fadeIn .4s ease; }
 
-        /* ═══ TARJETA UNIFICADA: PERFIL + CONSULTAS DISPONIBLES ═══ */
-        .account-card { max-width: 980px; margin: 88px auto 0; padding: 20px 22px; background: var(--navy-card); border: 1px solid var(--border-subtle); border-radius: var(--radius); box-shadow: var(--shadow-card); }
+        /* ═══ TARJETA UNIFICADA CON ANCHO COHERENTE (980PX MAX) ═══ */
+        .account-card { max-width: 980px; margin: 88px auto 0; padding: 22px 24px; background: var(--navy-card); border: 1px solid var(--border-subtle); border-radius: var(--radius); box-shadow: var(--shadow-card); width: 100%; }
         @media (max-width: 640px) { .account-card { margin-top: 76px; padding: 18px 16px; border-radius: 16px; } }
-        .account-row { display: flex; align-items: center; gap: 14px; padding-bottom: 16px; margin-bottom: 16px; border-bottom: 1px solid var(--border-subtle); }
-        .account-avatar { width: 46px; height: 46px; flex-shrink: 0; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: var(--navy-deep); background: linear-gradient(135deg, var(--emerald-light), var(--emerald-dark)); box-shadow: 0 4px 16px var(--emerald-glow); }
+        .account-row { display: flex; align-items: center; gap: 14px; padding-bottom: 18px; margin-bottom: 18px; border-bottom: 1px solid var(--border-subtle); }
+        .account-avatar { width: 48px; height: 48px; flex-shrink: 0; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; color: var(--navy-deep); background: linear-gradient(135deg, var(--emerald-light), var(--emerald-dark)); box-shadow: 0 4px 16px var(--emerald-glow); }
         .account-info { flex: 1; min-width: 0; }
-        .account-name { font-family: var(--font-display); font-weight: 700; font-size: 1.02rem; color: var(--white); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .account-name { font-family: var(--font-display); font-weight: 700; font-size: 1.05rem; color: var(--white); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .account-sub { font-size: .78rem; color: var(--text-muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .account-plan-btn { flex-shrink: 0; display: inline-flex; align-items: center; gap: 7px; padding: 9px 16px; border-radius: 999px; background: rgba(255,215,0,0.08); border: 1px solid rgba(255,215,0,0.25); color: var(--gold); font-size: .8rem; font-weight: 700; text-decoration: none; transition: all .2s ease; }
         .account-plan-btn:hover { background: rgba(255,215,0,0.14); transform: translateY(-2px); }
-        .account-quotas { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-        @media (max-width: 560px) { .account-quotas { grid-template-columns: 1fr; } }
-        .quota-item .quota-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-        .quota-label { font-size: .78rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: .05em; display: flex; align-items: center; gap: 6px; }
-        .quota-value { font-family: var(--font-mono); font-size: .85rem; font-weight: 700; color: var(--white); transition: color .25s ease; }
-        .quota-value.low { color: var(--ruby-light); }
-        .quota-value.low::before { content: '\f071'; font-family: 'Font Awesome 6 Free'; font-weight: 900; margin-right: 5px; font-size: .72rem; }
+
+        /* ═══ INDICADORES DE CONSUMO EN ARCO CIRCULAR — FILA HORIZONTAL CON SCROLL ═══ */
+        .account-quotas {
+            display: flex;
+            overflow-x: auto;
+            gap: 20px;
+            width: 100%;
+            padding-bottom: 8px;
+            -webkit-overflow-scrolling: touch;
+            scroll-snap-type: x mandatory;
+            align-items: stretch;
+        }
+        .account-quotas .quota-item {
+            flex: 0 0 auto;
+            min-width: 220px;
+            max-width: 280px;
+            scroll-snap-align: start;
+            display: flex;
+            flex-direction: column;
+            background: rgba(10, 22, 40, 0.4);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            align-items: center;
+            text-align: center;
+            position: relative;
+        }
+        .account-quotas .quota-item-header {
+            font-size: .78rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 6px;
+        }
+
+        /* Gauge Arc Semicircular Movistar */
+        .movistar-gauge-wrap {
+            position: relative;
+            width: 170px;
+            height: 95px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            margin: 4px 0;
+        }
+        .movistar-gauge-wrap svg {
+            width: 170px;
+            height: 95px;
+            overflow: visible;
+        }
+        .gauge-bg-path {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.08);
+            stroke-width: 11;
+            stroke-linecap: round;
+        }
+        .gauge-fill-path {
+            fill: none;
+            stroke: var(--emerald);
+            stroke-width: 11;
+            stroke-linecap: round;
+            stroke-dasharray: 220;
+            stroke-dashoffset: 0;
+            transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1), stroke 0.4s ease;
+        }
+        .gauge-fill-path.warn { stroke: var(--amber); }
+        .gauge-fill-path.danger { stroke: var(--ruby-light); }
+
+        .gauge-inner-info {
+            position: absolute;
+            bottom: 4px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .gauge-inner-sub {
+            font-size: .68rem;
+            color: var(--text-subtle);
+            text-transform: uppercase;
+            letter-spacing: .04em;
+            font-weight: 600;
+        }
+        .gauge-inner-val {
+            font-family: var(--font-mono);
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: var(--white);
+            line-height: 1.25;
+        }
+        .gauge-inner-val.low { color: var(--ruby-light); }
+
+        .gauge-footer-note {
+            font-size: .73rem;
+            color: var(--text-subtle);
+            margin-top: 4px;
+        }
+
+        /* Ocultar scrollbar en navegadores compatibles */
+        .account-quotas::-webkit-scrollbar {
+            height: 5px;
+        }
+        .account-quotas::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.03);
+            border-radius: 4px;
+        }
+        .account-quotas::-webkit-scrollbar-thumb {
+            background: var(--emerald-dark);
+            border-radius: 4px;
+        }
     </style>
 </head>
 <body>
@@ -469,7 +615,6 @@
             <div class="w-shape s3"></div>
         </div>
         <div class="welcome-content">
-            <span class="welcome-badge"><i class="fas fa-shield-halved"></i> Plataforma segura de validación</span>
             <h1>Validar <em>clientes</em> en segundos</h1>
             <p>Consulta DNI, RUC, cédula venezolana y números de teléfono de forma segura, sin exponer credenciales ni saltar los límites de tu plan.</p>
             <button id="startAppBtn" class="welcome-cta"><span>Empezar ahora</span><i class="fas fa-arrow-right"></i></button>
@@ -526,20 +671,37 @@
                 </div>
                 <a href="/planes" class="account-plan-btn"><i class="fas fa-bolt"></i> Mi plan</a>
             </div>
+            
+            <!-- Indicadores Arco Semicircular Movistar — en fila horizontal con scroll -->
             <div class="account-quotas">
                 <div class="quota-item">
-                    <div class="quota-top">
-                        <span class="quota-label"><i class="fas fa-id-card"></i> Identidad</span>
-                        <span class="quota-value" id="cupoDocsValue">—</span>
+                    <div class="quota-item-header"><i class="fas fa-id-card"></i> Consultas Identidad</div>
+                    <div class="movistar-gauge-wrap">
+                        <svg viewBox="0 0 100 55">
+                            <path class="gauge-bg-path" d="M 10 50 A 40 40 0 0 1 90 50"></path>
+                            <path class="gauge-fill-path" id="arcGaugeDocs" d="M 10 50 A 40 40 0 0 1 90 50"></path>
+                        </svg>
+                        <div class="gauge-inner-info">
+                            <span class="gauge-inner-sub">Te quedan</span>
+                            <span class="gauge-inner-val" id="cupoDocsValue">—</span>
+                        </div>
                     </div>
-                    <div class="cupo-bar-track"><div class="cupo-bar-fill" id="cupoDocsBar" style="width:0%"></div></div>
+                    <div class="gauge-footer-note">DNI · RUC · Cédula</div>
                 </div>
+
                 <div class="quota-item">
-                    <div class="quota-top">
-                        <span class="quota-label"><i class="fas fa-phone"></i> Teléfono</span>
-                        <span class="quota-value" id="cupoTelValue">—</span>
+                    <div class="quota-item-header"><i class="fas fa-phone"></i> Consultas Teléfono</div>
+                    <div class="movistar-gauge-wrap">
+                        <svg viewBox="0 0 100 55">
+                            <path class="gauge-bg-path" d="M 10 50 A 40 40 0 0 1 90 50"></path>
+                            <path class="gauge-fill-path" id="arcGaugeTel" d="M 10 50 A 40 40 0 0 1 90 50"></path>
+                        </svg>
+                        <div class="gauge-inner-info">
+                            <span class="gauge-inner-sub">Te quedan</span>
+                            <span class="gauge-inner-val" id="cupoTelValue">—</span>
+                        </div>
                     </div>
-                    <div class="cupo-bar-track"><div class="cupo-bar-fill" id="cupoTelBar" style="width:0%"></div></div>
+                    <div class="gauge-footer-note">Titularidad y operador</div>
                 </div>
             </div>
         </div>
@@ -884,25 +1046,40 @@
             return false;
         }
 
-        // ========== CUPO ==========
-        const CUPO_UMBRAL_BAJO = 8; // por debajo de este número de consultas restantes, se marca en rojo
-        function paintCupo(elValueId, elBarId, limite, consumidas) {
+        // ========== CUPO (ARCO CIRCULAR ESTILO MOVISTAR) ==========
+        const CUPO_UMBRAL_BAJO = 8;
+        const MAX_DASH_OFF = 126; 
+
+        function paintCupo(elValueId, elArcId, limite, consumidas) {
             const valueEl = document.getElementById(elValueId);
-            const barEl = document.getElementById(elBarId);
+            const arcEl = document.getElementById(elArcId);
+            if (!valueEl || !arcEl) return;
+
             if (limite === -1 || limite === undefined || limite === null) {
                 valueEl.textContent = 'Ilimitadas';
                 valueEl.classList.remove('low');
-                barEl.style.width = '100%';
-                barEl.className = 'cupo-bar-fill';
+                arcEl.style.strokeDashoffset = '0';
+                arcEl.className = 'gauge-fill-path';
                 return;
             }
+
             const disponibles = Math.max(limite - consumidas, 0);
-            const pct = limite > 0 ? Math.min((consumidas / limite) * 100, 100) : 100;
             const esBajo = disponibles <= CUPO_UMBRAL_BAJO;
-            valueEl.textContent = `${disponibles} / ${limite} disponibles`;
+
+            valueEl.textContent = `${disponibles} / ${limite}`;
             valueEl.classList.toggle('low', esBajo);
-            barEl.style.width = pct + '%';
-            barEl.className = 'cupo-bar-fill' + (esBajo ? ' danger' : pct >= 75 ? ' warn' : '');
+
+            const pctRestante = limite > 0 ? (disponibles / limite) : 0;
+            const offset = MAX_DASH_OFF * (1 - pctRestante);
+            arcEl.style.strokeDashoffset = offset.toFixed(1);
+
+            if (esBajo) {
+                arcEl.className = 'gauge-fill-path danger';
+            } else if (pctRestante <= 0.3) {
+                arcEl.className = 'gauge-fill-path warn';
+            } else {
+                arcEl.className = 'gauge-fill-path';
+            }
         }
 
         async function loadCupo() {
@@ -912,8 +1089,8 @@
                 if (!res.ok) return;
                 const data = await res.json();
                 if (data.success) {
-                    paintCupo('cupoDocsValue', 'cupoDocsBar', data.consultas.limite, data.consultas.consumidas);
-                    paintCupo('cupoTelValue', 'cupoTelBar', data.telefonos.limite, data.telefonos.consumidas);
+                    paintCupo('cupoDocsValue', 'arcGaugeDocs', data.consultas.limite, data.consultas.consumidas);
+                    paintCupo('cupoTelValue', 'arcGaugeTel', data.telefonos.limite, data.telefonos.consumidas);
                 }
             } catch (e) { console.error('Error cargando cupo', e); }
         }
@@ -937,7 +1114,7 @@
             container.innerHTML = `<div class="vc-alert ${isLimit ? 'limit' : 'error'}"><i class="fas ${isLimit ? 'fa-triangle-exclamation' : 'fa-circle-exclamation'}"></i><span>${esc(message)}</span></div>`;
         }
 
-        // ========== HISTORIAL (LocalStorage) ==========
+        // ========== HISTORIAL (LocalStorage) CON AVATAR SI ESTÁ VACÍO ==========
         const HISTORY_KEY = 'validation_history';
 
         function getHistory() {
@@ -975,7 +1152,11 @@
             if (countEl) countEl.textContent = history.length ? `(${history.length})` : '';
 
             if (!history.length) {
-                listEl.innerHTML = `<div class="vc-history-empty">No hay registros guardados.</div>`;
+                listEl.innerHTML = `
+                    <div class="vc-history-empty">
+                        <div class="empty-avatar"><i class="fas fa-folder-open"></i></div>
+                        <span>Sin consultas registradas aún</span>
+                    </div>`;
                 return;
             }
 
@@ -999,7 +1180,6 @@
             });
             listEl.innerHTML = html;
 
-            // Eventos para eliminar
             listEl.querySelectorAll('.h-del').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     e.stopPropagation();
@@ -1014,7 +1194,6 @@
         }
 
         // ========== RENDERERS CON BOTONES DE ACCIÓN ==========
-        // Guardamos referencia al último resultado para poder guardar/copiar
         let lastResultData = null;
         let lastResultType = null;
         let lastResultContainer = null;
@@ -1150,20 +1329,16 @@
             }
         };
 
-        // ========== FUNCIONES PARA COPIAR Y GUARDAR ==========
         function attachResultActions(container, tipo, data) {
-            // Guardar referencia para acciones
             lastResultData = data;
             lastResultType = tipo;
             lastResultContainer = container;
 
-            // Botón copiar
             const copyBtn = container.querySelector('[data-action="copy"]');
             if (copyBtn) {
                 copyBtn.addEventListener('click', () => {
                     const card = container.querySelector('.vc-result-card');
                     if (!card) return;
-                    // Extraer texto legible del resultado
                     const bodyEl = card.querySelector('.vc-result-body');
                     const items = bodyEl.querySelectorAll('.vc-data-item');
                     let text = '';
@@ -1172,14 +1347,11 @@
                         const v = item.querySelector('.v')?.textContent?.trim() || '';
                         if (k && v) text += `${k}: ${v}\n`;
                     });
-                    if (!text) {
-                        // fallback: todo el texto
-                        text = bodyEl.textContent.trim();
-                    }
+                    if (!text) text = bodyEl.textContent.trim();
+                    
                     navigator.clipboard?.writeText(text).then(() => {
                         showToast('Resultado copiado al portapapeles', 'fa-copy');
                     }).catch(() => {
-                        // fallback
                         const area = document.createElement('textarea');
                         area.value = text;
                         document.body.appendChild(area);
@@ -1190,7 +1362,6 @@
                 });
             }
 
-            // Botón guardar
             const saveBtn = container.querySelector('[data-action="save"]');
             if (saveBtn) {
                 saveBtn.addEventListener('click', () => {
@@ -1201,7 +1372,6 @@
                 });
             }
 
-            // Botón magia (sin funcionalidad aún)
             const magicBtn = container.querySelector('[data-action="magic"]');
             if (magicBtn) {
                 magicBtn.addEventListener('click', () => {
@@ -1215,10 +1385,6 @@
             if (endpoint === 'dni') return `/api/validar/dni/${encodeURIComponent(payload.dni)}`;
             if (endpoint === 'ruc') return `/api/validar/ruc/${encodeURIComponent(payload.ruc)}`;
             return `/api/validar/${endpoint}`;
-        }
-
-        function validateField(input) {
-            input.classList.remove('invalid');
         }
 
         document.querySelectorAll('.vc-form').forEach(form => {
@@ -1275,7 +1441,6 @@
                     const renderer = renderers[endpoint];
                     if (renderer) {
                         renderer(resultEl, json.data);
-                        // Cargar historial para este tipo
                         renderHistory(endpoint);
                     }
                     showToast('Consulta realizada con éxito');
@@ -1300,21 +1465,18 @@
                 if (resultEl) {
                     resultEl.innerHTML = `<div class="vc-empty"><i class="fas fa-inbox"></i>Sin resultados aún.</div>`;
                 }
-                // No limpiar historial
             });
         });
 
-        // Solo dígitos en campos numéricos
         ['dniInput', 'rucInput', 'telDocInput', 'telNumInput'].forEach(id => {
             const el = document.getElementById(id);
             el && el.addEventListener('input', () => { el.value = el.value.replace(/\D/g, ''); });
         });
 
-        // ========== INIT (se ejecuta al pulsar "Empezar ahora") ==========
+        // ========== INIT ==========
         async function initApp() {
             await checkSession();
             await loadCupo();
-            // Cargar historial para todos los tipos
             ['dni', 'ruc', 'cedula', 'buscar-cedula', 'buscar-dni', 'telefonia-doc', 'telefonia-numero'].forEach(tipo => {
                 renderHistory(tipo);
             });
