@@ -143,7 +143,7 @@
         .vc-tabs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 22px; scrollbar-width: thin; }
         .vc-tabs::-webkit-scrollbar { height: 4px; }
         .vc-tabs::-webkit-scrollbar-thumb { background: var(--emerald-dark); border-radius: 4px; }
-        .vc-tab { flex-shrink: 0; display: flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 999px; background: var(--navy-card); border: 1px solid var(--border-subtle); color: var(--text-muted); font-size: .85rem; font-weight: 600; cursor: pointer; transition: all .2s ease; white-space: nowrap; }
+        .vc-tab { flex-shrink: 0; width: 190px; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 18px; border-radius: 10px; background: var(--navy-card); border: 1px solid var(--border-subtle); color: var(--text-muted); font-size: .85rem; font-weight: 600; cursor: pointer; transition: all .2s ease; white-space: nowrap; }
         .vc-tab i { font-size: .95rem; }
         .vc-tab:hover { color: var(--white); border-color: var(--navy-border); }
         .vc-tab.active { background: linear-gradient(135deg, rgba(0,200,83,0.16), rgba(0,200,83,0.06)); border-color: var(--border-active); color: var(--emerald-light); }
@@ -746,7 +746,7 @@
         </div>
         <div class="welcome-content">
             <h1>Validar <em>clientes</em> en segundos</h1>
-            <p>Consulta DNI, RUC, cédula venezolana y números de teléfono de forma segura, sin exponer credenciales ni saltar los límites de tu plan.</p>
+            <p>Consulta DNI, RUC, cédula venezolana y números de teléfono de forma segura, sin exponer tus datos ni superar los límites de tu plan.</p>
             <button id="startAppBtn" class="welcome-cta"><span>Empezar ahora</span><i class="fas fa-arrow-right"></i></button>
             <div class="welcome-logos">
                 <span class="logos-caption">Datos verificados contra fuentes oficiales</span>
@@ -1518,7 +1518,7 @@
             const magicBtn = container.querySelector('[data-action="magic"]');
             if (magicBtn) {
                 magicBtn.addEventListener('click', () => {
-                    showToast('Funcionalidad mágica próxima', 'fa-wand-magic-sparkles');
+                    showToast('Esta función estará disponible pronto', 'fa-wand-magic-sparkles');
                 });
             }
         }
