@@ -1514,21 +1514,21 @@
                     <span>Planes</span>
                 </a>
                 <div class="sb-cat">Herramientas</div>
-                <a href="#" data-target="generar-boletas">
+                <a href="generar-boletas.html" data-target="generar-boletas">
                     <i class="fas fa-file-code sb-icon"></i>
                     <span>Generar Boletas</span>
                 </a>
-                <a href="#" data-target="validar-clientes">
+                <a href="validar-clientes.html" data-target="validar-clientes">
                     <i class="fas fa-globe sb-icon"></i>
                     <span>Validar Clientes</span>
                 </a>
                 
                 <div class="sb-cat">Cuenta</div>
-                <a href="#" data-target="ayuda">
+                <a href="ayuda.html" data-target="ayuda">
                     <i class="fas fa-headset sb-icon"></i>
                     <span>Ayuda y soporte</span>
                 </a>
-                <a href="#" data-target="actividad">
+                <a href="actividad.html" data-target="actividad">
                     <i class="fas fa-user-circle sb-icon"></i>
                     <span>Mi cuenta</span>
                 </a>
@@ -2053,17 +2053,17 @@
             window.location.href = url;
         }
 
+        // Funciones de navegación corregidas
         function handleFreeStart() {
-            // Redirigir a registro o login
-            window.location.href = '/register.html';
+            window.location.href = '/validar-clientes.html';
         }
 
-        // Funciones para los dos botones principales del Hero
         function handleGenerateBoletas() {
-            window.location.href = '/register.html';
+            window.location.href = '/generar-boletas.html';
         }
+
         function handleValidateClients() {
-            window.location.href = '/register.html';
+            window.location.href = '/validar-clientes.html';
         }
 
         // ========== SIDEBAR ==========
@@ -2096,8 +2096,8 @@
         sidebar.querySelectorAll('nav a').forEach(link => {
             link.addEventListener('click', (e) => {
                 const target = link.getAttribute('data-target');
+                // Si es un enlace a otra página (no home y no empieza con #), permitir navegación normal
                 if (target && target !== 'home' && !target.startsWith('#')) {
-                    // Si es un enlace a otra página, dejar que navegue
                     return;
                 }
                 e.preventDefault();
