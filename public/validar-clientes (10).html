@@ -1,0 +1,1876 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Validar Clientes — DNI, RUC, Cédula y Teléfonos | FacilitoTools</title>
+    <meta name="description" content="Valida DNI, RUC, cédula venezolana y números de teléfono de tus clientes al instante, de forma segura y profesional." />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://facilitotools.com/validar-clientes" />
+
+    <link rel="icon" type="image/png" href="https://i.postimg.cc/fLYYD0Bb/1000153255-preview-rev-1.png" />
+    <link rel="shortcut icon" type="image/png" href="https://i.postimg.cc/fLYYD0Bb/1000153255-preview-rev-1.png" />
+    <link rel="apple-touch-icon" href="https://i.postimg.cc/fLYYD0Bb/1000153255-preview-rev-1.png" />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+    <style>
+        :root {
+            --navy-deep: #0A1628;
+            --navy-surface: #0F1F3D;
+            --navy-card: #15294A;
+            --navy-border: #1E3A5F;
+            --emerald: #00C853;
+            --emerald-light: #69F0AE;
+            --emerald-dark: #00A844;
+            --emerald-glow: rgba(0, 200, 83, 0.2);
+            --gold: #FFD700;
+            --gold-dim: #B8960F;
+            --ruby: #E53935;
+            --ruby-light: #FF5252;
+            --ruby-glow: rgba(229, 57, 53, 0.2);
+            --amber: #FFA726;
+            --amber-glow: rgba(255, 167, 38, 0.18);
+            --white: #F8FAFC;
+            --text-primary: #E2E8F0;
+            --text-muted: #94A3B8;
+            --text-subtle: #64748B;
+            --border-subtle: rgba(255, 255, 255, 0.06);
+            --border-active: rgba(0, 200, 83, 0.25);
+            --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.4);
+            --shadow-emerald: 0 4px 20px rgba(0, 200, 83, 0.2);
+            --sh-hov: 0 24px 64px rgba(0, 0, 0, 0.5), 0 6px 24px rgba(0, 200, 83, 0.18);
+            --radius: 20px;
+            --radius-sm: 12px;
+            --font-family: 'Outfit', 'Inter', sans-serif;
+            --font-display: 'Space Grotesk', 'Outfit', sans-serif;
+            --font-mono: 'DM Mono', monospace;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { font-size: 106.25%; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; }
+        body {
+            font-family: var(--font-family);
+            background: var(--navy-deep);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            -webkit-font-smoothing: antialiased;
+        }
+        body::before {
+            content: '';
+            position: fixed; inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+            pointer-events: none; z-index: -1; opacity: 0.6;
+        }
+        .ambient-1 { position: fixed; top: -20%; left: -10%; width: 60vw; height: 60vw; border-radius: 50%; background: radial-gradient(circle, rgba(0,200,83,0.03) 0%, transparent 65%); pointer-events: none; z-index: -1; animation: floatAmbient 10s ease-in-out infinite; }
+        .ambient-2 { position: fixed; bottom: -20%; right: -10%; width: 50vw; height: 50vw; border-radius: 50%; background: radial-gradient(circle, rgba(255,215,0,0.04) 0%, transparent 65%); pointer-events: none; z-index: -1; animation: floatAmbient 12s ease-in-out infinite reverse; }
+        @keyframes floatAmbient { 0%,100%{transform:translate(0,0) scale(1);} 33%{transform:translate(20px,-20px) scale(1.05);} 66%{transform:translate(-15px,15px) scale(0.95);} }
+
+        /* ═══ SIDEBAR ═══ */
+        #sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 50; opacity: 0; transition: opacity .3s ease; display: none; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+        #sidebar-overlay.opacity-100 { opacity: 1; }
+        #sidebar-overlay.hidden { display: none; }
+        #sidebar { position: fixed; top: 0; left: 0; height: 100%; width: 290px; background: linear-gradient(180deg,#0A1628 0%,#0F1F3D 100%) !important; border-right: 1px solid var(--border-active); z-index: 60; overflow: hidden; transition: transform .35s cubic-bezier(.4,0,.2,1); transform: translateX(-100%); display: flex; flex-direction: column; box-shadow: 8px 0 40px rgba(0,0,0,.5); }
+        #sidebar.open { transform: translateX(0); }
+        .sb-header { padding: 32px 20px 20px; background: linear-gradient(160deg,#0A1628 0%,#0F1F3D 100%); border-bottom: 1px solid var(--border-active); text-align: center; position: relative; overflow: hidden; flex-shrink: 0; }
+        .sb-header::before { content: ''; position: absolute; top:0; left:0; right:0; height:2px; background: linear-gradient(90deg, transparent, var(--emerald), var(--gold), transparent); animation: shimmerHeader 3s infinite; }
+        @keyframes shimmerHeader { 0%,100%{transform:translateX(-100%);} 50%{transform:translateX(100%);} }
+        .sb-logo-box { width: 68px; height: 68px; margin: 0 auto 12px; border-radius: 18px; overflow: hidden; border: 2px solid var(--border-active); box-shadow: 0 0 25px var(--emerald-glow); transition: transform .3s ease; background: rgba(0,200,83,0.05); }
+        .sb-logo-box:hover { transform: scale(1.1) rotate(5deg); }
+        .sb-logo-box img { width: 100%; height: 100%; object-fit: cover; }
+        .sb-brand { font-weight: 800; font-size: 1.3rem; color: var(--gold) !important; letter-spacing: .2em; text-transform: uppercase; text-shadow: 0 0 20px rgba(255,215,0,.4); }
+        .sb-tagline { font-size: .7rem; font-weight: 500; color: var(--text-muted); letter-spacing: .15em; margin-top: 6px; text-transform: uppercase; }
+        .sb-scroll-area { flex: 1; overflow-y: auto; padding: 8px 0; }
+        .sb-scroll-area::-webkit-scrollbar { width: 3px; }
+        .sb-scroll-area::-webkit-scrollbar-thumb { background: var(--emerald-dark); border-radius: 3px; }
+        .sb-cat { padding: 14px 24px 8px; font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .2em; color: var(--emerald); }
+        #sidebar nav a { display: flex; align-items: center; gap: 12px; padding: 12px 24px; color: var(--text-primary) !important; transition: all .25s ease; text-decoration: none; font-size: .9rem; font-weight: 500; position: relative; overflow: hidden; cursor: pointer; }
+        #sidebar nav a::before { content: ''; position: absolute; left:0; top:0; bottom:0; width:3px; background: var(--emerald); transform: scaleY(0); transition: transform .25s ease; }
+        #sidebar nav a:hover { background: rgba(0,200,83,0.08); color: var(--emerald-light) !important; transform: translateX(4px); }
+        #sidebar nav a:hover::before { transform: scaleY(1); }
+        #sidebar nav a.active { background: linear-gradient(90deg, rgba(0,200,83,0.12) 0%, transparent 100%); color: var(--emerald) !important; font-weight: 700; }
+        #sidebar nav a.active::before { transform: scaleY(1); }
+        .sb-icon { width: 20px; height: 20px; flex-shrink: 0; font-size: 1.1rem; text-align: center; color: var(--text-muted); transition: color .25s ease; }
+        #sidebar nav a:hover .sb-icon, #sidebar nav a.active .sb-icon { color: var(--emerald); }
+        .sb-footer { padding: 16px 20px; border-top: 1px solid var(--border-subtle); display: flex; gap: 16px; justify-content: center; background: rgba(0,0,0,0.2); flex-shrink: 0; }
+        .sb-footer a { color: var(--text-muted) !important; font-size: 1.3rem; transition: all .25s ease; }
+        .sb-footer a:hover { color: var(--emerald) !important; transform: translateY(-3px); }
+
+        /* ═══ MENÚ DENTRO DE LA TARJETA ═══ */
+        #menu-toggle {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            z-index: 10;
+            background: rgba(15,31,61,0.9);
+            color: var(--emerald);
+            border: 1px solid var(--border-active);
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(0,0,0,.3);
+            transition: all .3s ease;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        #menu-toggle:hover {
+            transform: scale(1.08);
+            background: rgba(0,200,83,0.1);
+            box-shadow: 0 6px 20px var(--emerald-glow);
+        }
+        #menu-toggle i { color: var(--emerald); font-size: 1.3rem; }
+
+        main { position: relative; z-index: 1; width: 100%; }
+
+        /* ═══ LOGIN GATE ═══ */
+        .auth-gate { max-width: 980px; margin: 16px auto 0; padding: 0 20px; width: 100%; }
+        .auth-gate-inner { display: none; align-items: center; gap: 14px; background: rgba(255,167,38,0.08); border: 1px solid var(--amber-glow); border-radius: var(--radius-sm); padding: 16px 18px; }
+        .auth-gate-inner.show { display: flex; }
+        .auth-gate-inner i { font-size: 1.4rem; color: var(--amber); flex-shrink: 0; }
+        .auth-gate-inner p { font-size: .88rem; color: var(--text-primary); line-height: 1.5; }
+        .auth-gate-inner a { color: var(--emerald-light); font-weight: 700; text-decoration: none; }
+
+        /* ═══ TABS & MAIN LAYOUT (UNIFORM MAX-WIDTH 980PX) ═══ */
+        .vc-shell { max-width: 980px; margin: 22px auto 0; padding: 0 20px 64px; width: 100%; }
+        .vc-tabs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 22px; scrollbar-width: thin; }
+        .vc-tabs::-webkit-scrollbar { height: 4px; }
+        .vc-tabs::-webkit-scrollbar-thumb { background: var(--emerald-dark); border-radius: 4px; }
+        .vc-tab { flex-shrink: 0; width: 190px; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 18px; border-radius: 10px; background: var(--navy-card); border: 1px solid var(--border-subtle); color: var(--text-muted); font-size: .85rem; font-weight: 600; cursor: pointer; transition: all .2s ease; white-space: nowrap; }
+        .vc-tab i { font-size: .95rem; }
+        .vc-tab:hover { color: var(--white); border-color: var(--navy-border); }
+        .vc-tab.active { background: linear-gradient(135deg, rgba(0,200,83,0.16), rgba(0,200,83,0.06)); border-color: var(--border-active); color: var(--emerald-light); }
+
+        .vc-panel { display: none; }
+        .vc-panel.active { display: block; animation: fadeIn .25s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+        .vc-card { background: var(--navy-card); border: 1px solid var(--border-subtle); border-radius: var(--radius); box-shadow: var(--shadow-card); padding: 26px; width: 100%; }
+        @media (max-width: 640px) { .vc-card { padding: 20px 16px; } }
+        .vc-card-head { margin-bottom: 18px; }
+        .vc-card-head h2 { font-family: var(--font-display); font-size: 1.2rem; font-weight: 700; color: var(--white); display: flex; align-items: center; gap: 10px; }
+        .vc-card-head h2 i { color: var(--emerald); font-size: 1.05rem; }
+        .vc-card-head p { margin-top: 6px; font-size: .86rem; color: var(--text-muted); line-height: 1.5; }
+
+        .vc-form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 16px; }
+        .vc-field label { display: block; font-size: .78rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 7px; }
+        .vc-field input {
+            width: 100%; background: rgba(255,255,255,0.03); border: 1px solid var(--navy-border); border-radius: var(--radius-sm);
+            padding: 12px 14px; color: var(--white); font-family: var(--font-mono); font-size: .95rem; transition: all .2s ease;
+        }
+        .vc-field input::placeholder { color: var(--text-subtle); font-family: var(--font-family); }
+        .vc-field input:focus { outline: none; border-color: var(--emerald); box-shadow: 0 0 0 3px var(--emerald-glow); background: rgba(0,200,83,0.03); }
+        .vc-field input.invalid { border-color: var(--ruby); box-shadow: 0 0 0 3px var(--ruby-glow); }
+        .vc-hint { font-size: .74rem; color: var(--text-subtle); margin-top: 6px; }
+
+        /* ═══ BOTONES CON EFECTO DE DESTELLO LENTO Y SACUDIDA ═══ */
+        .vc-submit-row {
+            width: 100%;
+            margin-bottom: 8px;
+            position: relative;
+        }
+
+        @keyframes btnShineSweep {
+            0% { left: -45%; }
+            35%, 100% { left: 130%; }
+        }
+
+        .vc-clear-row {
+            width: 100%;
+            margin-bottom: 0;
+        }
+
+        .vc-btn {
+            width: 100%;
+            border-radius: 10px;
+            justify-content: center;
+            font-family: inherit;
+            font-size: .95rem;
+            font-weight: 800;
+            padding: 14px 28px;
+            cursor: pointer;
+            border: none;
+            transition: all .25s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            background: linear-gradient(135deg, var(--emerald), var(--emerald-dark));
+            color: var(--navy-deep);
+            box-shadow: var(--shadow-emerald);
+            animation: periodicShake 6s cubic-bezier(0.36, 0.07, 0.19, 0.97) infinite;
+            position: relative;
+            overflow: hidden;
+        }
+        .vc-btn::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -45%;
+            width: 35%;
+            height: 100%;
+            background: linear-gradient(115deg, transparent 0%, rgba(255,255,255,0.7) 50%, transparent 100%);
+            transform: skewX(-22deg);
+            animation: btnShineSweep 4s ease-in-out infinite;
+            pointer-events: none;
+        }
+        .vc-btn:disabled::after { animation: none; opacity: 0; }
+
+        @keyframes periodicShake {
+            0%, 82%, 100% { transform: translateY(0) rotate(0deg); }
+            84% { transform: translateY(-3px) rotate(-1.5deg); }
+            86% { transform: translateY(2px) rotate(1.5deg); }
+            88% { transform: translateY(-2px) rotate(-1deg); }
+            90% { transform: translateY(1px) rotate(1deg); }
+            92% { transform: translateY(-1px) rotate(-0.5deg); }
+        }
+
+        .vc-btn:hover:not(:disabled) {
+            transform: translateY(-2px) scale(1.01);
+            box-shadow: var(--sh-hov);
+            animation-play-state: paused;
+        }
+        .vc-btn:disabled {
+            opacity: .5;
+            cursor: not-allowed;
+            transform: none;
+            animation: none;
+        }
+        .vc-btn .spin { display: none; }
+        .vc-btn.loading .spin { display: inline-block; }
+        .vc-btn.loading .label-icon { display: none; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .spin { animation: spin .8s linear infinite; }
+
+        .vc-clear-btn {
+            width: 100%;
+            border-radius: 10px;
+            justify-content: center;
+            font-family: inherit;
+            font-size: .92rem;
+            font-weight: 700;
+            padding: 12px 28px;
+            cursor: pointer;
+            transition: all .2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            background: transparent;
+            border: 1px solid var(--ruby);
+            color: var(--ruby);
+        }
+        .vc-clear-btn:hover {
+            background: rgba(229,57,53,0.08);
+            color: var(--ruby-light);
+            border-color: var(--ruby-light);
+        }
+
+        /* ═══ RESULT AREA ═══ */
+        .vc-result { margin-top: 22px; }
+        .vc-empty { text-align: center; padding: 30px 12px; color: var(--text-subtle); font-size: .88rem; }
+        .vc-empty i { font-size: 1.8rem; display: block; margin-bottom: 10px; opacity: .5; }
+
+        .vc-alert { display: flex; gap: 12px; align-items: flex-start; border-radius: var(--radius-sm); padding: 14px 16px; font-size: .87rem; line-height: 1.5; }
+        .vc-alert i { font-size: 1.1rem; margin-top: 1px; }
+        .vc-alert.error { background: rgba(229,57,53,0.08); border: 1px solid var(--ruby-glow); color: #FFD9D6; }
+        .vc-alert.error i { color: var(--ruby-light); }
+        .vc-alert.limit { background: rgba(255,167,38,0.08); border: 1px solid var(--amber-glow); color: #FFE8C7; }
+        .vc-alert.limit i { color: var(--amber); }
+
+        .vc-result-card { background: rgba(0,200,83,0.05); border: 1px solid var(--border-active); border-radius: var(--radius-sm); overflow: hidden; }
+        .vc-result-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 14px 18px;
+            background: rgba(0,200,83,0.08);
+            border-bottom: 1px solid var(--border-active);
+        }
+        .vc-result-head .name { font-family: var(--font-display); font-weight: 700; color: var(--white); font-size: 1.02rem; }
+
+        .vc-result-actions { display: flex; gap: 6px; flex-shrink: 0; }
+        .vc-action-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-muted);
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all .2s ease;
+            font-size: .95rem;
+        }
+        .vc-action-btn:hover {
+            background: rgba(0,200,83,0.1);
+            border-color: var(--border-active);
+            color: var(--emerald-light);
+        }
+        .vc-action-btn:active { transform: scale(0.92); }
+
+        .vc-result-body { padding: 16px 18px; display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 14px 20px; }
+        .vc-data-item .k { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--text-subtle); margin-bottom: 4px; }
+        .vc-data-item .v { font-size: .92rem; color: var(--text-primary); font-weight: 500; word-break: break-word; }
+        .vc-data-item .v.mono { font-family: var(--font-mono); }
+
+        /* ═══ HISTORIAL: CONTENEDOR PROPIO, SEPARADO DE LA TARJETA DE CONSULTA ═══ */
+        .vc-history-wrap {
+            margin-top: 20px;
+            background: rgba(10, 22, 40, 0.6);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius);
+            padding: 18px;
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+        .vc-history-title {
+            font-size: .85rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        /* Buscador propio del historial */
+        .vc-history-search { position: relative; margin-bottom: 14px; }
+        .vc-history-search i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-subtle); font-size: .82rem; }
+        .vc-history-search input {
+            width: 100%; background: rgba(255,255,255,0.03); border: 1px solid var(--navy-border); border-radius: var(--radius-sm);
+            padding: 10px 14px 10px 34px; color: var(--white); font-family: var(--font-family); font-size: .84rem; transition: all .2s ease;
+        }
+        .vc-history-search input::placeholder { color: var(--text-subtle); }
+        .vc-history-search input:focus { outline: none; border-color: var(--emerald); box-shadow: 0 0 0 3px var(--emerald-glow); background: rgba(0,200,83,0.03); }
+
+        .vc-history-list { display: flex; flex-direction: column; gap: 16px; }
+
+        /* Categorías del historial (Hoy, Ayer, Esta semana, Anteriores) */
+        .vc-history-group { display: flex; flex-direction: column; gap: 8px; }
+        .vc-history-group-title {
+            font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--emerald); padding-left: 2px;
+        }
+
+        .vc-history-item {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            padding: 12px 14px;
+            transition: all .2s ease;
+        }
+        .vc-history-item:hover {
+            border-color: var(--navy-border);
+            background: rgba(255,255,255,0.04);
+        }
+        .vc-history-row-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: .85rem; }
+        .vc-history-row-top .h-doc { font-family: var(--font-mono); color: var(--emerald-light); flex-shrink: 0; }
+        .vc-history-row-top .h-name { color: var(--white); font-weight: 500; }
+
+        /* Fila inferior: fecha/hora a la izquierda, flecha de expandir a la derecha */
+        .vc-history-row-bottom { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; }
+        .vc-history-row-bottom .h-time { color: var(--text-subtle); font-size: .72rem; display: inline-flex; align-items: center; gap: 6px; }
+
+        .h-toggle {
+            background: transparent;
+            border: 1px solid var(--border-subtle);
+            color: var(--text-muted);
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all .2s ease;
+            flex-shrink: 0;
+        }
+        .h-toggle i { transition: transform .25s ease; }
+        .h-toggle:hover { color: var(--emerald-light); border-color: var(--border-active); background: rgba(0,200,83,0.08); }
+        .h-toggle.open { color: var(--emerald); border-color: var(--border-active); }
+        .h-toggle.open i { transform: rotate(180deg); }
+
+        /* Detalle expandible con el resultado completo de la consulta */
+        .vc-history-details { max-height: 0; overflow: hidden; transition: max-height .35s ease; }
+        .vc-history-details.open { max-height: 900px; margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border-subtle); }
+        .vc-history-fields { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px 16px; margin-bottom: 12px; }
+
+        /* ===== BOTÓN ELIMINAR REGISTRO — OCUPA TODO EL ANCHO Y CENTRADO ===== */
+        .h-del-full {
+            background: transparent;
+            border: 1px solid var(--ruby);
+            color: var(--ruby);
+            font-size: .78rem;
+            font-weight: 700;
+            padding: 8px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            width: 100%;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            transition: all .2s ease;
+        }
+        .h-del-full:hover {
+            background: rgba(229,57,53,0.08);
+            color: var(--ruby-light);
+            border-color: var(--ruby-light);
+        }
+
+        .vc-history-empty {
+            text-align: center;
+            padding: 24px 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .vc-history-empty .empty-avatar {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.03);
+            border: 1px dashed var(--navy-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-subtle);
+            font-size: 1.4rem;
+            margin-bottom: 4px;
+        }
+        .vc-history-empty span {
+            color: var(--text-subtle);
+            font-size: .85rem;
+        }
+
+        .vc-skeleton { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 14px 20px; padding: 4px 2px; }
+        .vc-skeleton .bar { height: 38px; border-radius: 8px; background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.07) 37%, rgba(255,255,255,0.03) 63%); background-size: 400% 100%; animation: shimmer 1.4s ease infinite; }
+        @keyframes shimmer { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } }
+
+        .vc-toast-wrap { position: fixed; top: 20px; right: 20px; z-index: 200; display: flex; flex-direction: column; gap: 10px; }
+        .vc-toast { background: var(--navy-card); border: 1px solid var(--border-active); color: var(--white); padding: 12px 18px; border-radius: 12px; font-size: .85rem; font-weight: 600; box-shadow: var(--shadow-card); display: flex; align-items: center; gap: 10px; animation: toastIn .25s ease; }
+        .vc-toast i { color: var(--emerald); }
+        @keyframes toastIn { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
+
+        .footer-content { width: 100%; padding: 48px 16px 32px; background: var(--navy-surface); border-top: 1px solid var(--border-active); text-align: center; position: relative; z-index: 1; }
+        .footer-content h3 { font-size: .85rem; font-weight: 600; color: var(--text-muted); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 16px; }
+        .footer-content .social-icons a { color: var(--text-muted); font-size: 1.6rem; margin: 0 12px; transition: all .2s; }
+        .footer-content .social-icons a:hover { color: var(--emerald); transform: translateY(-3px); }
+        .footer-content p { font-size: .78rem; color: var(--text-subtle); line-height: 1.6; margin-bottom: 8px; margin-top: 20px; }
+        .footer-content a { color: var(--emerald-light); text-decoration: none; font-weight: 600; }
+        .footer-content a:hover { color: var(--emerald); }
+
+        /* ═══════════════════════════════════════════
+           PANTALLA 1 — BIENVENIDA
+        ═══════════════════════════════════════════ */
+        #welcome-screen {
+            position: fixed; inset: 0; z-index: 500;
+            display: flex; align-items: center; justify-content: center;
+            min-height: 100vh; min-height: 100dvh;
+            overflow-y: auto; overflow-x: hidden;
+            background: var(--navy-deep);
+            padding: 32px 20px;
+            transition: opacity .4s ease, visibility .4s ease;
+        }
+        #welcome-screen.fade-out { opacity: 0; pointer-events: none; }
+
+        .welcome-3d-scene { position: absolute; inset: 0; overflow: hidden; z-index: 0; perspective: 1000px; }
+        .welcome-3d-scene .bg-radial {
+            position: absolute; inset: 0;
+            background: radial-gradient(ellipse 70% 55% at 50% 8%, rgba(0,200,83,.14) 0%, transparent 60%),
+                        radial-gradient(ellipse 60% 50% at 85% 90%, rgba(255,215,0,.08) 0%, transparent 65%),
+                        var(--navy-deep);
+        }
+        .grid-floor {
+            position: absolute; left: -60%; right: -60%; bottom: -8%; height: 65%;
+            background-image:
+                linear-gradient(rgba(0,200,83,.4) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,200,83,.4) 1px, transparent 1px);
+            background-size: 64px 64px;
+            transform: rotateX(78deg);
+            transform-origin: bottom center;
+            -webkit-mask-image: linear-gradient(to top, black, transparent 88%);
+            mask-image: linear-gradient(to top, black, transparent 88%);
+            opacity: .55;
+            animation: floorMove 7s linear infinite;
+        }
+        @keyframes floorMove { from { background-position: 0 0, 0 0; } to { background-position: 0 64px, 64px 0; } }
+        .w-orb { position: absolute; border-radius: 50%; filter: blur(70px); pointer-events: none; }
+        .w-orb.o1 { width: 46vw; height: 46vw; max-width: 480px; max-height: 480px; top: -14%; left: -10%; background: radial-gradient(circle, rgba(0,200,83,.4) 0%, transparent 70%); animation: floatAmbient 9s ease-in-out infinite; }
+        .w-orb.o2 { width: 40vw; height: 40vw; max-width: 420px; max-height: 420px; bottom: -16%; right: -10%; background: radial-gradient(circle, rgba(255,215,0,.24) 0%, transparent 70%); animation: floatAmbient 11s ease-in-out infinite reverse; }
+        .w-shape { position: absolute; border-radius: 22px; border: 1px solid rgba(255,255,255,.09); background: linear-gradient(145deg, rgba(255,255,255,.05), rgba(255,255,255,.01)); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); box-shadow: 0 20px 40px rgba(0,0,0,.35); animation: floatShape 7s ease-in-out infinite; }
+        .w-shape.s1 { width: 92px; height: 92px; top: 16%; right: 12%; transform: rotate(20deg); animation-delay: 0s; }
+        .w-shape.s2 { width: 60px; height: 60px; bottom: 22%; left: 8%; transform: rotate(-14deg); border-radius: 16px; animation-delay: 1.4s; }
+        .w-shape.s3 { width: 46px; height: 46px; top: 62%; right: 20%; border-radius: 50%; animation-delay: 2.6s; }
+        @keyframes floatShape { 0%,100% { transform: translateY(0) rotate(var(--r,0deg)); } 50% { transform: translateY(-18px) rotate(var(--r,0deg)); } }
+        @media (max-width: 640px) { .w-shape { display: none; } }
+
+        .welcome-content { position: relative; z-index: 2; max-width: 720px; width: 100%; text-align: center; display: flex; flex-direction: column; align-items: center; }
+        .welcome-content h1 { font-family: var(--font-display); font-weight: 800; font-size: clamp(2rem, 6vw, 3.2rem); color: var(--white); line-height: 1.15; letter-spacing: -0.02em; }
+        .welcome-content h1 em { font-style: normal; color: var(--emerald); text-shadow: 0 0 40px var(--emerald-glow); }
+        .welcome-content > p { margin-top: 14px; font-size: clamp(.95rem, 2vw, 1.1rem); color: var(--text-muted); line-height: 1.65; max-width: 560px; }
+
+        .welcome-cta {
+            margin-top: 28px; display: inline-flex; align-items: center; gap: 12px;
+            background: linear-gradient(135deg, var(--emerald-light), var(--emerald-dark));
+            color: var(--navy-deep); font-family: inherit; font-weight: 800; font-size: 1.02rem;
+            padding: 16px 34px; border: none; border-radius: 999px; cursor: pointer;
+            box-shadow: 0 10px 34px var(--emerald-glow); transition: all .25s ease;
+        }
+        .welcome-cta i { transition: transform .25s ease; }
+        .welcome-cta:hover { transform: translateY(-3px); box-shadow: 0 16px 44px rgba(0,200,83,.32); }
+        .welcome-cta:hover i { transform: translateX(4px); }
+
+        .welcome-logos { margin-top: 36px; display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap; }
+        .welcome-logos .logos-caption { width: 100%; font-size: .72rem; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--text-subtle); margin-bottom: 14px; }
+        .logo-chip {
+            display: flex; align-items: center; gap: 10px; padding: 12px 20px;
+            background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle);
+            border-radius: 14px; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+            transition: all .25s ease;
+        }
+        .logo-chip:hover { border-color: var(--border-active); background: rgba(0,200,83,0.05); transform: translateY(-3px); }
+        .logo-chip img { height: 26px; width: auto; max-width: 84px; object-fit: contain; filter: brightness(0) invert(1) opacity(0.92); }
+        .logo-chip span { font-size: .78rem; font-weight: 700; color: var(--text-muted); letter-spacing: .04em; }
+        @media (max-width: 480px) { .logo-chip { padding: 10px 14px; } .logo-chip span { display: none; } }
+
+        #app-screen { display: none; }
+        #app-screen.show { display: block; animation: fadeIn .4s ease; }
+
+        /* ═══ TARJETA DE PERFIL — NUEVO DISEÑO ═══ */
+        .account-card {
+            max-width: 100%;
+            margin: 0;
+            padding: 22px 24px;
+            background: var(--navy-card);
+            border-bottom: 1px solid var(--border-active);
+            box-shadow: var(--shadow-card);
+            width: 100%;
+            position: relative;
+            border-radius: 0;
+        }
+        @media (max-width: 640px) {
+            .account-card { padding: 18px 16px; }
+        }
+
+        /* Cabecera superior: menú + info usuario */
+        .account-header {
+            display: flex;
+            align-items: stretch;
+            gap: 16px;
+            padding-left: 60px; /* espacio para el menú absoluto */
+            min-height: 52px;
+            margin-bottom: 16px;
+        }
+        .account-user-info {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            flex: 1;
+            min-width: 0;
+            gap: 2px;
+        }
+        .account-email {
+            font-size: .9rem;
+            color: var(--text-primary);
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .account-id {
+            font-size: .78rem;
+            color: var(--text-subtle);
+            font-family: var(--font-mono);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Fila inferior: avatar + nombre + plan */
+        .account-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding-top: 4px;
+        }
+        .account-avatar {
+            width: 48px;
+            height: 48px;
+            flex-shrink: 0;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            color: var(--navy-deep);
+            background: linear-gradient(135deg, var(--emerald-light), var(--emerald-dark));
+            box-shadow: 0 4px 16px var(--emerald-glow);
+        }
+        .account-info {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .account-name {
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 1.05rem;
+            color: var(--white);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .account-plan-label {
+            font-size: .78rem;
+            color: var(--gold);
+            font-weight: 600;
+            letter-spacing: .05em;
+            text-transform: uppercase;
+        }
+        .account-plan-btn {
+            flex-shrink: 0;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 9px 16px;
+            border-radius: 999px;
+            background: rgba(255,215,0,0.08);
+            border: 1px solid rgba(255,215,0,0.25);
+            color: var(--gold);
+            font-size: .8rem;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all .2s ease;
+        }
+        .account-plan-btn:hover {
+            background: rgba(255,215,0,0.14);
+            transform: translateY(-2px);
+        }
+
+        /* Indicadores de consumo en arco — fila horizontal */
+        .account-quotas {
+            display: flex;
+            overflow-x: auto;
+            gap: 20px;
+            width: 100%;
+            padding-bottom: 8px;
+            padding-top: 12px;
+            -webkit-overflow-scrolling: touch;
+            scroll-snap-type: x mandatory;
+            align-items: stretch;
+            border-top: 1px solid var(--border-subtle);
+            margin-top: 18px;
+        }
+        .account-quotas .quota-item {
+            flex: 0 0 auto;
+            min-width: 220px;
+            max-width: 280px;
+            scroll-snap-align: start;
+            display: flex;
+            flex-direction: column;
+            background: rgba(10, 22, 40, 0.4);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            align-items: center;
+            text-align: center;
+            position: relative;
+        }
+        .account-quotas .quota-item-header {
+            font-size: .78rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 6px;
+        }
+
+        /* Gauge Arc Semicircular Movistar */
+        .movistar-gauge-wrap {
+            position: relative;
+            width: 170px;
+            height: 95px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            margin: 4px 0;
+        }
+        .movistar-gauge-wrap svg {
+            width: 170px;
+            height: 95px;
+            overflow: visible;
+        }
+        .gauge-bg-path {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.08);
+            stroke-width: 11;
+            stroke-linecap: round;
+        }
+        .gauge-fill-path {
+            fill: none;
+            stroke: var(--emerald);
+            stroke-width: 11;
+            stroke-linecap: round;
+            stroke-dasharray: 220;
+            stroke-dashoffset: 0;
+            transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1), stroke 0.4s ease;
+        }
+        .gauge-fill-path.warn { stroke: var(--amber); }
+        .gauge-fill-path.danger { stroke: var(--ruby-light); }
+
+        /* Consumo de cupo: color progresivo + animacion satisfactoria (mejora UX) */
+        .gauge-fill-path.mid { stroke: #38bdf8; }
+        .gauge-fill-path.danger.pulse { animation: gauge-low-pulse 1.5s ease-in-out infinite; }
+        @keyframes gauge-low-pulse {
+            0%, 100% { filter: drop-shadow(0 0 0 rgba(239,68,68,0)); }
+            50% { filter: drop-shadow(0 0 9px rgba(239,68,68,0.75)); }
+        }
+        .gauge-inner-val.pop { display: inline-block; animation: gauge-pop 0.45s cubic-bezier(.2,.9,.3,1.4); }
+        @keyframes gauge-pop {
+            0% { transform: scale(1.55); }
+            100% { transform: scale(1); }
+        }
+
+        .gauge-inner-info {
+            position: absolute;
+            bottom: 4px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .gauge-inner-sub {
+            font-size: .68rem;
+            color: var(--text-subtle);
+            text-transform: uppercase;
+            letter-spacing: .04em;
+            font-weight: 600;
+        }
+        .gauge-inner-val {
+            font-family: var(--font-mono);
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: var(--white);
+            line-height: 1.25;
+        }
+        .gauge-inner-val.low { color: var(--ruby-light); }
+
+        .gauge-footer-note {
+            font-size: .73rem;
+            color: var(--text-subtle);
+            margin-top: 4px;
+        }
+
+        .account-quotas::-webkit-scrollbar {
+            height: 5px;
+        }
+        .account-quotas::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.03);
+            border-radius: 4px;
+        }
+        .account-quotas::-webkit-scrollbar-thumb {
+            background: var(--emerald-dark);
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <!-- ═══════════════ PANTALLA 1: BIENVENIDA ═══════════════ -->
+    <div id="welcome-screen">
+        <div class="welcome-3d-scene">
+            <div class="bg-radial"></div>
+            <div class="grid-floor"></div>
+            <div class="w-orb o1"></div>
+            <div class="w-orb o2"></div>
+            <div class="w-shape s1"></div>
+            <div class="w-shape s2"></div>
+            <div class="w-shape s3"></div>
+        </div>
+        <div class="welcome-content">
+            <h1>Validar <em>clientes</em> en segundos</h1>
+            <p>Consulta DNI, RUC, cédula venezolana y números de teléfono de forma segura, sin exponer tus datos ni superar los límites de tu plan.</p>
+            <button id="startAppBtn" class="welcome-cta"><span>Empezar ahora</span><i class="fas fa-arrow-right"></i></button>
+            <div class="welcome-logos">
+                <span class="logos-caption">Datos verificados contra fuentes oficiales</span>
+                <div class="logo-chip"><img src="https://i.postimg.cc/hvD6wNV9/reniec.png" alt="RENIEC" loading="lazy"><span>RENIEC</span></div>
+                <div class="logo-chip"><img src="https://i.postimg.cc/wMqZPnDc/suna.png" alt="SUNAT" loading="lazy"><span>SUNAT</span></div>
+                <div class="logo-chip"><img src="https://i.postimg.cc/Fzr8qw0V/sunat.png" alt="SUNARP" loading="lazy"><span>SUNARP</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════ PANTALLA 2: VALIDACIÓN DE CLIENTES ═══════════════ -->
+    <div id="app-screen">
+        <div class="ambient-1"></div>
+        <div class="ambient-2"></div>
+
+        <div id="sidebar-overlay" class="hidden" aria-hidden="true"></div>
+
+        <aside id="sidebar" role="navigation" aria-label="Menú principal">
+            <div class="sb-header">
+                <div class="sb-logo-box"><img src="https://i.postimg.cc/fLYYD0Bb/1000153255-preview-rev-1.png" alt="Logotipo de FacilitoTools" loading="lazy"></div>
+                <div class="sb-brand">FacilitoTools</div>
+                <div class="sb-tagline">Boletas · Comprobantes · Validación</div>
+            </div>
+            <div class="sb-scroll-area">
+                <nav>
+                    <div class="sb-cat">General</div>
+                    <a href="/" data-target="home"><i class="fas fa-home sb-icon"></i><span>Inicio</span></a>
+                    <a href="/planes" data-target="planes"><i class="fas fa-bolt sb-icon"></i><span>Planes</span></a>
+                    <div class="sb-cat">Herramientas</div>
+                    <a href="/generar-boletas" data-target="generar-boletas"><i class="fas fa-file-code sb-icon"></i><span>Generar Boletas</span></a>
+                    <a href="#" data-target="validar-clientes" class="active"><i class="fas fa-globe sb-icon"></i><span>Validar Clientes</span></a>
+                    <div class="sb-cat">Cuenta</div>
+                    <a href="/ayuda" data-target="ayuda"><i class="fas fa-headset sb-icon"></i><span>Ayuda y soporte</span></a>
+                    <a href="/perfil" data-target="actividad"><i class="fas fa-user-circle sb-icon"></i><span>Mi cuenta</span></a>
+                </nav>
+            </div>
+            <div class="sb-footer">
+                <a href="https://m.facebook.com/61564349657272/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                <a href="https://youtube.com/@eltiojota628" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                <a href="https://wa.me/51944950234" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+            </div>
+        </aside>
+
+        <main>
+            <div class="account-card" id="accountCard">
+                <!-- Cabecera: menú + info usuario -->
+                <button id="menu-toggle" aria-label="Abrir menú de navegación"><i class="fas fa-bars"></i></button>
+                <div class="account-header">
+                    <div class="account-user-info">
+                        <div class="account-email" id="accountEmail">correo@ejemplo.com</div>
+                        <div class="account-id" id="accountId">ID: —</div>
+                    </div>
+                </div>
+
+                <!-- Fila inferior: avatar + nombre + plan -->
+                <div class="account-row">
+                    <div class="account-avatar"><i class="fas fa-user"></i></div>
+                    <div class="account-info">
+                        <div class="account-name" id="accountName">Mi cuenta</div>
+                        <div class="account-plan-label">Mi plan</div>
+                    </div>
+                    <a href="/planes" class="account-plan-btn"><i class="fas fa-bolt"></i> Gestionar</a>
+                </div>
+
+                <!-- Indicadores Arco Semicircular Movistar — en fila horizontal con scroll -->
+                <div class="account-quotas">
+                    <div class="quota-item">
+                        <div class="quota-item-header"><i class="fas fa-id-card"></i> Consultas DNI/RUC</div>
+                        <div class="movistar-gauge-wrap">
+                            <svg viewBox="0 0 100 55">
+                                <path class="gauge-bg-path" d="M 10 50 A 40 40 0 0 1 90 50"></path>
+                                <path class="gauge-fill-path" id="arcGaugeDocs" d="M 10 50 A 40 40 0 0 1 90 50"></path>
+                            </svg>
+                            <div class="gauge-inner-info">
+                                <span class="gauge-inner-sub">Te quedan</span>
+                                <span class="gauge-inner-val" id="cupoDocsValue">—</span>
+                            </div>
+                        </div>
+                        <div class="gauge-footer-note">DNI · RUC (APISPERU)</div>
+                    </div>
+
+                    <div class="quota-item">
+                        <div class="quota-item-header"><i class="fas fa-address-book"></i> DNI por nombres</div>
+                        <div class="movistar-gauge-wrap">
+                            <svg viewBox="0 0 100 55">
+                                <path class="gauge-bg-path" d="M 10 50 A 40 40 0 0 1 90 50"></path>
+                                <path class="gauge-fill-path" id="arcGaugeDniNombres" d="M 10 50 A 40 40 0 0 1 90 50"></path>
+                            </svg>
+                            <div class="gauge-inner-info">
+                                <span class="gauge-inner-sub">Te quedan</span>
+                                <span class="gauge-inner-val" id="cupoDniNombresValue">—</span>
+                            </div>
+                        </div>
+                        <div class="gauge-footer-note">Buscar DNI por nombres y apellidos</div>
+                    </div>
+
+                    <div class="quota-item">
+                        <div class="quota-item-header"><i class="fas fa-passport"></i> Cédula venezolana</div>
+                        <div class="movistar-gauge-wrap">
+                            <svg viewBox="0 0 100 55">
+                                <path class="gauge-bg-path" d="M 10 50 A 40 40 0 0 1 90 50"></path>
+                                <path class="gauge-fill-path" id="arcGaugeCedula" d="M 10 50 A 40 40 0 0 1 90 50"></path>
+                            </svg>
+                            <div class="gauge-inner-info">
+                                <span class="gauge-inner-sub">Te quedan</span>
+                                <span class="gauge-inner-val" id="cupoCedulaValue">—</span>
+                            </div>
+                        </div>
+                        <div class="gauge-footer-note">Cédula VE y búsqueda por nombre</div>
+                    </div>
+
+                    <div class="quota-item">
+                        <div class="quota-item-header"><i class="fas fa-phone"></i> Consultas Teléfono</div>
+                        <div class="movistar-gauge-wrap">
+                            <svg viewBox="0 0 100 55">
+                                <path class="gauge-bg-path" d="M 10 50 A 40 40 0 0 1 90 50"></path>
+                                <path class="gauge-fill-path" id="arcGaugeTel" d="M 10 50 A 40 40 0 0 1 90 50"></path>
+                            </svg>
+                            <div class="gauge-inner-info">
+                                <span class="gauge-inner-sub">Te quedan</span>
+                                <span class="gauge-inner-val" id="cupoTelValue">—</span>
+                            </div>
+                        </div>
+                        <div class="gauge-footer-note">Titularidad y operador</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="auth-gate">
+                <div class="auth-gate-inner" id="authGate">
+                    <i class="fas fa-lock"></i>
+                    <p>Debes <a href="/login">iniciar sesión</a> para validar clientes. Mientras tanto puedes explorar la interfaz.</p>
+                </div>
+            </div>
+
+            <div class="vc-shell">
+                <div class="vc-tabs" id="vcTabs">
+                    <button class="vc-tab active" data-tab="dni"><i class="fas fa-id-card"></i> DNI</button>
+                    <button class="vc-tab" data-tab="ruc"><i class="fas fa-building"></i> RUC</button>
+                    <button class="vc-tab" data-tab="cedula"><i class="fas fa-passport"></i> Cédula VE</button>
+                    <button class="vc-tab" data-tab="buscar-cedula"><i class="fas fa-search"></i> Buscar cédula</button>
+                    <button class="vc-tab" data-tab="buscar-dni"><i class="fas fa-search"></i> Buscar DNI</button>
+                    <button class="vc-tab" data-tab="telefonia-doc"><i class="fas fa-phone-volume"></i> Tel. por documento</button>
+                    <button class="vc-tab" data-tab="telefonia-numero"><i class="fas fa-mobile-alt"></i> Tel. por número</button>
+                </div>
+
+                <!-- DNI -->
+                <section class="vc-panel active" id="panel-dni">
+                    <div class="vc-card">
+                        <div class="vc-card-head">
+                            <h2><i class="fas fa-id-card"></i> Consultar DNI</h2>
+                            <p>Obtén nombres y apellidos registrados en RENIEC a partir del número de DNI.</p>
+                        </div>
+                        <form class="vc-form" data-endpoint="dni" data-method="GET">
+                            <div class="vc-form-row">
+                                <div class="vc-field">
+                                    <label for="dniInput">Número de DNI</label>
+                                    <input type="text" id="dniInput" name="dni" inputmode="numeric" maxlength="8" placeholder="Ej: 12345678" autocomplete="off" />
+                                    <div class="vc-hint">8 dígitos numéricos.</div>
+                                </div>
+                            </div>
+                            <div class="vc-submit-row">
+                                <button type="submit" class="vc-btn"><i class="fas fa-search label-icon"></i><i class="fas fa-circle-notch spin"></i> Validar DNI</button>
+                            </div>
+                            <div class="vc-clear-row">
+                                <button type="button" class="vc-clear-btn" data-clear="dni">Limpiar</button>
+                            </div>
+                        </form>
+                        <div class="vc-result" id="result-dni"><div class="vc-empty"><i class="fas fa-id-card"></i>Ingresa un DNI para ver el resultado aquí.</div></div>
+                    </div>
+                    <div class="vc-history-wrap" id="history-dni">
+                        <div class="vc-history-title">Historial <span class="h-count"></span></div>
+                        <div class="vc-history-search">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="historySearch-dni" placeholder="Buscar por nombre o DNI..." autocomplete="off" />
+                        </div>
+                        <div class="vc-history-list" id="historyList-dni"></div>
+                    </div>
+                </section>
+
+                <!-- RUC -->
+                <section class="vc-panel" id="panel-ruc">
+                    <div class="vc-card">
+                        <div class="vc-card-head">
+                            <h2><i class="fas fa-building"></i> Consultar RUC</h2>
+                            <p>Verifica razón social, estado y domicilio fiscal de una empresa ante SUNAT.</p>
+                        </div>
+                        <form class="vc-form" data-endpoint="ruc" data-method="GET">
+                            <div class="vc-form-row">
+                                <div class="vc-field">
+                                    <label for="rucInput">Número de RUC</label>
+                                    <input type="text" id="rucInput" name="ruc" inputmode="numeric" maxlength="11" placeholder="Ej: 20131312955" autocomplete="off" />
+                                    <div class="vc-hint">11 dígitos numéricos.</div>
+                                </div>
+                            </div>
+                            <div class="vc-submit-row">
+                                <button type="submit" class="vc-btn"><i class="fas fa-search label-icon"></i><i class="fas fa-circle-notch spin"></i> Validar RUC</button>
+                            </div>
+                            <div class="vc-clear-row">
+                                <button type="button" class="vc-clear-btn" data-clear="ruc">Limpiar</button>
+                            </div>
+                        </form>
+                        <div class="vc-result" id="result-ruc"><div class="vc-empty"><i class="fas fa-building"></i>Ingresa un RUC para ver el resultado aquí.</div></div>
+                    </div>
+                    <div class="vc-history-wrap" id="history-ruc">
+                        <div class="vc-history-title">Historial <span class="h-count"></span></div>
+                        <div class="vc-history-search">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="historySearch-ruc" placeholder="Buscar por razón social o RUC..." autocomplete="off" />
+                        </div>
+                        <div class="vc-history-list" id="historyList-ruc"></div>
+                    </div>
+                </section>
+
+                <!-- Cédula VE -->
+                <section class="vc-panel" id="panel-cedula">
+                    <div class="vc-card">
+                        <div class="vc-card-head">
+                            <h2><i class="fas fa-passport"></i> Cédula venezolana</h2>
+                            <p>Consulta datos asociados a una cédula de identidad venezolana.</p>
+                        </div>
+                        <form class="vc-form" data-endpoint="cedula" data-method="POST">
+                            <div class="vc-form-row">
+                                <div class="vc-field">
+                                    <label for="cedulaInput">Número de cédula</label>
+                                    <input type="text" id="cedulaInput" name="cedula" maxlength="12" placeholder="Ej: V12345678" autocomplete="off" style="text-transform:uppercase" />
+                                    <div class="vc-hint">Formato V/E seguido del número, ej: V12345678.</div>
+                                </div>
+                            </div>
+                            <div class="vc-submit-row">
+                                <button type="submit" class="vc-btn"><i class="fas fa-search label-icon"></i><i class="fas fa-circle-notch spin"></i> Validar cédula</button>
+                            </div>
+                            <div class="vc-clear-row">
+                                <button type="button" class="vc-clear-btn" data-clear="cedula">Limpiar</button>
+                            </div>
+                        </form>
+                        <div class="vc-result" id="result-cedula"><div class="vc-empty"><i class="fas fa-passport"></i>Ingresa una cédula para ver el resultado aquí.</div></div>
+                    </div>
+                    <div class="vc-history-wrap" id="history-cedula">
+                        <div class="vc-history-title">Historial <span class="h-count"></span></div>
+                        <div class="vc-history-search">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="historySearch-cedula" placeholder="Buscar por nombre o cédula..." autocomplete="off" />
+                        </div>
+                        <div class="vc-history-list" id="historyList-cedula"></div>
+                    </div>
+                </section>
+
+                <!-- Buscar cédula por nombre -->
+                <section class="vc-panel" id="panel-buscar-cedula">
+                    <div class="vc-card">
+                        <div class="vc-card-head">
+                            <h2><i class="fas fa-search"></i> Buscar cédula por nombre</h2>
+                            <p>Encuentra posibles cédulas venezolanas a partir de nombres y apellidos completos.</p>
+                        </div>
+                        <form class="vc-form" data-endpoint="buscar-cedula" data-method="POST">
+                            <div class="vc-form-row">
+                                <div class="vc-field" style="grid-column: 1 / -1;">
+                                    <label for="buscarCedulaInput">Nombres y apellidos</label>
+                                    <input type="text" id="buscarCedulaInput" name="query" placeholder="Ej: Juan Carlos Pérez Rodríguez" autocomplete="off" />
+                                    <div class="vc-hint">Cuanto más completo el nombre, más precisa la búsqueda.</div>
+                                </div>
+                            </div>
+                            <div class="vc-submit-row">
+                                <button type="submit" class="vc-btn"><i class="fas fa-search label-icon"></i><i class="fas fa-circle-notch spin"></i> Buscar</button>
+                            </div>
+                            <div class="vc-clear-row">
+                                <button type="button" class="vc-clear-btn" data-clear="buscar-cedula">Limpiar</button>
+                            </div>
+                        </form>
+                        <div class="vc-result" id="result-buscar-cedula"><div class="vc-empty"><i class="fas fa-search"></i>Ingresa un nombre para buscar coincidencias.</div></div>
+                    </div>
+                    <div class="vc-history-wrap" id="history-buscar-cedula">
+                        <div class="vc-history-title">Historial <span class="h-count"></span></div>
+                        <div class="vc-history-search">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="historySearch-buscar-cedula" placeholder="Buscar en el historial..." autocomplete="off" />
+                        </div>
+                        <div class="vc-history-list" id="historyList-buscar-cedula"></div>
+                    </div>
+                </section>
+
+                <!-- Buscar DNI por nombre -->
+                <section class="vc-panel" id="panel-buscar-dni">
+                    <div class="vc-card">
+                        <div class="vc-card-head">
+                            <h2><i class="fas fa-search"></i> Buscar DNI por nombres</h2>
+                            <p>Encuentra el DNI de una persona a partir de sus nombres y apellidos.</p>
+                        </div>
+                        <form class="vc-form" data-endpoint="buscar-dni" data-method="POST">
+                            <div class="vc-form-row">
+                                <div class="vc-field">
+                                    <label for="bdNombres">Nombres</label>
+                                    <input type="text" id="bdNombres" name="nombres" placeholder="Ej: Juan Carlos" autocomplete="off" />
+                                </div>
+                                <div class="vc-field">
+                                    <label for="bdApePaterno">Apellido paterno</label>
+                                    <input type="text" id="bdApePaterno" name="apepaterno" placeholder="Ej: Pérez" autocomplete="off" />
+                                </div>
+                                <div class="vc-field">
+                                    <label for="bdApeMaterno">Apellido materno (opcional)</label>
+                                    <input type="text" id="bdApeMaterno" name="apematerno" placeholder="Ej: Rodríguez" autocomplete="off" />
+                                </div>
+                            </div>
+                            <div class="vc-submit-row">
+                                <button type="submit" class="vc-btn"><i class="fas fa-search label-icon"></i><i class="fas fa-circle-notch spin"></i> Buscar</button>
+                            </div>
+                            <div class="vc-clear-row">
+                                <button type="button" class="vc-clear-btn" data-clear="buscar-dni">Limpiar</button>
+                            </div>
+                        </form>
+                        <div class="vc-result" id="result-buscar-dni"><div class="vc-empty"><i class="fas fa-search"></i>Completa nombres y apellido paterno para buscar.</div></div>
+                    </div>
+                    <div class="vc-history-wrap" id="history-buscar-dni">
+                        <div class="vc-history-title">Historial <span class="h-count"></span></div>
+                        <div class="vc-history-search">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="historySearch-buscar-dni" placeholder="Buscar en el historial..." autocomplete="off" />
+                        </div>
+                        <div class="vc-history-list" id="historyList-buscar-dni"></div>
+                    </div>
+                </section>
+
+                <!-- Telefonía por documento -->
+                <section class="vc-panel" id="panel-telefonia-doc">
+                    <div class="vc-card">
+                        <div class="vc-card-head">
+                            <h2><i class="fas fa-phone-volume"></i> Telefonía por documento</h2>
+                            <p>Consulta los números móviles y fijos asociados a un DNI o RUC.</p>
+                        </div>
+                        <form class="vc-form" data-endpoint="telefonia-doc" data-method="POST">
+                            <div class="vc-form-row">
+                                <div class="vc-field">
+                                    <label for="telDocInput">DNI o RUC</label>
+                                    <input type="text" id="telDocInput" name="documento" inputmode="numeric" maxlength="11" placeholder="Ej: 12345678" autocomplete="off" />
+                                    <div class="vc-hint">8 dígitos (DNI) u 11 dígitos (RUC).</div>
+                                </div>
+                            </div>
+                            <div class="vc-submit-row">
+                                <button type="submit" class="vc-btn"><i class="fas fa-search label-icon"></i><i class="fas fa-circle-notch spin"></i> Consultar</button>
+                            </div>
+                            <div class="vc-clear-row">
+                                <button type="button" class="vc-clear-btn" data-clear="telefonia-doc">Limpiar</button>
+                            </div>
+                        </form>
+                        <div class="vc-result" id="result-telefonia-doc"><div class="vc-empty"><i class="fas fa-phone-volume"></i>Ingresa un DNI o RUC para ver los teléfonos asociados.</div></div>
+                    </div>
+                    <div class="vc-history-wrap" id="history-telefonia-doc">
+                        <div class="vc-history-title">Historial <span class="h-count"></span></div>
+                        <div class="vc-history-search">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="historySearch-telefonia-doc" placeholder="Buscar por documento..." autocomplete="off" />
+                        </div>
+                        <div class="vc-history-list" id="historyList-telefonia-doc"></div>
+                    </div>
+                </section>
+
+                <!-- Telefonía por número -->
+                <section class="vc-panel" id="panel-telefonia-numero">
+                    <div class="vc-card">
+                        <div class="vc-card-head">
+                            <h2><i class="fas fa-mobile-alt"></i> Telefonía por número</h2>
+                            <p>Verifica la titularidad, operador y estado de un número telefónico específico.</p>
+                        </div>
+                        <form class="vc-form" data-endpoint="telefonia-numero" data-method="POST">
+                            <div class="vc-form-row">
+                                <div class="vc-field">
+                                    <label for="telNumInput">Número telefónico</label>
+                                    <input type="text" id="telNumInput" name="numero" inputmode="numeric" maxlength="9" placeholder="Ej: 987654321" autocomplete="off" />
+                                    <div class="vc-hint">9 dígitos.</div>
+                                </div>
+                            </div>
+                            <div class="vc-submit-row">
+                                <button type="submit" class="vc-btn"><i class="fas fa-search label-icon"></i><i class="fas fa-circle-notch spin"></i> Consultar</button>
+                            </div>
+                            <div class="vc-clear-row">
+                                <button type="button" class="vc-clear-btn" data-clear="telefonia-numero">Limpiar</button>
+                            </div>
+                        </form>
+                        <div class="vc-result" id="result-telefonia-numero"><div class="vc-empty"><i class="fas fa-mobile-alt"></i>Ingresa un número para ver su titularidad.</div></div>
+                    </div>
+                    <div class="vc-history-wrap" id="history-telefonia-numero">
+                        <div class="vc-history-title">Historial <span class="h-count"></span></div>
+                        <div class="vc-history-search">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="historySearch-telefonia-numero" placeholder="Buscar por número..." autocomplete="off" />
+                        </div>
+                        <div class="vc-history-list" id="historyList-telefonia-numero"></div>
+                    </div>
+                </section>
+            </div>
+
+            <footer class="footer-content">
+                <h3>Síguenos</h3>
+                <div class="social-icons">
+                    <a href="https://m.facebook.com/61564349657272/" target="_blank" rel="noopener noreferrer"><i class="fab fa-facebook-f"></i></a>
+                    <a href="https://youtube.com/@eltiojota628" target="_blank" rel="noopener noreferrer"><i class="fab fa-youtube"></i></a>
+                </div>
+                <p>FacilitoTools.com · Generación de comprobantes y validación de clientes © 2026</p>
+                <p><a href="/terminos-condiciones">Términos y condiciones</a> · <a href="/politica-privacidad">Política de privacidad</a> · <a href="/disclaimer-apis">Aviso legal APIs</a></p>
+            </footer>
+        </main>
+    </div><!-- /#app-screen -->
+
+    <div class="vc-toast-wrap" id="toastWrap"></div>
+
+    <script>
+        // ========== TRANSICIÓN BIENVENIDA → APP ==========
+        const welcomeScreen = document.getElementById('welcome-screen');
+        const appScreen = document.getElementById('app-screen');
+        const startAppBtn = document.getElementById('startAppBtn');
+        let appInitialized = false;
+
+        function launchApp() {
+            welcomeScreen.classList.add('fade-out');
+            setTimeout(() => {
+                welcomeScreen.style.display = 'none';
+                appScreen.classList.add('show');
+                if (!appInitialized) {
+                    appInitialized = true;
+                    initApp();
+                }
+            }, 400);
+        }
+        startAppBtn.addEventListener('click', launchApp);
+
+        // ========== SIDEBAR ==========
+        const menuToggle = document.getElementById('menu-toggle');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        function toggleMenu() {
+            const isOpen = sidebar.classList.toggle('open');
+            if (isOpen) {
+                overlay.classList.remove('hidden'); overlay.style.display = 'block';
+                document.body.style.overflow = 'hidden';
+                requestAnimationFrame(() => overlay.classList.add('opacity-100'));
+            } else {
+                overlay.classList.remove('opacity-100');
+                document.body.style.overflow = '';
+                setTimeout(() => { if (!sidebar.classList.contains('open')) { overlay.classList.add('hidden'); overlay.style.display = 'none'; } }, 300);
+            }
+        }
+        menuToggle.addEventListener('click', toggleMenu);
+        overlay.addEventListener('click', toggleMenu);
+        sidebar.querySelectorAll('nav a').forEach(link => {
+            link.addEventListener('click', () => { if (sidebar.classList.contains('open')) toggleMenu(); });
+        });
+
+        // ========== TABS ==========
+        const tabs = document.querySelectorAll('.vc-tab');
+        const panels = document.querySelectorAll('.vc-panel');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                panels.forEach(p => p.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+            });
+        });
+
+        // ========== TOASTS ==========
+        function showToast(message, icon = 'fa-check-circle') {
+            const wrap = document.getElementById('toastWrap');
+            const el = document.createElement('div');
+            el.className = 'vc-toast';
+            el.innerHTML = `<i class="fas ${icon}"></i><span>${message}</span>`;
+            wrap.appendChild(el);
+            setTimeout(() => { el.style.opacity = '0'; el.style.transform = 'translateX(30px)'; el.style.transition = 'all .25s ease'; }, 2200);
+            setTimeout(() => el.remove(), 2500);
+        }
+
+        // ========== SESIÓN ==========
+        let currentUid = null;
+        async function checkSession() {
+            const nameEl = document.getElementById('accountName');
+            const emailEl = document.getElementById('accountEmail');
+            const idEl = document.getElementById('accountId');
+            const subEl = document.getElementById('accountSub'); // ya no se usa, pero por si acaso
+            try {
+                const res = await fetch('/api/session', { credentials: 'same-origin' });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data && data.authenticated && data.uid) {
+                        currentUid = data.uid;
+                        document.getElementById('authGate').classList.remove('show');
+                        if (nameEl) nameEl.textContent = data.nombre || data.name || data.email || 'Mi cuenta';
+                        if (emailEl) emailEl.textContent = data.email || 'correo@ejemplo.com';
+                        if (idEl) idEl.textContent = `ID: ${data.uid}`;
+                        return true;
+                    }
+                }
+            } catch (e) { console.error('Error verificando sesión', e); }
+            document.getElementById('authGate').classList.add('show');
+            if (nameEl) nameEl.textContent = 'Invitado';
+            if (emailEl) emailEl.textContent = 'Inicia sesión para consultar';
+            if (idEl) idEl.textContent = 'ID: —';
+            document.querySelectorAll('.vc-btn').forEach(b => b.disabled = true);
+            return false;
+        }
+
+        // ========== CUPO (ARCO CIRCULAR ESTILO MOVISTAR) ==========
+        const CUPO_UMBRAL_BAJO = 8;
+        const MAX_DASH_OFF = 126; 
+
+        function paintCupo(elValueId, elArcId, limite, consumidas) {
+            const valueEl = document.getElementById(elValueId);
+            const arcEl = document.getElementById(elArcId);
+            if (!valueEl || !arcEl) return;
+
+            if (limite === -1 || limite === undefined || limite === null) {
+                valueEl.textContent = 'Ilimitadas';
+                valueEl.classList.remove('low');
+                arcEl.style.strokeDashoffset = '0';
+                arcEl.className = 'gauge-fill-path';
+                return;
+            }
+
+            const disponibles = Math.max(limite - consumidas, 0);
+            const esBajo = disponibles <= CUPO_UMBRAL_BAJO;
+
+            valueEl.textContent = `${disponibles} / ${limite}`;
+            valueEl.classList.toggle('low', esBajo);
+
+            const pctRestante = limite > 0 ? (disponibles / limite) : 0;
+            const offset = MAX_DASH_OFF * (1 - pctRestante);
+            arcEl.style.strokeDashoffset = offset.toFixed(1);
+
+            // 🎨 Nivel de color según el consumo: verde → cian → ámbar → rojo pulsante
+            let cls = 'gauge-fill-path';
+            if (esBajo) {
+                cls += ' danger pulse';
+            } else if (pctRestante <= 0.3) {
+                cls += ' warn';
+            } else if (pctRestante <= 0.55) {
+                cls += ' mid';
+            }
+            arcEl.className = cls;
+
+            // ✨ Pequeño "pop" del número cada vez que baja el saldo (sensación de consumo)
+            valueEl.classList.remove('pop');
+            void valueEl.offsetWidth;
+            valueEl.classList.add('pop');
+        }
+
+        async function loadCupo() {
+            if (!currentUid) return;
+            try {
+                const res = await fetch('/api/validar/cupo', { credentials: 'same-origin' });
+                if (!res.ok) return;
+                const data = await res.json();
+                if (data.success) {
+                    paintCupo('cupoDocsValue', 'arcGaugeDocs', data.consultas.limite, data.consultas.consumidas);
+                    paintCupo('cupoDniNombresValue', 'arcGaugeDniNombres', data.dniNombres.limite, data.dniNombres.consumidas);
+                    paintCupo('cupoCedulaValue', 'arcGaugeCedula', data.cedula.limite, data.cedula.consumidas);
+                    paintCupo('cupoTelValue', 'arcGaugeTel', data.telefonos.limite, data.telefonos.consumidas);
+                }
+            } catch (e) { console.error('Error cargando cupo', e); }
+        }
+
+        // ========== HELPERS DE RENDER ==========
+        function esc(v) {
+            if (v === null || v === undefined || v === '') return '<span style="color:var(--text-subtle)">No disponible</span>';
+            return String(v).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+        }
+
+        function dataItem(label, value, mono = false) {
+            return `<div class="vc-data-item"><div class="k">${esc(label)}</div><div class="v ${mono ? 'mono' : ''}">${esc(value)}</div></div>`;
+        }
+
+        function renderSkeleton(container) {
+            container.innerHTML = `<div class="vc-skeleton">${Array(6).fill('<div class="bar"></div>').join('')}</div>
+                <div class="vc-hint" style="text-align:center;margin-top:10px;"><i class="fas fa-circle-info"></i> Esta consulta puede tardar hasta 50 segundos. Por favor espera, no cierres ni recargues la página.</div>`;
+        }
+
+        function renderError(container, message, isLimit = false) {
+            container.innerHTML = `<div class="vc-alert ${isLimit ? 'limit' : 'error'}"><i class="fas ${isLimit ? 'fa-triangle-exclamation' : 'fa-circle-exclamation'}"></i><span>${esc(message)}</span></div>`;
+        }
+
+        // ========== HISTORIAL (LocalStorage) CON AVATAR SI ESTÁ VACÍO ==========
+        const HISTORY_KEY = 'validation_history';
+
+        function getHistory() {
+            try {
+                const raw = localStorage.getItem(HISTORY_KEY);
+                return raw ? JSON.parse(raw) : [];
+            } catch { return []; }
+        }
+
+        function saveHistoryItem(tipo, data) {
+            const history = getHistory();
+            const item = {
+                id: Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+                tipo: tipo,
+                fecha: new Date().toISOString(),
+                data: data
+            };
+            history.unshift(item);
+            localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+            return item;
+        }
+
+        function deleteHistoryItem(id) {
+            let history = getHistory();
+            history = history.filter(item => item.id !== id);
+            localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+        }
+
+        // Devuelve nombre y documento representativos de un registro, para el resumen del historial y el buscador
+        function getHistorySummary(d) {
+            let nombre = d.nombres || d.razonSocial || d.titular || d.nombreCompleto || 'Sin nombre';
+            if (typeof nombre === 'object') nombre = JSON.stringify(nombre);
+            let doc = d.dni || d.ruc || d.cedula || d.documento || d.numero || d.busqueda || '—';
+            if (typeof doc === 'object') doc = JSON.stringify(doc);
+            return { nombre, doc };
+        }
+
+        // Agrupa por categoría de fecha para organizar el historial (Hoy, Ayer, Esta semana, Anteriores)
+        function getHistoryCategory(fechaISO) {
+            const d = new Date(fechaISO);
+            const now = new Date();
+            const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const startOfYesterday = new Date(startOfToday); startOfYesterday.setDate(startOfYesterday.getDate() - 1);
+            const startOfWeek = new Date(startOfToday); startOfWeek.setDate(startOfWeek.getDate() - 7);
+            if (d >= startOfToday) return 'Hoy';
+            if (d >= startOfYesterday) return 'Ayer';
+            if (d >= startOfWeek) return 'Esta semana';
+            return 'Anteriores';
+        }
+
+        // Construye el registro del historial: fecha/hora abajo a la izquierda y flecha de expandir a la derecha
+        function tplHistoryItem(item, tipo) {
+            const { nombre, doc } = getHistorySummary(item.data);
+            const fecha = new Date(item.fecha);
+            const tiempo = fecha.toLocaleString('es-ES', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+            const builder = fieldsBuilders[tipo];
+            const detailHtml = builder ? builder(item.data) : '<div class="vc-empty">Sin datos disponibles.</div>';
+            return `
+                <div class="vc-history-item" data-id="${esc(item.id)}">
+                    <div class="vc-history-row-top">
+                        <span class="h-name">${esc(nombre)}</span>
+                        <span class="h-doc">${esc(doc)}</span>
+                    </div>
+                    <div class="vc-history-row-bottom">
+                        <span class="h-time"><i class="fas fa-clock"></i> ${esc(tiempo)}</span>
+                        <button class="h-toggle" data-id="${esc(item.id)}" aria-label="Ver resultado completo">
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                    </div>
+                    <div class="vc-history-details" id="details-${esc(item.id)}">
+                        <div class="vc-history-fields">${detailHtml}</div>
+                        <button class="h-del-full" data-id="${esc(item.id)}"><i class="fas fa-trash-alt"></i> Eliminar este registro</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderHistory(tipo) {
+            const listEl = document.getElementById('historyList-' + tipo);
+            const wrapEl = document.getElementById('history-' + tipo);
+            if (!listEl) return;
+            const fullHistory = getHistory().filter(item => item.tipo === tipo);
+            const countEl = wrapEl?.querySelector('.h-count');
+            if (countEl) countEl.textContent = fullHistory.length ? `(${fullHistory.length})` : '';
+
+            if (!fullHistory.length) {
+                listEl.innerHTML = `
+                    <div class="vc-history-empty">
+                        <div class="empty-avatar"><i class="fas fa-folder-open"></i></div>
+                        <span>Sin consultas registradas aún</span>
+                    </div>`;
+                return;
+            }
+
+            const searchInput = document.getElementById('historySearch-' + tipo);
+            const term = searchInput ? searchInput.value.trim().toLowerCase() : '';
+            const filtered = term ? fullHistory.filter(item => {
+                const { nombre, doc } = getHistorySummary(item.data);
+                return String(nombre).toLowerCase().includes(term) || String(doc).toLowerCase().includes(term);
+            }) : fullHistory;
+
+            if (!filtered.length) {
+                listEl.innerHTML = `
+                    <div class="vc-history-empty">
+                        <div class="empty-avatar"><i class="fas fa-search"></i></div>
+                        <span>No se encontraron consultas para "${esc(term)}"</span>
+                    </div>`;
+                return;
+            }
+
+            const categoryOrder = ['Hoy', 'Ayer', 'Esta semana', 'Anteriores'];
+            const groups = {};
+            filtered.forEach(item => {
+                const cat = getHistoryCategory(item.fecha);
+                (groups[cat] = groups[cat] || []).push(item);
+            });
+
+            let html = '';
+            categoryOrder.forEach(cat => {
+                if (!groups[cat] || !groups[cat].length) return;
+                html += `
+                    <div class="vc-history-group">
+                        <div class="vc-history-group-title">${esc(cat)}</div>
+                        ${groups[cat].map(item => tplHistoryItem(item, tipo)).join('')}
+                    </div>`;
+            });
+            listEl.innerHTML = html;
+
+            listEl.querySelectorAll('.h-toggle').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const id = btn.dataset.id;
+                    const details = document.getElementById('details-' + id);
+                    if (!details) return;
+                    const isOpen = details.classList.toggle('open');
+                    btn.classList.toggle('open', isOpen);
+                });
+            });
+
+            listEl.querySelectorAll('.h-del-full').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const id = btn.dataset.id;
+                    if (confirm('¿Eliminar este registro del historial?')) {
+                        deleteHistoryItem(id);
+                        renderHistory(tipo);
+                        showToast('Registro eliminado', 'fa-trash-alt');
+                    }
+                });
+            });
+        }
+
+        // ========== RENDERERS CON BOTONES DE ACCIÓN ==========
+        let lastResultData = null;
+        let lastResultType = null;
+        let lastResultContainer = null;
+
+        function buildResultCard(bodyHtml, statusText, statusClass = 'ok') {
+            return `
+                <div class="vc-result-card">
+                    <div class="vc-result-head">
+                        <span class="name">${esc(statusText)}</span>
+                        <div class="vc-result-actions">
+                            <button class="vc-action-btn" data-action="magic" title="Enviar al generador de boletas y llenar el formulario automáticamente"><i class="fas fa-wand-magic-sparkles"></i></button>
+                            <button class="vc-action-btn" data-action="copy" title="Copiar resultado"><i class="fas fa-copy"></i></button>
+                            <button class="vc-action-btn" data-action="save" title="Guardar en historial"><i class="fas fa-save"></i></button>
+                        </div>
+                    </div>
+                    <div class="vc-result-body">
+                        ${bodyHtml}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Campos de cada tipo de consulta. Se usan tanto para el resultado principal como para
+        // el detalle expandible del historial, así ambos siempre muestran exactamente lo mismo.
+        const fieldsBuilders = {
+            dni(data) {
+                return `
+                    ${dataItem('DNI', data.dni, true)}
+                    ${dataItem('Nombres', data.nombres)}
+                    ${dataItem('Apellido paterno', data.apellidoPaterno)}
+                    ${dataItem('Apellido materno', data.apellidoMaterno)}
+                    ${dataItem('Dígito verificador', data.codVerificaLetra || data.codVerifica, true)}
+                `;
+            },
+            ruc(data) {
+                return `
+                    ${dataItem('RUC', data.ruc, true)}
+                    ${dataItem('Nombre comercial', data.nombreComercial)}
+                    ${dataItem('Condición', data.condicion)}
+                    ${dataItem('Departamento', data.departamento)}
+                    ${dataItem('Provincia', data.provincia)}
+                    ${dataItem('Distrito', data.distrito)}
+                    ${dataItem('Ubigeo', data.ubigeo, true)}
+                    <div class="vc-data-item" style="grid-column:1/-1;">
+                        <div class="k">Dirección</div>
+                        <div class="v">${esc(data.direccion)}</div>
+                    </div>
+                `;
+            },
+            cedula(data) {
+                return `
+                    ${dataItem('Cédula', data.cedula, true)}
+                    ${dataItem('Nombres', data.nombres)}
+                    ${dataItem('Apellidos', data.apellidos)}
+                    ${dataItem('Estado', data.estado)}
+                    ${dataItem('Estado civil', data.estado_civil)}
+                    ${dataItem('Sexo', data.sexo)}
+                    ${dataItem('Fecha de nacimiento', data.fecha_nacimiento)}
+                    ${dataItem('Lugar de nacimiento', data.lugar_nacimiento)}
+                    ${dataItem('Fecha de expedición', data.fecha_expedicion)}
+                    <div class="vc-data-item" style="grid-column:1/-1;">
+                        <div class="k">Dirección</div>
+                        <div class="v">${esc(data.direccion)}</div>
+                    </div>
+                `;
+            },
+            'buscar-cedula'(data) {
+                const items = Array.isArray(data) ? data : (data.resultados || data.results || []);
+                if (!items.length) {
+                    return `<div class="vc-empty"><i class="fas fa-user-slash"></i>No se encontraron coincidencias para ese nombre.</div>`;
+                }
+                return `<div class="vc-list-results">${items.map(p => `
+                    <div class="vc-list-item">
+                        <span class="who">${esc(p.nombreCompleto || p.nombres_completos || [p.nombres, p.apellidos].filter(Boolean).join(' '))}</span>
+                        <span class="doc">${esc(p.cedula)}</span>
+                    </div>`).join('')}</div>`;
+            },
+            'buscar-dni'(data) {
+                const items = Array.isArray(data) ? data : (data.resultados || data.results || [data]);
+                if (!items.length || !items[0]) {
+                    return `<div class="vc-empty"><i class="fas fa-user-slash"></i>No se encontraron coincidencias para ese nombre.</div>`;
+                }
+                return `<div class="vc-list-results">${items.map(p => `
+                    <div class="vc-list-item">
+                        <span class="who">${esc(p.nombreCompleto || p.nombres_completos || [p.nombres, p.apellidoPaterno, p.apellidoMaterno].filter(Boolean).join(' '))}</span>
+                        <span class="doc">${esc(p.dni)}${p.departamento ? ' · ' + esc(p.departamento) : ''}</span>
+                    </div>`).join('')}</div>`;
+            },
+            'telefonia-doc'(data) {
+                const items = Array.isArray(data) ? data : (data.lineas || data.telefonos || data.resultados || [data]);
+                if (!items.length || !items[0]) {
+                    return `<div class="vc-empty"><i class="fas fa-phone-slash"></i>No se encontraron números asociados a este documento.</div>`;
+                }
+                let body = '';
+                if (data.titular) {
+                    body += `<div class="vc-data-item" style="grid-column:1/-1;margin-bottom:10px;"><div class="k">Titular</div><div class="v">${esc(data.titular)}</div></div>`;
+                }
+                body += `<div class="vc-list-results">${items.map(t => `
+                    <div class="vc-list-item">
+                        <span class="doc"><i class="fas fa-phone" style="margin-right:8px;color:var(--emerald);"></i>${esc(t.numero || t.telefono)}</span>
+                        <span class="who">${esc(t.operador || '')}${t.tipo ? ' · ' + esc(t.tipo) : ''}${t.estado ? ' · ' + esc(t.estado) : ''}</span>
+                    </div>`).join('')}</div>`;
+                return body;
+            },
+            'telefonia-numero'(data) {
+                return `
+                    ${dataItem('Número', data.numero, true)}
+                    ${dataItem('Documento titular', data.documento, true)}
+                    ${dataItem('Operador', data.operador)}
+                    ${dataItem('Tipo de línea', data.tipo || data.tipoLinea)}
+                    ${dataItem('Departamento', data.departamento)}
+                    ${dataItem('Fecha de activación', data.fecha_activacion || data.fechaActivacion)}
+                `;
+            }
+        };
+
+        const renderers = {
+            dni(container, data) {
+                const nombreCompleto = [data.nombres, data.apellidoPaterno, data.apellidoMaterno].filter(Boolean).join(' ');
+                container.innerHTML = buildResultCard(fieldsBuilders.dni(data), nombreCompleto || 'Persona encontrada', 'ok');
+                attachResultActions(container, 'dni', data);
+            },
+            ruc(container, data) {
+                const estado = (data.estado || '').toUpperCase();
+                const pillClass = estado === 'ACTIVO' ? 'ok' : 'warn';
+                container.innerHTML = buildResultCard(fieldsBuilders.ruc(data), data.razonSocial || 'Empresa encontrada', pillClass);
+                attachResultActions(container, 'ruc', data);
+            },
+            cedula(container, data) {
+                const nombreCompleto = data.nombreCompleto || [data.nombres, data.apellidos].filter(Boolean).join(' ') || 'Persona encontrada';
+                container.innerHTML = buildResultCard(fieldsBuilders.cedula(data), nombreCompleto, 'ok');
+                attachResultActions(container, 'cedula', data);
+            },
+            'buscar-cedula'(container, data) {
+                const items = Array.isArray(data) ? data : (data.resultados || data.results || []);
+                if (!items.length) {
+                    container.innerHTML = `<div class="vc-empty"><i class="fas fa-user-slash"></i>No se encontraron coincidencias para ese nombre.</div>`;
+                    return;
+                }
+                container.innerHTML = buildResultCard(fieldsBuilders['buscar-cedula'](data), `${items.length} coincidencia${items.length > 1 ? 's' : ''}`, 'ok');
+                attachResultActions(container, 'buscar-cedula', data);
+            },
+            'buscar-dni'(container, data) {
+                const items = Array.isArray(data) ? data : (data.resultados || data.results || [data]);
+                if (!items.length || !items[0]) {
+                    container.innerHTML = `<div class="vc-empty"><i class="fas fa-user-slash"></i>No se encontraron coincidencias para ese nombre.</div>`;
+                    return;
+                }
+                container.innerHTML = buildResultCard(fieldsBuilders['buscar-dni'](data), `${items.length} coincidencia${items.length > 1 ? 's' : ''}`, 'ok');
+                attachResultActions(container, 'buscar-dni', data);
+            },
+            'telefonia-doc'(container, data) {
+                const items = Array.isArray(data) ? data : (data.lineas || data.telefonos || data.resultados || [data]);
+                if (!items.length || !items[0]) {
+                    container.innerHTML = `<div class="vc-empty"><i class="fas fa-phone-slash"></i>No se encontraron números asociados a este documento.</div>`;
+                    return;
+                }
+                container.innerHTML = buildResultCard(fieldsBuilders['telefonia-doc'](data), `${items.length} número${items.length > 1 ? 's' : ''}`, 'ok');
+                attachResultActions(container, 'telefonia-doc', data);
+            },
+            'telefonia-numero'(container, data) {
+                const status = (data.estado || '').toUpperCase() === 'ACTIVO' ? 'ok' : 'warn';
+                container.innerHTML = buildResultCard(fieldsBuilders['telefonia-numero'](data), data.titular || data.nombre || 'Número consultado', status);
+                attachResultActions(container, 'telefonia-numero', data);
+            }
+        };
+
+        function attachResultActions(container, tipo, data) {
+            lastResultData = data;
+            lastResultType = tipo;
+            lastResultContainer = container;
+
+            const copyBtn = container.querySelector('[data-action="copy"]');
+            if (copyBtn) {
+                copyBtn.addEventListener('click', () => {
+                    const card = container.querySelector('.vc-result-card');
+                    if (!card) return;
+                    const bodyEl = card.querySelector('.vc-result-body');
+                    const items = bodyEl.querySelectorAll('.vc-data-item');
+                    let text = '';
+                    items.forEach(item => {
+                        const k = item.querySelector('.k')?.textContent?.trim() || '';
+                        const v = item.querySelector('.v')?.textContent?.trim() || '';
+                        if (k && v) text += `${k}: ${v}\n`;
+                    });
+                    if (!text) text = bodyEl.textContent.trim();
+                    
+                    navigator.clipboard?.writeText(text).then(() => {
+                        showToast('Resultado copiado al portapapeles', 'fa-copy');
+                    }).catch(() => {
+                        const area = document.createElement('textarea');
+                        area.value = text;
+                        document.body.appendChild(area);
+                        area.select();
+                        try { document.execCommand('copy'); showToast('Resultado copiado', 'fa-copy'); } catch {}
+                        document.body.removeChild(area);
+                    });
+                });
+            }
+
+            const saveBtn = container.querySelector('[data-action="save"]');
+            if (saveBtn) {
+                saveBtn.addEventListener('click', () => {
+                    if (!data) { showToast('No hay datos para guardar', 'fa-triangle-exclamation'); return; }
+                    saveHistoryItem(tipo, data);
+                    renderHistory(tipo);
+                    showToast('Guardado en historial', 'fa-save');
+                });
+            }
+
+            const magicBtn = container.querySelector('[data-action="magic"]');
+            if (magicBtn) {
+                magicBtn.addEventListener('click', () => {
+                    if (!data) { showToast('No hay resultados para enviar', 'fa-triangle-exclamation'); return; }
+                    try {
+                        sessionStorage.setItem('vc_magic_payload', JSON.stringify({ tipo: tipo, data: data, enviado: Date.now() }));
+                        showToast('Enviando al generador de boletas…', 'fa-wand-magic-sparkles');
+                        setTimeout(() => { window.location.href = 'generar-boletas.html'; }, 700);
+                    } catch (e) {
+                        console.error('Error enviando a boletas', e);
+                        showToast('No se pudo enviar la consulta', 'fa-triangle-exclamation');
+                    }
+                });
+            }
+        }
+
+        // ========== ENVÍO DE FORMULARIOS ==========
+        function buildUrl(endpoint, payload) {
+            if (endpoint === 'dni') return `/api/validar/dni/${encodeURIComponent(payload.dni)}`;
+            if (endpoint === 'ruc') return `/api/validar/ruc/${encodeURIComponent(payload.ruc)}`;
+            return `/api/validar/${endpoint}`;
+        }
+
+        document.querySelectorAll('.vc-form').forEach(form => {
+            const endpoint = form.dataset.endpoint;
+            const method = form.dataset.method;
+            const resultEl = document.getElementById('result-' + endpoint);
+            const btn = form.querySelector('.vc-btn');
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                if (!currentUid) { showToast('Inicia sesión para continuar', 'fa-lock'); return; }
+
+                const formData = new FormData(form);
+                const payload = {};
+                let valid = true;
+                for (const [key, value] of formData.entries()) {
+                    payload[key] = value.trim();
+                }
+
+                const requiredMap = {
+                    dni: ['dni'], ruc: ['ruc'], cedula: ['cedula'], 'buscar-cedula': ['query'],
+                    'buscar-dni': ['nombres', 'apepaterno'], 'telefonia-doc': ['documento'], 'telefonia-numero': ['numero']
+                };
+                for (const field of requiredMap[endpoint] || []) {
+                    const inputEl = form.querySelector(`[name="${field}"]`);
+                    if (!payload[field]) {
+                        inputEl && inputEl.classList.add('invalid');
+                        valid = false;
+                    } else {
+                        inputEl && inputEl.classList.remove('invalid');
+                    }
+                }
+                if (!valid) { showToast('Completa los campos requeridos', 'fa-triangle-exclamation'); return; }
+
+                btn.disabled = true;
+                btn.classList.add('loading');
+                renderSkeleton(resultEl);
+
+                try {
+                    const url = buildUrl(endpoint, payload);
+                    const options = { method, credentials: 'same-origin', headers: { 'Content-Type': 'application/json' } };
+                    if (method === 'POST') options.body = JSON.stringify(payload);
+
+                    const res = await fetch(url, options);
+                    const json = await res.json();
+
+                    if (!res.ok || !json.success) {
+                        const isLimit = json.code === 'LIMIT_REACHED' || res.status === 403;
+                        renderError(resultEl, json.error || 'No se pudo completar la consulta.', isLimit);
+                        if (isLimit) showToast('Límite de consultas alcanzado', 'fa-triangle-exclamation');
+                        loadCupo();
+                        return;
+                    }
+
+                    const renderer = renderers[endpoint];
+                    if (renderer) {
+                        renderer(resultEl, json.data);
+                        renderHistory(endpoint);
+                    }
+                    showToast('Consulta realizada con éxito');
+                    loadCupo();
+                } catch (err) {
+                    console.error(err);
+                    renderError(resultEl, 'Ocurrió un error de conexión. Intenta nuevamente.');
+                } finally {
+                    btn.disabled = false;
+                    btn.classList.remove('loading');
+                }
+            });
+        });
+
+        document.querySelectorAll('[data-clear]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const endpoint = btn.dataset.clear;
+                const form = document.querySelector(`.vc-form[data-endpoint="${endpoint}"]`);
+                if (form) form.reset();
+                form?.querySelectorAll('input').forEach(i => i.classList.remove('invalid'));
+                const resultEl = document.getElementById('result-' + endpoint);
+                if (resultEl) {
+                    resultEl.innerHTML = `<div class="vc-empty"><i class="fas fa-inbox"></i>Sin resultados aún.</div>`;
+                }
+            });
+        });
+
+        ['dniInput', 'rucInput', 'telDocInput', 'telNumInput'].forEach(id => {
+            const el = document.getElementById(id);
+            el && el.addEventListener('input', () => { el.value = el.value.replace(/\D/g, ''); });
+        });
+
+        // ========== INIT ==========
+        async function initApp() {
+            await checkSession();
+            await loadCupo();
+            ['dni', 'ruc', 'cedula', 'buscar-cedula', 'buscar-dni', 'telefonia-doc', 'telefonia-numero'].forEach(tipo => {
+                renderHistory(tipo);
+                const searchInput = document.getElementById('historySearch-' + tipo);
+                if (searchInput) {
+                    searchInput.addEventListener('input', () => renderHistory(tipo));
+                }
+            });
+        }
+    </script>
+</body>
+</html>
