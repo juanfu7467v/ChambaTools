@@ -44,108 +44,78 @@
             text-decoration: underline;
         }
     </style>
-    <title>Política de Privacidad</title>
+    <title>Política de Privacidad - FacilitoTools</title>
 </head>
 <body ondragstart="return false" onselectstart="return false" oncontextmenu="return false">
+    <div class="container">
+        <h1>POLÍTICA DE PRIVACIDAD Y TRATAMIENTO DE DATOS PERSONALES</h1>
+        <p style="text-align: center;"><strong>Plataforma Digital FacilitoTools</strong></p>
+        <p style="text-align: center;">Titular: José René Cubas Pérez</p>
+        <p style="text-align: center;">RUC: 10736224350</p>
+        <p style="text-align: center;">Fecha de última actualización: 2 de septiembre de 2026</p>
 
-    
+        <h2>1. Marco Legal y Compromiso de Privacidad</h2>
+        <p>La presente Política de Privacidad describe la forma en que José René Cubas Pérez, identificado con RUC N° 10736224350 (en adelante, "el Titular"), recopila, procesa, utiliza, almacena y protege la información personal de los usuarios de la plataforma digital FacilitoTools (en adelante, "la Plataforma").</p>
+        <p>El tratamiento de los datos personales se realiza en estricto cumplimiento de la Ley N° 29733 — Ley de Protección de Datos Personales de la República del Perú, su Reglamento aprobado mediante Decreto Supremo N° 003-2013-JUS, y las directivas emitidas por la Autoridad Nacional de Protección de Datos Personales (ANDPD).</p>
 
-        <h1>Política de Privacidad y Tratamiento de Datos Personales</h1>
-        <p style="text-align: center;"><strong>FacilitoTools</strong><br>
-        Titular: José René Cubas Pérez<br>
-        RUC: 10736224350<br>
-        Fecha de última actualización: 2 de septiembre de 2026</p>
+        <h2>2. Principio de "Residuo Cero" y Tratamiento del Historial de Consultas</h2>
+        <p>Para garantizar la máxima confidencialidad del Usuario y la protección de los titulares de la información consultada, FacilitoTools opera bajo un modelo estricto de Residuo Cero (Zero-Data Retention Policy) en el módulo de validación de datos.</p>
 
-        <h2>1. Identidad y Titularidad del Sitio Web</h2>
-        <p>El presente sitio web y la plataforma FacilitoTools (en adelante, "la Plataforma") son operados bajo la titularidad de José René Cubas Pérez, identificado con RUC 10736224350 (en adelante, "el Titular").</p>
-        <p>El Titular asume un compromiso estricto con el cumplimiento de la Ley N° 29733 — Ley de Protección de Datos Personales de la República del Perú, su Reglamento (Decreto Supremo N° 003-2013-JUS) y las normas complementarias vigentes. Esta Política de Privacidad describe de forma detallada e íntegra el tratamiento, almacenamiento, salvaguarda y límites de la información recopilada a través del sitio web.</p>
+        <h3>A. Tratamiento de Consultas de Verificación (DNI, RUC, Cédula y Telefonía)</h3>
+        <p><strong>Paso de Datos (Data Pipeline):</strong> Cuando el Usuario efectúa una búsqueda en los módulos de verificación, la Plataforma actúa exclusivamente como un canal técnico intermedio. Los parámetros de búsqueda se transmiten en tiempo real hacia las APIs de consulta externa y los resultados se despliegan de forma inmediata en la pantalla del Usuario.</p>
+        <p><strong>Ausencia de Almacenamiento Centralizado:</strong> La Plataforma no guarda, registra ni archiva en sus servidores ni en bases de datos en la nube los resultados de las consultas realizadas (tales como nombres, direcciones, estados tributarios o titularidades de líneas).</p>
+        <p><strong>Persistencia Local (LocalStorage):</strong> El historial de las búsquedas ejecutadas se almacena de forma confidencial y exclusiva en el navegador web del Usuario mediante la tecnología LocalStorage de su propio dispositivo.</p>
+        <p><strong>Control del Usuario:</strong> El Usuario conserva el control absoluto sobre dicho historial local, pudiendo filtrarlo o eliminarlo en cualquier momento. Si el Usuario limpia la caché o datos de navegación de su explorador, dicho historial se borrará de forma definitiva sin posibilidad de recuperación.</p>
 
-        <h2>2. Modelo Operativo y Finalidad del Servicio</h2>
-        <p>FacilitoTools es una infraestructura digital de herramientas orientada al sector comercial, empresarial e intermediarios que requieren verificar la identidad y validez legal de sus clientes y contrapartes.</p>
-        <p>Nuestros servicios abarcan:</p>
+        <h3>B. Generación de Comprobantes de Venta</h3>
+        <p><strong>Procesamiento Cliente (Client-Side):</strong> La información utilizada para la confección de boletas de venta se procesa únicamente en la memoria local del navegador del Usuario. La Plataforma no almacena copia ni registro contable de los comprobantes maquetados por el Usuario.</p>
+
+        <h2>3. Datos Personales Recopilados y Almacenamiento en la Nube</h2>
+        <p>Para la gestión de cuentas, autenticación de usuarios y administración del servicio, el Titular recopila únicamente la información estrictamente necesaria.</p>
+
+        <h3>A. Datos Recopilados para el Registro</h3>
         <ul>
-            <li><strong>Módulos de consulta y validación de información pública e intermediación:</strong> Consultas de DNI (RENIEC), RUC (SUNAT), cédula venezolana, búsqueda de documentos por nombre y titularidades de líneas telefónicas.</li>
-            <li><strong>Módulo de emisión y generación de comprobantes (boletas de venta):</strong> Herramienta que facilita la maquetación y generación local de comprobantes de pago.</li>
-        </ul>
-
-        <h2>3. Principio de "Residuo Cero" y Tratamiento del Historial de Consultas</h2>
-        <p>Para la máxima protección legal y privacidad tanto del usuario registrado como de los terceros cuyos datos son consultados en la Plataforma, FacilitoTools opera bajo una Política de Residuo Cero (Zero-Data Retention Policy) respecto al historial de datos de consulta.</p>
-
-        <h3>A. Tratamiento de Consultas de Validación</h3>
-        <p>Cuando realiza una consulta (DNI, RUC, Cédula o Telefonía):</p>
-        <ul>
-            <li><strong>Paso de Datos:</strong> La Plataforma actúa únicamente como un conducto técnico intermedio (data pipeline). Recibe el parámetro de búsqueda, procesa la petición ante la API correspondiente y devuelve el resultado a la pantalla del usuario.</li>
-            <li><strong>Sin Almacenamiento en Servidor:</strong> FacilitoTools no guarda ni registra en servidores externos, bases de datos remotas ni en la nube el contenido de los resultados obtenidos (nombres, direcciones, estados tributarios o números de teléfono).</li>
-            <li><strong>Persistencia Local (LocalStorage):</strong> Todo el historial de consultas de validación se almacena exclusivamente en el navegador del usuario mediante la tecnología LocalStorage de su dispositivo personal.</li>
-            <li><strong>Control Total del Usuario:</strong> El usuario conserva el control absoluto de dicho historial, pudiendo filtrarlo, consultarlo o eliminar registros individuales o totales en el momento que lo desee mediante los botones "Limpiar" y "Eliminar este registro". Si el usuario borra la caché o datos de navegación de su explorador, dicho historial se eliminará definitivamente sin posibilidad de recuperación por parte del Titular.</li>
-        </ul>
-
-        <h3>B. Tratamiento de la Emisión de Boletas</h3>
-        <ul>
-            <li><strong>Procesamiento Cliente (Client-Side):</strong> La información utilizada para la confección, maquetación y llenado de boletas de venta no se almacena en ninguna base de datos centralizada ni en la nube de la Plataforma.</li>
-            <li><strong>Generación Local:</strong> El guardado e historial de boletas generadas reside estrictamente en el almacenamiento local del dispositivo (LocalStorage) desde el cual opera el usuario.</li>
-        </ul>
-
-        <h2>4. Datos Personales Recopilados y Almacenamiento en Firestore</h2>
-        <p>Para la creación de cuentas, autenticación de usuarios y administración técnica del servicio, FacilitoTools recopila únicamente los datos estrictamente necesarios para la prestación del servicio.</p>
-
-        <h3>A. Registro y Autenticación</h3>
-        <p>Durante la creación de cuenta o inicio de sesión en la Plataforma, recopilamos:</p>
-        <ul>
-            <li>Nombre completo o nombre de usuario visible.</li>
+            <li>Nombre completo o nombre de usuario público.</li>
             <li>Dirección de correo electrónico.</li>
-            <li>Contraseña encriptada (en caso de registro directo con correo/contraseña).</li>
-            <li>Identificador único de usuario (UID) e información básica del perfil cuando el usuario opta por ingresar mediante proveedores de identidad de terceros (Google Sign-In o GitHub OAuth).</li>
+            <li>Contraseña encriptada (en caso de registro directo con correo y clave).</li>
+            <li>Identificador único de usuario (UID) e información básica del perfil cuando el Usuario opta por autenticarse mediante terceros (Google Sign-In o GitHub OAuth).</li>
         </ul>
 
-        <h3>B. Base de Datos Cloud</h3>
-        <p>Estos datos de perfil y autenticación se almacenan en la base de datos Google Firebase Firestore, bajo estrictas medidas de seguridad, reglas de autenticación y controles de acceso cifrados.</p>
+        <h3>B. Almacenamiento Seguro (Google Firebase Firestore)</h3>
+        <p>Los datos de perfil y autenticación se almacenan de forma segura en la base de datos Google Firebase Firestore, contando con controles de acceso restringido, reglas de seguridad de datos y protocolos de cifrado en tránsito y en reposo.</p>
 
-        <h3>C. Control de Consumo y Cupos</h3>
-        <p>Adicionalmente, en la base de datos Firestore se guarda el registro del saldo de cupos y las métricas numéricas de consumo del usuario (cantidad de consultas realizadas y límite disponible según su plan) para prevenir abusos y gestionar el acceso a los servicios de la API.</p>
+        <h3>C. Métricas de Consumo y Saldo</h3>
+        <p>En la base de datos se registra únicamente el saldo numérico de cupos y el conteo de transacciones ejecutadas por el Usuario con la sola finalidad de administrar el acceso al servicio y prevenir abusos o patrones fraudulentos.</p>
 
-        <h2>5. Pasarela de Pagos, Compras Automáticas y Gestión de Planes</h2>
-        <p>FacilitoTools pone a disposición de sus usuarios una interfaz transparente de adquisición de servicios para el acceso a las funciones de consulta.</p>
+        <h2>4. Pasarela de Pagos y Procesamiento Financiero</h2>
+        <p>Las transacciones de recarga de saldo o adquisición de paquetes de cupos se procesan mediante la pasarela de pagos oficial de Mercado Pago.</p>
+        <p><strong>Deslinde Financiero:</strong> FacilitoTools no captura, procesa ni almacena números de tarjetas de crédito/débito, códigos CVC/CVV, claves bancarias ni datos sensibles de pago.</p>
+        <p><strong>Estándar PCI-DSS:</strong> Toda la transacción financiera se realiza directamente en los servidores de Mercado Pago bajo los estándares internacionales de seguridad en transacciones electrónicas.</p>
 
-        <h3>A. Modalidad de Pago (Sin Suscripciones Recurrentes)</h3>
+        <h2>5. Transferencia de Datos a Terceros</h2>
+        <p>El Titular se compromete a no vender, alquilar, ceder ni comercializar los datos personales de sus usuarios con terceras empresas o anunciantes. La transferencia de datos se limita exclusivamente a la infraestructura técnica indispensable para el funcionamiento de la Plataforma:</p>
         <ul>
-            <li><strong>Cobros Únicos:</strong> La adquisición de saldo o planes dentro de FacilitoTools no constituye una suscripción de renovación automática.</li>
-            <li><strong>Prueba Gratuita:</strong> Al registrarse, el usuario puede disponer de un cupo de prueba gratuita para evaluar la Plataforma.</li>
-            <li><strong>Recargas por Recargo/Paquetes:</strong> Una vez agotada la prueba, el usuario puede comprar paquetes de consultas o asignación de cupos de forma puntual según sus necesidades operativas. No se realizarán cargos periódicos ni débitos automáticos no autorizados en el futuro.</li>
+            <li><strong>Google Cloud / Firebase:</strong> Alojamiento de la base de datos de usuarios y autenticación.</li>
+            <li><strong>Mercado Pago:</strong> Procesamiento seguro de pagos en línea.</li>
+            <li><strong>Proveedores de APIs de Consulta (APISPERU y fuentes oficiales):</strong> Canalización de peticiones en tiempo real para la obtención de respuestas públicas.</li>
         </ul>
 
-        <h3>B. Integración con la API de Mercado Pago</h3>
+        <h2>6. Ejercicio de Derechos ARCO</h2>
+        <p>De conformidad con la Ley N° 29733, el Usuario tiene derecho a ejercer sus derechos de Acceso, Rectificación, Cancelación y Oposición (Derechos ARCO) sobre sus datos personales almacenados en su cuenta de perfil.</p>
+        <p>Para ejercer cualquiera de estos derechos o solicitar la eliminación definitiva de su cuenta de usuario de la base de datos de Firebase, el Usuario deberá remitir una solicitud expresa mediante los siguientes canales de atención:</p>
         <ul>
-            <li><strong>Aprovisionamiento Instantáneo:</strong> Los pagos son procesados de forma 100% automática a través de la API oficial de Mercado Pago. Una vez confirmado el pago por la pasarela, los cupos se acreditan de manera inmediata en la cuenta del usuario.</li>
-            <li><strong>Métodos de Pago Aceptados:</strong> Se aceptan transferencias mediante Yape y todo tipo de Tarjetas de Débito y Crédito procesadas por la pasarela.</li>
-            <li><strong>No Retención de Datos Financieros:</strong> FacilitoTools jamás captura, procesa ni almacena los datos de sus tarjetas de crédito/débito, claves secretas ni tokens bancarios. Todas las transacciones financieras son gestionadas en los servidores seguros y bajo los estándares de encriptación PCI-DSS de Mercado Pago.</li>
+            <li><strong>WhatsApp de Soporte:</strong> +51 944 950 234</li>
+            <li><strong>Módulo de Ayuda:</strong> Sección de soporte dentro del panel de la Plataforma.</li>
         </ul>
+        <p>La solicitud será atendida dentro de los plazos legales establecidos por la normativa peruana de protección de datos.</p>
 
-        <h2>6. Transferencia de Datos a Terceros y Servicios Conectados</h2>
-        <p>FacilitoTools no vende, alquila ni comercializa datos personales a terceras empresas. Para la operatividad técnica del sitio, la Plataforma se conecta con las siguientes entidades:</p>
-        <ul>
-            <li><strong>Google Firebase (Firestore / Authentication):</strong> Para la gestión de cuentas, autenticación de usuarios y registro de cupos de uso.</li>
-            <li><strong>Mercado Pago (API):</strong> Para la pasarela de pagos en línea.</li>
-            <li><strong>APIs de Consulta Externa (APISPERU y fuentes oficiales):</strong> Para la canalización en tiempo real de las respuestas de validación.</li>
-        </ul>
-
-        <h2>7. Ejercicio de Derechos ARCO</h2>
-        <p>De acuerdo con la Ley N° 29733, los usuarios registrados en FacilitoTools pueden ejercer sus derechos de Acceso, Rectificación, Cancelación y Oposición (Derechos ARCO) respecto a su cuenta de usuario y datos de perfil.</p>
-        <p>Para iniciar una solicitud ARCO, el usuario puede comunicarse directamente con el Titular enviando una solicitud formal a través de los canales oficiales de soporte:</p>
-        <ul>
-            <li><strong>WhatsApp de soporte:</strong> +51 944 950 234</li>
-            <li><strong>Sección de soporte interna:</strong> A través del módulo de Ayuda y soporte disponible en el menú de navegación de la Plataforma.</li>
-        </ul>
-
-        <h2>8. Modificaciones a la Política de Privacidad</h2>
-        <p>El Titular se reserva el derecho de modificar o actualizar la presente Política de Privacidad en cualquier momento para adaptarla a novedades legislativas, jurisprudenciales o prácticas de la industria. Cualquier cambio será publicado oportunamente en esta misma sección. Se recomienda a los usuarios revisar esta política periódicamente.</p>
+        <h2>7. Cambios a la Política de Privacidad</h2>
+        <p>El Titular se reserva el derecho de actualizar o modificar la presente Política de Privacidad para adecuarla a reformas legislativas o mejoras operativas del servicio. Las actualizaciones serán publicadas en este mismo apartado con la fecha correspondiente, siendo responsabilidad del Usuario revisar esta sección periódicamente.</p>
 
         <footer>
-            <p>© 2026 FacilitoTools</p>
-            <p><strong>Titular:</strong> José René Cubas Pérez | <strong>RUC:</strong> 10736224350</p>
+            <p>© 2026 FacilitoTools | Plataforma Digital de Verificación y Validación de Datos</p>
+            <p><strong>Titular:</strong> José René Cubas Pérez | <strong>RUC:</strong> 10736224350 | Perú</p>
         </footer>
-
     </div>
-
 </body>
 </html>
