@@ -1,0 +1,3252 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FacilitoTools – Generador de boletas, facturas y validación de clientes en Perú | DNI, RUC y teléfonos</title>
+    <meta name="description" content="Genera boletas y facturas profesionales, valida DNI, RUC y teléfonos de tus clientes al instante. Herramienta integral para emprendedores y empresas en Perú. Prueba gratis." />
+    <meta name="keywords" content="generador de boletas, generador de facturas, validación de clientes, consulta DNI, consulta RUC, consulta de teléfonos, herramientas para emprendedores, Perú, facilitotools, comprobantes profesionales, validación de identidad, facturación electrónica, empresas peruanas" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://facilitotools.com/" />
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="FacilitoTools – Generador de boletas, facturas y validación de clientes en Perú" />
+    <meta property="og:description" content="Genera boletas y facturas profesionales, valida DNI, RUC y teléfonos. La herramienta integral para emprendedores y empresas en Perú. ¡Prueba gratis ahora!" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://facilitotools.com/" />
+    <meta property="og:image" content="https://i.postimg.cc/fLYYD0Bb/1000153255-preview-rev-1.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content="es_PE" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="FacilitoTools – Generador de boletas, facturas y validación de clientes en Perú" />
+    <meta name="twitter:description" content="Genera boletas y facturas, valida DNI, RUC y teléfonos. Herramienta integral para emprendedores y empresas peruanas. ¡Prueba gratis!" />
+    <meta name="twitter:image" content="https://i.postimg.cc/fLYYD0Bb/1000153255-preview-rev-1.png" />
+
+    <!-- Iconos -->
+    <link rel="icon" type="image/png" href="https://i.postimg.cc/fLYYD0Bb/1000153255-preview-rev-1.png" />
+    <link rel="shortcut icon" type="image/png" href="https://i.postimg.cc/fLYYD0Bb/1000153255-preview-rev-1.png" />
+    <link rel="apple-touch-icon" href="https://i.postimg.cc/fLYYD0Bb/1000153255-preview-rev-1.png" />
+
+    <!-- Datos estructurados Schema.org -->
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "WebApplication",
+            "name": "FacilitoTools",
+            "url": "https://facilitotools.com/",
+            "description": "Generador de boletas, facturas y validación de clientes (DNI, RUC, teléfonos) para emprendedores y empresas en Perú. Prueba gratis.",
+            "applicationCategory": "BusinessApplication",
+            "operatingSystem": "All",
+            "offers": [{
+                "@type": "Offer",
+                "name": "Gratuito",
+                "price": "0",
+                "priceCurrency": "PEN"
+            }, {
+                "@type": "Offer",
+                "name": "Emprendedor Digital",
+                "price": "19",
+                "priceCurrency": "PEN",
+                "description": "Plan mensual con 800 comprobantes y 60 consultas"
+            }, {
+                "@type": "Offer",
+                "name": "Negocio Estable",
+                "price": "32",
+                "priceCurrency": "PEN",
+                "description": "Plan bimestral con 1,800 comprobantes y 140 consultas"
+            }],
+            "publisher": {
+                "@type": "Organization",
+                "name": "FacilitoTools",
+                "url": "https://facilitotools.com/",
+                "logo": "https://i.postimg.cc/fLYYD0Bb/1000153255-preview-rev-1.png"
+            },
+            "about": {
+                "@type": "Thing",
+                "name": "Validación de clientes y generación de comprobantes",
+                "description": "Herramientas para generar boletas y facturas, validar DNI, RUC y teléfonos en Perú"
+            },
+            "browserRequirements": "Requiere JavaScript y un navegador moderno"
+        }
+    </script>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com">
+    </script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <!-- Remixicon -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" />
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700;800&family=DM+Mono:wght@400;500&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&display=swap" rel="stylesheet" />
+
+    <!-- Firebase (se mantiene) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js">
+    </script>
+    <script src="returnConfig.js">
+    </script>
+
+    <style>
+        /* ========== ESTILOS COMPLETOS (heredados y mejorados) ========== */
+        :root {
+            --navy-deep: #0A1628;
+            --navy-surface: #0F1F3D;
+            --navy-card: #15294A;
+            --navy-border: #1E3A5F;
+            --emerald: #00C853;
+            --emerald-light: #69F0AE;
+            --emerald-dark: #00A844;
+            --emerald-glow: rgba(0, 200, 83, 0.2);
+            --emerald-glow-strong: rgba(0, 200, 83, 0.35);
+            --gold: #FFD700;
+            --gold-light: #FFED4A;
+            --gold-dim: #B8960F;
+            --gold-glow: rgba(255, 215, 0, 0.15);
+            --ruby: #E53935;
+            --ruby-light: #FF5252;
+            --ruby-glow: rgba(229, 57, 53, 0.2);
+            --white: #F8FAFC;
+            --text-primary: #E2E8F0;
+            --text-muted: #94A3B8;
+            --text-subtle: #64748B;
+            --border-subtle: rgba(255, 255, 255, 0.06);
+            --border-active: rgba(0, 200, 83, 0.25);
+            --border-gold: rgba(255, 215, 0, 0.25);
+            --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.4);
+            --shadow-emerald: 0 4px 20px rgba(0, 200, 83, 0.2);
+            --sh-hov: 0 24px 64px rgba(0, 0, 0, 0.5), 0 6px 24px rgba(0, 200, 83, 0.18);
+            --radius: 20px;
+            --radius-sm: 10px;
+            --font-family: 'Outfit', 'Inter', sans-serif;
+            --font-display: 'Space Grotesk', 'Outfit', sans-serif;
+            --font-serif: 'Cormorant Garamond', serif;
+            --font-mono: 'DM Mono', monospace;
+            --tech-blue: #00BFFF;
+            --tech-blue-light: #66D9FF;
+            --tech-blue-glow: rgba(0, 191, 255, 0.2);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            font-size: 106.25%;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background: var(--navy-deep);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            -webkit-font-smoothing: antialiased;
+            user-select: none;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0.6;
+        }
+
+        .ambient-1 {
+            position: fixed;
+            top: -20%;
+            left: -10%;
+            width: 60vw;
+            height: 60vw;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(0, 200, 83, 0.03) 0%, transparent 65%);
+            pointer-events: none;
+            z-index: -1;
+            animation: floatAmbient 10s ease-in-out infinite;
+        }
+        .ambient-2 {
+            position: fixed;
+            bottom: -20%;
+            right: -10%;
+            width: 50vw;
+            height: 50vw;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.04) 0%, transparent 65%);
+            pointer-events: none;
+            z-index: -1;
+            animation: floatAmbient 12s ease-in-out infinite reverse;
+        }
+
+        @keyframes floatAmbient {
+            0%,
+            100% {
+                transform: translate(0, 0) scale(1);
+            }
+            33% {
+                transform: translate(20px, -20px) scale(1.05);
+            }
+            66% {
+                transform: translate(-15px, 15px) scale(0.95);
+            }
+        }
+
+        /* ═══ SIDEBAR ═══ */
+        #sidebar-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 50;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            display: none;
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+        }
+        #sidebar-overlay.opacity-100 {
+            opacity: 1;
+        }
+        #sidebar-overlay.hidden {
+            display: none;
+        }
+
+        #sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 290px;
+            background: linear-gradient(180deg, #0A1628 0%, #0F1F3D 100%) !important;
+            border-right: 1px solid var(--border-active);
+            z-index: 60;
+            overflow: hidden;
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateX(-100%);
+            display: flex;
+            flex-direction: column;
+            box-shadow: 8px 0 40px rgba(0, 0, 0, 0.5);
+        }
+        #sidebar.open {
+            transform: translateX(0);
+        }
+
+        .sb-header {
+            padding: 32px 20px 20px;
+            background: linear-gradient(160deg, #0A1628 0%, #0F1F3D 100%);
+            border-bottom: 1px solid var(--border-active);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .sb-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--emerald), var(--gold), transparent);
+            animation: shimmerHeader 3s infinite;
+        }
+        @keyframes shimmerHeader {
+            0%,
+            100% {
+                transform: translateX(-100%);
+            }
+            50% {
+                transform: translateX(100%);
+            }
+        }
+        .sb-logo-box {
+            width: 68px;
+            height: 68px;
+            margin: 0 auto 12px;
+            border-radius: 18px;
+            overflow: hidden;
+            border: 2px solid var(--border-active);
+            box-shadow: 0 0 25px var(--emerald-glow);
+            transition: transform 0.3s ease;
+            background: rgba(0, 200, 83, 0.05);
+        }
+        .sb-logo-box:hover {
+            transform: scale(1.1) rotate(5deg);
+        }
+        .sb-logo-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .sb-brand {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 1.3rem;
+            color: var(--gold) !important;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+        }
+        .sb-tagline {
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            letter-spacing: 0.15em;
+            margin-top: 6px;
+            text-transform: uppercase;
+        }
+        .sb-scroll-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px 0;
+        }
+        .sb-scroll-area::-webkit-scrollbar {
+            width: 3px;
+        }
+        .sb-scroll-area::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .sb-scroll-area::-webkit-scrollbar-thumb {
+            background: var(--emerald-dark);
+            border-radius: 3px;
+        }
+        .sb-cat {
+            padding: 14px 24px 8px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            color: var(--emerald);
+        }
+        #sidebar nav a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 24px;
+            color: var(--text-primary) !important;
+            transition: all 0.25s ease;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+        #sidebar nav a::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: var(--emerald);
+            transform: scaleY(0);
+            transition: transform 0.25s ease;
+        }
+        #sidebar nav a:hover {
+            background: rgba(0, 200, 83, 0.08);
+            color: var(--emerald-light) !important;
+            transform: translateX(4px);
+        }
+        #sidebar nav a:hover::before {
+            transform: scaleY(1);
+        }
+        #sidebar nav a.active {
+            background: linear-gradient(90deg, rgba(0, 200, 83, 0.12) 0%, transparent 100%);
+            color: var(--emerald) !important;
+            font-weight: 700;
+        }
+        #sidebar nav a.active::before {
+            transform: scaleY(1);
+        }
+        .sb-icon {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+            font-size: 1.1rem;
+            text-align: center;
+            color: var(--text-muted);
+            transition: color 0.25s ease;
+        }
+        #sidebar nav a:hover .sb-icon,
+        #sidebar nav a.active .sb-icon {
+            color: var(--emerald);
+        }
+        .sb-badge {
+            font-size: 0.65rem;
+            padding: 2px 8px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--emerald-dark), var(--emerald));
+            color: #000;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+            animation: pulse 2s infinite;
+            margin-left: auto;
+        }
+        @keyframes pulse {
+            0%,
+            100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.7;
+            }
+        }
+        .sb-footer {
+            padding: 16px 20px;
+            border-top: 1px solid var(--border-subtle);
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.2);
+            flex-shrink: 0;
+        }
+        .sb-footer a {
+            color: var(--text-muted) !important;
+            font-size: 1.3rem;
+            transition: all 0.25s ease;
+        }
+        .sb-footer a:hover {
+            color: var(--emerald) !important;
+            transform: translateY(-3px);
+        }
+
+        /* Botón hamburguesa */
+        #menu-toggle {
+            position: fixed;
+            top: 16px;
+            left: 16px;
+            z-index: 100;
+            background: rgba(15, 31, 61, 0.9);
+            color: var(--emerald);
+            border: 1px solid var(--border-active);
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        #menu-toggle:hover {
+            transform: scale(1.08);
+            background: rgba(0, 200, 83, 0.1);
+            box-shadow: 0 6px 20px var(--emerald-glow);
+        }
+        #menu-toggle i {
+            color: var(--emerald);
+            font-size: 1.3rem;
+        }
+
+        /* ═══ MAIN ═══ */
+        main {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+        }
+
+        /* ═══ FOOTER ═══ */
+        .footer-content {
+            width: 100%;
+            padding: 48px 16px 32px;
+            background: var(--navy-surface);
+            border-top: 1px solid var(--border-active);
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+        .footer-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--emerald), transparent);
+        }
+        .footer-content h3 {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 16px;
+        }
+        .footer-content .social-icons {
+            margin-bottom: 24px;
+        }
+        .footer-content .social-icons a {
+            color: var(--text-muted);
+            font-size: 1.6rem;
+            margin: 0 12px;
+            transition: all 0.2s;
+        }
+        .footer-content .social-icons a:hover {
+            color: var(--emerald);
+            transform: translateY(-3px);
+        }
+        .footer-content p {
+            font-size: 0.78rem;
+            color: var(--text-subtle);
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+        .footer-content a {
+            color: var(--emerald-light);
+            text-decoration: none;
+            transition: color 0.2s;
+            font-weight: 600;
+        }
+        .footer-content a:hover {
+            color: var(--emerald);
+        }
+
+        /* ═══ WHATSAPP ═══ */
+        .chat-bubble {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #25D366, #128C7E);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 28px;
+            cursor: pointer;
+            box-shadow: 0 6px 25px rgba(37, 211, 102, 0.4);
+            z-index: 1000;
+            animation: slideIn 1s ease-out forwards;
+            transition: all 0.3s ease;
+            border: none;
+        }
+        .chat-bubble:hover {
+            transform: scale(1.1);
+        }
+        .chat-text {
+            position: fixed;
+            bottom: 94px;
+            right: 24px;
+            background: linear-gradient(135deg, #25D366, #128C7E);
+            color: white;
+            padding: 12px 18px;
+            border-radius: 14px;
+            font-size: 14px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            white-space: nowrap;
+            opacity: 0;
+            transform: scale(0.9);
+            transition: opacity 0.4s, transform 0.4s;
+            z-index: 1001;
+            cursor: pointer;
+            font-family: var(--font-family);
+            font-weight: 600;
+        }
+        .chat-text.show {
+            opacity: 1;
+            transform: scale(1);
+        }
+        .chat-text.hide {
+            opacity: 0;
+            transform: scale(0.9);
+        }
+        @keyframes slideIn {
+            from {
+                transform: translateX(80px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            #sidebar {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+
+        /* ============================================================
+           NUEVOS ESTILOS PARA EL INDICADOR DE PROGRESO Y PASOS
+           ============================================================ */
+        .step-progress {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0;
+            padding: 28px 16px 12px;
+            max-width: 500px;
+            margin: 0 auto;
+            position: relative;
+        }
+        .step-progress .step-circle {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            position: relative;
+            z-index: 2;
+            cursor: default;
+            flex: 1;
+        }
+        .step-progress .step-circle .circle {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 1rem;
+            background: var(--navy-surface);
+            border: 2px solid var(--navy-border);
+            color: var(--text-muted);
+            transition: all 0.35s ease;
+            position: relative;
+        }
+        .step-progress .step-circle .circle .label {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            font-size: 0.5rem;
+            background: var(--navy-deep);
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--navy-border);
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+        .step-progress .step-circle.active .circle {
+            border-color: var(--emerald);
+            background: var(--emerald);
+            color: #000;
+            box-shadow: 0 0 24px var(--emerald-glow-strong);
+        }
+        .step-progress .step-circle.active .circle .label {
+            border-color: var(--emerald);
+            color: var(--emerald);
+            background: var(--navy-deep);
+        }
+        .step-progress .step-circle.done .circle {
+            border-color: var(--emerald);
+            background: rgba(0, 200, 83, 0.12);
+            color: var(--emerald);
+        }
+        .step-progress .step-circle.done .circle .label {
+            border-color: var(--emerald);
+            color: var(--emerald);
+            background: var(--navy-deep);
+        }
+        .step-progress .step-circle .step-label {
+            font-size: 0.6rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-subtle);
+            transition: color 0.3s ease;
+            white-space: nowrap;
+        }
+        .step-progress .step-circle.active .step-label {
+            color: var(--emerald-light);
+        }
+        .step-progress .step-circle.done .step-label {
+            color: var(--text-muted);
+        }
+
+        .step-progress .step-line {
+            flex: 1;
+            height: 2px;
+            background: var(--navy-border);
+            position: relative;
+            z-index: 1;
+            margin: 0 -4px;
+            border-radius: 2px;
+            transition: background 0.5s ease;
+        }
+        .step-progress .step-line.done {
+            background: var(--emerald);
+        }
+
+        /* Contenedores de pasos */
+        .step-container {
+            display: none;
+            animation: fadeStep 0.45s ease forwards;
+        }
+        .step-container.active {
+            display: block;
+        }
+        @keyframes fadeStep {
+            from {
+                opacity: 0;
+                transform: translateY(18px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ============================================================
+           ESTILOS PARA LA PANTALLA DE BIENVENIDA (STEP 1)
+           ============================================================ */
+        .welcome-step {
+            width: 100%;
+            min-height: 70vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px 48px;
+            text-align: center;
+            position: relative;
+        }
+        .welcome-step .welcome-icon {
+            font-size: 4rem;
+            color: var(--emerald);
+            margin-bottom: 20px;
+            display: block;
+            animation: pulseIcon 2.5s ease-in-out infinite;
+        }
+        @keyframes pulseIcon {
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.08);
+                opacity: 0.85;
+            }
+        }
+        .welcome-step h1 {
+            font-family: var(--font-serif);
+            font-size: clamp(2.4rem, 7vw, 4.2rem);
+            font-weight: 300;
+            color: var(--white);
+            line-height: 1.1;
+            margin-bottom: 12px;
+        }
+        .welcome-step h1 em {
+            font-style: italic;
+            color: var(--emerald);
+        }
+        .welcome-step .welcome-desc {
+            font-size: 1.05rem;
+            color: var(--text-muted);
+            max-width: 560px;
+            line-height: 1.7;
+            margin: 0 auto 28px;
+        }
+        .welcome-step .welcome-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background: linear-gradient(135deg, var(--emerald), var(--emerald-dark));
+            color: #000;
+            font-weight: 700;
+            font-size: 0.95rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            padding: 16px 40px;
+            border-radius: 60px;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 8px 32px var(--emerald-glow-strong);
+            transition: all 0.25s ease;
+            font-family: var(--font-display);
+        }
+        .welcome-step .welcome-btn:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 12px 44px var(--emerald-glow-strong);
+        }
+        .welcome-step .welcome-features {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px 36px;
+            margin-top: 32px;
+        }
+        .welcome-step .welcome-features span {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+        .welcome-step .welcome-features i {
+            color: var(--emerald);
+            font-size: 1rem;
+        }
+
+        /* ============================================================
+           ESTILOS PARA EL MODAL DE CONSEJO (TIP)
+           ============================================================ */
+        .tip-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 200;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            padding: 20px;
+            animation: fadeInOverlay 0.3s ease forwards;
+        }
+        .tip-modal-overlay.open {
+            display: flex;
+        }
+        @keyframes fadeInOverlay {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        .tip-modal {
+            background: linear-gradient(160deg, var(--navy-card), var(--navy-surface));
+            border: 1px solid var(--border-active);
+            border-radius: var(--radius);
+            max-width: 500px;
+            width: 100%;
+            padding: 32px 28px 28px;
+            box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6), 0 0 40px var(--emerald-glow);
+            position: relative;
+            animation: slideUpModal 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            transform: translateY(30px);
+            opacity: 0;
+        }
+        .tip-modal.open {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        @keyframes slideUpModal {
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        .tip-modal .tip-avatar {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--emerald), var(--emerald-dark));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: -48px auto 16px;
+            font-size: 2rem;
+            color: #000;
+            box-shadow: 0 8px 24px var(--emerald-glow-strong);
+            border: 3px solid var(--navy-card);
+        }
+        .tip-modal h4 {
+            font-family: var(--font-display);
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--white);
+            text-align: center;
+            margin-bottom: 8px;
+        }
+        .tip-modal p {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            line-height: 1.7;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .tip-modal .tip-close {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, var(--emerald), var(--emerald-dark));
+            color: #000;
+            font-weight: 700;
+            border: none;
+            border-radius: 60px;
+            cursor: pointer;
+            font-family: var(--font-display);
+            font-size: 0.85rem;
+            transition: all 0.25s ease;
+            letter-spacing: 0.05em;
+        }
+        .tip-modal .tip-close:hover {
+            transform: scale(1.02);
+            box-shadow: 0 6px 20px var(--emerald-glow);
+        }
+        .tip-trigger-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0, 191, 255, 0.10);
+            border: 1px solid rgba(0, 191, 255, 0.20);
+            color: var(--tech-blue-light);
+            padding: 8px 16px;
+            border-radius: 60px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            font-family: var(--font-family);
+            margin-bottom: 12px;
+        }
+        .tip-trigger-btn:hover {
+            background: rgba(0, 191, 255, 0.18);
+            border-color: var(--tech-blue);
+            transform: translateY(-2px);
+        }
+        .tip-trigger-btn i {
+            font-size: 0.9rem;
+        }
+
+        /* ============================================================
+           GENERADOR DE BOLETAS — estilos propios (sin colisión)
+           ============================================================ */
+        .gb-hero {
+            width: 100%;
+            padding: 40px 20px 20px;
+            text-align: center;
+            background: transparent;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        .gb-hero h1 {
+            font-family: var(--font-display);
+            font-size: clamp(1.8rem, 5vw, 2.75rem);
+            font-weight: 700;
+            color: var(--white);
+            margin-bottom: 14px;
+            letter-spacing: -0.01em;
+        }
+        .gb-hero p {
+            font-size: 1rem;
+            color: var(--text-muted);
+            max-width: 680px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .layout {
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 20px 20px 80px;
+            display: grid;
+            grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+            gap: 24px;
+            align-items: start;
+        }
+        @media (max-width: 980px) {
+            .layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            background: transparent !important;
+            border: none !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+            overflow: visible !important;
+        }
+        .panel-header {
+            padding: 20px 0 10px 0;
+            border-bottom: 1px solid var(--border-subtle);
+            margin-bottom: 16px;
+        }
+        .panel-title {
+            font-family: var(--font-display);
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: var(--white);
+        }
+        .panel-subtitle {
+            margin-top: 6px;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+        .form-wrap {
+            padding: 0 0 20px 0;
+        }
+
+        .preview-panel {
+            position: sticky;
+            top: 20px;
+            background: transparent !important;
+        }
+        .preview-top {
+            padding: 0 0 16px 0;
+            border-bottom: 1px solid var(--border-subtle);
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 14px;
+        }
+        .preview-body {
+            padding: 16px 0 0 0;
+            position: relative;
+        }
+
+        .notice {
+            background: rgba(0, 191, 255, 0.08);
+            border: 1px solid rgba(0, 191, 255, 0.25);
+            color: var(--tech-blue-light);
+            border-radius: var(--radius-sm);
+            padding: 12px 16px;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            margin-bottom: 18px;
+        }
+
+        .error,
+        .success {
+            display: none;
+            border-radius: var(--radius-sm);
+            padding: 12px 16px;
+            font-size: 0.88rem;
+            line-height: 1.5;
+            margin-bottom: 16px;
+            font-weight: 500;
+        }
+        .error {
+            background: var(--ruby-glow);
+            border: 1px solid rgba(229, 57, 53, 0.35);
+            color: var(--ruby-light);
+        }
+        .success {
+            background: var(--emerald-glow);
+            border: 1px solid var(--border-active);
+            color: var(--emerald-light);
+        }
+
+        /* ============================================================
+           MEJORA 1: TARJETA DEL PLAN (más profesional con aro indicador)
+           ============================================================ */
+        #planInfo {
+            background: linear-gradient(135deg, rgba(0, 200, 83, 0.08), rgba(0, 191, 255, 0.05)) !important;
+            border: 1px solid var(--border-subtle) !important;
+            border-left: 4px solid var(--emerald) !important;
+            border-radius: 12px !important;
+            color: var(--text-primary);
+            font-size: 0.88rem;
+            padding: 14px 16px;
+            margin-bottom: 16px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0, 200, 83, 0.08);
+        }
+        #planInfo::before {
+            content: '';
+            position: absolute;
+            top: -20px;
+            right: -20px;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            border: 2px solid rgba(0, 200, 83, 0.15);
+            pointer-events: none;
+            z-index: 0;
+        }
+        #planInfo::after {
+            content: '';
+            position: absolute;
+            bottom: -30px;
+            left: 30%;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 215, 0, 0.08);
+            pointer-events: none;
+            z-index: 0;
+        }
+        #planInfo .plan-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--emerald), var(--emerald-dark));
+            color: #000;
+            font-weight: 800;
+            font-size: 0.65rem;
+            padding: 2px 12px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-left: 8px;
+            vertical-align: middle;
+            box-shadow: 0 2px 8px rgba(0, 200, 83, 0.3);
+        }
+        #planInfo strong {
+            color: var(--white);
+        }
+        #planNombre {
+            color: var(--emerald-light);
+            font-weight: 700;
+            position: relative;
+            z-index: 1;
+        }
+        #comprobantesDisponibles {
+            color: var(--gold-light);
+            font-weight: 700;
+        }
+        #planLink {
+            color: var(--tech-blue-light) !important;
+            font-size: 0.85rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ============================================================
+           MEJORA 2: FORMULARIOS (más bonitos, modernos, intuitivos)
+           ============================================================ */
+        input,
+        select,
+        textarea {
+            width: 100%;
+            background: var(--navy-surface);
+            border: 1px solid var(--navy-border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            padding: 12px 16px;
+            font-size: 0.92rem;
+            font-family: inherit;
+            transition: all 0.25s ease;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--emerald);
+            box-shadow: 0 0 0 3px var(--emerald-glow), inset 0 1px 3px rgba(0, 0, 0, 0.1);
+            background: var(--navy-card);
+        }
+        input::placeholder,
+        textarea::placeholder {
+            color: var(--text-subtle);
+            opacity: 0.7;
+        }
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2394A3B8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            padding-right: 40px;
+            cursor: pointer;
+        }
+        select:hover {
+            border-color: var(--border-active);
+        }
+        textarea {
+            min-height: 90px;
+            resize: vertical;
+            line-height: 1.6;
+        }
+        label {
+            display: block;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            transition: color 0.2s;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px;
+            margin-bottom: 18px;
+        }
+        .grid>div:last-child:not(.grid-2):not(.grid-3) {
+            margin-bottom: 0;
+        }
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px;
+        }
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 18px;
+        }
+        @media (max-width: 640px) {
+            .grid,
+            .grid-2,
+            .grid-3 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .inline-toggle {
+            display: flex !important;
+            align-items: center;
+            gap: 12px;
+            text-transform: none;
+            font-size: 0.88rem;
+            color: var(--text-primary);
+            margin-top: 30px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .inline-toggle input {
+            width: auto;
+            accent-color: var(--emerald);
+            cursor: pointer;
+            transform: scale(1.1);
+        }
+
+        .gb-block h3 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--white);
+            margin-bottom: 16px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-subtle);
+            letter-spacing: -0.01em;
+        }
+
+        /* ============================================================
+           TOOLTIPS INTELIGENTES DE CAMPO
+           Sugerencias discretas que aparecen al enfocar campos clave del
+           formulario de cliente, sin cubrir el input ni interrumpir la
+           escritura, con un atajo directo a Validar Clientes.
+           ============================================================ */
+        .field-wrap { position: relative; }
+        .field-tip {
+            position: absolute;
+            z-index: 45;
+            top: calc(100% + 9px);
+            left: 0;
+            min-width: 250px;
+            max-width: 310px;
+            background: linear-gradient(160deg, var(--navy-card), var(--navy-surface));
+            border: 1px solid var(--border-active);
+            border-radius: 12px;
+            padding: 12px 14px;
+            box-shadow: 0 14px 34px rgba(0,0,0,.5);
+            opacity: 0;
+            transform: translateY(-6px) scale(.97);
+            pointer-events: none;
+            transition: opacity .22s ease, transform .22s ease;
+        }
+        .field-tip.show { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
+        .field-tip::before {
+            content: '';
+            position: absolute;
+            top: -6px; left: 20px;
+            width: 12px; height: 12px;
+            background: var(--navy-card);
+            border-left: 1px solid var(--border-active);
+            border-top: 1px solid var(--border-active);
+            transform: rotate(45deg);
+        }
+        .field-tip-text { font-size: .78rem; line-height: 1.45; color: var(--text-primary); margin-bottom: 10px; }
+        .field-tip-text i { color: var(--gold); margin-right: 5px; }
+        .field-tip-actions { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+        .field-tip-cta {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: linear-gradient(135deg, var(--emerald-dark), var(--emerald));
+            color: #06210f; font-weight: 700; font-size: .72rem;
+            padding: 7px 12px; border-radius: 8px; border: none; cursor: pointer;
+            text-transform: uppercase; letter-spacing: .03em; white-space: nowrap;
+            transition: transform .15s ease, box-shadow .15s ease;
+        }
+        .field-tip-cta:hover { transform: translateY(-1px); box-shadow: 0 6px 16px var(--emerald-glow); }
+        .field-tip-dismiss { background: none; border: none; color: var(--text-subtle); font-size: .95rem; line-height: 1; cursor: pointer; padding: 4px 6px; flex-shrink: 0; }
+        .field-tip-dismiss:hover { color: var(--text-primary); }
+        @media (max-width: 640px) {
+            .field-tip { left: 50%; right: auto; transform: translate(-50%,-6px) scale(.97); }
+            .field-tip.show { transform: translate(-50%,0) scale(1); }
+            .field-tip::before { left: 50%; margin-left: -6px; }
+        }
+
+        /* ============================================================
+           MEJORA 3: BOTONES EN PASO 2 (full-width, bordes cuadrados, etc.)
+           ============================================================ */
+        .step-nav-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-subtle);
+        }
+        .step-nav-actions .btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+        }
+        .step-nav-actions .btn-back,
+        .step-nav-actions .btn-next,
+        .step-nav-actions .btn-ghost,
+        .step-nav-actions .btn {
+            width: 100%;
+            border-radius: 10px !important;
+            /* ligeramente cuadrado */
+            padding: 14px 20px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-align: center;
+            justify-content: center;
+            transition: all 0.25s ease;
+            border: none;
+            cursor: pointer;
+            font-family: var(--font-family);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .step-nav-actions .btn-back {
+            background: transparent;
+            color: var(--text-muted);
+            border: 1px solid var(--navy-border);
+        }
+        .step-nav-actions .btn-back:hover {
+            color: var(--white);
+            border-color: var(--text-muted);
+        }
+        .step-nav-actions .btn-next {
+            background: linear-gradient(135deg, var(--emerald), var(--emerald-dark));
+            color: #000;
+            box-shadow: 0 4px 16px var(--emerald-glow);
+            position: relative;
+            overflow: hidden;
+        }
+        .step-nav-actions .btn-next:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 28px var(--emerald-glow-strong);
+        }
+        .step-nav-actions .btn-next:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        /* Destello blanco lento */
+        .step-nav-actions .btn-next::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -60%;
+            width: 40%;
+            height: 200%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(25deg);
+            animation: shinePulse 4s infinite ease-in-out;
+            pointer-events: none;
+        }
+        @keyframes shinePulse {
+            0%,
+            100% {
+                left: -60%;
+                opacity: 0;
+            }
+            50% {
+                left: 120%;
+                opacity: 1;
+            }
+        }
+        /* Sacudida suave */
+        .step-nav-actions .btn-next {
+            animation: gentleShake 6s infinite ease-in-out;
+        }
+        @keyframes gentleShake {
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+            5% {
+                transform: translateX(-4px);
+            }
+            10% {
+                transform: translateX(4px);
+            }
+            15% {
+                transform: translateX(-2px);
+            }
+            20% {
+                transform: translateX(2px);
+            }
+            25% {
+                transform: translateX(0);
+            }
+        }
+        /* Botón Limpiar (rojo, transparente) */
+        .step-nav-actions .btn-clean {
+            background: transparent !important;
+            color: var(--ruby-light) !important;
+            border: 1px solid rgba(229, 57, 53, 0.4) !important;
+            border-radius: 10px !important;
+            padding: 14px 20px;
+            font-weight: 700;
+            transition: all 0.25s ease;
+        }
+        .step-nav-actions .btn-clean:hover {
+            background: var(--ruby-glow) !important;
+            border-color: var(--ruby-light) !important;
+        }
+
+        /* ============================================================
+           MEJORA 4: SUBTOTAL, IGV, TOTAL EN UNA FILA (siempre)
+           ============================================================ */
+        .summary-boxes {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            width: 100%;
+            margin-top: 8px;
+        }
+        .summary-boxes.hidden {
+            display: none;
+        }
+        .summary-card {
+            background: var(--navy-surface);
+            border: 1px solid var(--navy-border);
+            border-radius: var(--radius-sm);
+            padding: 8px 6px;
+            text-align: center;
+        }
+        .summary-card small {
+            display: block;
+            color: var(--text-subtle);
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-bottom: 2px;
+        }
+        .summary-card strong {
+            color: var(--emerald-light);
+            font-size: 0.85rem;
+        }
+        /* En móviles mantener 3 columnas pero con fuente más pequeña */
+        @media (max-width: 480px) {
+            .summary-boxes {
+                gap: 6px;
+            }
+            .summary-card {
+                padding: 4px 2px;
+            }
+            .summary-card small {
+                font-size: 0.5rem;
+            }
+            .summary-card strong {
+                font-size: 0.7rem;
+            }
+        }
+
+        /* ============================================================
+           MEJORA 5: IFRAME RESPONSIVE Y BOTONES SUPERPUESTOS
+           ============================================================ */
+        .preview-frame-wrapper {
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--navy-border);
+            background: #fff;
+        }
+        .preview-frame-wrapper .preview-frame {
+            display: block;
+            width: 100%;
+            height: auto;
+            min-height: 480px;
+            border: none;
+            background: #fff;
+            transform-origin: top left;
+            transition: transform 0.2s ease;
+        }
+        /* Botones superpuestos */
+        .preview-actions-overlay {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 8px;
+            z-index: 10;
+        }
+        .preview-actions-overlay .action-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            padding: 0;
+        }
+        .preview-actions-overlay .action-btn:hover {
+            background: rgba(0, 200, 83, 0.5);
+            transform: scale(1.08);
+        }
+        .preview-actions-overlay .action-btn:active {
+            transform: scale(0.95);
+        }
+        /* Ocultar los botones originales de descarga/compartir en el paso 3 */
+        #step3 .preview-actions .btn-secondary,
+        #step3 .preview-actions .btn-ghost {
+            display: none;
+        }
+        /* Eliminar el step-nav-actions del paso 3 */
+        #step3 .step-nav-actions {
+            display: none;
+        }
+
+        /* Ajustes para móviles */
+        @media (max-width: 640px) {
+            .preview-actions-overlay .action-btn {
+                width: 36px;
+                height: 36px;
+                font-size: 0.95rem;
+            }
+            .preview-frame-wrapper .preview-frame {
+                min-height: 320px;
+            }
+        }
+        @media (max-width: 480px) {
+            .preview-actions-overlay .action-btn {
+                width: 32px;
+                height: 32px;
+                font-size: 0.8rem;
+                border-radius: 6px;
+            }
+            .preview-frame-wrapper .preview-frame {
+                min-height: 240px;
+            }
+        }
+
+        .status {
+            display: inline-block;
+            margin-top: 6px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            background: var(--navy-surface);
+            border: 1px solid var(--navy-border);
+            padding: 5px 12px;
+            border-radius: 999px;
+        }
+
+        .upsell-banner {
+            display: none;
+            margin-bottom: 20px;
+            padding: 16px 18px;
+            border-radius: var(--radius-sm);
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 215, 0, 0.02));
+            border: 1px solid var(--border-gold);
+        }
+        .upsell-banner.visible {
+            display: block;
+        }
+        .upsell-banner strong {
+            color: var(--gold-light);
+            display: block;
+            margin-bottom: 4px;
+            font-size: 0.92rem;
+        }
+        .upsell-banner p {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+        .upsell-banner a {
+            display: inline-block;
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--navy-deep);
+            background: linear-gradient(135deg, var(--gold), var(--gold-light));
+            padding: 8px 16px;
+            border-radius: 999px;
+            text-decoration: none;
+        }
+
+        .gb-block {
+            margin-bottom: 28px;
+        }
+
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 14px;
+        }
+        .template-card {
+            position: relative;
+            background: var(--navy-surface);
+            border: 2px solid var(--navy-border);
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            text-align: left;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s ease;
+            color: var(--text-primary);
+        }
+        .template-card:hover {
+            border-color: var(--border-active);
+            transform: translateY(-2px);
+        }
+        .template-card.active {
+            border-color: var(--emerald);
+            box-shadow: 0 0 0 3px var(--emerald-glow);
+            background: rgba(0, 200, 83, 0.06);
+        }
+        .template-card.locked {
+            cursor: pointer;
+            opacity: 0.72;
+        }
+        .template-card.locked:hover {
+            border-color: var(--border-gold);
+        }
+        .template-swatch {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+        .template-swatch span {
+            width: 22px;
+            height: 22px;
+            border-radius: 6px;
+            display: inline-block;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+        .template-card h4 {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--white);
+            margin-bottom: 4px;
+        }
+        .template-card p {
+            font-size: 0.76rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+        .template-lock-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 215, 0, 0.14);
+            border: 1px solid var(--border-gold);
+            color: var(--gold-light);
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 999px;
+            letter-spacing: 0.02em;
+        }
+        .template-free-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--emerald-glow);
+            border: 1px solid var(--border-active);
+            color: var(--emerald-light);
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 999px;
+        }
+        .template-watermark-note {
+            margin-top: 12px;
+            font-size: 0.78rem;
+            color: var(--gold-light);
+            background: rgba(255, 215, 0, 0.06);
+            border: 1px solid var(--border-gold);
+            border-radius: var(--radius-sm);
+            padding: 10px 14px;
+            display: none;
+            line-height: 1.5;
+        }
+        .template-watermark-note.visible {
+            display: block;
+        }
+
+        .logo-uploader {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+        .logo-preview {
+            width: 64px;
+            height: 64px;
+            border-radius: 12px;
+            border: 1px dashed var(--navy-border);
+            background: var(--navy-surface);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .logo-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        .logo-preview span {
+            font-size: 0.65rem;
+            color: var(--text-subtle);
+            text-align: center;
+            padding: 4px;
+        }
+        .logo-uploader-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .logo-locked-note {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            background: var(--navy-surface);
+            border: 1px solid var(--navy-border);
+            border-radius: var(--radius-sm);
+            padding: 12px 14px;
+            line-height: 1.5;
+        }
+        .logo-locked-note a {
+            color: var(--gold-light);
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .item-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .item-row {
+            background: var(--navy-surface);
+            border: 1px solid var(--navy-border);
+            border-radius: var(--radius-sm);
+            padding: 16px;
+        }
+        .item-row-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .item-row-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .btn,
+        .btn-secondary,
+        .btn-ghost,
+        .btn-danger {
+            font-family: inherit;
+            font-size: 0.88rem;
+            font-weight: 700;
+            border-radius: 999px;
+            padding: 12px 24px;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+        }
+        .btn {
+            background: linear-gradient(135deg, var(--emerald), var(--emerald-dark));
+            color: var(--navy-deep);
+            box-shadow: var(--shadow-emerald);
+        }
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: var(--sh-hov);
+        }
+        .btn-secondary {
+            background: var(--navy-surface);
+            color: var(--white);
+            border: 1px solid var(--border-active);
+        }
+        .btn-secondary:hover:not(:disabled) {
+            border-color: var(--emerald);
+        }
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-muted);
+            border: 1px solid var(--navy-border);
+        }
+        .btn-ghost:hover:not(:disabled) {
+            color: var(--white);
+            border-color: var(--text-muted);
+        }
+        .btn-danger {
+            background: transparent;
+            color: var(--ruby-light);
+            border: 1px solid rgba(229, 57, 53, 0.3);
+            padding: 6px 12px;
+            font-size: 0.76rem;
+        }
+        .btn-danger:hover {
+            background: var(--ruby-glow);
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* se eliminó .summary-boxes duplicado */
+    </style>
+</head>
+<body>
+    <!-- Ambient -->
+    <div class="ambient-1"></div>
+    <div class="ambient-2"></div>
+
+    <!-- Botón hamburguesa -->
+    <button id="menu-toggle" aria-label="Abrir menú de navegación">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Overlay -->
+    <div id="sidebar-overlay" class="hidden" aria-hidden="true"></div>
+
+    <!-- ═══ SIDEBAR ═══ -->
+    <aside id="sidebar" role="navigation" aria-label="Menú principal">
+        <div class="sb-header">
+            <div class="sb-logo-box">
+                <img src="https://i.postimg.cc/fLYYD0Bb/1000153255-preview-rev-1.png" alt="Logotipo de FacilitoTools" loading="lazy">
+            </div>
+            <div class="sb-brand">FacilitoTools</div>
+            <div class="sb-tagline">Boletas · Comprobantes · Validación</div>
+        </div>
+        <div class="sb-scroll-area">
+            <nav>
+                <div class="sb-cat">General</div>
+                <a href="/" data-target="home">
+                    <i class="fas fa-home sb-icon"></i>
+                    <span>Inicio</span>
+                </a>
+                <a href="/planes" data-target="planes">
+                    <i class="fas fa-bolt sb-icon"></i>
+                    <span>Planes</span>
+                </a>
+                <div class="sb-cat">Herramientas</div>
+                <a href="#" data-target="generar-boletas" class="active">
+                    <i class="fas fa-file-code sb-icon"></i>
+                    <span>Generar Boletas</span>
+                </a>
+                <a href="/validar-clientes" data-target="validar-clientes">
+                    <i class="fas fa-globe sb-icon"></i>
+                    <span>Validar Clientes</span>
+                </a>
+                <div class="sb-cat">Cuenta</div>
+                <a href="/ayuda" data-target="ayuda">
+                    <i class="fas fa-headset sb-icon"></i>
+                    <span>Ayuda y soporte</span>
+                </a>
+                <a href="/perfil" data-target="actividad">
+                    <i class="fas fa-user-circle sb-icon"></i>
+                    <span>Mi cuenta</span>
+                </a>
+            </nav>
+        </div>
+        <div class="sb-footer">
+            <a href="https://m.facebook.com/61564349657272/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+            <a href="https://youtube.com/@eltiojota628" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+            <a href="https://wa.me/51944950234" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+        </div>
+    </aside>
+
+    <!-- ═══ MAIN CONTENT ═══ -->
+    <main>
+        <div class="page">
+
+            <!-- ============================================================
+            INDICADOR DE PROGRESO (① ② ③)
+            ============================================================ -->
+            <div class="step-progress" id="stepProgress">
+                <div class="step-circle active" data-step="1">
+                    <div class="circle">1<span class="label">①</span></div>
+                    <span class="step-label">Bienvenida</span>
+                </div>
+                <div class="step-line" id="line1"></div>
+                <div class="step-circle" data-step="2">
+                    <div class="circle">2<span class="label">②</span></div>
+                    <span class="step-label">Configuración</span>
+                </div>
+                <div class="step-line" id="line2"></div>
+                <div class="step-circle" data-step="3">
+                    <div class="circle">3<span class="label">③</span></div>
+                    <span class="step-label">Vista previa</span>
+                </div>
+            </div>
+
+            <!-- ============================================================
+            STEP 1 — BIENVENIDA
+            ============================================================ -->
+            <div class="step-container active" id="step1">
+                <section class="welcome-step">
+                    <span class="welcome-icon"><i class="fas fa-file-invoice"></i></span>
+                    <h1>Boletas y facturas <em>listas en segundos</em></h1>
+                    <p class="welcome-desc">
+                        Elige una plantilla profesional, completa un formulario simple y genera un comprobante listo para vista previa,
+                        descarga en PDF o compartir por WhatsApp, Instagram o cualquier canal compatible con Web Share.
+                    </p>
+                    <button class="welcome-btn" id="welcomeStartBtn">
+                        Comenzar ahora <i class="fas fa-arrow-right"></i>
+                    </button>
+                    <div class="welcome-features">
+                        <span><i class="fas fa-check-circle"></i> Sin registro previo</span>
+                        <span><i class="fas fa-check-circle"></i> Plantillas profesionales</span>
+                        <span><i class="fas fa-check-circle"></i> Descarga en PDF</span>
+                        <span><i class="fas fa-check-circle"></i> Comparte al instante</span>
+                    </div>
+                </section>
+            </div>
+
+            <!-- ============================================================
+            STEP 2 — FORMULARIO (Configuración)
+            ============================================================ -->
+            <div class="step-container" id="step2">
+                <div class="layout">
+                    <section class="panel">
+                        <div class="panel-header">
+                            <h2 class="panel-title">Configuración del comprobante</h2>
+                            <p class="panel-subtitle">Completa los datos y genera tu comprobante profesional.</p>
+                        </div>
+
+                        <div class="form-wrap">
+                            <!-- Botón para abrir el modal de consejo -->
+                            <button class="tip-trigger-btn" id="tipTriggerBtn">
+                                <i class="fas fa-lightbulb"></i> Ver consejo útil
+                            </button>
+
+                            <div id="errorBox" class="error"></div>
+                            <div id="successBox" class="success"></div>
+
+                            <!-- INFO DEL PLAN (MEJORADA) -->
+                            <div id="planInfo">
+                                <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; align-items: center;">
+                                    <span><strong>Plan:</strong> <span id="planNombre">Cargando...</span> <span class="plan-badge">Activo</span></span>
+                                    <span><strong>Comprobantes disponibles:</strong> <span id="comprobantesDisponibles">-</span></span>
+                                </div>
+                                <div style="margin-top: 8px;">
+                                    <a href="/planes" id="planLink">Ver planes y actualizar</a>
+                                </div>
+                            </div>
+
+                            <!-- MENSAJE COMERCIAL / UPSELL -->
+                            <div id="upsellBanner" class="upsell-banner">
+                                <strong>No te veas igual que el resto ✨</strong>
+                                <p>Desbloquea las plantillas Elegante, Corporativa y Premium, sube el logo de tu negocio y haz que tus comprobantes destaquen frente a tus competidores.</p>
+                                <a href="/planes">Ver planes desde S/7</a>
+                            </div>
+
+                            <form id="voucherForm">
+                                <section class="gb-block">
+                                    <h3>Plantilla</h3>
+                                    <div id="templateGrid" class="template-grid"></div>
+                                    <div id="watermarkNote" class="template-watermark-note">
+                                        Tu plan gratuito incluye la plantilla <strong>Moderna Azul</strong> con una marca de agua "FacilitoTools" en el comprobante. Actualiza tu plan para generar comprobantes sin marca de agua.
+                                    </div>
+                                    <input type="hidden" id="templateId" name="templateId" value="moderna" />
+                                </section>
+
+                                <section class="gb-block">
+                                    <h3>Tipo de comprobante</h3>
+                                    <div class="grid-2">
+                                        <div>
+                                            <label for="documentType">Documento</label>
+                                            <select id="documentType" name="documentType">
+                                                <option value="boleta">Boleta de venta</option>
+                                                <option value="factura">Factura</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label for="paymentMethod">Forma de pago</label>
+                                            <input id="paymentMethod" name="paymentMethod" value="Yape / Transferencia / Efectivo" />
+                                        </div>
+                                    </div>
+                                </section>
+
+                                <section class="gb-block">
+                                    <h3>Datos del emisor</h3>
+                                    <div class="grid">
+                                        <div>
+                                            <label for="issuerBusinessName">Razón social o nombre comercial</label>
+                                            <input id="issuerBusinessName" name="issuerBusinessName" placeholder="Mi Tienda Online" required />
+                                        </div>
+                                        <div class="grid-2">
+                                            <div>
+                                                <label for="issuerDocumentNumber">RUC / DNI</label>
+                                                <input id="issuerDocumentNumber" name="issuerDocumentNumber" placeholder="20123456789" />
+                                            </div>
+                                            <div>
+                                                <label for="issuerPhone">Teléfono</label>
+                                                <input id="issuerPhone" name="issuerPhone" placeholder="987654321" />
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label for="issuerAddress">Dirección</label>
+                                            <input id="issuerAddress" name="issuerAddress" placeholder="Av. Principal 123" />
+                                        </div>
+                                        <div class="grid-2">
+                                            <div>
+                                                <label for="issuerEmail">Email</label>
+                                                <input id="issuerEmail" name="issuerEmail" placeholder="ventas@mitienda.com" />
+                                            </div>
+                                            <div>
+                                                <label for="issuerWebsite">Web o Instagram</label>
+                                                <input id="issuerWebsite" name="issuerWebsite" placeholder="instagram.com/mitienda" />
+                                            </div>
+                                        </div>
+                                        <div id="logoField">
+                                            <label>Logo del negocio</label>
+                                            <div id="logoUploaderUnlocked" class="logo-uploader" style="display:none;">
+                                                <div class="logo-preview" id="logoPreview"><span>Sin logo</span></div>
+                                                <div class="logo-uploader-actions">
+                                                    <input type="file" id="logoInput" accept="image/png,image/jpeg,image/webp" style="max-width:220px;" />
+                                                    <button type="button" class="btn-danger" id="logoRemoveButton" style="align-self:flex-start;">Quitar logo</button>
+                                                    <div class="helper">PNG, JPG o WEBP. Se recomienda fondo transparente, máx. 2MB.</div>
+                                                </div>
+                                            </div>
+                                            <div id="logoLockedNote" class="logo-locked-note" style="display:none;">
+                                                Subir tu propio logo está disponible desde el plan <strong>Prueba Corta</strong>. <a href="/planes">Actualiza tu plan</a> para personalizar tus comprobantes.
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                <section class="gb-block">
+                                    <h3>Datos del cliente</h3>
+                                    <div class="grid">
+                                        <div class="field-wrap">
+                                            <label for="customerName">Nombre o razón social</label>
+                                            <input id="customerName" name="customerName" placeholder="Cliente final" required autocomplete="off" />
+                                            <div class="field-tip" id="tip-customerName" role="tooltip">
+                                                <div class="field-tip-text"><i class="fas fa-lightbulb"></i>¿No recuerdas el nombre completo? Ingresa el DNI o RUC y te lo completamos.</div>
+                                                <div class="field-tip-actions">
+                                                    <button type="button" class="field-tip-cta" data-tip-cta="customerName"><i class="fas fa-magnifying-glass"></i> Consultar</button>
+                                                    <button type="button" class="field-tip-dismiss" data-tip-dismiss="customerName" aria-label="Cerrar sugerencia">&times;</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="grid-3">
+                                            <div>
+                                                <label for="customerDocumentType">Tipo de documento</label>
+                                                <select id="customerDocumentType" name="customerDocumentType">
+                                                    <option value="DNI">DNI</option>
+                                                    <option value="RUC">RUC</option>
+                                                    <option value="CE">CE</option>
+                                                    <option value="PAS">Pasaporte</option>
+                                                </select>
+                                            </div>
+                                            <div class="field-wrap">
+                                                <label for="customerDocumentNumber">Número</label>
+                                                <input id="customerDocumentNumber" name="customerDocumentNumber" placeholder="12345678" autocomplete="off" />
+                                                <div class="field-tip" id="tip-customerDocumentNumber" role="tooltip">
+                                                    <div class="field-tip-text"><i class="fas fa-shield-halved"></i>¿Quieres verificar si este cliente es real antes de facturar?</div>
+                                                    <div class="field-tip-actions">
+                                                        <button type="button" class="field-tip-cta" data-tip-cta="customerDocumentNumber"><i class="fas fa-magnifying-glass"></i> Consultar</button>
+                                                        <button type="button" class="field-tip-dismiss" data-tip-dismiss="customerDocumentNumber" aria-label="Cerrar sugerencia">&times;</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label for="issueDate">Fecha</label>
+                                                <input id="issueDate" name="issueDate" type="datetime-local" />
+                                            </div>
+                                        </div>
+                                        <div class="grid-2">
+                                            <div>
+                                                <label for="customerEmail">Email</label>
+                                                <input id="customerEmail" name="customerEmail" placeholder="cliente@email.com" />
+                                            </div>
+                                            <div class="field-wrap">
+                                                <label for="customerPhone">Teléfono</label>
+                                                <input id="customerPhone" name="customerPhone" placeholder="999888777" autocomplete="off" />
+                                                <div class="field-tip" id="tip-customerPhone" role="tooltip">
+                                                    <div class="field-tip-text"><i class="fas fa-phone"></i>Puedes verificar operador y titularidad de este número.</div>
+                                                    <div class="field-tip-actions">
+                                                        <button type="button" class="field-tip-cta" data-tip-cta="customerPhone"><i class="fas fa-magnifying-glass"></i> Consultar</button>
+                                                        <button type="button" class="field-tip-dismiss" data-tip-dismiss="customerPhone" aria-label="Cerrar sugerencia">&times;</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label for="customerAddress">Dirección</label>
+                                            <input id="customerAddress" name="customerAddress" placeholder="Dirección del cliente" />
+                                        </div>
+                                    </div>
+                                </section>
+
+                                <section class="gb-block">
+                                    <h3>Productos o servicios</h3>
+                                    <div id="itemList" class="item-list"></div>
+                                    <div class="actions" style="margin-top: 14px;">
+                                        <button type="button" class="btn-ghost" id="addItemButton">+ Añadir otro ítem</button>
+                                    </div>
+                                </section>
+
+                                <section class="gb-block">
+                                    <h3>Impuestos y notas</h3>
+                                    <div class="grid-2">
+                                        <div>
+                                            <label for="taxRate">IGV</label>
+                                            <input id="taxRate" name="taxRate" type="number" step="0.01" min="0" value="0.18" />
+                                            <div class="helper">Usa 0.18 para 18%.</div>
+                                        </div>
+                                        <div>
+                                            <label class="inline-toggle">
+                                                <input id="pricesIncludeTax" name="pricesIncludeTax" type="checkbox" checked />
+                                                El precio ingresado ya incluye IGV
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div style="margin-top: 14px;">
+                                        <label for="notes">Observaciones</label>
+                                        <textarea id="notes" name="notes" placeholder="Entrega inmediata por WhatsApp. Gracias por tu compra."></textarea>
+                                    </div>
+                                </section>
+
+                                <!-- Navegación dentro del paso 2 (MEJORADA) -->
+                                <div class="step-nav-actions">
+                                    <button class="btn-back" id="step2BackBtn"><i class="fas fa-undo-alt"></i> Volver</button>
+                                    <button class="btn-next" type="submit" id="generateButton"><i class="fas fa-wand-magic-sparkles"></i> Generar vista previa</button>
+                                    <button class="btn-clean" type="button" id="resetButton">Limpiar formulario</button>
+                                </div>
+                            </form>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+            <!-- ============================================================
+            STEP 3 — VISTA PREVIA (MEJORADA)
+            ============================================================ -->
+            <div class="step-container" id="step3">
+                <div class="layout" style="grid-template-columns:1fr;">
+                    <section class="panel preview-panel" style="position:static;">
+                        <div class="preview-top">
+                            <div>
+                                <h2 class="panel-title" style="margin-bottom: 6px;">Vista previa en vivo</h2>
+                                <div id="statusBadge" class="status">Esperando datos para generar</div>
+                            </div>
+                            <!-- Los botones originales de descarga y compartir se ocultan con CSS, los reemplazamos con los superpuestos -->
+                            <div class="preview-actions" style="display:none;">
+                                <button class="btn-secondary" type="button" id="downloadButton" disabled>Descargar PDF</button>
+                                <button class="btn-ghost" type="button" id="shareButton" disabled>Compartir</button>
+                            </div>
+                            <!-- Summary boxes: Subtotal, IGV, Total en una fila -->
+                            <div id="summaryBoxes" class="summary-boxes hidden">
+                                <div class="summary-card">
+                                    <small>Subtotal</small>
+                                    <strong id="summarySubtotal">S/ 0.00</strong>
+                                </div>
+                                <div class="summary-card">
+                                    <small>IGV</small>
+                                    <strong id="summaryTax">S/ 0.00</strong>
+                                </div>
+                                <div class="summary-card">
+                                    <small>Total</small>
+                                    <strong id="summaryTotal">S/ 0.00</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="preview-body">
+                            <!-- Contenedor del iframe con los botones superpuestos -->
+                            <div class="preview-frame-wrapper">
+                                <iframe id="previewFrame" class="preview-frame" title="Vista previa del comprobante"></iframe>
+                                <!-- Botones superpuestos (solo iconos) -->
+                                <div class="preview-actions-overlay">
+                                    <button class="action-btn" id="step3BackBtn" title="Editar datos">
+                                        <i class="fas fa-pen"></i>
+                                    </button>
+                                    <button class="action-btn" id="downloadButton2" title="Descargar PDF" disabled>
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                    <button class="action-btn" id="shareButton2" title="Compartir" disabled>
+                                        <i class="fas fa-share-alt"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Eliminamos el step-nav-actions del paso 3 (oculto con CSS) -->
+                        <div class="step-nav-actions" style="display:none;"></div>
+                    </section>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- ═══ FOOTER ═══ -->
+    <footer class="footer-content">
+        <h3>Síguenos</h3>
+        <div class="social-icons">
+            <a href="https://m.facebook.com/61564349657272/" target="_blank" rel="noopener noreferrer"><i class="fab fa-facebook-f"></i></a>
+            <a href="https://youtube.com/@eltiojota628?si=sZw2ZHHTUMdaR0nL" target="_blank" rel="noopener noreferrer"><i class="fab fa-youtube"></i></a>
+        </div>
+        <p>FacilitoTools.com · Generación de comprobantes y validación de clientes © 2026</p>
+        <p><a href="/terminos-condiciones">Términos y condiciones</a> · <a href="/politica-privacidad">Política de privacidad</a> · <a href="/disclaimer-apis">Aviso legal APIs</a> · <a href="/aviso-legal-peliprex">Aviso legal PeliPREX</a> · <a href="/politica.compras.html">Política de compras</a></p>
+    </footer>
+
+    <!-- ═══ WHATSAPP ═══ -->
+    <button class="chat-bubble" onclick="goToWhatsApp()" aria-label="Contactar por WhatsApp"><i class="fab fa-whatsapp"></i></button>
+    <div class="chat-text" id="chatText" onclick="goToWhatsApp()"></div>
+
+    <!-- ============================================================
+    MODAL DE CONSEJO (TIP)
+    ============================================================ -->
+    <div class="tip-modal-overlay" id="tipModalOverlay">
+        <div class="tip-modal" id="tipModal">
+            <div class="tip-avatar"><i class="fas fa-lightbulb"></i></div>
+            <h4>💡 Consejo rápido</h4>
+            <p>
+                Si vendes por redes sociales, deja plantillas, datos del negocio y textos frecuentes preconfigurados para emitir más rápido.
+            </p>
+            <button class="tip-close" id="tipModalCloseBtn">Entendido, ¡gracias!</button>
+        </div>
+    </div>
+
+    <!-- ========== TEMPLATES Y SCRIPTS DEL GENERADOR ========== -->
+    <template id="itemRowTemplate">
+        <div class="item-row">
+            <div class="item-row-header">
+                <div class="item-row-title">Ítem <span class="item-index"></span></div>
+                <button type="button" class="btn-danger remove-item">Eliminar</button>
+            </div>
+            <div class="grid">
+                <div>
+                    <label>Descripción</label>
+                    <input class="item-description" placeholder="Producto o servicio" required />
+                </div>
+                <div class="grid-3">
+                    <div>
+                        <label>Unidad</label>
+                        <input class="item-unit-label" value="UND" />
+                    </div>
+                    <div>
+                        <label>Cantidad</label>
+                        <input class="item-quantity" type="number" min="0.01" step="0.01" value="1" required />
+                    </div>
+                    <div>
+                        <label>Precio unitario</label>
+                        <input class="item-unit-price" type="number" min="0" step="0.01" value="0" required />
+                    </div>
+                </div>
+                <div>
+                    <label>SKU o referencia</label>
+                    <input class="item-sku" placeholder="Opcional" />
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <script>
+        // ========== FIREBASE CONFIGURACIÓN (común) ==========
+        let auth;
+
+        async function initFirebase() {
+            try {
+                const response = await fetch('/api/config');
+                const config = await response.json();
+                if (!firebase.apps.length) {
+                    firebase.initializeApp(config.firebaseConfig);
+                }
+                auth = firebase.auth();
+            } catch (error) {
+                console.error('Error inicializando Firebase:', error);
+            }
+        }
+
+        // ========== SIDEBAR LOGIC ==========
+        const menuToggle = document.getElementById('menu-toggle');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+
+        function toggleMenu() {
+            const isOpen = sidebar.classList.toggle('open');
+            if (isOpen) {
+                overlay.classList.remove('hidden');
+                overlay.style.display = 'block';
+                document.body.style.overflow = 'hidden';
+                requestAnimationFrame(() => overlay.classList.add('opacity-100'));
+            } else {
+                overlay.classList.remove('opacity-100');
+                document.body.style.overflow = '';
+                setTimeout(() => {
+                    if (!sidebar.classList.contains('open')) {
+                        overlay.classList.add('hidden');
+                        overlay.style.display = 'none';
+                    }
+                }, 300);
+            }
+        }
+
+        menuToggle.addEventListener('click', toggleMenu);
+        overlay.addEventListener('click', toggleMenu);
+
+        sidebar.querySelectorAll('nav a').forEach(link => {
+            link.addEventListener('click', (e) => {
+                const target = link.getAttribute('data-target');
+                if (target && target !== 'generar-boletas' && !target.startsWith('#')) {
+                    return;
+                }
+                e.preventDefault();
+                if (target === 'home') {
+                    window.location.href = '/';
+                } else if (target === 'generar-boletas') {
+                    // ya estamos aquí
+                } else if (target && target.startsWith('#')) {
+                    const el = document.querySelector(target);
+                    if (el) el.scrollIntoView({ behavior: 'smooth' });
+                }
+                if (sidebar.classList.contains('open')) toggleMenu();
+            });
+        });
+
+        // ========== WHATSAPP ==========
+        const chatTextEl = document.getElementById("chatText");
+        const whatsappMessage = "¡Cotiza tu plan por Whatsapp!";
+        let idx = 0;
+
+        function typeWriterWhatsapp() {
+            if (idx < whatsappMessage.length) {
+                chatTextEl.textContent += whatsappMessage.charAt(idx++);
+                setTimeout(typeWriterWhatsapp, 100);
+            } else {
+                setTimeout(() => {
+                    chatTextEl.classList.remove('show');
+                    chatTextEl.classList.add('hide');
+                    setTimeout(() => {
+                        chatTextEl.textContent = "";
+                        idx = 0;
+                        chatTextEl.classList.remove('hide');
+                        setTimeout(() => {
+                            chatTextEl.classList.add('show');
+                            typeWriterWhatsapp();
+                        }, 500);
+                    }, 1000);
+                }, 2500);
+            }
+        }
+
+        window.goToWhatsApp = function() {
+            window.open(
+                `https://wa.me/51944950234?text=${encodeURIComponent('Hola, necesito información sobre los planes de FacilitoTools.')}`,
+                '_blank');
+        };
+
+        // ========== STEP NAVIGATION ==========
+        let currentStep = 1;
+        const totalSteps = 3;
+
+        const stepContainers = {
+            1: document.getElementById('step1'),
+            2: document.getElementById('step2'),
+            3: document.getElementById('step3')
+        };
+        const stepCircles = document.querySelectorAll('.step-circle');
+        const stepLines = {
+            1: document.getElementById('line1'),
+            2: document.getElementById('line2')
+        };
+
+        function goToStep(step) {
+            if (step < 1 || step > totalSteps) return;
+            currentStep = step;
+
+            Object.values(stepContainers).forEach(el => el.classList.remove('active'));
+            stepContainers[step].classList.add('active');
+
+            stepCircles.forEach((circle, index) => {
+                const num = index + 1;
+                circle.classList.remove('active', 'done');
+                if (num === step) {
+                    circle.classList.add('active');
+                } else if (num < step) {
+                    circle.classList.add('done');
+                }
+            });
+
+            if (stepLines[1]) {
+                stepLines[1].classList.toggle('done', step > 1);
+            }
+            if (stepLines[2]) {
+                stepLines[2].classList.toggle('done', step > 2);
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        document.getElementById('welcomeStartBtn').addEventListener('click', () => {
+            goToStep(2);
+        });
+
+        document.getElementById('step2BackBtn').addEventListener('click', () => {
+            goToStep(1);
+        });
+
+        // ========== MODAL DE CONSEJO (TIP) ==========
+        const tipOverlay = document.getElementById('tipModalOverlay');
+        const tipModal = document.getElementById('tipModal');
+        const tipTrigger = document.getElementById('tipTriggerBtn');
+        const tipClose = document.getElementById('tipModalCloseBtn');
+
+        function openTipModal() {
+            tipOverlay.classList.add('open');
+            tipModal.classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeTipModal() {
+            tipOverlay.classList.remove('open');
+            tipModal.classList.remove('open');
+            document.body.style.overflow = '';
+        }
+
+        tipTrigger.addEventListener('click', openTipModal);
+        tipClose.addEventListener('click', closeTipModal);
+        tipOverlay.addEventListener('click', (e) => {
+            if (e.target === tipOverlay) closeTipModal();
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeTipModal();
+        });
+
+        let tipShown = false;
+
+        function maybeShowTip() {
+            if (currentStep === 2 && !tipShown) {
+                setTimeout(() => {
+                    openTipModal();
+                    tipShown = true;
+                }, 600);
+            }
+        }
+
+        const originalGoToStep = goToStep;
+        goToStep = function(step) {
+            originalGoToStep(step);
+            if (step === 2) {
+                maybeShowTip();
+            }
+        };
+
+        // ========== TOOLTIPS INTELIGENTES DE CAMPO ==========
+        // Sugerencias discretas y automáticas (aparecen al enfocar el campo) que ayudan
+        // al usuario a completar los datos del cliente o a verificarlos en Validar Clientes,
+        // sin bloquear ni interrumpir la escritura.
+        const DOC_TYPE_TO_ENDPOINT = { DNI: 'dni', RUC: 'ruc', CE: 'cedula' };
+
+        function fieldTipEndpointAndValue(fieldId) {
+            if (fieldId === 'customerPhone') {
+                return { endpoint: 'telefonia-numero', value: document.getElementById('customerPhone').value.trim() };
+            }
+            // "customerName" y "customerDocumentNumber" comparten el tipo/número de documento actuales.
+            const docType = document.getElementById('customerDocumentType').value;
+            const endpoint = DOC_TYPE_TO_ENDPOINT[docType] || 'dni';
+            const value = document.getElementById('customerDocumentNumber').value.trim();
+            return { endpoint, value };
+        }
+
+        function fieldTipDismissedKey(fieldId) { return 'ft_tip_dismissed_' + fieldId; }
+
+        function showFieldTip(fieldId) {
+            if (sessionStorage.getItem(fieldTipDismissedKey(fieldId)) === '1') return;
+            const tip = document.getElementById('tip-' + fieldId);
+            if (!tip) return;
+            document.querySelectorAll('.field-tip.show').forEach(t => { if (t !== tip) t.classList.remove('show'); });
+            tip.classList.add('show');
+        }
+
+        function hideFieldTip(fieldId) {
+            const tip = document.getElementById('tip-' + fieldId);
+            if (tip) tip.classList.remove('show');
+        }
+
+        function goToValidarClientes(endpoint, value) {
+            // Guardamos un snapshot de los datos ya ingresados para no perderlos al volver
+            // desde Validar Clientes (p. ej. si el usuario ya escribió el nombre y solo
+            // quiere verificar el teléfono).
+            try {
+                const draft = {
+                    customerName: document.getElementById('customerName').value.trim(),
+                    customerDocumentType: document.getElementById('customerDocumentType').value,
+                    customerDocumentNumber: document.getElementById('customerDocumentNumber').value.trim(),
+                    customerEmail: document.getElementById('customerEmail').value.trim(),
+                    customerPhone: document.getElementById('customerPhone').value.trim(),
+                    customerAddress: document.getElementById('customerAddress').value.trim()
+                };
+                sessionStorage.setItem('ft_boleta_draft', JSON.stringify(draft));
+            } catch (e) { console.error('No se pudo guardar el borrador del cliente', e); }
+
+            const url = value
+                ? `/validar-clientes?auto=${encodeURIComponent(endpoint)}&value=${encodeURIComponent(value)}`
+                : `/validar-clientes?tab=${encodeURIComponent(endpoint)}`;
+            window.location.href = url;
+        }
+
+        ['customerName', 'customerDocumentNumber', 'customerPhone'].forEach(fieldId => {
+            const input = document.getElementById(fieldId);
+            const tip = document.getElementById('tip-' + fieldId);
+            if (!input || !tip) return;
+
+            input.addEventListener('focus', () => showFieldTip(fieldId));
+            input.addEventListener('blur', () => {
+                // Pequeño retraso para permitir pulsar los botones del tooltip antes de ocultarlo.
+                setTimeout(() => { if (!tip.matches(':hover')) hideFieldTip(fieldId); }, 150);
+            });
+
+            const dismissBtn = tip.querySelector('[data-tip-dismiss]');
+            if (dismissBtn) {
+                dismissBtn.addEventListener('click', () => {
+                    sessionStorage.setItem(fieldTipDismissedKey(fieldId), '1');
+                    hideFieldTip(fieldId);
+                });
+            }
+
+            const ctaBtn = tip.querySelector('[data-tip-cta]');
+            if (ctaBtn) {
+                ctaBtn.addEventListener('click', () => {
+                    const { endpoint, value } = fieldTipEndpointAndValue(fieldId);
+                    goToValidarClientes(endpoint, value);
+                });
+            }
+        });
+
+        // ========== RECEPCIÓN DE DATOS DESDE VALIDAR CLIENTES ("MAGIA") ==========
+        // Aplica el borrador guardado antes de salir y/o los datos enviados desde el botón
+        // mágico de Validar Clientes, dejando el formulario listo en el paso 2.
+        function applyIncomingCustomerData() {
+            let appliedSomething = false;
+            let draft = null;
+            let magic = null;
+
+            try {
+                const rawDraft = sessionStorage.getItem('ft_boleta_draft');
+                if (rawDraft) { draft = JSON.parse(rawDraft); sessionStorage.removeItem('ft_boleta_draft'); }
+            } catch (e) { console.error('No se pudo leer el borrador del cliente', e); }
+
+            try {
+                const rawMagic = localStorage.getItem('ft_magic_customer');
+                if (rawMagic) {
+                    const parsed = JSON.parse(rawMagic);
+                    // Sólo se usa si llegó hace poco (10 minutos), para no reaplicar datos viejos.
+                    if (parsed && (!parsed.ts || Date.now() - parsed.ts < 10 * 60 * 1000)) magic = parsed;
+                    localStorage.removeItem('ft_magic_customer');
+                }
+            } catch (e) { console.error('No se pudo leer el traspaso de Validar Clientes', e); }
+
+            if (draft) {
+                if (draft.customerName) { document.getElementById('customerName').value = draft.customerName; appliedSomething = true; }
+                if (draft.customerDocumentType) document.getElementById('customerDocumentType').value = draft.customerDocumentType;
+                if (draft.customerDocumentNumber) { document.getElementById('customerDocumentNumber').value = draft.customerDocumentNumber; appliedSomething = true; }
+                if (draft.customerEmail) document.getElementById('customerEmail').value = draft.customerEmail;
+                if (draft.customerPhone) document.getElementById('customerPhone').value = draft.customerPhone;
+                if (draft.customerAddress) document.getElementById('customerAddress').value = draft.customerAddress;
+            }
+
+            if (magic) {
+                if (magic.name) document.getElementById('customerName').value = magic.name;
+                if (magic.documentType) document.getElementById('customerDocumentType').value = magic.documentType;
+                if (magic.documentNumber) document.getElementById('customerDocumentNumber').value = magic.documentNumber;
+                if (magic.email) document.getElementById('customerEmail').value = magic.email;
+                if (magic.phone) document.getElementById('customerPhone').value = magic.phone;
+                if (magic.address) document.getElementById('customerAddress').value = magic.address;
+                appliedSomething = true;
+            }
+
+            if (appliedSomething) {
+                goToStep(2);
+                showSuccess('✨ Datos del cliente completados automáticamente desde Validar Clientes.');
+                setStatus('Datos importados');
+            }
+
+            // Limpia el parámetro ?magic=1 de la URL para que un refresh no repita el mensaje.
+            if (window.location.search.includes('magic=')) {
+                history.replaceState(null, '', window.location.pathname);
+            }
+        }
+
+        // ========== GENERADOR DE BOLETAS (funcionalidad original) ==========
+        const API_BASE = '/api/comprobantes';
+        const templateGrid = document.getElementById('templateGrid');
+        const templateIdInput = document.getElementById('templateId');
+        const itemList = document.getElementById('itemList');
+        const itemRowTemplate = document.getElementById('itemRowTemplate');
+        const voucherForm = document.getElementById('voucherForm');
+        const previewFrame = document.getElementById('previewFrame');
+        const summaryBoxes = document.getElementById('summaryBoxes');
+        const summarySubtotal = document.getElementById('summarySubtotal');
+        const summaryTax = document.getElementById('summaryTax');
+        const summaryTotal = document.getElementById('summaryTotal');
+        // Botones originales (ocultos) pero con sus listeners
+        const downloadButton = document.getElementById('downloadButton');
+        const shareButton = document.getElementById('shareButton');
+        // Nuevos botones superpuestos
+        const downloadButton2 = document.getElementById('downloadButton2');
+        const shareButton2 = document.getElementById('shareButton2');
+        const step3BackBtn = document.getElementById('step3BackBtn');
+        const statusBadge = document.getElementById('statusBadge');
+        const errorBox = document.getElementById('errorBox');
+        const successBox = document.getElementById('successBox');
+        const addItemButton = document.getElementById('addItemButton');
+        const resetButton = document.getElementById('resetButton');
+        const documentTypeSelect = document.getElementById('documentType');
+        const customerDocumentTypeSelect = document.getElementById('customerDocumentType');
+        const issueDateInput = document.getElementById('issueDate');
+        const planNombre = document.getElementById('planNombre');
+        const comprobantesDisponibles = document.getElementById('comprobantesDisponibles');
+        const planLink = document.getElementById('planLink');
+        const upsellBanner = document.getElementById('upsellBanner');
+        const watermarkNote = document.getElementById('watermarkNote');
+        const logoField = document.getElementById('logoField');
+        const logoUploaderUnlocked = document.getElementById('logoUploaderUnlocked');
+        const logoLockedNote = document.getElementById('logoLockedNote');
+        const logoInput = document.getElementById('logoInput');
+        const logoPreview = document.getElementById('logoPreview');
+        const logoRemoveButton = document.getElementById('logoRemoveButton');
+        const generateButton = document.getElementById('generateButton');
+
+        let currentTemplates = [];
+        let lastPayload = null;
+        let lastDocumentName = 'comprobante.pdf';
+        let lastShareText = 'Comprobante generado';
+        let uid = null;
+        let logoDataUrl = '';
+
+        let planState = {
+            plan: 'gratis',
+            planNombre: 'Gratuito',
+            disponibles: 0,
+            permiteLogo: false,
+            plantillasPermitidas: ['moderna']
+        };
+
+        async function getUid() {
+            try {
+                const response = await fetch('/api/session', { credentials: 'same-origin' });
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data && data.authenticated && data.uid) {
+                        localStorage.setItem('user_uid', data.uid);
+                        return data.uid;
+                    }
+                }
+            } catch (error) {
+                console.error('Error verificando la sesión activa:', error);
+            }
+            return localStorage.getItem('user_uid') || null;
+        }
+
+        async function loadPlanInfo() {
+            uid = await getUid();
+            if (!uid) {
+                planNombre.textContent = 'No autenticado';
+                comprobantesDisponibles.textContent = '—';
+                applyPlanRestrictions();
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/user/plan?uid=${encodeURIComponent(uid)}`);
+                if (!response.ok) {
+                    throw new Error('Error al obtener plan');
+                }
+                const data = await response.json();
+                planState = {
+                    plan: data.plan || 'gratis',
+                    planNombre: data.planNombre || data.plan || 'Gratuito',
+                    disponibles: data.disponibles !== undefined ? data.disponibles : '—',
+                    permiteLogo: !!data.permiteLogo,
+                    plantillasPermitidas: Array.isArray(data.plantillasPermitidas) && data.plantillasPermitidas.length ?
+                        data.plantillasPermitidas : ['moderna']
+                };
+                planNombre.textContent = planState.planNombre;
+                comprobantesDisponibles.textContent = planState.disponibles;
+            } catch (error) {
+                console.error('Error cargando plan:', error);
+                planNombre.textContent = 'Error';
+                comprobantesDisponibles.textContent = 'Error';
+            }
+
+            applyPlanRestrictions();
+        }
+
+        function applyPlanRestrictions() {
+            const esGratis = planState.plan === 'gratis';
+
+            upsellBanner.classList.toggle('visible', esGratis);
+            watermarkNote.classList.toggle('visible', esGratis);
+
+            if (planState.permiteLogo) {
+                logoUploaderUnlocked.style.display = 'flex';
+                logoLockedNote.style.display = 'none';
+            } else {
+                logoUploaderUnlocked.style.display = 'none';
+                logoLockedNote.style.display = 'block';
+                clearLogo();
+            }
+
+            renderTemplateCards();
+
+            if (!planState.plantillasPermitidas.includes(templateIdInput.value)) {
+                selectTemplate('moderna');
+            }
+        }
+
+        async function refreshPlanInfo() {
+            await loadPlanInfo();
+        }
+
+        function showError(message) {
+            errorBox.textContent = message;
+            errorBox.style.display = 'block';
+            successBox.style.display = 'none';
+        }
+
+        function showSuccess(message) {
+            successBox.textContent = message;
+            successBox.style.display = 'block';
+            errorBox.style.display = 'none';
+        }
+
+        function clearMessages() {
+            errorBox.style.display = 'none';
+            successBox.style.display = 'none';
+            errorBox.textContent = '';
+            successBox.textContent = '';
+        }
+
+        function formatMoney(value, currency = 'PEN') {
+            return new Intl.NumberFormat('es-PE', {
+                style: 'currency',
+                currency,
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(Number(value || 0));
+        }
+
+        function setStatus(text) {
+            statusBadge.textContent = text;
+        }
+
+        function setDefaultDateTime() {
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            issueDateInput.value = now.toISOString().slice(0, 16);
+        }
+
+        function addItemRow(data = {}) {
+            const fragment = itemRowTemplate.content.cloneNode(true);
+            const row = fragment.querySelector('.item-row');
+            row.querySelector('.item-description').value = data.description || '';
+            row.querySelector('.item-unit-label').value = data.unitLabel || 'UND';
+            row.querySelector('.item-quantity').value = data.quantity ?? 1;
+            row.querySelector('.item-unit-price').value = data.unitPrice ?? 0;
+            row.querySelector('.item-sku').value = data.sku || '';
+
+            row.querySelector('.remove-item').addEventListener('click', () => {
+                if (itemList.children.length === 1) {
+                    showError('Debe existir al menos un ítem.');
+                    return;
+                }
+                row.remove();
+                refreshItemIndexes();
+            });
+
+            itemList.appendChild(row);
+            refreshItemIndexes();
+        }
+
+        function refreshItemIndexes() {
+            Array.from(itemList.children).forEach((row, index) => {
+                row.querySelector('.item-index').textContent = index + 1;
+            });
+        }
+
+        function createTemplateCard(template) {
+            const locked = !planState.plantillasPermitidas.includes(template.id);
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'template-card' + (locked ? ' locked' : '');
+            button.dataset.templateId = template.id;
+            button.innerHTML = `
+                ${locked ? '<span class="template-lock-badge">🔒 Plan superior</span>' : (template.id === 'moderna' ? '<span class="template-free-badge">Gratis</span>' : '')}
+                <div class="template-swatch">
+                    <span style="background:${template.accent};"></span>
+                    <span style="background:${template.accentSoft};"></span>
+                </div>
+                <h4>${template.name}</h4>
+                <p>${template.description}</p>
+            `;
+
+            button.addEventListener('click', () => {
+                if (locked) {
+                    showError(
+                        `La plantilla "${template.name}" está disponible desde el plan Prueba Corta. Ve a la sección Planes para desbloquearla.`
+                        );
+                    return;
+                }
+                selectTemplate(template.id);
+            });
+            return button;
+        }
+
+        function renderTemplateCards() {
+            if (!currentTemplates.length) return;
+            const selectedId = templateIdInput.value;
+            templateGrid.innerHTML = '';
+            currentTemplates.forEach((template) => {
+                templateGrid.appendChild(createTemplateCard(template));
+            });
+            document.querySelectorAll('.template-card').forEach((card) => {
+                card.classList.toggle('active', card.dataset.templateId === selectedId);
+            });
+        }
+
+        function selectTemplate(templateId) {
+            if (!planState.plantillasPermitidas.includes(templateId)) {
+                templateId = 'moderna';
+            }
+            templateIdInput.value = templateId;
+            document.querySelectorAll('.template-card').forEach((card) => {
+                card.classList.toggle('active', card.dataset.templateId === templateId);
+            });
+            watermarkNote.classList.toggle('visible', planState.plan === 'gratis');
+        }
+
+        async function loadTemplates() {
+            const response = await fetch(`${API_BASE}/templates`);
+            if (!response.ok) throw new Error('No se pudieron cargar las plantillas.');
+            const data = await response.json();
+            currentTemplates = data.templates || [];
+            templateGrid.innerHTML = '';
+            currentTemplates.forEach((template) => {
+                templateGrid.appendChild(createTemplateCard(template));
+            });
+            const defaultId = templateIdInput.value || (currentTemplates[0] && currentTemplates[0].id) || 'moderna';
+            selectTemplate(defaultId);
+        }
+
+        function buildPayload() {
+            const items = Array.from(itemList.querySelectorAll('.item-row')).map((row) => ({
+                description: row.querySelector('.item-description').value.trim(),
+                unitLabel: row.querySelector('.item-unit-label').value.trim() || 'UND',
+                quantity: Number(row.querySelector('.item-quantity').value),
+                unitPrice: Number(row.querySelector('.item-unit-price').value),
+                sku: row.querySelector('.item-sku').value.trim()
+            }));
+
+            return {
+                uid: uid,
+                templateId: templateIdInput.value,
+                documentType: document.getElementById('documentType').value,
+                paymentMethod: document.getElementById('paymentMethod').value.trim(),
+                issueDate: document.getElementById('issueDate').value ? new Date(document.getElementById('issueDate')
+                    .value).toISOString() : new Date().toISOString(),
+                taxRate: Number(document.getElementById('taxRate').value || 0.18),
+                pricesIncludeTax: document.getElementById('pricesIncludeTax').checked,
+                notes: document.getElementById('notes').value.trim(),
+                issuer: {
+                    businessName: document.getElementById('issuerBusinessName').value.trim(),
+                    documentNumber: document.getElementById('issuerDocumentNumber').value.trim(),
+                    address: document.getElementById('issuerAddress').value.trim(),
+                    phone: document.getElementById('issuerPhone').value.trim(),
+                    email: document.getElementById('issuerEmail').value.trim(),
+                    website: document.getElementById('issuerWebsite').value.trim(),
+                    logoDataUrl: planState.permiteLogo ? logoDataUrl : ''
+                },
+                customer: {
+                    name: document.getElementById('customerName').value.trim(),
+                    documentType: document.getElementById('customerDocumentType').value,
+                    documentNumber: document.getElementById('customerDocumentNumber').value.trim(),
+                    email: document.getElementById('customerEmail').value.trim(),
+                    phone: document.getElementById('customerPhone').value.trim(),
+                    address: document.getElementById('customerAddress').value.trim()
+                },
+                items
+            };
+        }
+
+        async function requestPreview(payload) {
+            const response = await fetch(`${API_BASE}/preview`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await response.json();
+            if (!response.ok || !data.ok) {
+                throw new Error(data.message || 'No se pudo generar la vista previa.');
+            }
+            return data;
+        }
+
+        async function requestPdfBlob(payload) {
+            const response = await fetch(`${API_BASE}/pdf`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                let message = 'No se pudo generar el PDF.';
+                try {
+                    const data = await response.json();
+                    message = data.message || message;
+                } catch (_) {}
+                throw new Error(message);
+            }
+
+            return response.blob();
+        }
+
+        function renderPreview(result) {
+            previewFrame.srcdoc = result.html;
+            // El escalado se hará en el evento load del iframe
+            previewFrame.addEventListener('load', function onLoad() {
+                // Ajustar altura dinámicamente
+                try {
+                    const body = this.contentWindow?.document?.body;
+                    if (body) {
+                        const height = Math.max(body.scrollHeight + 30, 480);
+                        this.style.height = height + 'px';
+                    }
+                } catch (e) {}
+                // Escalar para que quepa en el ancho del contenedor
+                scaleIframe();
+                // Eliminar el listener para que no se ejecute múltiples veces
+                this.removeEventListener('load', onLoad);
+            });
+
+            summarySubtotal.textContent = formatMoney(result.summary.subtotal, result.summary.currency);
+            summaryTax.textContent = formatMoney(result.summary.tax, result.summary.currency);
+            summaryTotal.textContent = formatMoney(result.summary.total, result.summary.currency);
+            summaryBoxes.classList.remove('hidden');
+            // Habilitar botones
+            downloadButton.disabled = false;
+            shareButton.disabled = false;
+            downloadButton2.disabled = false;
+            shareButton2.disabled = false;
+            lastDocumentName = `${result.summary.documentType}_${result.documentNumber}.pdf`;
+            lastShareText = result.shareText || 'Comprobante generado';
+            setStatus(`Vista previa lista · ${result.documentNumber}`);
+        }
+
+        // Función para escalar el iframe en móviles
+        function scaleIframe() {
+            const wrapper = previewFrame.closest('.preview-frame-wrapper');
+            if (!wrapper) return;
+            const containerWidth = wrapper.clientWidth;
+            // Intentar obtener el ancho del contenido del iframe
+            let contentWidth = 800; // valor por defecto
+            try {
+                const doc = previewFrame.contentWindow?.document;
+                if (doc && doc.body) {
+                    // Obtener el ancho del contenido (scrollWidth)
+                    const scrollWidth = doc.body.scrollWidth;
+                    if (scrollWidth > 0) contentWidth = scrollWidth;
+                }
+            } catch (e) {}
+            // Si el contenido es más ancho que el contenedor, aplicar scale
+            if (contentWidth > containerWidth) {
+                const scale = containerWidth / contentWidth;
+                previewFrame.style.transform = `scale(${scale})`;
+                // Ajustar altura para compensar el scale
+                const height = parseFloat(previewFrame.style.height) || 480;
+                previewFrame.style.height = (height / scale) + 'px';
+                previewFrame.style.transformOrigin = 'top left';
+            } else {
+                previewFrame.style.transform = 'scale(1)';
+                previewFrame.style.transformOrigin = 'top left';
+                // Restaurar altura si es necesario
+                const body = previewFrame.contentWindow?.document?.body;
+                if (body) {
+                    const h = Math.max(body.scrollHeight + 30, 480);
+                    previewFrame.style.height = h + 'px';
+                }
+            }
+        }
+
+        // Escalar al redimensionar la ventana
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                if (currentStep === 3) {
+                    scaleIframe();
+                }
+            }, 200);
+        });
+
+        async function generatePreview() {
+            clearMessages();
+            if (!uid) {
+                showError('Debes iniciar sesión para generar comprobantes.');
+                return;
+            }
+            if (!planState.plantillasPermitidas.includes(templateIdInput.value)) {
+                showError('La plantilla seleccionada no está disponible en tu plan actual. Elige otra o actualiza tu plan.');
+                return;
+            }
+            if (planState.disponibles !== 'Ilimitados' && Number(planState.disponibles) <= 0) {
+                showError('Has alcanzado el límite de comprobantes de tu plan. Actualiza tu plan para seguir generando.');
+                return;
+            }
+            setStatus('Generando vista previa...');
+            const payload = buildPayload();
+            const result = await requestPreview(payload);
+            lastPayload = payload;
+            renderPreview(result);
+            showSuccess('Vista previa generada correctamente. Ya puedes descargar o compartir.');
+            goToStep(3);
+        }
+
+        async function downloadPdf() {
+            if (!lastPayload) {
+                showError('Primero genera la vista previa del comprobante.');
+                return;
+            }
+            if (!uid) {
+                showError('Debes iniciar sesión.');
+                return;
+            }
+            clearMessages();
+            setStatus('Generando PDF...');
+            try {
+                const blob = await requestPdfBlob(lastPayload);
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = lastDocumentName;
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                URL.revokeObjectURL(url);
+                setStatus('PDF generado y descargado');
+                showSuccess('PDF descargado correctamente.');
+                await refreshPlanInfo();
+            } catch (error) {
+                setStatus('Error al generar PDF');
+                showError(error.message || 'No se pudo generar el PDF.');
+            }
+        }
+
+        async function sharePdf() {
+            if (!lastPayload) {
+                showError('Primero genera la vista previa del comprobante.');
+                return;
+            }
+            if (!uid) {
+                showError('Debes iniciar sesión.');
+                return;
+            }
+            clearMessages();
+            setStatus('Preparando archivo para compartir...');
+            try {
+                const blob = await requestPdfBlob(lastPayload);
+                const file = new File([blob], lastDocumentName, { type: 'application/pdf' });
+
+                if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+                    await navigator.share({
+                        files: [file],
+                        title: 'Comprobante listo',
+                        text: lastShareText
+                    });
+                    setStatus('Comprobante compartido');
+                    showSuccess('Comprobante compartido correctamente.');
+                    await refreshPlanInfo();
+                    return;
+                }
+
+                if (navigator.clipboard) {
+                    await navigator.clipboard.writeText(lastShareText);
+                }
+
+                const url = URL.createObjectURL(blob);
+                window.open(url, '_blank');
+                setStatus('Archivo abierto para compartir');
+                showSuccess(
+                    'Tu navegador no soporta compartir archivos directamente. Se abrió el PDF en otra pestaña y se copió un texto base al portapapeles si estaba disponible.'
+                    );
+                setTimeout(() => URL.revokeObjectURL(url), 30000);
+                await refreshPlanInfo();
+            } catch (error) {
+                setStatus('Error al compartir');
+                showError(error.message || 'No se pudo compartir el comprobante.');
+            }
+        }
+
+        const MAX_LOGO_BYTES = 2 * 1024 * 1024;
+
+        function clearLogo() {
+            logoDataUrl = '';
+            if (logoInput) logoInput.value = '';
+            if (logoPreview) logoPreview.innerHTML = '<span>Sin logo</span>';
+        }
+
+        function handleLogoFile(file) {
+            if (!file) return;
+            if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
+                showError('El logo debe ser una imagen PNG, JPG o WEBP.');
+                clearLogo();
+                return;
+            }
+            if (file.size > MAX_LOGO_BYTES) {
+                showError('El logo es demasiado pesado. El límite es 2MB.');
+                clearLogo();
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = () => {
+                logoDataUrl = reader.result;
+                logoPreview.innerHTML = `<img src="${logoDataUrl}" alt="Logo del negocio" />`;
+            };
+            reader.onerror = () => {
+                showError('No se pudo leer el archivo del logo. Intenta con otra imagen.');
+                clearLogo();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        if (logoInput) {
+            logoInput.addEventListener('change', (event) => {
+                handleLogoFile(event.target.files && event.target.files[0]);
+            });
+        }
+        if (logoRemoveButton) {
+            logoRemoveButton.addEventListener('click', clearLogo);
+        }
+
+        function resetForm() {
+            voucherForm.reset();
+            itemList.innerHTML = '';
+            addItemRow({ description: 'Producto principal', quantity: 1, unitPrice: 0, unitLabel: 'UND' });
+            templateIdInput.value = 'moderna';
+            selectTemplate('moderna');
+            clearLogo();
+            setDefaultDateTime();
+            previewFrame.srcdoc =
+                '<html><body style="font-family:Inter,Arial,sans-serif;padding:40px;background:#f8fafc;color:#475569;"><h2 style="margin-top:0;color:#0f172a;">Aquí verás la vista previa</h2><p>Completa el formulario de la izquierda y pulsa <strong>Generar vista previa</strong>.</p></body></html>';
+            summaryBoxes.classList.add('hidden');
+            downloadButton.disabled = true;
+            shareButton.disabled = true;
+            downloadButton2.disabled = true;
+            shareButton2.disabled = true;
+            lastPayload = null;
+            lastDocumentName = 'comprobante.pdf';
+            lastShareText = 'Comprobante generado';
+            setStatus('Formulario reiniciado');
+            clearMessages();
+            // Resetear transform del iframe
+            previewFrame.style.transform = 'scale(1)';
+            previewFrame.style.height = '';
+        }
+
+        addItemButton.addEventListener('click', () => addItemRow());
+        resetButton.addEventListener('click', resetForm);
+
+        voucherForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            try {
+                await generatePreview();
+            } catch (error) {
+                setStatus('Error al generar');
+                showError(error.message || 'Ocurrió un error inesperado.');
+            }
+        });
+
+        // Listeners para los botones de descarga y compartición (tanto los originales ocultos como los nuevos)
+        downloadButton.addEventListener('click', async () => {
+            await downloadPdf();
+        });
+        downloadButton2.addEventListener('click', async () => {
+            await downloadPdf();
+        });
+
+        shareButton.addEventListener('click', async () => {
+            await sharePdf();
+        });
+        shareButton2.addEventListener('click', async () => {
+            await sharePdf();
+        });
+
+        // Botón "Editar datos" (volver al paso 2)
+        step3BackBtn.addEventListener('click', () => {
+            goToStep(2);
+        });
+
+        documentTypeSelect.addEventListener('change', () => {
+            customerDocumentTypeSelect.value = documentTypeSelect.value === 'factura' ? 'RUC' : 'DNI';
+        });
+
+        (async function init() {
+            try {
+                setDefaultDateTime();
+                addItemRow({ description: 'Servicio / producto principal', quantity: 1, unitPrice: 0, unitLabel: 'UND' });
+                uid = await getUid();
+
+                await Promise.all([loadTemplates(), loadPlanInfo()]);
+
+                resetForm();
+                applyPlanRestrictions();
+
+                if (!uid) {
+                    showError('Debes iniciar sesión para generar comprobantes. Mientras tanto puedes explorar las plantillas disponibles.');
+                    if (generateButton) generateButton.disabled = true;
+                }
+
+                goToStep(1);
+                applyIncomingCustomerData();
+            } catch (error) {
+                showError(error.message || 'No se pudo iniciar la página.');
+            }
+        })();
+
+        document.addEventListener("DOMContentLoaded", () => {
+            setTimeout(() => {
+                chatTextEl.classList.add('show');
+                typeWriterWhatsapp();
+            }, 1500);
+        });
+    </script>
+</body>
+</html>
