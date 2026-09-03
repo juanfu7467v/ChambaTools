@@ -48,7 +48,13 @@
             --font-family: 'Outfit', 'Inter', sans-serif;
             --font-display: 'Space Grotesk', 'Outfit', sans-serif;
             --font-mono: 'DM Mono', monospace;
+            --shell-max: 980px;
         }
+        /* Ancho de contenido adaptable: aprovecha mejor el espacio en tablets y escritorio,
+           manteniendo intacto el aspecto que ya funciona bien en móviles. */
+        @media (min-width: 768px) { :root { --shell-max: 1100px; } }
+        @media (min-width: 1100px) { :root { --shell-max: 1240px; } }
+        @media (min-width: 1440px) { :root { --shell-max: 1360px; } }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         html { font-size: 106.25%; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; }
         body {
@@ -131,7 +137,7 @@
         main { position: relative; z-index: 1; width: 100%; }
 
         /* ═══ LOGIN GATE ═══ */
-        .auth-gate { max-width: 980px; margin: 16px auto 0; padding: 0 20px; width: 100%; }
+        .auth-gate { max-width: var(--shell-max); margin: 16px auto 0; padding: 0 20px; width: 100%; }
         .auth-gate-inner { display: none; align-items: center; gap: 14px; background: rgba(255,167,38,0.08); border: 1px solid var(--amber-glow); border-radius: var(--radius-sm); padding: 16px 18px; }
         .auth-gate-inner.show { display: flex; }
         .auth-gate-inner i { font-size: 1.4rem; color: var(--amber); flex-shrink: 0; }
@@ -139,7 +145,7 @@
         .auth-gate-inner a { color: var(--emerald-light); font-weight: 700; text-decoration: none; }
 
         /* ═══ TABS & MAIN LAYOUT (UNIFORM MAX-WIDTH 980PX) ═══ */
-        .vc-shell { max-width: 980px; margin: 22px auto 0; padding: 0 20px 64px; width: 100%; }
+        .vc-shell { max-width: var(--shell-max); margin: 22px auto 0; padding: 0 20px 64px; width: 100%; }
         .vc-tabs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 22px; scrollbar-width: thin; }
         .vc-tabs::-webkit-scrollbar { height: 4px; }
         .vc-tabs::-webkit-scrollbar-thumb { background: var(--emerald-dark); border-radius: 4px; }
@@ -154,6 +160,9 @@
 
         .vc-card { background: var(--navy-card); border: 1px solid var(--border-subtle); border-radius: var(--radius); box-shadow: var(--shadow-card); padding: 26px; width: 100%; }
         @media (max-width: 640px) { .vc-card { padding: 20px 16px; } }
+        @media (min-width: 1024px) { .vc-card { padding: 34px 38px; } }
+        @media (min-width: 1024px) { .vc-form-row { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); } }
+        @media (min-width: 1024px) { .vc-result-body, .vc-skeleton { grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); } }
         .vc-card-head { margin-bottom: 18px; }
         .vc-card-head h2 { font-family: var(--font-display); font-size: 1.2rem; font-weight: 700; color: var(--white); display: flex; align-items: center; gap: 10px; }
         .vc-card-head h2 i { color: var(--emerald); font-size: 1.05rem; }
@@ -422,9 +431,29 @@
         .vc-history-row-top .h-doc { font-family: var(--font-mono); color: var(--emerald-light); flex-shrink: 0; }
         .vc-history-row-top .h-name { color: var(--white); font-weight: 500; }
 
-        /* Fila inferior: fecha/hora a la izquierda, flecha de expandir a la derecha */
+        /* Fila inferior: fecha/hora a la izquierda, acciones (magia + flecha de expandir) a la derecha */
         .vc-history-row-bottom { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; }
         .vc-history-row-bottom .h-time { color: var(--text-subtle); font-size: .72rem; display: inline-flex; align-items: center; gap: 6px; }
+        .h-actions-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+        /* Botón mágico del historial: envía el registro directamente a Generar Boletas */
+        .h-magic {
+            background: rgba(255,215,0,0.08);
+            border: 1px solid var(--gold-dim);
+            color: var(--gold);
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all .2s ease;
+            flex-shrink: 0;
+            font-size: .8rem;
+        }
+        .h-magic:hover { background: rgba(255,215,0,0.18); border-color: var(--gold); box-shadow: 0 0 12px rgba(255,215,0,.25); }
+        .h-magic:active { transform: scale(0.92); }
 
         .h-toggle {
             background: transparent;
@@ -510,6 +539,7 @@
         @keyframes toastIn { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
 
         .footer-content { width: 100%; padding: 48px 16px 32px; background: var(--navy-surface); border-top: 1px solid var(--border-active); text-align: center; position: relative; z-index: 1; }
+        .footer-content-inner { max-width: var(--shell-max); margin: 0 auto; width: 100%; }
         .footer-content h3 { font-size: .85rem; font-weight: 600; color: var(--text-muted); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 16px; }
         .footer-content .social-icons a { color: var(--text-muted); font-size: 1.6rem; margin: 0 12px; transition: all .2s; }
         .footer-content .social-icons a:hover { color: var(--emerald); transform: translateY(-3px); }
@@ -609,6 +639,10 @@
         @media (max-width: 640px) {
             .account-card { padding: 18px 16px; }
         }
+        /* Contenedor interno que alinea el ancho del encabezado de cuenta con el resto del
+           contenido (vc-shell / auth-gate), aprovechando el espacio en tablets y escritorio,
+           mientras el fondo de la tarjeta sigue ocupando todo el ancho. */
+        .account-card-inner { max-width: var(--shell-max); margin: 0 auto; width: 100%; }
 
         /* Cabecera superior: menú + info usuario */
         .account-header {
@@ -901,6 +935,7 @@
             <div class="account-card" id="accountCard">
                 <!-- Cabecera: menú + info usuario -->
                 <button id="menu-toggle" aria-label="Abrir menú de navegación"><i class="fas fa-bars"></i></button>
+                <div class="account-card-inner">
                 <div class="account-header">
                     <div class="account-user-info">
                         <div class="account-email" id="accountEmail">correo@ejemplo.com</div>
@@ -980,6 +1015,7 @@
                         <div class="gauge-footer-note">Titularidad y operador</div>
                     </div>
                 </div>
+                </div><!-- /.account-card-inner -->
             </div>
 
             <div class="auth-gate">
@@ -1247,13 +1283,16 @@
             </div>
 
             <footer class="footer-content">
-                <h3>Síguenos</h3>
-                <div class="social-icons">
-                    <a href="https://m.facebook.com/61564349657272/" target="_blank" rel="noopener noreferrer"><i class="fab fa-facebook-f"></i></a>
-                    <a href="https://youtube.com/@eltiojota628" target="_blank" rel="noopener noreferrer"><i class="fab fa-youtube"></i></a>
+                <div class="footer-content-inner">
+                    <h3>Síguenos</h3>
+                    <div class="social-icons">
+                        <a href="https://m.facebook.com/61564349657272/" target="_blank" rel="noopener noreferrer"><i class="fab fa-facebook-f"></i></a>
+                        <a href="https://youtube.com/@eltiojota628" target="_blank" rel="noopener noreferrer"><i class="fab fa-youtube"></i></a>
+                    </div>
+                    <p>FacilitoTools.com · Generación de comprobantes y validación de clientes © 2026</p>
+                    <p><a href="/terminos-condiciones">Términos y condiciones</a> · <a href="/politica-privacidad">Política de privacidad</a> · <a href="politica.compras.html">Política de compras y reembolsos</a></p>
+                    <p>¿Necesitas ayuda? Escríbenos a <a href="mailto:soporte@facilitotools.com">soporte@facilitotools.com</a></p>
                 </div>
-                <p>FacilitoTools.com · Generación de comprobantes y validación de clientes © 2026</p>
-                <p><a href="/terminos-condiciones">Términos y condiciones</a> · <a href="/politica-privacidad">Política de privacidad</a> · <a href="/disclaimer-apis">Aviso legal APIs</a></p>
             </footer>
         </main>
     </div><!-- /#app-screen -->
@@ -1267,7 +1306,25 @@
         const startAppBtn = document.getElementById('startAppBtn');
         let appInitialized = false;
 
-        function launchApp() {
+        // Recordamos si el usuario ya pulsó "Empezar" para no volver a mostrar la bienvenida.
+        const WELCOME_KEY = 'ft_welcome_seen';
+        function hasSeenWelcome() {
+            try { return localStorage.getItem(WELCOME_KEY) === '1'; } catch { return false; }
+        }
+        function markWelcomeSeen() {
+            try { localStorage.setItem(WELCOME_KEY, '1'); } catch (e) { /* almacenamiento no disponible */ }
+        }
+
+        function launchApp(skipAnimation) {
+            if (skipAnimation) {
+                welcomeScreen.style.display = 'none';
+                appScreen.classList.add('show');
+                if (!appInitialized) {
+                    appInitialized = true;
+                    initApp();
+                }
+                return;
+            }
             welcomeScreen.classList.add('fade-out');
             setTimeout(() => {
                 welcomeScreen.style.display = 'none';
@@ -1278,7 +1335,15 @@
                 }
             }, 400);
         }
-        startAppBtn.addEventListener('click', launchApp);
+        startAppBtn.addEventListener('click', () => {
+            markWelcomeSeen();
+            launchApp(false);
+        });
+
+        // Si el usuario ya vio la bienvenida antes, saltamos directo a la app.
+        if (hasSeenWelcome()) {
+            launchApp(true);
+        }
 
         // ========== SIDEBAR ==========
         const menuToggle = document.getElementById('menu-toggle');
@@ -1552,9 +1617,14 @@
                     </div>
                     <div class="vc-history-row-bottom">
                         <span class="h-time"><i class="fas fa-clock"></i> ${esc(tiempo)}</span>
-                        <button class="h-toggle" data-id="${esc(item.id)}" aria-label="Ver resultado completo">
-                            <i class="fas fa-chevron-down"></i>
-                        </button>
+                        <div class="h-actions-right">
+                            <button class="h-magic" data-id="${esc(item.id)}" title="Usar estos datos en Generar Boletas" aria-label="Usar estos datos en Generar Boletas">
+                                <i class="fas fa-wand-magic-sparkles"></i>
+                            </button>
+                            <button class="h-toggle" data-id="${esc(item.id)}" aria-label="Ver resultado completo">
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                        </div>
                     </div>
                     <div class="vc-history-details" id="details-${esc(item.id)}">
                         <div class="vc-history-fields">${detailHtml}</div>
@@ -1622,6 +1692,23 @@
                     if (!details) return;
                     const isOpen = details.classList.toggle('open');
                     btn.classList.toggle('open', isOpen);
+                });
+            });
+
+            // Botón mágico del historial: envía el registro seleccionado a Generar Boletas
+            listEl.querySelectorAll('.h-magic').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const id = btn.dataset.id;
+                    const record = getHistory().find(h => h.id === id);
+                    if (!record) { showToast('No hay datos para enviar', 'fa-triangle-exclamation'); return; }
+                    const items = getResultItems(tipo, record.data);
+                    if (!items.length || !items[0]) { showToast('No hay datos para enviar', 'fa-triangle-exclamation'); return; }
+                    const payload = mapToCustomerPayload(tipo, items[0]);
+                    if (['buscar-cedula', 'buscar-dni', 'telefonia-doc'].includes(tipo) && items.length > 1) {
+                        showToast('Se usó el primer resultado de la lista', 'fa-wand-magic-sparkles');
+                    }
+                    sendToBoletas(payload);
                 });
             });
 
