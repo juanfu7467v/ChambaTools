@@ -1059,11 +1059,73 @@
             color: var(--gold-light);
             font-weight: 700;
         }
-        #planLink {
-            color: var(--tech-blue-light) !important;
-            font-size: 0.85rem;
+
+        /* Indicador visual (barra) del consumo de comprobantes disponibles */
+        .plan-usage {
             position: relative;
             z-index: 1;
+            margin-top: 10px;
+        }
+        .plan-usage-header {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .plan-usage-bar {
+            width: 100%;
+            height: 8px;
+            margin-top: 8px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 999px;
+            overflow: hidden;
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+        .plan-usage-bar-fill {
+            height: 100%;
+            width: 100%;
+            border-radius: 999px;
+            background: linear-gradient(90deg, var(--emerald-dark), var(--emerald-light));
+            transition: width 0.5s ease, background 0.5s ease;
+        }
+        .plan-usage-bar-fill.level-mid {
+            background: linear-gradient(90deg, var(--gold-dim), var(--gold));
+        }
+        .plan-usage-bar-fill.level-low {
+            background: linear-gradient(90deg, var(--ruby), var(--ruby-light));
+        }
+
+        /* Botón "Ver planes y actualizar": centrado, borde/texto verde, fondo transparente */
+        .plan-cta-wrap {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            justify-content: center;
+            margin-top: 14px;
+        }
+        .plan-upgrade-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: transparent;
+            border: 1.5px solid var(--emerald);
+            color: var(--emerald-light) !important;
+            font-weight: 700;
+            font-size: 0.85rem;
+            padding: 9px 22px;
+            border-radius: 999px;
+            text-decoration: none;
+            transition: all 0.25s ease;
+        }
+        .plan-upgrade-btn:hover {
+            background: var(--emerald-glow);
+            border-color: var(--emerald-light);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px var(--emerald-glow);
+        }
+        .plan-upgrade-btn i {
+            color: var(--emerald-light);
+            font-size: 0.9rem;
         }
 
         /* ============================================================
@@ -1074,14 +1136,18 @@
         textarea {
             width: 100%;
             background: var(--navy-surface);
-            border: 1px solid var(--navy-border);
+            border: 1.5px solid var(--gold-dim);
             border-radius: 10px;
             color: var(--text-primary);
             padding: 12px 16px;
             font-size: 0.92rem;
             font-family: inherit;
             transition: all 0.25s ease;
-            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255, 215, 0, 0.08);
+        }
+        input:hover,
+        textarea:hover {
+            border-color: var(--gold);
         }
         input:focus,
         select:focus,
@@ -1105,7 +1171,7 @@
             cursor: pointer;
         }
         select:hover {
-            border-color: var(--border-active);
+            border-color: var(--gold);
         }
         textarea {
             min-height: 90px;
@@ -1893,11 +1959,6 @@
                         </div>
 
                         <div class="form-wrap">
-                            <!-- Botón para abrir el modal de consejo -->
-                            <button class="tip-trigger-btn" id="tipTriggerBtn">
-                                <i class="fas fa-lightbulb"></i> Ver consejo útil
-                            </button>
-
                             <div id="errorBox" class="error"></div>
                             <div id="successBox" class="success"></div>
 
@@ -1905,10 +1966,23 @@
                             <div id="planInfo">
                                 <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; align-items: center;">
                                     <span><strong>Plan:</strong> <span id="planNombre">Cargando...</span> <span class="plan-badge">Activo</span></span>
-                                    <span><strong>Comprobantes disponibles:</strong> <span id="comprobantesDisponibles">-</span></span>
                                 </div>
-                                <div style="margin-top: 8px;">
-                                    <a href="/planes" id="planLink">Ver planes y actualizar</a>
+
+                                <!-- Indicador visual de consumo de comprobantes -->
+                                <div class="plan-usage" id="planUsage">
+                                    <div class="plan-usage-header">
+                                        <strong>Comprobantes disponibles:</strong>
+                                        <span id="comprobantesDisponibles">-</span>
+                                    </div>
+                                    <div class="plan-usage-bar">
+                                        <div class="plan-usage-bar-fill" id="planUsageFill"></div>
+                                    </div>
+                                </div>
+
+                                <div class="plan-cta-wrap">
+                                    <a href="/planes" id="planLink" class="plan-upgrade-btn">
+                                        <i class="fas fa-gem"></i> Ver planes y actualizar
+                                    </a>
                                 </div>
                             </div>
 
@@ -2358,6 +2432,8 @@
         // ========== MODAL DE CONSEJO (TIP) ==========
         const tipOverlay = document.getElementById('tipModalOverlay');
         const tipModal = document.getElementById('tipModal');
+        // El botón "Ver consejo útil" fue eliminado; el modal se conserva y sigue
+        // apareciendo automáticamente (ver maybeShowTip), solo se retira el disparador manual.
         const tipTrigger = document.getElementById('tipTriggerBtn');
         const tipClose = document.getElementById('tipModalCloseBtn');
 
@@ -2373,8 +2449,8 @@
             document.body.style.overflow = '';
         }
 
-        tipTrigger.addEventListener('click', openTipModal);
-        tipClose.addEventListener('click', closeTipModal);
+        if (tipTrigger) tipTrigger.addEventListener('click', openTipModal);
+        if (tipClose) tipClose.addEventListener('click', closeTipModal);
         tipOverlay.addEventListener('click', (e) => {
             if (e.target === tipOverlay) closeTipModal();
         });
@@ -2711,11 +2787,44 @@
             return localStorage.getItem('user_uid') || null;
         }
 
+        // Total estimado de comprobantes por plan, usado como respaldo únicamente
+        // cuando la API no informa un total explícito (data.total / data.limite / etc.),
+        // para poder dibujar el indicador visual de consumo.
+        const PLAN_TOTALS_FALLBACK = {
+            gratis: 5,
+            emprendedor: 800,
+            negocio: 1800
+        };
+
+        function updatePlanUsageBar(disponiblesValue, totalValue) {
+            const fill = document.getElementById('planUsageFill');
+            if (!fill) return;
+            const bar = fill.parentElement;
+            const disponibles = Number(disponiblesValue);
+            const total = Number(totalValue);
+
+            if (!Number.isFinite(disponibles) || !Number.isFinite(total) || total <= 0) {
+                if (bar) bar.style.display = 'none';
+                return;
+            }
+
+            if (bar) bar.style.display = '';
+            const pct = Math.max(0, Math.min(100, (disponibles / total) * 100));
+            fill.style.width = pct + '%';
+            fill.classList.remove('level-mid', 'level-low');
+            if (pct <= 20) {
+                fill.classList.add('level-low');
+            } else if (pct <= 50) {
+                fill.classList.add('level-mid');
+            }
+        }
+
         async function loadPlanInfo() {
             uid = await getUid();
             if (!uid) {
                 planNombre.textContent = 'No autenticado';
                 comprobantesDisponibles.textContent = '—';
+                updatePlanUsageBar(null, null);
                 applyPlanRestrictions();
                 return;
             }
@@ -2736,10 +2845,18 @@
                 };
                 planNombre.textContent = planState.planNombre;
                 comprobantesDisponibles.textContent = planState.disponibles;
+
+                const total = data.total !== undefined ? data.total :
+                    (data.limite !== undefined ? data.limite :
+                    (data.comprobantesTotal !== undefined ? data.comprobantesTotal :
+                    (data.maxComprobantes !== undefined ? data.maxComprobantes :
+                    PLAN_TOTALS_FALLBACK[planState.plan])));
+                updatePlanUsageBar(planState.disponibles, total);
             } catch (error) {
                 console.error('Error cargando plan:', error);
                 planNombre.textContent = 'Error';
                 comprobantesDisponibles.textContent = 'Error';
+                updatePlanUsageBar(null, null);
             }
 
             applyPlanRestrictions();
