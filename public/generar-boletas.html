@@ -517,68 +517,6 @@
             color: var(--emerald);
         }
 
-        /* ═══ WHATSAPP ═══ */
-        .chat-bubble {
-            position: fixed;
-            bottom: 24px;
-            right: 24px;
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(135deg, #25D366, #128C7E);
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 28px;
-            cursor: pointer;
-            box-shadow: 0 6px 25px rgba(37, 211, 102, 0.4);
-            z-index: 1000;
-            animation: slideIn 1s ease-out forwards;
-            transition: all 0.3s ease;
-            border: none;
-        }
-        .chat-bubble:hover {
-            transform: scale(1.1);
-        }
-        .chat-text {
-            position: fixed;
-            bottom: 94px;
-            right: 24px;
-            background: linear-gradient(135deg, #25D366, #128C7E);
-            color: white;
-            padding: 12px 18px;
-            border-radius: 14px;
-            font-size: 14px;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-            white-space: nowrap;
-            opacity: 0;
-            transform: scale(0.9);
-            transition: opacity 0.4s, transform 0.4s;
-            z-index: 1001;
-            cursor: pointer;
-            font-family: var(--font-family);
-            font-weight: 600;
-        }
-        .chat-text.show {
-            opacity: 1;
-            transform: scale(1);
-        }
-        .chat-text.hide {
-            opacity: 0;
-            transform: scale(0.9);
-        }
-        @keyframes slideIn {
-            from {
-                transform: translateX(80px);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-
         /* Responsive */
         @media (max-width: 640px) {
             #sidebar {
@@ -948,23 +886,30 @@
         .gb-hero p {
             font-size: 1rem;
             color: var(--text-muted);
-            max-width: 680px;
+            max-width: 720px;
             margin: 0 auto;
             line-height: 1.6;
         }
 
         .layout {
-            max-width: 1440px;
+            max-width: 1600px;
             margin: 0 auto;
-            padding: 20px 20px 80px;
+            padding: 20px clamp(20px, 3vw, 56px) 80px;
             display: grid;
             grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
-            gap: 24px;
+            gap: clamp(24px, 2.5vw, 48px);
             align-items: start;
+            width: 100%;
         }
         @media (max-width: 980px) {
             .layout {
                 grid-template-columns: 1fr;
+                padding: 20px 20px 80px;
+            }
+        }
+        @media (min-width: 1700px) {
+            .layout {
+                max-width: 1880px;
             }
         }
 
@@ -2223,12 +2168,9 @@
             <a href="https://youtube.com/@eltiojota628?si=sZw2ZHHTUMdaR0nL" target="_blank" rel="noopener noreferrer"><i class="fab fa-youtube"></i></a>
         </div>
         <p>FacilitoTools.com · Generación de comprobantes y validación de clientes © 2026</p>
-        <p><a href="/terminos-condiciones">Términos y condiciones</a> · <a href="/politica-privacidad">Política de privacidad</a> · <a href="/disclaimer-apis">Aviso legal APIs</a> · <a href="/aviso-legal-peliprex">Aviso legal PeliPREX</a> · <a href="/politica.compras.html">Política de compras</a></p>
+        <p><a href="/terminos-condiciones">Términos y condiciones</a> · <a href="/politica-privacidad">Política de privacidad</a> · <a href="/politica.compras.html">Política de compras y reembolsos</a></p>
+        <p>¿Necesitas ayuda? Escríbenos a <a href="mailto:soporte@facilitotools.com">soporte@facilitotools.com</a></p>
     </footer>
-
-    <!-- ═══ WHATSAPP ═══ -->
-    <button class="chat-bubble" onclick="goToWhatsApp()" aria-label="Contactar por WhatsApp"><i class="fab fa-whatsapp"></i></button>
-    <div class="chat-text" id="chatText" onclick="goToWhatsApp()"></div>
 
     <!-- ============================================================
     MODAL DE CONSEJO (TIP)
@@ -2341,37 +2283,26 @@
             });
         });
 
-        // ========== WHATSAPP ==========
-        const chatTextEl = document.getElementById("chatText");
-        const whatsappMessage = "¡Cotiza tu plan por Whatsapp!";
-        let idx = 0;
+        // ========== PERSISTENCIA LOCAL (bienvenida, consejo, formulario) ==========
+        const WELCOME_SEEN_KEY = 'ft_welcome_seen';
+        const TIP_SHOWN_COUNT_KEY = 'ft_tip_shown_count';
+        const TIP_MAX_AUTO_SHOWS = 2;
 
-        function typeWriterWhatsapp() {
-            if (idx < whatsappMessage.length) {
-                chatTextEl.textContent += whatsappMessage.charAt(idx++);
-                setTimeout(typeWriterWhatsapp, 100);
-            } else {
-                setTimeout(() => {
-                    chatTextEl.classList.remove('show');
-                    chatTextEl.classList.add('hide');
-                    setTimeout(() => {
-                        chatTextEl.textContent = "";
-                        idx = 0;
-                        chatTextEl.classList.remove('hide');
-                        setTimeout(() => {
-                            chatTextEl.classList.add('show');
-                            typeWriterWhatsapp();
-                        }, 500);
-                    }, 1000);
-                }, 2500);
+        function hasSeenWelcome() {
+            try {
+                return localStorage.getItem(WELCOME_SEEN_KEY) === '1';
+            } catch (error) {
+                return false;
             }
         }
 
-        window.goToWhatsApp = function() {
-            window.open(
-                `https://wa.me/51944950234?text=${encodeURIComponent('Hola, necesito información sobre los planes de FacilitoTools.')}`,
-                '_blank');
-        };
+        function markWelcomeSeen() {
+            try {
+                localStorage.setItem(WELCOME_SEEN_KEY, '1');
+            } catch (error) {
+                console.error('No se pudo guardar el estado de bienvenida:', error);
+            }
+        }
 
         // ========== STEP NAVIGATION ==========
         let currentStep = 1;
@@ -2416,6 +2347,7 @@
         }
 
         document.getElementById('welcomeStartBtn').addEventListener('click', () => {
+            markWelcomeSeen();
             goToStep(2);
         });
 
@@ -2450,13 +2382,30 @@
             if (e.key === 'Escape') closeTipModal();
         });
 
-        let tipShown = false;
+        let tipShownThisSession = false;
+
+        function getTipShownCount() {
+            try {
+                return parseInt(localStorage.getItem(TIP_SHOWN_COUNT_KEY) || '0', 10) || 0;
+            } catch (error) {
+                return 0;
+            }
+        }
+
+        function registerTipShown() {
+            try {
+                localStorage.setItem(TIP_SHOWN_COUNT_KEY, String(getTipShownCount() + 1));
+            } catch (error) {
+                console.error('No se pudo guardar el contador del consejo:', error);
+            }
+        }
 
         function maybeShowTip() {
-            if (currentStep === 2 && !tipShown) {
+            if (currentStep === 2 && !tipShownThisSession && getTipShownCount() < TIP_MAX_AUTO_SHOWS) {
                 setTimeout(() => {
                     openTipModal();
-                    tipShown = true;
+                    tipShownThisSession = true;
+                    registerTipShown();
                 }, 600);
             }
         }
@@ -2660,6 +2609,92 @@
             plantillasPermitidas: ['moderna']
         };
 
+        // ========== AUTOGUARDADO DEL FORMULARIO (localStorage) ==========
+        // Guarda automáticamente lo que el usuario va escribiendo para que no
+        // se pierda si sale y vuelve a entrar. El logo (archivo) y la fecha de
+        // emisión (que siempre debe reflejar el momento actual) quedan afuera.
+        const FORM_STORAGE_PREFIX = 'ft_form_';
+        const ITEMS_STORAGE_KEY = 'ft_form_items';
+        const AUTOSAVE_EXCLUDED_IDS = new Set(['logoInput', 'issueDate']);
+
+        function getPersistableFields() {
+            return Array.from(voucherForm.querySelectorAll('input[id], select[id], textarea[id]'))
+                .filter((el) => el.type !== 'file' && !AUTOSAVE_EXCLUDED_IDS.has(el.id));
+        }
+
+        function saveFieldValue(el) {
+            try {
+                const key = FORM_STORAGE_PREFIX + el.id;
+                if (el.type === 'checkbox') {
+                    localStorage.setItem(key, el.checked ? '1' : '0');
+                } else {
+                    localStorage.setItem(key, el.value);
+                }
+            } catch (error) {
+                console.error('No se pudo guardar el campo en localStorage:', error);
+            }
+        }
+
+        function restoreFieldValue(el) {
+            const saved = localStorage.getItem(FORM_STORAGE_PREFIX + el.id);
+            if (saved === null) return;
+            if (el.type === 'checkbox') {
+                el.checked = saved === '1';
+            } else {
+                el.value = saved;
+            }
+        }
+
+        function restoreSavedFormFields() {
+            getPersistableFields().forEach(restoreFieldValue);
+        }
+
+        function attachAutosaveListeners() {
+            getPersistableFields().forEach((el) => {
+                const evt = (el.tagName === 'SELECT' || el.type === 'checkbox') ? 'change' : 'input';
+                el.addEventListener(evt, () => saveFieldValue(el));
+            });
+        }
+
+        function clearSavedFormData() {
+            try {
+                getPersistableFields().forEach((el) => localStorage.removeItem(FORM_STORAGE_PREFIX + el.id));
+                localStorage.removeItem(ITEMS_STORAGE_KEY);
+            } catch (error) {
+                console.error('No se pudo limpiar el guardado local del formulario:', error);
+            }
+        }
+
+        function saveItemsToStorage() {
+            try {
+                const items = Array.from(itemList.querySelectorAll('.item-row')).map((row) => ({
+                    description: row.querySelector('.item-description').value,
+                    unitLabel: row.querySelector('.item-unit-label').value,
+                    quantity: row.querySelector('.item-quantity').value,
+                    unitPrice: row.querySelector('.item-unit-price').value,
+                    sku: row.querySelector('.item-sku').value
+                }));
+                localStorage.setItem(ITEMS_STORAGE_KEY, JSON.stringify(items));
+            } catch (error) {
+                console.error('No se pudieron guardar los ítems en localStorage:', error);
+            }
+        }
+
+        function restoreItemsFromStorage() {
+            try {
+                const raw = localStorage.getItem(ITEMS_STORAGE_KEY);
+                if (!raw) return false;
+                const items = JSON.parse(raw);
+                if (!Array.isArray(items) || !items.length) return false;
+                itemList.innerHTML = '';
+                items.forEach((item) => addItemRow(item));
+                return true;
+            } catch (error) {
+                console.error('No se pudieron restaurar los ítems guardados:', error);
+                return false;
+            }
+        }
+
         async function getUid() {
             try {
                 const response = await fetch('/api/session', { credentials: 'same-origin' });
@@ -2790,6 +2825,7 @@
                 }
                 row.remove();
                 refreshItemIndexes();
+                saveItemsToStorage();
             });
 
             itemList.appendChild(row);
@@ -3181,8 +3217,18 @@
             previewFrame.style.height = '';
         }
 
-        addItemButton.addEventListener('click', () => addItemRow());
-        resetButton.addEventListener('click', resetForm);
+        addItemButton.addEventListener('click', () => {
+            addItemRow();
+            saveItemsToStorage();
+        });
+
+        // El botón "Limpiar formulario" también debe borrar lo guardado en
+        // localStorage, para que al recargar la página no reaparezcan los
+        // datos que el usuario acaba de eliminar intencionalmente.
+        resetButton.addEventListener('click', () => {
+            resetForm();
+            clearSavedFormData();
+        });
 
         voucherForm.addEventListener('submit', async (event) => {
             event.preventDefault();
@@ -3218,6 +3264,10 @@
             customerDocumentTypeSelect.value = documentTypeSelect.value === 'factura' ? 'RUC' : 'DNI';
         });
 
+        // Guarda los ítems cada vez que el usuario edita descripción, cantidad,
+        // precio, unidad o SKU dentro de cualquier fila (delegación de eventos).
+        itemList.addEventListener('input', saveItemsToStorage);
+
         (async function init() {
             try {
                 setDefaultDateTime();
@@ -3229,24 +3279,27 @@
                 resetForm();
                 applyPlanRestrictions();
 
+                // Restaurar datos guardados previamente por el usuario (localStorage),
+                // para que no tenga que volver a escribir todo si sale y regresa.
+                restoreItemsFromStorage();
+                restoreSavedFormFields();
+                if (templateIdInput.value) {
+                    selectTemplate(templateIdInput.value);
+                }
+                attachAutosaveListeners();
+
                 if (!uid) {
                     showError('Debes iniciar sesión para generar comprobantes. Mientras tanto puedes explorar las plantillas disponibles.');
                     if (generateButton) generateButton.disabled = true;
                 }
 
-                goToStep(1);
+                // La pantalla de bienvenida solo se muestra la primera vez.
+                goToStep(hasSeenWelcome() ? 2 : 1);
                 applyIncomingCustomerData();
             } catch (error) {
                 showError(error.message || 'No se pudo iniciar la página.');
             }
         })();
-
-        document.addEventListener("DOMContentLoaded", () => {
-            setTimeout(() => {
-                chatTextEl.classList.add('show');
-                typeWriterWhatsapp();
-            }, 1500);
-        });
     </script>
 </body>
 </html>
