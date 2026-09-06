@@ -2391,6 +2391,25 @@
     </template>
 
     <script>
+        // ========== OVERLAY DE CARGA: RED DE SEGURIDAD ==========
+        // Se define y se activa lo primero de todo, para garantizar que el
+        // overlay de carga NUNCA quede bloqueando la interfaz de forma
+        // indefinida, incluso si alguna petición de red (sesión, plantillas,
+        // plan) se cuelga o tarda demasiado en responder.
+        let appLoadingOverlayHidden = false;
+        function hideAppLoadingOverlay() {
+            if (appLoadingOverlayHidden) return;
+            appLoadingOverlayHidden = true;
+            const overlay = document.getElementById('appLoadingOverlay');
+            if (!overlay) return;
+            overlay.classList.add('fade-out');
+            setTimeout(() => overlay.remove(), 400);
+        }
+        // Tiempo máximo de espera: pase lo que pase, a los 6 segundos se
+        // libera la interfaz para que el usuario nunca se quede atrapado
+        // detrás del loader.
+        setTimeout(hideAppLoadingOverlay, 6000);
+
         // ========== FIREBASE CONFIGURACIÓN (común) ==========
         let auth;
 
@@ -2507,32 +2526,3 @@
             currentStep = step;
 
             Object.values(stepContainers).forEach(el => el.classList.remove('active'));
-            stepContainers[step].classList.add('active');
-
-            stepCircles.forEach((circle, index) => {
-                const num = index + 1;
-                circle.classList.remove('active', 'done');
-                if (num === step) {
-                    circle.classList.add('active');
-                } else if (num < step) {
-                    circle.classList.add('done');
-                }
-            });
-
-            if (stepLines[1]) {
-                stepLines[1].classList.toggle('done', step > 1);
-            }
-            if (stepLines[2]) {
-                stepLines[2].classList.toggle('done', step > 2);
-            }
-
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        document.getElementById('welcomeStartBtn').addEventListener('click', () => {
-            markWelcomeSeen();
-            goToStep(2);
-        });
-
-        document.getElementById('step2BackBtn').addEventListener('click', () => {
-            goToStep(1);
