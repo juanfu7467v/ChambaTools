@@ -2390,6 +2390,23 @@
     </template>
 
     <script>
+        // ========== RED DE SEGURIDAD DEL LOADER INICIAL ==========
+        // Esto va DELIBERADAMENTE como lo primero que se ejecuta en todo el
+        // script. Si más abajo ocurre un error inesperado (de red, de un
+        // elemento que no existe, lo que sea) que detenga el resto del
+        // script antes de llegar al init() del final, esta red de seguridad
+        // igual oculta el loader de 3 puntos pasados unos segundos, para que
+        // la pantalla nunca se quede "cargando" de forma indefinida.
+        (function () {
+            function forceHideLoader() {
+                const loader = document.getElementById('appLoader');
+                if (loader) loader.classList.add('app-loader-hidden');
+            }
+            window.setTimeout(forceHideLoader, 8000);
+            window.addEventListener('error', forceHideLoader);
+            window.addEventListener('unhandledrejection', forceHideLoader);
+        })();
+
         // ========== FIREBASE CONFIGURACIÓN (común) ==========
         let auth;
 
@@ -2504,29 +2521,3 @@
                     circle.classList.add('done');
                 }
             });
-
-            if (stepLines[1]) {
-                stepLines[1].classList.toggle('done', step > 1);
-            }
-            if (stepLines[2]) {
-                stepLines[2].classList.toggle('done', step > 2);
-            }
-
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        document.getElementById('welcomeStartBtn').addEventListener('click', () => {
-            markWelcomeSeen();
-            goToStep(2);
-        });
-
-        document.getElementById('step2BackBtn').addEventListener('click', () => {
-            goToStep(1);
-        });
-
-        // ========== MODAL DE CONSEJO (TIP) ==========
-        const tipOverlay = document.getElementById('tipModalOverlay');
-        const tipModal = document.getElementById('tipModal');
-        // El botón "Ver consejo útil" fue eliminado; el modal se conserva y sigue
-        // apareciendo automáticamente (ver maybeShowTip), solo se retira el disparador manual.
-    
