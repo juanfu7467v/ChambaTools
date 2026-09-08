@@ -1582,8 +1582,10 @@
 
         .upsell-banner {
             display: none;
-            margin-bottom: 20px;
-            padding: 16px 18px;
+            position: relative;
+            z-index: 1;
+            margin-top: 14px;
+            padding: 12px 14px;
             border-radius: var(--radius-sm);
             background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 215, 0, 0.02));
             border: 1px solid var(--border-gold);
@@ -1595,23 +1597,13 @@
             color: var(--gold-light);
             display: block;
             margin-bottom: 4px;
-            font-size: 0.92rem;
+            font-size: 0.88rem;
         }
         .upsell-banner p {
             color: var(--text-muted);
-            font-size: 0.85rem;
-            line-height: 1.5;
-            margin-bottom: 10px;
-        }
-        .upsell-banner a {
-            display: inline-block;
             font-size: 0.82rem;
-            font-weight: 700;
-            color: var(--navy-deep);
-            background: linear-gradient(135deg, var(--gold), var(--gold-light));
-            padding: 8px 16px;
-            border-radius: 999px;
-            text-decoration: none;
+            line-height: 1.5;
+            margin-bottom: 0;
         }
 
         .gb-block {
@@ -1845,11 +1837,11 @@
             cursor: not-allowed;
         }
 
-        /* Botón cerrar en vista previa */
+        /* Botón (+) en vista previa */
         .btn-close-preview {
-            background: transparent;
-            border: 1px solid var(--navy-border);
-            color: var(--text-muted);
+            background: var(--emerald-glow);
+            border: 1px solid var(--emerald);
+            color: var(--emerald-light);
             border-radius: 8px;
             padding: 6px 12px;
             font-size: 1.2rem;
@@ -1861,9 +1853,10 @@
             justify-content: center;
         }
         .btn-close-preview:hover {
-            border-color: var(--ruby);
-            color: var(--ruby-light);
-            background: var(--ruby-glow);
+            border-color: var(--emerald-light);
+            color: var(--emerald-light);
+            background: var(--emerald-glow);
+            transform: translateY(-2px);
         }
     </style>
 </head>
@@ -1994,7 +1987,7 @@
                                 <!-- Estado Activo/Inactivo (se actualiza dinámicamente) -->
                                 <div id="planStatus" class="active">Activo</div>
                                 <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; align-items: center;">
-                                    <span><strong>Plan:</strong> <span id="planNombre">Cargando...</span> <span class="plan-badge">Activo</span></span>
+                                    <span><strong>Plan:</strong> <span id="planNombre">Cargando...</span></span>
                                 </div>
 
                                 <!-- Indicador visual de consumo de comprobantes -->
@@ -2008,18 +2001,17 @@
                                     </div>
                                 </div>
 
+                                <!-- MENSAJE COMERCIAL / UPSELL (integrado en la tarjeta del plan) -->
+                                <div id="upsellBanner" class="upsell-banner">
+                                    <strong>No te veas igual que el resto ✨</strong>
+                                    <p>Desbloquea las plantillas Elegante, Corporativa y Premium, sube el logo de tu negocio y haz que tus comprobantes destaquen frente a tus competidores.</p>
+                                </div>
+
                                 <div class="plan-cta-wrap">
                                     <a href="/planes" id="planLink" class="plan-upgrade-btn">
                                         <i class="fas fa-gem"></i> Ver planes y actualizar
                                     </a>
                                 </div>
-                            </div>
-
-                            <!-- MENSAJE COMERCIAL / UPSELL -->
-                            <div id="upsellBanner" class="upsell-banner">
-                                <strong>No te veas igual que el resto ✨</strong>
-                                <p>Desbloquea las plantillas Elegante, Corporativa y Premium, sube el logo de tu negocio y haz que tus comprobantes destaquen frente a tus competidores.</p>
-                                <a href="/planes">Ver planes desde S/7</a>
                             </div>
 
                             <form id="voucherForm">
@@ -2211,12 +2203,14 @@
                         <div class="preview-top">
                             <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
                                 <h2 class="panel-title" style="margin-bottom: 0;">Vista previa en vivo</h2>
-                                <!-- Botón cerrar (X) -->
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                                <div id="statusBadge" class="status">Esperando datos para generar</div>
+                                <!-- Botón (+) -->
                                 <button class="btn-close-preview" id="closePreviewBtn" title="Cerrar vista previa y editar">
-                                    <i class="fas fa-times"></i>
+                                    <i class="fas fa-plus"></i>
                                 </button>
                             </div>
-                            <div id="statusBadge" class="status">Esperando datos para generar</div>
                             <!-- Los botones originales de descarga y compartir se ocultan con CSS, los reemplazamos con los superpuestos -->
                             <div class="preview-actions" style="display:none;">
                                 <button class="btn-secondary" type="button" id="downloadButton" disabled>Descargar PDF</button>
@@ -3018,9 +3012,6 @@
 
             button.addEventListener('click', () => {
                 if (locked) {
-                    showError(
-                        `La plantilla "${template.name}" está disponible desde el plan Prueba Corta. Ve a la sección Planes para desbloquearla.`
-                        );
                     return;
                 }
                 selectTemplate(template.id);
@@ -3310,7 +3301,6 @@
             renderPreview(result);
             // Guardar estado en localStorage
             savePreviewState(payload, result);
-            showSuccess('Vista previa generada correctamente. Ya puedes descargar o compartir.');
             goToStep(3);
         }
 
