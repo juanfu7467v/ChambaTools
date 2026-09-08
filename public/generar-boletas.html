@@ -1059,10 +1059,6 @@
             color: var(--gold-light);
             font-weight: 700;
         }
-        #consultasDisponibles {
-            color: var(--tech-blue-light);
-            font-weight: 700;
-        }
 
         /* Indicador visual (barra) del consumo de comprobantes disponibles */
         .plan-usage {
@@ -1130,6 +1126,90 @@
         .plan-upgrade-btn i {
             color: var(--emerald-light);
             font-size: 0.9rem;
+        }
+
+        /* ============================================================
+           MEJORA 1 (extendida): TARJETA DE USUARIO (correo y consumo)
+           ============================================================ */
+        .user-plan-card {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            padding: 6px 0 4px;
+            position: relative;
+            z-index: 1;
+        }
+        .user-plan-card .user-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--emerald-dark), var(--emerald));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: #000;
+            font-weight: 700;
+            flex-shrink: 0;
+            box-shadow: 0 0 20px var(--emerald-glow);
+        }
+        .user-plan-card .user-info {
+            flex: 1;
+            min-width: 140px;
+        }
+        .user-plan-card .user-info .user-email {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--white);
+            word-break: break-all;
+        }
+        .user-plan-card .user-info .user-plan-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .user-plan-card .user-stats {
+            display: flex;
+            gap: 12px;
+            background: rgba(0, 0, 0, 0.25);
+            padding: 6px 14px;
+            border-radius: 999px;
+            border: 1px solid var(--border-subtle);
+            flex-shrink: 0;
+        }
+        .user-plan-card .user-stats .stat-item {
+            display: flex;
+            align-items: baseline;
+            gap: 4px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+        .user-plan-card .user-stats .stat-item strong {
+            font-size: 0.9rem;
+            color: var(--emerald-light);
+            font-weight: 700;
+        }
+        .user-plan-card .user-stats .stat-divider {
+            width: 1px;
+            height: 24px;
+            background: var(--border-subtle);
+        }
+        @media (max-width: 640px) {
+            .user-plan-card .user-stats {
+                padding: 4px 10px;
+                gap: 8px;
+            }
+            .user-plan-card .user-stats .stat-item {
+                font-size: 0.65rem;
+            }
+            .user-plan-card .user-stats .stat-item strong {
+                font-size: 0.75rem;
+            }
+            .user-plan-card .user-info .user-email {
+                font-size: 0.75rem;
+            }
         }
 
         /* ============================================================
@@ -1842,26 +1922,45 @@
         }
 
         /* se eliminó .summary-boxes duplicado */
-        /* Botón "+" para nueva boleta */
-        .new-boleta-btn {
-            background: var(--emerald);
-            color: #000;
-            border: none;
-            border-radius: 50%;
-            width: 44px;
-            height: 44px;
-            font-size: 1.5rem;
-            display: flex;
+
+        /* ============================================================
+           NUEVO: BOTÓN DE REGRESO EN VISTA PREVIA (ícono atractivo)
+           ============================================================ */
+        .preview-back-btn {
+            display: inline-flex;
             align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 12px var(--emerald-glow);
-            transition: all 0.25s ease;
+            gap: 6px;
+            background: rgba(0, 200, 83, 0.08);
+            border: 1px solid var(--border-active);
+            color: var(--emerald-light);
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 6px 14px 6px 10px;
+            border-radius: 999px;
             cursor: pointer;
+            transition: all 0.25s ease;
+            font-family: var(--font-family);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
             flex-shrink: 0;
+            margin-left: auto;
         }
-        .new-boleta-btn:hover {
-            transform: scale(1.08) rotate(90deg);
-            box-shadow: 0 6px 20px var(--emerald-glow-strong);
+        .preview-back-btn:hover {
+            background: rgba(0, 200, 83, 0.18);
+            border-color: var(--emerald);
+            transform: scale(1.03);
+        }
+        .preview-back-btn i {
+            font-size: 0.9rem;
+        }
+        @media (max-width: 640px) {
+            .preview-back-btn {
+                font-size: 0.65rem;
+                padding: 4px 10px 4px 8px;
+            }
+            .preview-back-btn i {
+                font-size: 0.75rem;
+            }
         }
     </style>
 </head>
@@ -1989,25 +2088,34 @@
 
                             <!-- INFO DEL PLAN (MEJORADA) -->
                             <div id="planInfo">
-                                <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; align-items: center;">
-                                    <span><strong>Plan:</strong> <span id="planNombre">Cargando...</span> <span class="plan-badge">Activo</span></span>
+                                <!-- Tarjeta de usuario mejorada: correo + consumo -->
+                                <div class="user-plan-card">
+                                    <div class="user-avatar" id="userAvatar">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    <div class="user-info">
+                                        <div class="user-email" id="userEmailDisplay">Cargando...</div>
+                                        <div class="user-plan-label">Plan <span id="planNombre">Gratuito</span> <span class="plan-badge">Activo</span></div>
+                                    </div>
+                                    <div class="user-stats" id="userStats">
+                                        <div class="stat-item">
+                                            <i class="fas fa-file-pdf"></i> <strong id="comprobantesDisponibles">-</strong>
+                                        </div>
+                                        <div class="stat-divider"></div>
+                                        <div class="stat-item">
+                                            <i class="fas fa-chart-line"></i> <span id="planUsageLabel">Disponibles</span>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <!-- Indicador visual de consumo de comprobantes -->
                                 <div class="plan-usage" id="planUsage">
                                     <div class="plan-usage-header">
-                                        <strong>Comprobantes disponibles:</strong>
-                                        <span id="comprobantesDisponibles">-</span>
+                                        <span style="font-size:0.7rem;color:var(--text-muted);">Uso del plan</span>
                                     </div>
                                     <div class="plan-usage-bar">
                                         <div class="plan-usage-bar-fill" id="planUsageFill"></div>
                                     </div>
-                                </div>
-
-                                <!-- MEJORA 1: Consultas disponibles -->
-                                <div class="plan-consultas" id="planConsultas" style="margin-top:8px;">
-                                    <strong>Consultas disponibles:</strong>
-                                    <span id="consultasDisponibles">-</span>
                                 </div>
 
                                 <div class="plan-cta-wrap">
@@ -2211,16 +2319,14 @@
                 <div class="layout" style="grid-template-columns:1fr;">
                     <section class="panel preview-panel" style="position:static;">
                         <div class="preview-top">
-                            <div style="display:flex; justify-content:space-between; align-items:center; width:100%; flex-wrap:wrap; gap:12px;">
-                                <div>
-                                    <h2 class="panel-title" style="margin-bottom: 6px;">Vista previa en vivo</h2>
-                                    <div id="statusBadge" class="status">Esperando datos para generar</div>
-                                </div>
-                                <!-- MEJORA 4: Botón "+" para nueva boleta -->
-                                <button id="newBoletaBtn" class="new-boleta-btn" title="Crear nueva boleta">
-                                    <i class="fas fa-plus"></i>
-                                </button>
+                            <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+                                <h2 class="panel-title" style="margin-bottom: 0;">Vista previa en vivo</h2>
+                                <div id="statusBadge" class="status">Esperando datos para generar</div>
                             </div>
+                            <!-- Botón de regreso (ícono) -->
+                            <button class="preview-back-btn" id="previewBackBtn">
+                                <i class="fas fa-arrow-left"></i> Regresar
+                            </button>
                             <!-- Los botones originales de descarga y compartir se ocultan con CSS, los reemplazamos con los superpuestos -->
                             <div class="preview-actions" style="display:none;">
                                 <button class="btn-secondary" type="button" id="downloadButton" disabled>Descargar PDF</button>
@@ -2394,10 +2500,11 @@
             });
         });
 
-        // ========== PERSISTENCIA LOCAL (bienvenida, consejo, formulario) ==========
+        // ========== PERSISTENCIA LOCAL (bienvenida, consejo, formulario, boleta) ==========
         const WELCOME_SEEN_KEY = 'ft_welcome_seen';
         const TIP_SHOWN_COUNT_KEY = 'ft_tip_shown_count';
         const TIP_MAX_AUTO_SHOWS = 2;
+        const LAST_BOLETA_KEY = 'ft_last_boleta';
 
         function hasSeenWelcome() {
             try {
@@ -2454,10 +2561,10 @@
                 stepLines[2].classList.toggle('done', step > 2);
             }
 
-            // Guardar estado actual (paso) en localStorage
-            saveState();
-
             window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            // Guardar paso actual en localStorage para recuperar tras recarga
+            try { localStorage.setItem('ft_current_step', String(step)); } catch(e) {}
         }
 
         document.getElementById('welcomeStartBtn').addEventListener('click', () => {
@@ -2571,9 +2678,9 @@
                 sessionStorage.setItem('ft_boleta_draft', JSON.stringify(draft));
             } catch (e) { console.error('No se pudo guardar el borrador del cliente', e); }
 
-            const url = value ?
-                `/validar-clientes?auto=${encodeURIComponent(endpoint)}&value=${encodeURIComponent(value)}` :
-                `/validar-clientes?tab=${encodeURIComponent(endpoint)}`;
+            const url = value
+                ? `/validar-clientes?auto=${encodeURIComponent(endpoint)}&value=${encodeURIComponent(value)}`
+                : `/validar-clientes?tab=${encodeURIComponent(endpoint)}`;
             window.location.href = url;
         }
 
@@ -2612,8 +2719,7 @@
 
             try {
                 const rawDraft = sessionStorage.getItem('ft_boleta_draft');
-                if (rawDraft) { draft = JSON.parse(rawDraft);
-                    sessionStorage.removeItem('ft_boleta_draft'); }
+                if (rawDraft) { draft = JSON.parse(rawDraft); sessionStorage.removeItem('ft_boleta_draft'); }
             } catch (e) { console.error('No se pudo leer el borrador del cliente', e); }
 
             try {
@@ -2626,13 +2732,9 @@
             } catch (e) { console.error('No se pudo leer el traspaso de Validar Clientes', e); }
 
             if (draft) {
-                if (draft.customerName) { document.getElementById('customerName').value = draft.customerName;
-                    appliedSomething = true; }
-                if (draft.customerDocumentType) document.getElementById('customerDocumentType').value = draft
-                    .customerDocumentType;
-                if (draft.customerDocumentNumber) { document.getElementById('customerDocumentNumber').value = draft
-                        .customerDocumentNumber;
-                    appliedSomething = true; }
+                if (draft.customerName) { document.getElementById('customerName').value = draft.customerName; appliedSomething = true; }
+                if (draft.customerDocumentType) document.getElementById('customerDocumentType').value = draft.customerDocumentType;
+                if (draft.customerDocumentNumber) { document.getElementById('customerDocumentNumber').value = draft.customerDocumentNumber; appliedSomething = true; }
                 if (draft.customerEmail) document.getElementById('customerEmail').value = draft.customerEmail;
                 if (draft.customerPhone) document.getElementById('customerPhone').value = draft.customerPhone;
                 if (draft.customerAddress) document.getElementById('customerAddress').value = draft.customerAddress;
@@ -2676,6 +2778,7 @@
         const downloadButton2 = document.getElementById('downloadButton2');
         const shareButton2 = document.getElementById('shareButton2');
         const step3BackBtn = document.getElementById('step3BackBtn');
+        const previewBackBtn = document.getElementById('previewBackBtn');
         const statusBadge = document.getElementById('statusBadge');
         const errorBox = document.getElementById('errorBox');
         const successBox = document.getElementById('successBox');
@@ -2686,7 +2789,7 @@
         const issueDateInput = document.getElementById('issueDate');
         const planNombre = document.getElementById('planNombre');
         const comprobantesDisponibles = document.getElementById('comprobantesDisponibles');
-        const consultasDisponibles = document.getElementById('consultasDisponibles');
+        const userEmailDisplay = document.getElementById('userEmailDisplay');
         const planLink = document.getElementById('planLink');
         const upsellBanner = document.getElementById('upsellBanner');
         const watermarkNote = document.getElementById('watermarkNote');
@@ -2697,21 +2800,19 @@
         const logoPreview = document.getElementById('logoPreview');
         const logoRemoveButton = document.getElementById('logoRemoveButton');
         const generateButton = document.getElementById('generateButton');
-        // Botón nueva boleta (mejora 4)
-        const newBoletaBtn = document.getElementById('newBoletaBtn');
 
         let currentTemplates = [];
         let lastPayload = null;
         let lastDocumentName = 'comprobante.pdf';
         let lastShareText = 'Comprobante generado';
         let uid = null;
+        let userEmail = '';
         let logoDataUrl = '';
 
         let planState = {
             plan: 'gratis',
             planNombre: 'Gratuito',
             disponibles: 0,
-            consultas: 0,
             permiteLogo: false,
             plantillasPermitidas: ['moderna']
         };
@@ -2764,8 +2865,6 @@
             try {
                 getPersistableFields().forEach((el) => localStorage.removeItem(FORM_STORAGE_PREFIX + el.id));
                 localStorage.removeItem(ITEMS_STORAGE_KEY);
-                localStorage.removeItem('ft_step_state');
-                localStorage.removeItem('ft_last_payload');
             } catch (error) {
                 console.error('No se pudo limpiar el guardado local del formulario:', error);
             }
@@ -2801,45 +2900,71 @@
             }
         }
 
-        // ========== GUARDAR Y RESTAURAR ESTADO (paso y payload) ==========
-        const STEP_STATE_KEY = 'ft_step_state';
-        const LAST_PAYLOAD_KEY = 'ft_last_payload';
-
-        function saveState() {
+        // ========== GUARDAR / RESTAURAR BOLETA GENERADA (localStorage) ==========
+        function saveLastBoleta(payload, html, documentName, shareText, summary) {
             try {
-                localStorage.setItem(STEP_STATE_KEY, String(currentStep));
-                if (lastPayload) {
-                    localStorage.setItem(LAST_PAYLOAD_KEY, JSON.stringify(lastPayload));
-                } else {
-                    localStorage.removeItem(LAST_PAYLOAD_KEY);
-                }
-            } catch (e) { console.error('No se pudo guardar el estado', e); }
+                const data = {
+                    payload,
+                    html,
+                    documentName,
+                    shareText,
+                    summary,
+                    timestamp: Date.now()
+                };
+                localStorage.setItem(LAST_BOLETA_KEY, JSON.stringify(data));
+            } catch (error) {
+                console.error('No se pudo guardar la boleta:', error);
+            }
         }
 
-        function restoreState() {
+        function getLastBoleta() {
             try {
-                const step = parseInt(localStorage.getItem(STEP_STATE_KEY) || '1', 10);
-                if (step >= 1 && step <= 3) {
-                    return step;
+                const raw = localStorage.getItem(LAST_BOLETA_KEY);
+                if (!raw) return null;
+                const data = JSON.parse(raw);
+                // Si tiene más de 1 hora, considerarla expirada (opcional)
+                if (data.timestamp && (Date.now() - data.timestamp) > 3600000) {
+                    localStorage.removeItem(LAST_BOLETA_KEY);
+                    return null;
                 }
-            } catch (e) { console.error('No se pudo restaurar el paso', e); }
-            return null;
+                return data;
+            } catch (error) {
+                console.error('No se pudo leer la boleta guardada:', error);
+                return null;
+            }
         }
 
-        function restorePayload() {
+        function restoreLastBoleta() {
+            const saved = getLastBoleta();
+            if (!saved) return false;
             try {
-                const raw = localStorage.getItem(LAST_PAYLOAD_KEY);
-                if (raw) {
-                    const parsed = JSON.parse(raw);
-                    if (parsed && typeof parsed === 'object') {
-                        return parsed;
-                    }
+                lastPayload = saved.payload;
+                lastDocumentName = saved.documentName || 'comprobante.pdf';
+                lastShareText = saved.shareText || 'Comprobante generado';
+                previewFrame.srcdoc = saved.html;
+                // Actualizar summary
+                if (saved.summary) {
+                    summarySubtotal.textContent = formatMoney(saved.summary.subtotal, saved.summary.currency || 'PEN');
+                    summaryTax.textContent = formatMoney(saved.summary.tax, saved.summary.currency || 'PEN');
+                    summaryTotal.textContent = formatMoney(saved.summary.total, saved.summary.currency || 'PEN');
+                    summaryBoxes.classList.remove('hidden');
                 }
-            } catch (e) { console.error('No se pudo restaurar el payload', e); }
-            return null;
+                downloadButton.disabled = false;
+                shareButton.disabled = false;
+                downloadButton2.disabled = false;
+                shareButton2.disabled = false;
+                setStatus('Vista previa restaurada');
+                showSuccess('Se recuperó la boleta que estabas generando.');
+                goToStep(3);
+                // Escalar iframe
+                setTimeout(scaleIframe, 300);
+                return true;
+            } catch (error) {
+                console.error('Error al restaurar la boleta:', error);
+                return false;
+            }
         }
 
-        // ========== FUNCIONES DE PLAN ==========
         async function getUid() {
             try {
                 const response = await fetch('/api/session', { credentials: 'same-origin' });
@@ -2847,13 +2972,16 @@
                     const data = await response.json();
                     if (data && data.authenticated && data.uid) {
                         localStorage.setItem('user_uid', data.uid);
+                        if (data.email) userEmail = data.email;
                         return data.uid;
                     }
                 }
             } catch (error) {
                 console.error('Error verificando la sesión activa:', error);
             }
-            return localStorage.getItem('user_uid') || null;
+            const stored = localStorage.getItem('user_uid');
+            if (stored) return stored;
+            return null;
         }
 
         const PLAN_TOTALS_FALLBACK = {
@@ -2890,7 +3018,7 @@
             if (!uid) {
                 planNombre.textContent = 'No autenticado';
                 comprobantesDisponibles.textContent = '—';
-                consultasDisponibles.textContent = '—';
+                userEmailDisplay.textContent = 'Inicia sesión';
                 updatePlanUsageBar(null, null);
                 applyPlanRestrictions();
                 return;
@@ -2906,26 +3034,29 @@
                     plan: data.plan || 'gratis',
                     planNombre: data.planNombre || data.plan || 'Gratuito',
                     disponibles: data.disponibles !== undefined ? data.disponibles : '—',
-                    consultas: data.consultasDisponibles !== undefined ? data.consultasDisponibles : '—',
                     permiteLogo: !!data.permiteLogo,
                     plantillasPermitidas: Array.isArray(data.plantillasPermitidas) && data.plantillasPermitidas.length ?
                         data.plantillasPermitidas : ['moderna']
                 };
                 planNombre.textContent = planState.planNombre;
                 comprobantesDisponibles.textContent = planState.disponibles;
-                consultasDisponibles.textContent = planState.consultas;
+                if (userEmail) {
+                    userEmailDisplay.textContent = userEmail;
+                } else {
+                    userEmailDisplay.textContent = data.email || 'Usuario';
+                }
 
                 const total = data.total !== undefined ? data.total :
                     (data.limite !== undefined ? data.limite :
-                        (data.comprobantesTotal !== undefined ? data.comprobantesTotal :
-                            (data.maxComprobantes !== undefined ? data.maxComprobantes :
-                                PLAN_TOTALS_FALLBACK[planState.plan])));
+                    (data.comprobantesTotal !== undefined ? data.comprobantesTotal :
+                    (data.maxComprobantes !== undefined ? data.maxComprobantes :
+                    PLAN_TOTALS_FALLBACK[planState.plan])));
                 updatePlanUsageBar(planState.disponibles, total);
             } catch (error) {
                 console.error('Error cargando plan:', error);
                 planNombre.textContent = 'Error';
                 comprobantesDisponibles.textContent = 'Error';
-                consultasDisponibles.textContent = 'Error';
+                userEmailDisplay.textContent = 'Error';
                 updatePlanUsageBar(null, null);
             }
 
@@ -2958,7 +3089,6 @@
             await loadPlanInfo();
         }
 
-        // ========== FUNCIONES AUXILIARES ==========
         function showError(message) {
             errorBox.textContent = message;
             errorBox.style.display = 'block';
@@ -3130,6 +3260,28 @@
             };
         }
 
+        // ========== CÁLCULO DE SUBTOTAL, IGV, TOTAL (FRONTEND) ==========
+        function computeTotals(items, taxRate, pricesIncludeTax) {
+            let subtotal = 0;
+            for (const item of items) {
+                const qty = Number(item.quantity) || 0;
+                const price = Number(item.unitPrice) || 0;
+                subtotal += qty * price;
+            }
+            let taxable = subtotal;
+            let igv = 0;
+            if (pricesIncludeTax) {
+                // El subtotal ya incluye IGV, lo separamos
+                const factor = 1 + taxRate;
+                taxable = subtotal / factor;
+                igv = subtotal - taxable;
+            } else {
+                igv = subtotal * taxRate;
+            }
+            const total = taxable + igv;
+            return { subtotal: taxable, tax: igv, total };
+        }
+
         async function requestPreview(payload) {
             const response = await fetch(`${API_BASE}/preview`, {
                 method: 'POST',
@@ -3177,17 +3329,31 @@
                 this.removeEventListener('load', onLoad);
             });
 
-            summarySubtotal.textContent = formatMoney(result.summary.subtotal, result.summary.currency);
-            summaryTax.textContent = formatMoney(result.summary.tax, result.summary.currency);
-            summaryTotal.textContent = formatMoney(result.summary.total, result.summary.currency);
-            summaryBoxes.classList.remove('hidden');
+            // Actualizar summary con los valores del backend (o los nuestros)
+            if (result.summary) {
+                summarySubtotal.textContent = formatMoney(result.summary.subtotal, result.summary.currency);
+                summaryTax.textContent = formatMoney(result.summary.tax, result.summary.currency);
+                summaryTotal.textContent = formatMoney(result.summary.total, result.summary.currency);
+                summaryBoxes.classList.remove('hidden');
+            } else {
+                // Si el backend no devuelve summary, usamos los calculados en frontend
+                const payload = lastPayload;
+                if (payload) {
+                    const totals = computeTotals(payload.items, payload.taxRate, payload.pricesIncludeTax);
+                    summarySubtotal.textContent = formatMoney(totals.subtotal);
+                    summaryTax.textContent = formatMoney(totals.tax);
+                    summaryTotal.textContent = formatMoney(totals.total);
+                    summaryBoxes.classList.remove('hidden');
+                }
+            }
+
             downloadButton.disabled = false;
             shareButton.disabled = false;
             downloadButton2.disabled = false;
             shareButton2.disabled = false;
-            lastDocumentName = `${result.summary.documentType}_${result.documentNumber}.pdf`;
+            lastDocumentName = `${result.summary?.documentType || 'comprobante'}_${result.documentNumber || '0001'}.pdf`;
             lastShareText = result.shareText || 'Comprobante generado';
-            setStatus(`Vista previa lista · ${result.documentNumber}`);
+            setStatus(`Vista previa lista · ${result.documentNumber || ''}`);
         }
 
         function scaleIframe() {
@@ -3245,12 +3411,23 @@
             }
             setStatus('Generando vista previa...');
             const payload = buildPayload();
+
+            // Calcular totals en frontend para mostrarlos inmediatamente
+            const totals = computeTotals(payload.items, payload.taxRate, payload.pricesIncludeTax);
+            summarySubtotal.textContent = formatMoney(totals.subtotal);
+            summaryTax.textContent = formatMoney(totals.tax);
+            summaryTotal.textContent = formatMoney(totals.total);
+            summaryBoxes.classList.remove('hidden');
+
             const result = await requestPreview(payload);
             lastPayload = payload;
             renderPreview(result);
+
+            // Guardar boleta en localStorage
+            saveLastBoleta(payload, result.html, lastDocumentName, lastShareText, result.summary || totals);
+
             showSuccess('Vista previa generada correctamente. Ya puedes descargar o compartir.');
             goToStep(3);
-            saveState();
         }
 
         async function downloadPdf() {
@@ -3391,7 +3568,8 @@
             clearMessages();
             previewFrame.style.transform = 'scale(1)';
             previewFrame.style.height = '';
-            clearSavedFormData();
+            // Limpiar boleta guardada
+            try { localStorage.removeItem(LAST_BOLETA_KEY); } catch(e) {}
         }
 
         addItemButton.addEventListener('click', () => {
@@ -3401,6 +3579,7 @@
 
         resetButton.addEventListener('click', () => {
             resetForm();
+            clearSavedFormData();
         });
 
         voucherForm.addEventListener('submit', async (event) => {
@@ -3427,12 +3606,11 @@
             await sharePdf();
         });
 
+        // Botones para volver al paso 2 (editar)
         step3BackBtn.addEventListener('click', () => {
             goToStep(2);
         });
-
-        // MEJORA 4: Botón "+" para nueva boleta
-        newBoletaBtn.addEventListener('click', () => {
+        previewBackBtn.addEventListener('click', () => {
             goToStep(2);
         });
 
@@ -3442,7 +3620,6 @@
 
         itemList.addEventListener('input', saveItemsToStorage);
 
-        // ========== INICIALIZACIÓN ==========
         (async function init() {
             try {
                 setDefaultDateTime();
@@ -3466,30 +3643,33 @@
                     if (generateButton) generateButton.disabled = true;
                 }
 
-                // Restaurar paso y payload guardados
-                const restoredStep = restoreState();
-                const restoredPayload = restorePayload();
+                // Determinar paso inicial: si hay boleta guardada, ir a step3
+                const hasBoleta = getLastBoleta() !== null;
+                const savedStep = parseInt(localStorage.getItem('ft_current_step') || '0', 10);
+                let initialStep = 1;
+                if (hasBoleta) {
+                    initialStep = 3;
+                } else if (savedStep >= 2 && savedStep <= 3) {
+                    initialStep = savedStep;
+                } else if (hasSeenWelcome()) {
+                    initialStep = 2;
+                }
+                goToStep(initialStep);
 
-                // Si hay un payload y estamos en paso 3, regenerar vista previa automáticamente
-                if (restoredPayload && restoredStep === 3) {
-                    try {
-                        lastPayload = restoredPayload;
-                        // Reutilizar el payload para regenerar la vista previa sin consumir límite
-                        const result = await requestPreview(restoredPayload);
-                        renderPreview(result);
-                        showSuccess('Vista previa restaurada automáticamente.');
-                    } catch (e) {
-                        console.warn('No se pudo restaurar la vista previa automáticamente:', e);
-                        // Si falla, ir al paso 2
-                        goToStep(hasSeenWelcome() ? 2 : 1);
+                // Si hay boleta guardada, restaurarla
+                if (hasBoleta) {
+                    const restored = restoreLastBoleta();
+                    if (restored) {
+                        // Si se restauró, ya estamos en step3
                     }
-                } else {
-                    // Sino, ir al paso que corresponda (bienvenida o paso 2)
-                    goToStep(hasSeenWelcome() ? (restoredStep || 2) : 1);
                 }
 
                 applyIncomingCustomerData();
 
+                // Si no hay boleta y el usuario ya vio bienvenida, saltar al paso 2
+                if (!hasBoleta && hasSeenWelcome() && initialStep === 1) {
+                    goToStep(2);
+                }
             } catch (error) {
                 showError(error.message || 'No se pudo iniciar la página.');
             }
