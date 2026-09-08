@@ -997,7 +997,7 @@
            ============================================================ */
         #planInfo {
             background: linear-gradient(135deg, rgba(0, 200, 83, 0.08), rgba(0, 191, 255, 0.05)) !important;
-            border: 1px solid var(--border-subtle) !important;
+            border: 1px solid var(--emerald) !important;
             border-radius: 12px !important;
             color: var(--text-primary);
             font-size: 0.88rem;
@@ -2051,11 +2051,11 @@
                                         <div class="grid-2">
                                             <div>
                                                 <label for="issuerDocumentNumber">RUC / DNI</label>
-                                                <input id="issuerDocumentNumber" name="issuerDocumentNumber" placeholder="20123456789" />
+                                                <input id="issuerDocumentNumber" name="issuerDocumentNumber" placeholder="20123456789" inputmode="numeric" />
                                             </div>
                                             <div>
                                                 <label for="issuerPhone">Teléfono</label>
-                                                <input id="issuerPhone" name="issuerPhone" placeholder="987654321" />
+                                                <input id="issuerPhone" name="issuerPhone" placeholder="987654321" type="tel" inputmode="tel" />
                                             </div>
                                         </div>
                                         <div>
@@ -2065,7 +2065,7 @@
                                         <div class="grid-2">
                                             <div>
                                                 <label for="issuerEmail">Email</label>
-                                                <input id="issuerEmail" name="issuerEmail" placeholder="ventas@mitienda.com" />
+                                                <input id="issuerEmail" name="issuerEmail" placeholder="ventas@mitienda.com" type="email" inputmode="email" />
                                             </div>
                                             <div>
                                                 <label for="issuerWebsite">Web o Instagram</label>
@@ -2115,7 +2115,7 @@
                                             </div>
                                             <div class="field-wrap">
                                                 <label for="customerDocumentNumber">Número</label>
-                                                <input id="customerDocumentNumber" name="customerDocumentNumber" placeholder="12345678" autocomplete="off" />
+                                                <input id="customerDocumentNumber" name="customerDocumentNumber" placeholder="12345678" autocomplete="off" inputmode="numeric" />
                                                 <div class="field-tip" id="tip-customerDocumentNumber" role="tooltip">
                                                     <div class="field-tip-text"><i class="fas fa-shield-halved"></i>¿Quieres verificar si este cliente es real antes de facturar?</div>
                                                     <div class="field-tip-actions">
@@ -2132,11 +2132,11 @@
                                         <div class="grid-2">
                                             <div>
                                                 <label for="customerEmail">Email</label>
-                                                <input id="customerEmail" name="customerEmail" placeholder="cliente@email.com" />
+                                                <input id="customerEmail" name="customerEmail" placeholder="cliente@email.com" type="email" inputmode="email" />
                                             </div>
                                             <div class="field-wrap">
                                                 <label for="customerPhone">Teléfono</label>
-                                                <input id="customerPhone" name="customerPhone" placeholder="999888777" autocomplete="off" />
+                                                <input id="customerPhone" name="customerPhone" placeholder="999888777" autocomplete="off" type="tel" inputmode="tel" />
                                                 <div class="field-tip" id="tip-customerPhone" role="tooltip">
                                                     <div class="field-tip-text"><i class="fas fa-phone"></i>Puedes verificar operador y titularidad de este número.</div>
                                                     <div class="field-tip-actions">
@@ -2201,16 +2201,12 @@
                 <div class="layout" style="grid-template-columns:1fr;">
                     <section class="panel preview-panel" style="position:static;">
                         <div class="preview-top">
-                            <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
-                                <h2 class="panel-title" style="margin-bottom: 0;">Vista previa en vivo</h2>
-                            </div>
-                            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-                                <div id="statusBadge" class="status">Esperando datos para generar</div>
-                                <!-- Botón (+) -->
-                                <button class="btn-close-preview" id="closePreviewBtn" title="Cerrar vista previa y editar">
-                                    <i class="fas fa-plus"></i>
-                                </button>
-                            </div>
+                            <!-- Botón (volver) -->
+                            <button class="btn-close-preview" id="closePreviewBtn" title="Volver a editar" style="flex-shrink: 0;">
+                                <i class="fas fa-arrow-left"></i>
+                            </button>
+                            <h2 class="panel-title" style="margin-bottom: 0; flex: 1; text-align: center;">Vista previa en vivo</h2>
+                            <div id="statusBadge" class="status" style="flex-shrink: 0;">Esperando datos para generar</div>
                             <!-- Los botones originales de descarga y compartir se ocultan con CSS, los reemplazamos con los superpuestos -->
                             <div class="preview-actions" style="display:none;">
                                 <button class="btn-secondary" type="button" id="downloadButton" disabled>Descargar PDF</button>
@@ -3495,8 +3491,18 @@
             goToStep(2);
         });
 
+        // Ajusta el teclado del número de documento del cliente: numérico para DNI/RUC, texto para CE/Pasaporte
+        const customerDocumentNumberInput = document.getElementById('customerDocumentNumber');
+        function updateCustomerDocumentInputMode() {
+            const isNumeric = ['DNI', 'RUC'].includes(customerDocumentTypeSelect.value);
+            customerDocumentNumberInput.setAttribute('inputmode', isNumeric ? 'numeric' : 'text');
+        }
+        customerDocumentTypeSelect.addEventListener('change', updateCustomerDocumentInputMode);
+        updateCustomerDocumentInputMode();
+
         documentTypeSelect.addEventListener('change', () => {
             customerDocumentTypeSelect.value = documentTypeSelect.value === 'factura' ? 'RUC' : 'DNI';
+            updateCustomerDocumentInputMode();
         });
 
         // Escuchar cambios en campos que afectan el resumen
