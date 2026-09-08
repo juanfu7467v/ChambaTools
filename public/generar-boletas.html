@@ -651,6 +651,104 @@
         }
 
         /* ============================================================
+           MEJORA 2: LOADER INICIAL DE 3 CÍRCULOS
+           Cubre toda la pantalla mientras la app termina de iniciarse,
+           evitando que se vea contenido a medio cargar (formularios
+           vacíos, plan sin datos, pantalla de bienvenida incorrecta, etc.)
+           ============================================================ */
+        .app-loader {
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            background: var(--navy-deep);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 18px;
+            transition: opacity 0.4s ease, visibility 0.4s ease;
+        }
+        .app-loader.app-loader-hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+        .app-loader-dots {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .app-loader-dots span {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--emerald);
+            box-shadow: 0 0 14px var(--emerald-glow-strong);
+            animation: appLoaderBounce 1s ease-in-out infinite;
+        }
+        .app-loader-dots span:nth-child(2) {
+            animation-delay: 0.15s;
+            background: var(--gold);
+            box-shadow: 0 0 14px var(--gold-glow);
+        }
+        .app-loader-dots span:nth-child(3) {
+            animation-delay: 0.3s;
+            background: var(--tech-blue);
+            box-shadow: 0 0 14px var(--tech-blue-glow);
+        }
+        @keyframes appLoaderBounce {
+            0%, 80%, 100% {
+                transform: scale(0.6);
+                opacity: 0.5;
+            }
+            40% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        .app-loader-text {
+            font-family: var(--font-display);
+            font-size: 0.8rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+
+        /* ============================================================
+           MEJORA 5: ICONO "REGRESAR" JUNTO A "VISTA PREVIA EN VIVO"
+           ============================================================ */
+        .preview-title-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .preview-title-back-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--emerald-glow);
+            border: 1px solid var(--border-active);
+            color: var(--emerald-light);
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.25s ease;
+            flex-shrink: 0;
+            padding: 0;
+        }
+        .preview-title-back-btn:hover {
+            background: var(--emerald);
+            color: #04170c;
+            transform: translateX(-2px);
+            box-shadow: 0 4px 14px var(--emerald-glow);
+        }
+        .preview-title-back-btn:active {
+            transform: scale(0.92);
+        }
+
+        /* ============================================================
            ESTILOS PARA LA PANTALLA DE BIENVENIDA (STEP 1)
            ============================================================ */
         .welcome-step {
@@ -993,28 +1091,30 @@
         }
 
         /* ============================================================
-           MEJORA 1: TARJETA DEL PLAN (más profesional con aro indicador)
+           MEJORA 1: TARJETA DE CUENTA / PLAN (rediseño moderno, claro
+           y profesional — con correo del usuario y PDFs/boletas
+           disponibles bien destacados, especialmente en pantallas grandes)
            ============================================================ */
         #planInfo {
-            background: linear-gradient(135deg, rgba(0, 200, 83, 0.08), rgba(0, 191, 255, 0.05)) !important;
+            background: linear-gradient(145deg, rgba(0, 200, 83, 0.10), rgba(0, 191, 255, 0.04) 55%, rgba(21, 41, 74, 0.55)) !important;
             border: 1px solid var(--border-subtle) !important;
-            border-left: 4px solid var(--emerald) !important;
-            border-radius: 12px !important;
+            border-radius: 18px !important;
             color: var(--text-primary);
-            font-size: 0.88rem;
-            padding: 14px 16px;
-            margin-bottom: 16px;
+            padding: 18px 20px;
+            margin-bottom: 18px;
             position: relative;
             overflow: hidden;
-            box-shadow: 0 2px 12px rgba(0, 200, 83, 0.08);
+            box-shadow: var(--shadow-card);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
         }
         #planInfo::before {
             content: '';
             position: absolute;
-            top: -20px;
-            right: -20px;
-            width: 70px;
-            height: 70px;
+            top: -30px;
+            right: -30px;
+            width: 110px;
+            height: 110px;
             border-radius: 50%;
             border: 2px solid rgba(0, 200, 83, 0.15);
             pointer-events: none;
@@ -1023,63 +1123,150 @@
         #planInfo::after {
             content: '';
             position: absolute;
-            bottom: -30px;
-            left: 30%;
-            width: 100px;
-            height: 100px;
+            bottom: -40px;
+            left: 20%;
+            width: 130px;
+            height: 130px;
             border-radius: 50%;
             border: 2px solid rgba(255, 215, 0, 0.08);
             pointer-events: none;
             z-index: 0;
         }
-        #planInfo .plan-badge {
-            display: inline-block;
-            background: linear-gradient(135deg, var(--emerald), var(--emerald-dark));
-            color: #000;
-            font-weight: 800;
-            font-size: 0.65rem;
-            padding: 2px 12px;
-            border-radius: 20px;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            margin-left: 8px;
-            vertical-align: middle;
-            box-shadow: 0 2px 8px rgba(0, 200, 83, 0.3);
-        }
         #planInfo strong {
             color: var(--white);
+        }
+
+        /* Fila superior: avatar + correo + plan, y el badge "Activo" a la derecha */
+        .plan-card-top {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            flex-wrap: wrap;
+            padding-bottom: 14px;
+            margin-bottom: 14px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        .plan-card-user {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+        .plan-user-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--emerald), var(--tech-blue));
+            color: #04170c;
+            font-size: 1.05rem;
+            box-shadow: 0 4px 14px rgba(0, 200, 83, 0.3);
+        }
+        .plan-user-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            min-width: 0;
+        }
+        .plan-user-email {
+            font-weight: 700;
+            font-size: 0.92rem;
+            color: var(--white);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 260px;
+        }
+        .plan-user-sub {
+            font-size: 0.76rem;
+            color: var(--text-muted);
+        }
+        .plan-user-sub strong {
+            color: var(--text-muted);
+            font-weight: 600;
         }
         #planNombre {
             color: var(--emerald-light);
             font-weight: 700;
+        }
+        #planInfo .plan-badge {
+            display: inline-flex;
+            align-items: center;
+            background: linear-gradient(135deg, var(--emerald), var(--emerald-dark));
+            color: #04170c;
+            font-weight: 800;
+            font-size: 0.65rem;
+            padding: 4px 14px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            box-shadow: 0 2px 8px rgba(0, 200, 83, 0.3);
+            flex-shrink: 0;
+        }
+
+        /* Estadística destacada: PDFs / boletas disponibles */
+        .plan-stats-row {
             position: relative;
             z-index: 1;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        .plan-stat-box {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            padding: 12px 16px;
+        }
+        .plan-stat-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--gold-glow);
+            color: var(--gold-light);
+            font-size: 1.05rem;
+            flex-shrink: 0;
+        }
+        .plan-stat-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            min-width: 0;
+        }
+        .plan-stat-info small {
+            font-size: 0.68rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-subtle);
         }
         #comprobantesDisponibles {
+            font-size: 1.15rem;
             color: var(--gold-light);
-            font-weight: 700;
-        }
-        #consultasDisponibles {
-            color: var(--tech-blue-light);
-            font-weight: 700;
+            font-weight: 800;
         }
 
         /* Indicador visual (barra) del consumo de comprobantes disponibles */
         .plan-usage {
             position: relative;
             z-index: 1;
-            margin-top: 10px;
-        }
-        .plan-usage-header {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            flex-wrap: wrap;
+            margin-bottom: 14px;
         }
         .plan-usage-bar {
             width: 100%;
             height: 8px;
-            margin-top: 8px;
             background: rgba(255, 255, 255, 0.08);
             border-radius: 999px;
             overflow: hidden;
@@ -1105,7 +1292,6 @@
             z-index: 1;
             display: flex;
             justify-content: center;
-            margin-top: 14px;
         }
         .plan-upgrade-btn {
             display: inline-flex;
@@ -1130,6 +1316,33 @@
         .plan-upgrade-btn i {
             color: var(--emerald-light);
             font-size: 0.9rem;
+        }
+
+        /* En pantallas de escritorio la tarjeta se ve más espaciosa y clara */
+        @media (min-width: 900px) {
+            #planInfo {
+                padding: 24px 28px;
+            }
+            .plan-user-avatar {
+                width: 48px;
+                height: 48px;
+                font-size: 1.2rem;
+            }
+            .plan-user-email {
+                font-size: 1rem;
+                max-width: 360px;
+            }
+            .plan-stat-box {
+                padding: 14px 18px;
+            }
+            #comprobantesDisponibles {
+                font-size: 1.3rem;
+            }
+        }
+        @media (max-width: 480px) {
+            .plan-user-email {
+                max-width: 160px;
+            }
         }
 
         /* ============================================================
@@ -1842,30 +2055,21 @@
         }
 
         /* se eliminó .summary-boxes duplicado */
-        /* Botón "+" para nueva boleta */
-        .new-boleta-btn {
-            background: var(--emerald);
-            color: #000;
-            border: none;
-            border-radius: 50%;
-            width: 44px;
-            height: 44px;
-            font-size: 1.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 12px var(--emerald-glow);
-            transition: all 0.25s ease;
-            cursor: pointer;
-            flex-shrink: 0;
-        }
-        .new-boleta-btn:hover {
-            transform: scale(1.08) rotate(90deg);
-            box-shadow: 0 6px 20px var(--emerald-glow-strong);
-        }
     </style>
 </head>
 <body>
+    <!-- ============================================================
+         MEJORA 2: LOADER INICIAL (3 círculos)
+         Cubre todo el contenido mientras la app termina de inicializarse.
+         Se oculta automáticamente desde el script principal (hideAppLoader).
+         ============================================================ -->
+    <div id="appLoader" class="app-loader" role="status" aria-live="polite" aria-label="Cargando aplicación">
+        <div class="app-loader-dots">
+            <span></span><span></span><span></span>
+        </div>
+        <p class="app-loader-text">Cargando FacilitoTools…</p>
+    </div>
+
     <!-- Ambient -->
     <div class="ambient-1"></div>
     <div class="ambient-2"></div>
@@ -1987,27 +2191,34 @@
                             <div id="errorBox" class="error"></div>
                             <div id="successBox" class="success"></div>
 
-                            <!-- INFO DEL PLAN (MEJORADA) -->
+                            <!-- INFO DE CUENTA Y PLAN (MEJORADA: correo del usuario + PDFs/boletas disponibles) -->
                             <div id="planInfo">
-                                <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; align-items: center;">
-                                    <span><strong>Plan:</strong> <span id="planNombre">Cargando...</span> <span class="plan-badge">Activo</span></span>
+                                <div class="plan-card-top">
+                                    <div class="plan-card-user">
+                                        <span class="plan-user-avatar"><i class="fas fa-user"></i></span>
+                                        <div class="plan-user-meta">
+                                            <span class="plan-user-email" id="planUserEmail">Cargando…</span>
+                                            <span class="plan-user-sub"><strong>Plan:</strong> <span id="planNombre">Cargando...</span></span>
+                                        </div>
+                                    </div>
+                                    <span class="plan-badge">Activo</span>
+                                </div>
+
+                                <div class="plan-stats-row">
+                                    <div class="plan-stat-box">
+                                        <span class="plan-stat-icon"><i class="fas fa-file-pdf"></i></span>
+                                        <div class="plan-stat-info">
+                                            <small>PDFs / boletas disponibles</small>
+                                            <strong id="comprobantesDisponibles">-</strong>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <!-- Indicador visual de consumo de comprobantes -->
                                 <div class="plan-usage" id="planUsage">
-                                    <div class="plan-usage-header">
-                                        <strong>Comprobantes disponibles:</strong>
-                                        <span id="comprobantesDisponibles">-</span>
-                                    </div>
                                     <div class="plan-usage-bar">
                                         <div class="plan-usage-bar-fill" id="planUsageFill"></div>
                                     </div>
-                                </div>
-
-                                <!-- MEJORA 1: Consultas disponibles -->
-                                <div class="plan-consultas" id="planConsultas" style="margin-top:8px;">
-                                    <strong>Consultas disponibles:</strong>
-                                    <span id="consultasDisponibles">-</span>
                                 </div>
 
                                 <div class="plan-cta-wrap">
@@ -2211,15 +2422,14 @@
                 <div class="layout" style="grid-template-columns:1fr;">
                     <section class="panel preview-panel" style="position:static;">
                         <div class="preview-top">
-                            <div style="display:flex; justify-content:space-between; align-items:center; width:100%; flex-wrap:wrap; gap:12px;">
-                                <div>
+                            <div>
+                                <div class="preview-title-row">
                                     <h2 class="panel-title" style="margin-bottom: 6px;">Vista previa en vivo</h2>
-                                    <div id="statusBadge" class="status">Esperando datos para generar</div>
+                                    <button type="button" id="previewTitleBackBtn" class="preview-title-back-btn" title="Volver a la configuración" aria-label="Volver a la configuración">
+                                        <i class="fas fa-arrow-left"></i>
+                                    </button>
                                 </div>
-                                <!-- MEJORA 4: Botón "+" para nueva boleta -->
-                                <button id="newBoletaBtn" class="new-boleta-btn" title="Crear nueva boleta">
-                                    <i class="fas fa-plus"></i>
-                                </button>
+                                <div id="statusBadge" class="status">Esperando datos para generar</div>
                             </div>
                             <!-- Los botones originales de descarga y compartir se ocultan con CSS, los reemplazamos con los superpuestos -->
                             <div class="preview-actions" style="display:none;">
@@ -2344,1156 +2554,4 @@
                 }
                 auth = firebase.auth();
             } catch (error) {
-                console.error('Error inicializando Firebase:', error);
-            }
-        }
-
-        // ========== SIDEBAR LOGIC ==========
-        const menuToggle = document.getElementById('menu-toggle');
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('sidebar-overlay');
-
-        function toggleMenu() {
-            const isOpen = sidebar.classList.toggle('open');
-            if (isOpen) {
-                overlay.classList.remove('hidden');
-                overlay.style.display = 'block';
-                document.body.style.overflow = 'hidden';
-                requestAnimationFrame(() => overlay.classList.add('opacity-100'));
-            } else {
-                overlay.classList.remove('opacity-100');
-                document.body.style.overflow = '';
-                setTimeout(() => {
-                    if (!sidebar.classList.contains('open')) {
-                        overlay.classList.add('hidden');
-                        overlay.style.display = 'none';
-                    }
-                }, 300);
-            }
-        }
-
-        menuToggle.addEventListener('click', toggleMenu);
-        overlay.addEventListener('click', toggleMenu);
-
-        sidebar.querySelectorAll('nav a').forEach(link => {
-            link.addEventListener('click', (e) => {
-                const target = link.getAttribute('data-target');
-                if (target && target !== 'generar-boletas' && !target.startsWith('#')) {
-                    return;
-                }
-                e.preventDefault();
-                if (target === 'home') {
-                    window.location.href = '/';
-                } else if (target === 'generar-boletas') {
-                    // ya estamos aquí
-                } else if (target && target.startsWith('#')) {
-                    const el = document.querySelector(target);
-                    if (el) el.scrollIntoView({ behavior: 'smooth' });
-                }
-                if (sidebar.classList.contains('open')) toggleMenu();
-            });
-        });
-
-        // ========== PERSISTENCIA LOCAL (bienvenida, consejo, formulario) ==========
-        const WELCOME_SEEN_KEY = 'ft_welcome_seen';
-        const TIP_SHOWN_COUNT_KEY = 'ft_tip_shown_count';
-        const TIP_MAX_AUTO_SHOWS = 2;
-
-        function hasSeenWelcome() {
-            try {
-                return localStorage.getItem(WELCOME_SEEN_KEY) === '1';
-            } catch (error) {
-                return false;
-            }
-        }
-
-        function markWelcomeSeen() {
-            try {
-                localStorage.setItem(WELCOME_SEEN_KEY, '1');
-            } catch (error) {
-                console.error('No se pudo guardar el estado de bienvenida:', error);
-            }
-        }
-
-        // ========== STEP NAVIGATION ==========
-        let currentStep = 1;
-        const totalSteps = 3;
-
-        const stepContainers = {
-            1: document.getElementById('step1'),
-            2: document.getElementById('step2'),
-            3: document.getElementById('step3')
-        };
-        const stepCircles = document.querySelectorAll('.step-circle');
-        const stepLines = {
-            1: document.getElementById('line1'),
-            2: document.getElementById('line2')
-        };
-
-        function goToStep(step) {
-            if (step < 1 || step > totalSteps) return;
-            currentStep = step;
-
-            Object.values(stepContainers).forEach(el => el.classList.remove('active'));
-            stepContainers[step].classList.add('active');
-
-            stepCircles.forEach((circle, index) => {
-                const num = index + 1;
-                circle.classList.remove('active', 'done');
-                if (num === step) {
-                    circle.classList.add('active');
-                } else if (num < step) {
-                    circle.classList.add('done');
-                }
-            });
-
-            if (stepLines[1]) {
-                stepLines[1].classList.toggle('done', step > 1);
-            }
-            if (stepLines[2]) {
-                stepLines[2].classList.toggle('done', step > 2);
-            }
-
-            // Guardar estado actual (paso) en localStorage
-            saveState();
-
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        document.getElementById('welcomeStartBtn').addEventListener('click', () => {
-            markWelcomeSeen();
-            goToStep(2);
-        });
-
-        document.getElementById('step2BackBtn').addEventListener('click', () => {
-            goToStep(1);
-        });
-
-        // ========== MODAL DE CONSEJO (TIP) ==========
-        const tipOverlay = document.getElementById('tipModalOverlay');
-        const tipModal = document.getElementById('tipModal');
-        const tipClose = document.getElementById('tipModalCloseBtn');
-
-        function openTipModal() {
-            tipOverlay.classList.add('open');
-            tipModal.classList.add('open');
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeTipModal() {
-            tipOverlay.classList.remove('open');
-            tipModal.classList.remove('open');
-            document.body.style.overflow = '';
-        }
-
-        if (tipClose) tipClose.addEventListener('click', closeTipModal);
-        tipOverlay.addEventListener('click', (e) => {
-            if (e.target === tipOverlay) closeTipModal();
-        });
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') closeTipModal();
-        });
-
-        let tipShownThisSession = false;
-
-        function getTipShownCount() {
-            try {
-                return parseInt(localStorage.getItem(TIP_SHOWN_COUNT_KEY) || '0', 10) || 0;
-            } catch (error) {
-                return 0;
-            }
-        }
-
-        function registerTipShown() {
-            try {
-                localStorage.setItem(TIP_SHOWN_COUNT_KEY, String(getTipShownCount() + 1));
-            } catch (error) {
-                console.error('No se pudo guardar el contador del consejo:', error);
-            }
-        }
-
-        function maybeShowTip() {
-            if (currentStep === 2 && !tipShownThisSession && getTipShownCount() < TIP_MAX_AUTO_SHOWS) {
-                setTimeout(() => {
-                    openTipModal();
-                    tipShownThisSession = true;
-                    registerTipShown();
-                }, 600);
-            }
-        }
-
-        const originalGoToStep = goToStep;
-        goToStep = function(step) {
-            originalGoToStep(step);
-            if (step === 2) {
-                maybeShowTip();
-            }
-        };
-
-        // ========== TOOLTIPS INTELIGENTES DE CAMPO ==========
-        const DOC_TYPE_TO_ENDPOINT = { DNI: 'dni', RUC: 'ruc', CE: 'cedula' };
-
-        function fieldTipEndpointAndValue(fieldId) {
-            if (fieldId === 'customerPhone') {
-                return { endpoint: 'telefonia-numero', value: document.getElementById('customerPhone').value.trim() };
-            }
-            const docType = document.getElementById('customerDocumentType').value;
-            const endpoint = DOC_TYPE_TO_ENDPOINT[docType] || 'dni';
-            const value = document.getElementById('customerDocumentNumber').value.trim();
-            return { endpoint, value };
-        }
-
-        function fieldTipDismissedKey(fieldId) { return 'ft_tip_dismissed_' + fieldId; }
-
-        function showFieldTip(fieldId) {
-            if (sessionStorage.getItem(fieldTipDismissedKey(fieldId)) === '1') return;
-            const tip = document.getElementById('tip-' + fieldId);
-            if (!tip) return;
-            document.querySelectorAll('.field-tip.show').forEach(t => { if (t !== tip) t.classList.remove('show'); });
-            tip.classList.add('show');
-        }
-
-        function hideFieldTip(fieldId) {
-            const tip = document.getElementById('tip-' + fieldId);
-            if (tip) tip.classList.remove('show');
-        }
-
-        function goToValidarClientes(endpoint, value) {
-            try {
-                const draft = {
-                    customerName: document.getElementById('customerName').value.trim(),
-                    customerDocumentType: document.getElementById('customerDocumentType').value,
-                    customerDocumentNumber: document.getElementById('customerDocumentNumber').value.trim(),
-                    customerEmail: document.getElementById('customerEmail').value.trim(),
-                    customerPhone: document.getElementById('customerPhone').value.trim(),
-                    customerAddress: document.getElementById('customerAddress').value.trim()
-                };
-                sessionStorage.setItem('ft_boleta_draft', JSON.stringify(draft));
-            } catch (e) { console.error('No se pudo guardar el borrador del cliente', e); }
-
-            const url = value ?
-                `/validar-clientes?auto=${encodeURIComponent(endpoint)}&value=${encodeURIComponent(value)}` :
-                `/validar-clientes?tab=${encodeURIComponent(endpoint)}`;
-            window.location.href = url;
-        }
-
-        ['customerName', 'customerDocumentNumber', 'customerPhone'].forEach(fieldId => {
-            const input = document.getElementById(fieldId);
-            const tip = document.getElementById('tip-' + fieldId);
-            if (!input || !tip) return;
-
-            input.addEventListener('focus', () => showFieldTip(fieldId));
-            input.addEventListener('blur', () => {
-                setTimeout(() => { if (!tip.matches(':hover')) hideFieldTip(fieldId); }, 150);
-            });
-
-            const dismissBtn = tip.querySelector('[data-tip-dismiss]');
-            if (dismissBtn) {
-                dismissBtn.addEventListener('click', () => {
-                    sessionStorage.setItem(fieldTipDismissedKey(fieldId), '1');
-                    hideFieldTip(fieldId);
-                });
-            }
-
-            const ctaBtn = tip.querySelector('[data-tip-cta]');
-            if (ctaBtn) {
-                ctaBtn.addEventListener('click', () => {
-                    const { endpoint, value } = fieldTipEndpointAndValue(fieldId);
-                    goToValidarClientes(endpoint, value);
-                });
-            }
-        });
-
-        // ========== RECEPCIÓN DE DATOS DESDE VALIDAR CLIENTES ("MAGIA") ==========
-        function applyIncomingCustomerData() {
-            let appliedSomething = false;
-            let draft = null;
-            let magic = null;
-
-            try {
-                const rawDraft = sessionStorage.getItem('ft_boleta_draft');
-                if (rawDraft) { draft = JSON.parse(rawDraft);
-                    sessionStorage.removeItem('ft_boleta_draft'); }
-            } catch (e) { console.error('No se pudo leer el borrador del cliente', e); }
-
-            try {
-                const rawMagic = localStorage.getItem('ft_magic_customer');
-                if (rawMagic) {
-                    const parsed = JSON.parse(rawMagic);
-                    if (parsed && (!parsed.ts || Date.now() - parsed.ts < 10 * 60 * 1000)) magic = parsed;
-                    localStorage.removeItem('ft_magic_customer');
-                }
-            } catch (e) { console.error('No se pudo leer el traspaso de Validar Clientes', e); }
-
-            if (draft) {
-                if (draft.customerName) { document.getElementById('customerName').value = draft.customerName;
-                    appliedSomething = true; }
-                if (draft.customerDocumentType) document.getElementById('customerDocumentType').value = draft
-                    .customerDocumentType;
-                if (draft.customerDocumentNumber) { document.getElementById('customerDocumentNumber').value = draft
-                        .customerDocumentNumber;
-                    appliedSomething = true; }
-                if (draft.customerEmail) document.getElementById('customerEmail').value = draft.customerEmail;
-                if (draft.customerPhone) document.getElementById('customerPhone').value = draft.customerPhone;
-                if (draft.customerAddress) document.getElementById('customerAddress').value = draft.customerAddress;
-            }
-
-            if (magic) {
-                if (magic.name) document.getElementById('customerName').value = magic.name;
-                if (magic.documentType) document.getElementById('customerDocumentType').value = magic.documentType;
-                if (magic.documentNumber) document.getElementById('customerDocumentNumber').value = magic.documentNumber;
-                if (magic.email) document.getElementById('customerEmail').value = magic.email;
-                if (magic.phone) document.getElementById('customerPhone').value = magic.phone;
-                if (magic.address) document.getElementById('customerAddress').value = magic.address;
-                appliedSomething = true;
-            }
-
-            if (appliedSomething) {
-                goToStep(2);
-                showSuccess('✨ Datos del cliente completados automáticamente desde Validar Clientes.');
-                setStatus('Datos importados');
-            }
-
-            if (window.location.search.includes('magic=')) {
-                history.replaceState(null, '', window.location.pathname);
-            }
-        }
-
-        // ========== GENERADOR DE BOLETAS (funcionalidad original) ==========
-        const API_BASE = '/api/comprobantes';
-        const templateGrid = document.getElementById('templateGrid');
-        const templateIdInput = document.getElementById('templateId');
-        const itemList = document.getElementById('itemList');
-        const itemRowTemplate = document.getElementById('itemRowTemplate');
-        const voucherForm = document.getElementById('voucherForm');
-        const previewFrame = document.getElementById('previewFrame');
-        const summaryBoxes = document.getElementById('summaryBoxes');
-        const summarySubtotal = document.getElementById('summarySubtotal');
-        const summaryTax = document.getElementById('summaryTax');
-        const summaryTotal = document.getElementById('summaryTotal');
-        const downloadButton = document.getElementById('downloadButton');
-        const shareButton = document.getElementById('shareButton');
-        const downloadButton2 = document.getElementById('downloadButton2');
-        const shareButton2 = document.getElementById('shareButton2');
-        const step3BackBtn = document.getElementById('step3BackBtn');
-        const statusBadge = document.getElementById('statusBadge');
-        const errorBox = document.getElementById('errorBox');
-        const successBox = document.getElementById('successBox');
-        const addItemButton = document.getElementById('addItemButton');
-        const resetButton = document.getElementById('resetButton');
-        const documentTypeSelect = document.getElementById('documentType');
-        const customerDocumentTypeSelect = document.getElementById('customerDocumentType');
-        const issueDateInput = document.getElementById('issueDate');
-        const planNombre = document.getElementById('planNombre');
-        const comprobantesDisponibles = document.getElementById('comprobantesDisponibles');
-        const consultasDisponibles = document.getElementById('consultasDisponibles');
-        const planLink = document.getElementById('planLink');
-        const upsellBanner = document.getElementById('upsellBanner');
-        const watermarkNote = document.getElementById('watermarkNote');
-        const logoField = document.getElementById('logoField');
-        const logoUploaderUnlocked = document.getElementById('logoUploaderUnlocked');
-        const logoLockedNote = document.getElementById('logoLockedNote');
-        const logoInput = document.getElementById('logoInput');
-        const logoPreview = document.getElementById('logoPreview');
-        const logoRemoveButton = document.getElementById('logoRemoveButton');
-        const generateButton = document.getElementById('generateButton');
-        // Botón nueva boleta (mejora 4)
-        const newBoletaBtn = document.getElementById('newBoletaBtn');
-
-        let currentTemplates = [];
-        let lastPayload = null;
-        let lastDocumentName = 'comprobante.pdf';
-        let lastShareText = 'Comprobante generado';
-        let uid = null;
-        let logoDataUrl = '';
-
-        let planState = {
-            plan: 'gratis',
-            planNombre: 'Gratuito',
-            disponibles: 0,
-            consultas: 0,
-            permiteLogo: false,
-            plantillasPermitidas: ['moderna']
-        };
-
-        // ========== AUTOGUARDADO DEL FORMULARIO (localStorage) ==========
-        const FORM_STORAGE_PREFIX = 'ft_form_';
-        const ITEMS_STORAGE_KEY = 'ft_form_items';
-        const AUTOSAVE_EXCLUDED_IDS = new Set(['logoInput', 'issueDate']);
-
-        function getPersistableFields() {
-            return Array.from(voucherForm.querySelectorAll('input[id], select[id], textarea[id]'))
-                .filter((el) => el.type !== 'file' && !AUTOSAVE_EXCLUDED_IDS.has(el.id));
-        }
-
-        function saveFieldValue(el) {
-            try {
-                const key = FORM_STORAGE_PREFIX + el.id;
-                if (el.type === 'checkbox') {
-                    localStorage.setItem(key, el.checked ? '1' : '0');
-                } else {
-                    localStorage.setItem(key, el.value);
-                }
-            } catch (error) {
-                console.error('No se pudo guardar el campo en localStorage:', error);
-            }
-        }
-
-        function restoreFieldValue(el) {
-            const saved = localStorage.getItem(FORM_STORAGE_PREFIX + el.id);
-            if (saved === null) return;
-            if (el.type === 'checkbox') {
-                el.checked = saved === '1';
-            } else {
-                el.value = saved;
-            }
-        }
-
-        function restoreSavedFormFields() {
-            getPersistableFields().forEach(restoreFieldValue);
-        }
-
-        function attachAutosaveListeners() {
-            getPersistableFields().forEach((el) => {
-                const evt = (el.tagName === 'SELECT' || el.type === 'checkbox') ? 'change' : 'input';
-                el.addEventListener(evt, () => saveFieldValue(el));
-            });
-        }
-
-        function clearSavedFormData() {
-            try {
-                getPersistableFields().forEach((el) => localStorage.removeItem(FORM_STORAGE_PREFIX + el.id));
-                localStorage.removeItem(ITEMS_STORAGE_KEY);
-                localStorage.removeItem('ft_step_state');
-                localStorage.removeItem('ft_last_payload');
-            } catch (error) {
-                console.error('No se pudo limpiar el guardado local del formulario:', error);
-            }
-        }
-
-        function saveItemsToStorage() {
-            try {
-                const items = Array.from(itemList.querySelectorAll('.item-row')).map((row) => ({
-                    description: row.querySelector('.item-description').value,
-                    unitLabel: row.querySelector('.item-unit-label').value,
-                    quantity: row.querySelector('.item-quantity').value,
-                    unitPrice: row.querySelector('.item-unit-price').value,
-                    sku: row.querySelector('.item-sku').value
-                }));
-                localStorage.setItem(ITEMS_STORAGE_KEY, JSON.stringify(items));
-            } catch (error) {
-                console.error('No se pudieron guardar los ítems en localStorage:', error);
-            }
-        }
-
-        function restoreItemsFromStorage() {
-            try {
-                const raw = localStorage.getItem(ITEMS_STORAGE_KEY);
-                if (!raw) return false;
-                const items = JSON.parse(raw);
-                if (!Array.isArray(items) || !items.length) return false;
-                itemList.innerHTML = '';
-                items.forEach((item) => addItemRow(item));
-                return true;
-            } catch (error) {
-                console.error('No se pudieron restaurar los ítems guardados:', error);
-                return false;
-            }
-        }
-
-        // ========== GUARDAR Y RESTAURAR ESTADO (paso y payload) ==========
-        const STEP_STATE_KEY = 'ft_step_state';
-        const LAST_PAYLOAD_KEY = 'ft_last_payload';
-
-        function saveState() {
-            try {
-                localStorage.setItem(STEP_STATE_KEY, String(currentStep));
-                if (lastPayload) {
-                    localStorage.setItem(LAST_PAYLOAD_KEY, JSON.stringify(lastPayload));
-                } else {
-                    localStorage.removeItem(LAST_PAYLOAD_KEY);
-                }
-            } catch (e) { console.error('No se pudo guardar el estado', e); }
-        }
-
-        function restoreState() {
-            try {
-                const step = parseInt(localStorage.getItem(STEP_STATE_KEY) || '1', 10);
-                if (step >= 1 && step <= 3) {
-                    return step;
-                }
-            } catch (e) { console.error('No se pudo restaurar el paso', e); }
-            return null;
-        }
-
-        function restorePayload() {
-            try {
-                const raw = localStorage.getItem(LAST_PAYLOAD_KEY);
-                if (raw) {
-                    const parsed = JSON.parse(raw);
-                    if (parsed && typeof parsed === 'object') {
-                        return parsed;
-                    }
-                }
-            } catch (e) { console.error('No se pudo restaurar el payload', e); }
-            return null;
-        }
-
-        // ========== FUNCIONES DE PLAN ==========
-        async function getUid() {
-            try {
-                const response = await fetch('/api/session', { credentials: 'same-origin' });
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data && data.authenticated && data.uid) {
-                        localStorage.setItem('user_uid', data.uid);
-                        return data.uid;
-                    }
-                }
-            } catch (error) {
-                console.error('Error verificando la sesión activa:', error);
-            }
-            return localStorage.getItem('user_uid') || null;
-        }
-
-        const PLAN_TOTALS_FALLBACK = {
-            gratis: 5,
-            emprendedor: 800,
-            negocio: 1800
-        };
-
-        function updatePlanUsageBar(disponiblesValue, totalValue) {
-            const fill = document.getElementById('planUsageFill');
-            if (!fill) return;
-            const bar = fill.parentElement;
-            const disponibles = Number(disponiblesValue);
-            const total = Number(totalValue);
-
-            if (!Number.isFinite(disponibles) || !Number.isFinite(total) || total <= 0) {
-                if (bar) bar.style.display = 'none';
-                return;
-            }
-
-            if (bar) bar.style.display = '';
-            const pct = Math.max(0, Math.min(100, (disponibles / total) * 100));
-            fill.style.width = pct + '%';
-            fill.classList.remove('level-mid', 'level-low');
-            if (pct <= 20) {
-                fill.classList.add('level-low');
-            } else if (pct <= 50) {
-                fill.classList.add('level-mid');
-            }
-        }
-
-        async function loadPlanInfo() {
-            uid = await getUid();
-            if (!uid) {
-                planNombre.textContent = 'No autenticado';
-                comprobantesDisponibles.textContent = '—';
-                consultasDisponibles.textContent = '—';
-                updatePlanUsageBar(null, null);
-                applyPlanRestrictions();
-                return;
-            }
-
-            try {
-                const response = await fetch(`/api/user/plan?uid=${encodeURIComponent(uid)}`);
-                if (!response.ok) {
-                    throw new Error('Error al obtener plan');
-                }
-                const data = await response.json();
-                planState = {
-                    plan: data.plan || 'gratis',
-                    planNombre: data.planNombre || data.plan || 'Gratuito',
-                    disponibles: data.disponibles !== undefined ? data.disponibles : '—',
-                    consultas: data.consultasDisponibles !== undefined ? data.consultasDisponibles : '—',
-                    permiteLogo: !!data.permiteLogo,
-                    plantillasPermitidas: Array.isArray(data.plantillasPermitidas) && data.plantillasPermitidas.length ?
-                        data.plantillasPermitidas : ['moderna']
-                };
-                planNombre.textContent = planState.planNombre;
-                comprobantesDisponibles.textContent = planState.disponibles;
-                consultasDisponibles.textContent = planState.consultas;
-
-                const total = data.total !== undefined ? data.total :
-                    (data.limite !== undefined ? data.limite :
-                        (data.comprobantesTotal !== undefined ? data.comprobantesTotal :
-                            (data.maxComprobantes !== undefined ? data.maxComprobantes :
-                                PLAN_TOTALS_FALLBACK[planState.plan])));
-                updatePlanUsageBar(planState.disponibles, total);
-            } catch (error) {
-                console.error('Error cargando plan:', error);
-                planNombre.textContent = 'Error';
-                comprobantesDisponibles.textContent = 'Error';
-                consultasDisponibles.textContent = 'Error';
-                updatePlanUsageBar(null, null);
-            }
-
-            applyPlanRestrictions();
-        }
-
-        function applyPlanRestrictions() {
-            const esGratis = planState.plan === 'gratis';
-
-            upsellBanner.classList.toggle('visible', esGratis);
-            watermarkNote.classList.toggle('visible', esGratis);
-
-            if (planState.permiteLogo) {
-                logoUploaderUnlocked.style.display = 'flex';
-                logoLockedNote.style.display = 'none';
-            } else {
-                logoUploaderUnlocked.style.display = 'none';
-                logoLockedNote.style.display = 'block';
-                clearLogo();
-            }
-
-            renderTemplateCards();
-
-            if (!planState.plantillasPermitidas.includes(templateIdInput.value)) {
-                selectTemplate('moderna');
-            }
-        }
-
-        async function refreshPlanInfo() {
-            await loadPlanInfo();
-        }
-
-        // ========== FUNCIONES AUXILIARES ==========
-        function showError(message) {
-            errorBox.textContent = message;
-            errorBox.style.display = 'block';
-            successBox.style.display = 'none';
-        }
-
-        function showSuccess(message) {
-            successBox.textContent = message;
-            successBox.style.display = 'block';
-            errorBox.style.display = 'none';
-        }
-
-        function clearMessages() {
-            errorBox.style.display = 'none';
-            successBox.style.display = 'none';
-            errorBox.textContent = '';
-            successBox.textContent = '';
-        }
-
-        function formatMoney(value, currency = 'PEN') {
-            return new Intl.NumberFormat('es-PE', {
-                style: 'currency',
-                currency,
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-            }).format(Number(value || 0));
-        }
-
-        function setStatus(text) {
-            statusBadge.textContent = text;
-        }
-
-        function setDefaultDateTime() {
-            const now = new Date();
-            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-            issueDateInput.value = now.toISOString().slice(0, 16);
-        }
-
-        function addItemRow(data = {}) {
-            const fragment = itemRowTemplate.content.cloneNode(true);
-            const row = fragment.querySelector('.item-row');
-            row.querySelector('.item-description').value = data.description || '';
-            row.querySelector('.item-unit-label').value = data.unitLabel || 'UND';
-            row.querySelector('.item-quantity').value = data.quantity ?? 1;
-            row.querySelector('.item-unit-price').value = data.unitPrice ?? 0;
-            row.querySelector('.item-sku').value = data.sku || '';
-
-            row.querySelector('.remove-item').addEventListener('click', () => {
-                if (itemList.children.length === 1) {
-                    showError('Debe existir al menos un ítem.');
-                    return;
-                }
-                row.remove();
-                refreshItemIndexes();
-                saveItemsToStorage();
-            });
-
-            itemList.appendChild(row);
-            refreshItemIndexes();
-        }
-
-        function refreshItemIndexes() {
-            Array.from(itemList.children).forEach((row, index) => {
-                row.querySelector('.item-index').textContent = index + 1;
-            });
-        }
-
-        function createTemplateCard(template) {
-            const locked = !planState.plantillasPermitidas.includes(template.id);
-            const button = document.createElement('button');
-            button.type = 'button';
-            button.className = 'template-card' + (locked ? ' locked' : '');
-            button.dataset.templateId = template.id;
-            button.innerHTML = `
-                ${locked ? '<span class="template-lock-badge">🔒 Plan superior</span>' : (template.id === 'moderna' ? '<span class="template-free-badge">Gratis</span>' : '')}
-                <div class="template-swatch">
-                    <span style="background:${template.accent};"></span>
-                    <span style="background:${template.accentSoft};"></span>
-                </div>
-                <h4>${template.name}</h4>
-                <p>${template.description}</p>
-            `;
-
-            button.addEventListener('click', () => {
-                if (locked) {
-                    showError(
-                        `La plantilla "${template.name}" está disponible desde el plan Prueba Corta. Ve a la sección Planes para desbloquearla.`
-                        );
-                    return;
-                }
-                selectTemplate(template.id);
-            });
-            return button;
-        }
-
-        function renderTemplateCards() {
-            if (!currentTemplates.length) return;
-            const selectedId = templateIdInput.value;
-            templateGrid.innerHTML = '';
-            currentTemplates.forEach((template) => {
-                templateGrid.appendChild(createTemplateCard(template));
-            });
-            document.querySelectorAll('.template-card').forEach((card) => {
-                card.classList.toggle('active', card.dataset.templateId === selectedId);
-            });
-        }
-
-        function selectTemplate(templateId) {
-            if (!planState.plantillasPermitidas.includes(templateId)) {
-                templateId = 'moderna';
-            }
-            templateIdInput.value = templateId;
-            document.querySelectorAll('.template-card').forEach((card) => {
-                card.classList.toggle('active', card.dataset.templateId === templateId);
-            });
-            watermarkNote.classList.toggle('visible', planState.plan === 'gratis');
-        }
-
-        async function loadTemplates() {
-            const response = await fetch(`${API_BASE}/templates`);
-            if (!response.ok) throw new Error('No se pudieron cargar las plantillas.');
-            const data = await response.json();
-            currentTemplates = data.templates || [];
-            templateGrid.innerHTML = '';
-            currentTemplates.forEach((template) => {
-                templateGrid.appendChild(createTemplateCard(template));
-            });
-            const defaultId = templateIdInput.value || (currentTemplates[0] && currentTemplates[0].id) || 'moderna';
-            selectTemplate(defaultId);
-        }
-
-        function buildPayload() {
-            const items = Array.from(itemList.querySelectorAll('.item-row')).map((row) => ({
-                description: row.querySelector('.item-description').value.trim(),
-                unitLabel: row.querySelector('.item-unit-label').value.trim() || 'UND',
-                quantity: Number(row.querySelector('.item-quantity').value),
-                unitPrice: Number(row.querySelector('.item-unit-price').value),
-                sku: row.querySelector('.item-sku').value.trim()
-            }));
-
-            return {
-                uid: uid,
-                templateId: templateIdInput.value,
-                documentType: document.getElementById('documentType').value,
-                paymentMethod: document.getElementById('paymentMethod').value.trim(),
-                issueDate: document.getElementById('issueDate').value ? new Date(document.getElementById('issueDate')
-                    .value).toISOString() : new Date().toISOString(),
-                taxRate: Number(document.getElementById('taxRate').value || 0.18),
-                pricesIncludeTax: document.getElementById('pricesIncludeTax').checked,
-                notes: document.getElementById('notes').value.trim(),
-                issuer: {
-                    businessName: document.getElementById('issuerBusinessName').value.trim(),
-                    documentNumber: document.getElementById('issuerDocumentNumber').value.trim(),
-                    address: document.getElementById('issuerAddress').value.trim(),
-                    phone: document.getElementById('issuerPhone').value.trim(),
-                    email: document.getElementById('issuerEmail').value.trim(),
-                    website: document.getElementById('issuerWebsite').value.trim(),
-                    logoDataUrl: planState.permiteLogo ? logoDataUrl : ''
-                },
-                customer: {
-                    name: document.getElementById('customerName').value.trim(),
-                    documentType: document.getElementById('customerDocumentType').value,
-                    documentNumber: document.getElementById('customerDocumentNumber').value.trim(),
-                    email: document.getElementById('customerEmail').value.trim(),
-                    phone: document.getElementById('customerPhone').value.trim(),
-                    address: document.getElementById('customerAddress').value.trim()
-                },
-                items
-            };
-        }
-
-        async function requestPreview(payload) {
-            const response = await fetch(`${API_BASE}/preview`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-
-            const data = await response.json();
-            if (!response.ok || !data.ok) {
-                throw new Error(data.message || 'No se pudo generar la vista previa.');
-            }
-            return data;
-        }
-
-        async function requestPdfBlob(payload) {
-            const response = await fetch(`${API_BASE}/pdf`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-
-            if (!response.ok) {
-                let message = 'No se pudo generar el PDF.';
-                try {
-                    const data = await response.json();
-                    message = data.message || message;
-                } catch (_) {}
-                throw new Error(message);
-            }
-
-            return response.blob();
-        }
-
-        function renderPreview(result) {
-            previewFrame.srcdoc = result.html;
-            previewFrame.addEventListener('load', function onLoad() {
-                try {
-                    const body = this.contentWindow?.document?.body;
-                    if (body) {
-                        const height = Math.max(body.scrollHeight + 30, 480);
-                        this.style.height = height + 'px';
-                    }
-                } catch (e) {}
-                scaleIframe();
-                this.removeEventListener('load', onLoad);
-            });
-
-            summarySubtotal.textContent = formatMoney(result.summary.subtotal, result.summary.currency);
-            summaryTax.textContent = formatMoney(result.summary.tax, result.summary.currency);
-            summaryTotal.textContent = formatMoney(result.summary.total, result.summary.currency);
-            summaryBoxes.classList.remove('hidden');
-            downloadButton.disabled = false;
-            shareButton.disabled = false;
-            downloadButton2.disabled = false;
-            shareButton2.disabled = false;
-            lastDocumentName = `${result.summary.documentType}_${result.documentNumber}.pdf`;
-            lastShareText = result.shareText || 'Comprobante generado';
-            setStatus(`Vista previa lista · ${result.documentNumber}`);
-        }
-
-        function scaleIframe() {
-            const wrapper = previewFrame.closest('.preview-frame-wrapper');
-            if (!wrapper) return;
-            const containerWidth = wrapper.clientWidth;
-            let contentWidth = 800;
-            try {
-                const doc = previewFrame.contentWindow?.document;
-                if (doc && doc.body) {
-                    const scrollWidth = doc.body.scrollWidth;
-                    if (scrollWidth > 0) contentWidth = scrollWidth;
-                }
-            } catch (e) {}
-            if (contentWidth > containerWidth) {
-                const scale = containerWidth / contentWidth;
-                previewFrame.style.transform = `scale(${scale})`;
-                const height = parseFloat(previewFrame.style.height) || 480;
-                previewFrame.style.height = (height / scale) + 'px';
-                previewFrame.style.transformOrigin = 'top left';
-            } else {
-                previewFrame.style.transform = 'scale(1)';
-                previewFrame.style.transformOrigin = 'top left';
-                const body = previewFrame.contentWindow?.document?.body;
-                if (body) {
-                    const h = Math.max(body.scrollHeight + 30, 480);
-                    previewFrame.style.height = h + 'px';
-                }
-            }
-        }
-
-        let resizeTimeout;
-        window.addEventListener('resize', () => {
-            clearTimeout(resizeTimeout);
-            resizeTimeout = setTimeout(() => {
-                if (currentStep === 3) {
-                    scaleIframe();
-                }
-            }, 200);
-        });
-
-        async function generatePreview() {
-            clearMessages();
-            if (!uid) {
-                showError('Debes iniciar sesión para generar comprobantes.');
-                return;
-            }
-            if (!planState.plantillasPermitidas.includes(templateIdInput.value)) {
-                showError('La plantilla seleccionada no está disponible en tu plan actual. Elige otra o actualiza tu plan.');
-                return;
-            }
-            if (planState.disponibles !== 'Ilimitados' && Number(planState.disponibles) <= 0) {
-                showError('Has alcanzado el límite de comprobantes de tu plan. Actualiza tu plan para seguir generando.');
-                return;
-            }
-            setStatus('Generando vista previa...');
-            const payload = buildPayload();
-            const result = await requestPreview(payload);
-            lastPayload = payload;
-            renderPreview(result);
-            showSuccess('Vista previa generada correctamente. Ya puedes descargar o compartir.');
-            goToStep(3);
-            saveState();
-        }
-
-        async function downloadPdf() {
-            if (!lastPayload) {
-                showError('Primero genera la vista previa del comprobante.');
-                return;
-            }
-            if (!uid) {
-                showError('Debes iniciar sesión.');
-                return;
-            }
-            clearMessages();
-            setStatus('Generando PDF...');
-            try {
-                const blob = await requestPdfBlob(lastPayload);
-                const url = URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = lastDocumentName;
-                document.body.appendChild(link);
-                link.click();
-                link.remove();
-                URL.revokeObjectURL(url);
-                setStatus('PDF generado y descargado');
-                showSuccess('PDF descargado correctamente.');
-                await refreshPlanInfo();
-            } catch (error) {
-                setStatus('Error al generar PDF');
-                showError(error.message || 'No se pudo generar el PDF.');
-            }
-        }
-
-        async function sharePdf() {
-            if (!lastPayload) {
-                showError('Primero genera la vista previa del comprobante.');
-                return;
-            }
-            if (!uid) {
-                showError('Debes iniciar sesión.');
-                return;
-            }
-            clearMessages();
-            setStatus('Preparando archivo para compartir...');
-            try {
-                const blob = await requestPdfBlob(lastPayload);
-                const file = new File([blob], lastDocumentName, { type: 'application/pdf' });
-
-                if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-                    await navigator.share({
-                        files: [file],
-                        title: 'Comprobante listo',
-                        text: lastShareText
-                    });
-                    setStatus('Comprobante compartido');
-                    showSuccess('Comprobante compartido correctamente.');
-                    await refreshPlanInfo();
-                    return;
-                }
-
-                if (navigator.clipboard) {
-                    await navigator.clipboard.writeText(lastShareText);
-                }
-
-                const url = URL.createObjectURL(blob);
-                window.open(url, '_blank');
-                setStatus('Archivo abierto para compartir');
-                showSuccess(
-                    'Tu navegador no soporta compartir archivos directamente. Se abrió el PDF en otra pestaña y se copió un texto base al portapapeles si estaba disponible.'
-                    );
-                setTimeout(() => URL.revokeObjectURL(url), 30000);
-                await refreshPlanInfo();
-            } catch (error) {
-                setStatus('Error al compartir');
-                showError(error.message || 'No se pudo compartir el comprobante.');
-            }
-        }
-
-        const MAX_LOGO_BYTES = 2 * 1024 * 1024;
-
-        function clearLogo() {
-            logoDataUrl = '';
-            if (logoInput) logoInput.value = '';
-            if (logoPreview) logoPreview.innerHTML = '<span>Sin logo</span>';
-        }
-
-        function handleLogoFile(file) {
-            if (!file) return;
-            if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
-                showError('El logo debe ser una imagen PNG, JPG o WEBP.');
-                clearLogo();
-                return;
-            }
-            if (file.size > MAX_LOGO_BYTES) {
-                showError('El logo es demasiado pesado. El límite es 2MB.');
-                clearLogo();
-                return;
-            }
-            const reader = new FileReader();
-            reader.onload = () => {
-                logoDataUrl = reader.result;
-                logoPreview.innerHTML = `<img src="${logoDataUrl}" alt="Logo del negocio" />`;
-            };
-            reader.onerror = () => {
-                showError('No se pudo leer el archivo del logo. Intenta con otra imagen.');
-                clearLogo();
-            };
-            reader.readAsDataURL(file);
-        }
-
-        if (logoInput) {
-            logoInput.addEventListener('change', (event) => {
-                handleLogoFile(event.target.files && event.target.files[0]);
-            });
-        }
-        if (logoRemoveButton) {
-            logoRemoveButton.addEventListener('click', clearLogo);
-        }
-
-        function resetForm() {
-            voucherForm.reset();
-            itemList.innerHTML = '';
-            addItemRow({ description: 'Producto principal', quantity: 1, unitPrice: 0, unitLabel: 'UND' });
-            templateIdInput.value = 'moderna';
-            selectTemplate('moderna');
-            clearLogo();
-            setDefaultDateTime();
-            previewFrame.srcdoc =
-                '<html><body style="font-family:Inter,Arial,sans-serif;padding:40px;background:#f8fafc;color:#475569;"><h2 style="margin-top:0;color:#0f172a;">Aquí verás la vista previa</h2><p>Completa el formulario de la izquierda y pulsa <strong>Generar vista previa</strong>.</p></body></html>';
-            summaryBoxes.classList.add('hidden');
-            downloadButton.disabled = true;
-            shareButton.disabled = true;
-            downloadButton2.disabled = true;
-            shareButton2.disabled = true;
-            lastPayload = null;
-            lastDocumentName = 'comprobante.pdf';
-            lastShareText = 'Comprobante generado';
-            setStatus('Formulario reiniciado');
-            clearMessages();
-            previewFrame.style.transform = 'scale(1)';
-            previewFrame.style.height = '';
-            clearSavedFormData();
-        }
-
-        addItemButton.addEventListener('click', () => {
-            addItemRow();
-            saveItemsToStorage();
-        });
-
-        resetButton.addEventListener('click', () => {
-            resetForm();
-        });
-
-        voucherForm.addEventListener('submit', async (event) => {
-            event.preventDefault();
-            try {
-                await generatePreview();
-            } catch (error) {
-                setStatus('Error al generar');
-                showError(error.message || 'Ocurrió un error inesperado.');
-            }
-        });
-
-        downloadButton.addEventListener('click', async () => {
-            await downloadPdf();
-        });
-        downloadButton2.addEventListener('click', async () => {
-            await downloadPdf();
-        });
-
-        shareButton.addEventListener('click', async () => {
-            await sharePdf();
-        });
-        shareButton2.addEventListener('click', async () => {
-            await sharePdf();
-        });
-
-        step3BackBtn.addEventListener('click', () => {
-            goToStep(2);
-        });
-
-        // MEJORA 4: Botón "+" para nueva boleta
-        newBoletaBtn.addEventListener('click', () => {
-            goToStep(2);
-        });
-
-        documentTypeSelect.addEventListener('change', () => {
-            customerDocumentTypeSelect.value = documentTypeSelect.value === 'factura' ? 'RUC' : 'DNI';
-        });
-
-        itemList.addEventListener('input', saveItemsToStorage);
-
-        // ========== INICIALIZACIÓN ==========
-        (async function init() {
-            try {
-                setDefaultDateTime();
-                addItemRow({ description: 'Servicio / producto principal', quantity: 1, unitPrice: 0, unitLabel: 'UND' });
-                uid = await getUid();
-
-                await Promise.all([loadTemplates(), loadPlanInfo()]);
-
-                resetForm();
-                applyPlanRestrictions();
-
-                restoreItemsFromStorage();
-                restoreSavedFormFields();
-                if (templateIdInput.value) {
-                    selectTemplate(templateIdInput.value);
-                }
-                attachAutosaveListeners();
-
-                if (!uid) {
-                    showError('Debes iniciar sesión para generar comprobantes. Mientras tanto puedes explorar las plantillas disponibles.');
-                    if (generateButton) generateButton.disabled = true;
-                }
-
-                // Restaurar paso y payload guardados
-                const restoredStep = restoreState();
-                const restoredPayload = restorePayload();
-
-                // Si hay un payload y estamos en paso 3, regenerar vista previa automáticamente
-                if (restoredPayload && restoredStep === 3) {
-                    try {
-                        lastPayload = restoredPayload;
-                        // Reutilizar el payload para regenerar la vista previa sin consumir límite
-                        const result = await requestPreview(restoredPayload);
-                        renderPreview(result);
-                        showSuccess('Vista previa restaurada automáticamente.');
-                    } catch (e) {
-                        console.warn('No se pudo restaurar la vista previa automáticamente:', e);
-                        // Si falla, ir al paso 2
-                        goToStep(hasSeenWelcome() ? 2 : 1);
-                    }
-                } else {
-                    // Sino, ir al paso que corresponda (bienvenida o paso 2)
-                    goToStep(hasSeenWelcome() ? (restoredStep || 2) : 1);
-                }
-
-                applyIncomingCustomerData();
-
-            } catch (error) {
-                showError(error.message || 'No se pudo iniciar la página.');
-            }
-        })();
-    </script>
-</body>
-</html>
+                console.error('Error inicializando Fireb
