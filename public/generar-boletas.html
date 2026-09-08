@@ -1845,10 +1845,10 @@
             cursor: not-allowed;
         }
 
-        /* Botón cerrar en vista previa (ahora con icono + verde) */
+        /* Botón cerrar en vista previa - ahora es verde y con + */
         .btn-close-preview {
             background: transparent;
-            border: 1px solid var(--emerald);
+            border: 1.5px solid var(--emerald);
             color: var(--emerald);
             border-radius: 8px;
             padding: 6px 12px;
@@ -1861,9 +1861,9 @@
             justify-content: center;
         }
         .btn-close-preview:hover {
+            background: var(--emerald-glow);
             border-color: var(--emerald-light);
             color: var(--emerald-light);
-            background: var(--emerald-glow);
         }
     </style>
 </head>
@@ -2211,8 +2211,8 @@
                         <div class="preview-top">
                             <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
                                 <h2 class="panel-title" style="margin-bottom: 0;">Vista previa en vivo</h2>
-                                <!-- Botón cerrar con icono + verde -->
-                                <button class="btn-close-preview" id="closePreviewBtn" title="Volver a editar">
+                                <!-- Botón cerrar (ahora + verde) -->
+                                <button class="btn-close-preview" id="closePreviewBtn" title="Cerrar vista previa y editar">
                                     <i class="fas fa-plus"></i>
                                 </button>
                             </div>
@@ -3310,7 +3310,7 @@
             renderPreview(result);
             // Guardar estado en localStorage
             savePreviewState(payload, result);
-            // Se eliminó el mensaje de éxito "Vista previa generada correctamente..."
+            // Mensaje de éxito eliminado
             goToStep(3);
         }
 
@@ -3500,7 +3500,7 @@
             goToStep(2);
         });
 
-        // Botón cerrar vista previa (ahora con icono +)
+        // Botón cerrar vista previa (ahora con +)
         closePreviewBtn.addEventListener('click', () => {
             goToStep(2);
         });
