@@ -5,6 +5,44 @@
 
 const ReturnConfig = {
     /**
+     * Rutas de interfaces existentes que requieren una sesión autenticada.
+     * Las páginas públicas no se incluyen aquí por diseño.
+     */
+    protectedPaths: [
+        '/actividad.html',
+        '/ayuda.html',
+        '/checkout.html',
+        '/generar-boletas.html',
+        '/validar-clientes.html',
+        '/verificacion.html'
+    ],
+    isProtectedPage: function(pathname = window.location.pathname) {
+        const normalizedPath = pathname.endsWith('/') ? pathname.slice(0, -1) : pathname;
+        const htmlPath = normalizedPath.endsWith('.html') ? normalizedPath : `${normalizedPath}.html`;
+        return this.protectedPaths.includes(normalizedPath) || this.protectedPaths.includes(htmlPath);
+    },
+    /**
+     * Comprueba la sesión del backend y conserva la ruta actual para volver
+     * después del login, igual que el flujo existente de actividad.html.
+     */
+    enforceAuth: async function() {
+        if (!this.isProtectedPage()) return true;
+        try {
+            const response = await fetch('/api/session', {
+                credentials: 'same-origin',
+                cache: 'no-store'
+            });
+            if (response.ok) {
+                const session = await response.json();
+                if (session && session.authenticated && session.uid) return true;
+            }
+        } catch (error) {
+            console.error('Error verificando la sesión:', error);
+        }
+        this.redirectToLogin();
+        return false;
+    },
+    /**
      * Obtiene un parámetro de la URL por su nombre.
      * @param {string} name - Nombre del parámetro.
      * @returns {string|null} - Valor del parámetro o null si no existe.
