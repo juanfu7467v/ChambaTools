@@ -2343,10 +2343,8 @@
                 stepLines[2].classList.toggle('done', step > 2);
             }
 
-            // Guardar el paso actual en localStorage para persistencia
-            try {
-                localStorage.setItem('ft_current_step', String(step));
-            } catch (e) {}
+            // NO se guarda el paso actual en localStorage (mejora solicitada)
+            // para evitar volver automáticamente a la vista previa.
 
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
@@ -2664,12 +2662,7 @@
             try {
                 getPersistableFields().forEach((el) => localStorage.removeItem(FORM_STORAGE_PREFIX + el.id));
                 localStorage.removeItem(ITEMS_STORAGE_KEY);
-                localStorage.removeItem('ft_current_step');
-                localStorage.removeItem('ft_preview_html');
-                localStorage.removeItem('ft_preview_payload');
-                localStorage.removeItem('ft_preview_documentName');
-                localStorage.removeItem('ft_preview_shareText');
-                localStorage.removeItem('ft_preview_summary');
+                // Ya no se eliminan ft_current_step ni ft_preview_* porque no se usan.
             } catch (error) {
                 console.error('No se pudo limpiar el guardado local del formulario:', error);
             }
@@ -3010,49 +3003,8 @@
             }
         }
 
-        // ========== PERSISTENCIA DE VISTA PREVIA (Mejora 4) ==========
-        function savePreviewState(payload, result) {
-            try {
-                localStorage.setItem('ft_preview_payload', JSON.stringify(payload));
-                localStorage.setItem('ft_preview_html', result.html);
-                localStorage.setItem('ft_preview_documentName', lastDocumentName);
-                localStorage.setItem('ft_preview_shareText', lastShareText);
-                localStorage.setItem('ft_preview_summary', JSON.stringify(result.summary));
-            } catch (e) { console.error('No se pudo guardar la vista previa:', e); }
-        }
-
-        function restorePreviewState() {
-            try {
-                const payloadRaw = localStorage.getItem('ft_preview_payload');
-                const html = localStorage.getItem('ft_preview_html');
-                const docName = localStorage.getItem('ft_preview_documentName');
-                const shareText = localStorage.getItem('ft_preview_shareText');
-                const summaryRaw = localStorage.getItem('ft_preview_summary');
-                if (payloadRaw && html) {
-                    lastPayload = JSON.parse(payloadRaw);
-                    lastDocumentName = docName || 'comprobante.pdf';
-                    lastShareText = shareText || 'Comprobante generado';
-                    previewFrame.srcdoc = html;
-                    const summary = summaryRaw ? JSON.parse(summaryRaw) : null;
-                    if (summary) {
-                        summarySubtotal.textContent = formatMoney(summary.subtotal, summary.currency);
-                        summaryTax.textContent = formatMoney(summary.tax, summary.currency);
-                        summaryTotal.textContent = formatMoney(summary.total, summary.currency);
-                        summaryBoxes.classList.remove('hidden');
-                    } else {
-                        // Recalcular desde los ítems si no hay summary guardado
-                        updateSummary();
-                    }
-                    downloadButton.disabled = false;
-                    shareButton.disabled = false;
-                    downloadButton2.disabled = false;
-                    shareButton2.disabled = false;
-                    setStatus('Vista previa restaurada');
-                    return true;
-                }
-            } catch (e) { console.error('No se pudo restaurar la vista previa:', e); }
-            return false;
-        }
+        // ========== PERSISTENCIA DE VISTA PREVIA (ELIMINADA) ==========
+        // Ya no se guarda ni restaura la vista previa en localStorage.
 
         // ========== CONSTRUIR PAYLOAD Y GENERAR PREVIEW ==========
         function buildPayload() {
@@ -3214,8 +3166,7 @@
             const result = await requestPreview(payload);
             lastPayload = payload;
             renderPreview(result);
-            // Guardar estado en localStorage
-            savePreviewState(payload, result);
+            // No se guarda en localStorage la vista previa.
             goToStep(3);
         }
 
@@ -3357,14 +3308,7 @@
             clearMessages();
             previewFrame.style.transform = 'scale(1)';
             previewFrame.style.height = '';
-            // Limpiar preview guardada
-            try {
-                localStorage.removeItem('ft_preview_html');
-                localStorage.removeItem('ft_preview_payload');
-                localStorage.removeItem('ft_preview_documentName');
-                localStorage.removeItem('ft_preview_shareText');
-                localStorage.removeItem('ft_preview_summary');
-            } catch (e) {}
+            // No se elimina nada de localStorage relacionado con preview (ya no existe).
         }
 
         addItemButton.addEventListener('click', () => {
@@ -3451,7 +3395,7 @@
                 resetForm();
                 applyPlanRestrictions();
 
-                // Restaurar datos guardados
+                // Restaurar datos guardados (solo campos del formulario e ítems)
                 restoreItemsFromStorage();
                 restoreSavedFormFields();
                 if (templateIdInput.value) {
@@ -3467,25 +3411,16 @@
                     if (generateButton) generateButton.disabled = true;
                 }
 
-                // Restaurar paso y vista previa si existe
-                let savedStep = 1;
-                try {
-                    const stepRaw = localStorage.getItem('ft_current_step');
-                    if (stepRaw) savedStep = parseInt(stepRaw, 10) || 1;
-                } catch (e) {}
-                // Si hay vista previa guardada, restaurarla y mostrar paso 3
-                const hasPreview = restorePreviewState();
-                if (hasPreview) {
-                    savedStep = 3;
-                }
+                // Decidir paso inicial SIN usar localStorage del paso ni de la vista previa.
+                // Si ya hay datos del emisor guardados, ir directamente al paso 2 (Interfaz 2).
+                // De lo contrario, comenzar en el paso 1.
+                const issuerName = document.getElementById('issuerBusinessName').value.trim();
+                const initialStep = issuerName ? 2 : 1;
+                goToStep(initialStep);
 
-                goToStep(savedStep);
                 applyIncomingCustomerData();
 
-                // Si hay preview y estamos en paso 3, escalar iframe
-                if (hasPreview && savedStep === 3) {
-                    setTimeout(scaleIframe, 300);
-                }
+                // No se restaura ninguna vista previa guardada.
 
             } catch (error) {
                 showError(error.message || 'No se pudo iniciar la página.');
