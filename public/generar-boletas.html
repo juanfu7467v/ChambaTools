@@ -2104,7 +2104,7 @@
 
                                 <!-- Navegación dentro del paso 2 (MEJORADA) -->
                                 <div class="step-nav-actions">
-                                    <button class="btn-back" id="step2BackBtn"><i class="fas fa-arrow-left"></i> Atrás</button>
+                                    <button class="btn-back" type="button" id="step2BackBtn"><i class="fas fa-arrow-left"></i> Atrás</button>
                                     <button class="btn-next" type="submit" id="generateButton"><i class="fas fa-wand-magic-sparkles"></i> Generar vista previa</button>
                                     <button class="btn-clean" type="button" id="resetButton">Limpiar formulario</button>
                                 </div>
@@ -2365,7 +2365,9 @@
             goToStep(2);
         });
 
-        document.getElementById('step2BackBtn').addEventListener('click', () => {
+        document.getElementById('step2BackBtn').addEventListener('click', (event) => {
+            event.preventDefault();
+            event.stopPropagation();
             goToStep(1);
         });
 
