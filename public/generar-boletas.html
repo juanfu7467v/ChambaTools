@@ -1845,11 +1845,11 @@
             cursor: not-allowed;
         }
 
-        /* Botón cerrar en vista previa */
+        /* Botón cerrar en vista previa (ahora con icono + verde) */
         .btn-close-preview {
             background: transparent;
-            border: 1px solid var(--navy-border);
-            color: var(--text-muted);
+            border: 1px solid var(--emerald);
+            color: var(--emerald);
             border-radius: 8px;
             padding: 6px 12px;
             font-size: 1.2rem;
@@ -1861,9 +1861,9 @@
             justify-content: center;
         }
         .btn-close-preview:hover {
-            border-color: var(--ruby);
-            color: var(--ruby-light);
-            background: var(--ruby-glow);
+            border-color: var(--emerald-light);
+            color: var(--emerald-light);
+            background: var(--emerald-glow);
         }
     </style>
 </head>
@@ -2211,9 +2211,9 @@
                         <div class="preview-top">
                             <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
                                 <h2 class="panel-title" style="margin-bottom: 0;">Vista previa en vivo</h2>
-                                <!-- Botón cerrar (X) -->
-                                <button class="btn-close-preview" id="closePreviewBtn" title="Cerrar vista previa y editar">
-                                    <i class="fas fa-times"></i>
+                                <!-- Botón cerrar con icono + verde -->
+                                <button class="btn-close-preview" id="closePreviewBtn" title="Volver a editar">
+                                    <i class="fas fa-plus"></i>
                                 </button>
                             </div>
                             <div id="statusBadge" class="status">Esperando datos para generar</div>
@@ -3310,7 +3310,7 @@
             renderPreview(result);
             // Guardar estado en localStorage
             savePreviewState(payload, result);
-            showSuccess('Vista previa generada correctamente. Ya puedes descargar o compartir.');
+            // Se eliminó el mensaje de éxito "Vista previa generada correctamente..."
             goToStep(3);
         }
 
@@ -3500,7 +3500,7 @@
             goToStep(2);
         });
 
-        // Botón cerrar vista previa (Mejora 5)
+        // Botón cerrar vista previa (ahora con icono +)
         closePreviewBtn.addEventListener('click', () => {
             goToStep(2);
         });
