@@ -1272,12 +1272,13 @@
         }
         .step-nav-actions .btn-back {
             background: transparent;
-            color: var(--text-muted);
-            border: 1px solid var(--navy-border);
+            color: var(--tech-blue);
+            border: 1px solid var(--tech-blue);
         }
         .step-nav-actions .btn-back:hover {
-            color: var(--white);
-            border-color: var(--text-muted);
+            background: transparent;
+            color: var(--tech-blue-light);
+            border-color: var(--tech-blue-light);
         }
         .step-nav-actions .btn-next {
             background: linear-gradient(135deg, var(--emerald), var(--emerald-dark));
@@ -2103,7 +2104,7 @@
 
                                 <!-- Navegación dentro del paso 2 (MEJORADA) -->
                                 <div class="step-nav-actions">
-                                    <button class="btn-back" id="step2BackBtn"><i class="fas fa-undo-alt"></i> Volver</button>
+                                    <button class="btn-back" id="step2BackBtn"><i class="fas fa-arrow-left"></i> Atrás</button>
                                     <button class="btn-next" type="submit" id="generateButton"><i class="fas fa-wand-magic-sparkles"></i> Generar vista previa</button>
                                     <button class="btn-clean" type="button" id="resetButton">Limpiar formulario</button>
                                 </div>
