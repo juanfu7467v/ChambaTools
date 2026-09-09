@@ -1,0 +1,68 @@
+rules_version = '2';
+
+// ================================================================
+// Firestore security rules — bloque NUEVO y ADITIVO para api_keys.
+// Pegar este bloque en tu archivo firestore.rules existente (NO
+// reemplaza las reglas que ya tienes para usuarios, empresas,
+// emisores, emisores_logos o pagos_registrados; simplemente agrega
+// una sección nueva para la colección api_keys).
+// ================================================================
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ... (TUS reglas existentes para /usuarios, /empresas, /emisores,
+    //      /emisores_logos, /pagos_registrados, etc. — NO TOCAR) ...
+
+    // ============================================================
+    // 🆕 api_keys — autogestión de API Keys por el propio usuario
+    //
+    // Reglas:
+    // - Solo el dueño (request.auth.uid == resource.data.uid) puede
+    //   LISTAR o LEER su(s) propia(s) clave(s).
+    // - Solo puede CREAR una clave para sí mismo (el campo `uid` debe
+    //   coincidir con `request.auth.uid`).
+    // - Solo puede ACTUALIZAR su propia clave (típicamente para revocar:
+    //   set revoked=true / revokedAt=now). NUNCA puede modificar
+    //   `keyHash` ni `uid` ni `keyPrefix` (reglas validate).
+    // - Puede ELIMINAR su clave por completo si lo desea.
+    //
+    // 🔒 BACKEND: el servidor (apps con Admin SDK) tiene acceso total
+    //    y se usa para crear/actualizar desde endpoints autenticados
+    //    por cookie httpOnly (/api/developer/keys/*). El cliente
+    //    solo ve lo que muestra la UI; los secrets NUNCA viajan al
+    //    navegador después de la creación.
+    // ============================================================
+    match /api_keys/{keyId} {
+
+      // listar (queries): el filtro debe limitar a las keys del usuario
+      allow list: if request.auth != null
+                   && request.auth.uid == request.query.filters[0].value.uid;
+
+      // leer un doc específico: solo el dueño
+      allow read: if request.auth != null
+                  && resource.data.uid == request.auth.uid;
+
+      // crear: el uid embebido debe coincidir con el uid autenticado,
+      // y el hash debe estar presente (es lo único que identifica la key)
+      allow create: if request.auth != null
+                    && request.resource.data.uid == request.auth.uid
+                    && request.resource.data.keys().hasAll(['keyHash', 'uid', 'prefix'])
+                    && request.resource.data.keyHash is string
+                    && request.resource.data.uid is string
+                    && request.resource.data.prefix is string;
+
+      // actualizar: típico = revocar. NUNCA puede cambiar uid ni keyHash.
+      allow update: if request.auth != null
+                    && resource.data.uid == request.auth.uid
+                    && request.resource.data.uid == resource.data.uid
+                    && request.resource.data.keyHash == resource.data.keyHash
+                    && request.resource.data.prefix == resource.data.prefix;
+
+      // eliminar: solo el dueño
+      allow delete: if request.auth != null
+                    && resource.data.uid == request.auth.uid;
+    }
+
+  }
+}
