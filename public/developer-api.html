@@ -179,22 +179,6 @@
             box-shadow: var(--shadow-card);
         }
 
-        /* Plan banner */
-        .plan-banner {
-            background: linear-gradient(135deg, var(--gold-glow), transparent);
-            border: 1px solid var(--border-gold);
-            border-radius: var(--radius-sm);
-            padding: 16px 18px;
-            margin-bottom: 20px;
-            color: var(--text-primary);
-            display: flex; align-items: center; gap: 14px;
-        }
-        .plan-banner.allowed { background: linear-gradient(135deg, var(--emerald-glow), transparent); border-color: var(--border-active); }
-        .plan-banner i { font-size: 22px; color: var(--gold); }
-        .plan-banner.allowed i { color: var(--emerald-light); }
-        .plan-banner .pb-text strong { display: block; }
-        .plan-banner .pb-text small { color: var(--text-muted); }
-
         /* Create-key card */
         .create-key-row { display: flex; gap: 12px; align-items: center; margin-bottom: 18px; flex-wrap: wrap; }
         .create-key-row input {
@@ -234,17 +218,36 @@
         .secret-banner code {
             display: block; padding: 14px 16px; border-radius: 10px;
             background: rgba(0,0,0,0.5); color: var(--emerald-light);
-            font-family: var(--font-mono); font-size: 13px; word-break: break-all;
+            font-family: var(--font-mono); font-size: 13px;
+            word-break: break-all; overflow-wrap: anywhere;
             border: 1px dashed var(--emerald-glow-strong);
         }
         .secret-actions { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
 
         /* Keys table */
-        .keys-table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        #keysTableWrap {
+            width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;
+            border-radius: 12px;
+        }
+        .keys-table { width: 100%; min-width: 680px; border-collapse: collapse; margin-top: 12px; table-layout: fixed; }
+        .keys-table th:nth-child(1), .keys-table td:nth-child(1) { width: 20%; }
+        .keys-table th:nth-child(2), .keys-table td:nth-child(2) { width: 14%; }
+        .keys-table th:nth-child(3), .keys-table td:nth-child(3) { width: 10%; }
+        .keys-table th:nth-child(4), .keys-table td:nth-child(4) { width: 14%; }
+        .keys-table th:nth-child(5), .keys-table td:nth-child(5) { width: 14%; }
+        .keys-table th:nth-child(6), .keys-table td:nth-child(6) { width: 10%; }
+        .keys-table th:nth-child(7), .keys-table td:nth-child(7) { width: 18%; }
         .keys-table th, .keys-table td {
             padding: 14px 14px; text-align: left; font-size: 13px;
             border-bottom: 1px solid var(--border-subtle);
         }
+        .keys-table th, .keys-table td:not(.empty-state) {
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .keys-table th:nth-child(7), .keys-table td:nth-child(7) {
+            white-space: normal; text-align: right;
+        }
+        .keys-table td:nth-child(7) button { margin: 3px 0 3px 6px; }
         .keys-table th { font-weight: 700; color: var(--tech-blue-light); text-transform: uppercase; letter-spacing: 0.08em; font-size: 11px; }
         .keys-table tr.revoked td { opacity: 0.55; text-decoration: line-through; }
         .pill { display: inline-block; padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; }
@@ -301,8 +304,32 @@
             .hero h1 { font-size: 28px; }
             main { padding: 0 16px 64px; }
             .panel { padding: 18px; }
-            .keys-table { font-size: 12px; }
+            .keys-table { font-size: 12px; min-width: 560px; }
+            .keys-table th, .keys-table td { padding: 10px 10px; }
         }
+
+        /* ═══ FOOTER ═══ */
+        .footer-content {
+            width: 100%; padding: 48px 16px 32px;
+            background: var(--navy-surface);
+            border-top: 1px solid var(--border-active);
+            text-align: center; position: relative; z-index: 1;
+        }
+        .footer-content::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--emerald), transparent);
+        }
+        .footer-content h3 {
+            font-size: 13px; font-weight: 600; color: var(--text-muted);
+            letter-spacing: 0.1em; text-transform: uppercase;
+            margin-bottom: 16px;
+        }
+        .footer-content .social-icons { margin-bottom: 24px; }
+        .footer-content .social-icons a { color: var(--text-muted); font-size: 26px; margin: 0 12px; transition: all .2s; }
+        .footer-content .social-icons a:hover { color: var(--emerald); transform: translateY(-3px); }
+        .footer-content p { font-size: 12.5px; color: var(--text-subtle); line-height: 1.6; margin-bottom: 8px; }
+        .footer-content a { color: var(--emerald-light); text-decoration: none; transition: color .2s; font-weight: 600; }
+        .footer-content a:hover { color: var(--emerald); }
     </style>
 </head>
 <body>
@@ -355,34 +382,6 @@
             </p>
         </section>
 
-        <!-- ═══ QUICK START: guía rápida para encontrar "Crear API Key" ═══ -->
-        <section class="section" id="quickStart" style="margin-bottom:20px;">
-            <div class="panel" style="background:linear-gradient(135deg,rgba(0,200,83,0.18),rgba(0,191,255,0.10));border:1.5px solid var(--border-active);">
-                <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:center;">
-                    <div style="flex:1;min-width:260px;">
-                        <h3 style="font-family:var(--font-display);font-size:18px;color:white;margin-bottom:6px;">
-                            <i class="fas fa-rocket" style="color:var(--emerald-light);"></i>
-                            Obtén tu API Key en 3 pasos
-                        </h3>
-                        <p style="color:var(--text-muted);font-size:14px;line-height:1.6;margin:0;">
-                            1️⃣ Inicia sesión con tu cuenta.<br/>
-                            2️⃣ Baja hasta la sección <strong style="color:var(--emerald-light);">«Tus API Keys»</strong>.<br/>
-                            3️⃣ Escribe un nombre (ej. <em>Producción Web</em>) y pulsa el botón verde <strong style="color:var(--emerald-light);">«Crear API Key»</strong>.
-                            La clave completa se mostrará <strong>una sola vez</strong> — cópiala y guárdala de inmediato.
-                        </p>
-                    </div>
-                    <div style="display:flex;flex-direction:column;gap:8px;">
-                        <a href="#apiKeyManager" class="btn btn-primary" id="quickStartGo">
-                            <i class="fas fa-key"></i> Ir a «Crear API Key»
-                        </a>
-                        <a href="/planes" class="btn btn-ghost" id="quickStartPlans">
-                            <i class="fas fa-crown"></i> Ver planes
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </section>
-
         <!-- ═══ AUTH REQUIRED BANNER ═══ -->
         <section class="section requires-auth" style="display:none;">
             <div id="authGate" class="panel empty-state">
@@ -402,15 +401,6 @@
                 nunca podemos recuperar la clave completa, solo tú la verás al crearla.
                 La API consume del <strong>mismo cupo de comprobantes</strong> que la interfaz normal de generación de boletas.
             </p>
-
-            <div id="planBanner" class="plan-banner" style="display:none;">
-                <i class="fas fa-crown"></i>
-                <div class="pb-text">
-                    <strong id="planBannerTitle">Plan requerido</strong>
-                    <small id="planBannerText">Actualiza tu plan para acceder a la API de developers.</small>
-                </div>
-                <div style="margin-left:auto;"><a href="/planes" class="btn btn-primary">Ver planes</a></div>
-            </div>
 
             <div class="panel">
                 <div class="create-key-row">
@@ -658,6 +648,19 @@ curl_close($ch);</pre>
         </section>
     </main>
 
+    <!-- ═══ FOOTER ═══ -->
+    <footer class="footer-content">
+        <h3>Síguenos</h3>
+        <div class="social-icons">
+            <a href="https://m.facebook.com/61564349657272/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+            <a href="https://youtube.com/@eltiojota628" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+            <a href="https://wa.me/51944950234" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+        </div>
+        <p>FacilitoTools.com · Generación de comprobantes, validación de clientes y API para developers © 2026</p>
+        <p><a href="terminos-condiciones">Términos y condiciones</a> · <a href="politica-privacidad">Política de privacidad</a> · <a href="politica.compras.html">Política de compras y reembolsos</a></p>
+        <p>¿Necesitas ayuda? Escríbenos a <a href="mailto:soporte@facilitotools.com">soporte@facilitotools.com</a></p>
+    </footer>
+
     <div id="toastBox" class="toast-box"></div>
 
     <script>
@@ -702,9 +705,6 @@ curl_close($ch);</pre>
         const copySecretBtn = document.getElementById('copySecretBtn');
         const dismissSecretBtn = document.getElementById('dismissSecretBtn');
         const keysTbody = document.getElementById('keysTbody');
-        const planBanner = document.getElementById('planBanner');
-        const planBannerTitle = document.getElementById('planBannerTitle');
-        const planBannerText = document.getElementById('planBannerText');
         const authGate = document.getElementById('authGate');
         const authGateSection = authGate ? authGate.closest('section') : null;
         const apiKeyManagerSection = document.getElementById('apiKeyManager');
@@ -720,27 +720,6 @@ curl_close($ch);</pre>
         }
 
         nameInput.addEventListener('input', () => { createBtn.disabled = !nameInput.value.trim(); });
-
-        // 🆕 Scroll suave al formulario desde el botón "Ir a Crear API Key"
-        (function() {
-            const go = document.getElementById('quickStartGo');
-            if (go) {
-                go.addEventListener('click', (e) => {
-                    // Si no hay sesión (body.logged-out), llevamos al login primero
-                    if (document.body.classList.contains('logged-out')) {
-                        e.preventDefault();
-                        toast('Inicia sesión primero para crear tu API Key.', 'error');
-                        setTimeout(() => { window.location.href = '/login'; }, 800);
-                        return;
-                    }
-                    // Si ya hay sesión, hace scroll suave al formulario
-                    e.preventDefault();
-                    const target = document.getElementById('apiKeyManager');
-                    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    setTimeout(() => nameInput && nameInput.focus(), 500);
-                });
-            }
-        })();
 
         async function fetchJSON(url, opts = {}) {
             const r = await fetch(url, { credentials: 'same-origin', ...opts });
@@ -780,16 +759,10 @@ curl_close($ch);</pre>
         }
 
         function showPlanGate(plan) {
-            // La creación de API Keys depende únicamente de que exista una sesión.
+            // La creación de API Keys depende únicamente de que exista una sesión,
+            // sin importar el plan del usuario (disponible para todos los planes).
             const isAuthenticated = Boolean(plan);
             createBtn.disabled = !isAuthenticated || !nameInput.value.trim();
-            planBanner.style.display = 'flex';
-            planBanner.classList.add('allowed');
-            // 🆕 Se muestra el plan real de la cuenta autenticada, para confirmar
-            // que la información visible corresponde al usuario que inició sesión.
-            const planNombre = plan && (plan.planNombre || plan.plan);
-            planBannerTitle.textContent = planNombre ? ('API disponible · Plan ' + planNombre) : 'API disponible';
-            planBannerText.textContent = 'Puedes crear y probar tu API Key. Máximo 5 activas en simultáneo.';
         }
 
         async function loadKeys() {
