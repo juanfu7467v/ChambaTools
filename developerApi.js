@@ -168,13 +168,6 @@ developerApiRouter.post('/keys', async (req, res) => {
 
     const plan = await getUserPlan(uid);
     if (!plan) return res.status(404).json({ success: false, error: 'Usuario no encontrado.' });
-    if (plan.tipoPlan === 'gratis' || plan.planStatus !== 'active') {
-      return res.status(403).json({
-        success: false,
-        error: 'La API para desarrolladores está disponible desde el plan "Prueba Corta" en adelante. Actualiza tu plan para obtener tu API Key.',
-        code: 'PLAN_REQUIRED'
-      });
-    }
 
     const existing = await db.collection('api_keys').where('uid', '==', uid).get();
     const active = existing.docs.filter((d) => !d.data().revoked);
@@ -466,16 +459,6 @@ publicDeveloperRouter.post('/comprobantes/build', async (req, res) => {
   try {
     const auth = await authenticateByApiKey(req, res);
     if (!auth) return;
-    if (auth.planStatus !== 'active') {
-      return res.status(403).json({ ok: false, error: 'Plan no activo.', code: 'PLAN_INACTIVE' });
-    }
-    if (auth.tipoPlan === 'gratis') {
-      return res.status(403).json({
-        ok: false,
-        error: 'La API está disponible solo para planes pagos. Actualiza tu plan.',
-        code: 'PLAN_REQUIRED'
-      });
-    }
     let normalized;
     try {
       // El emisor opcionalmente puede venir vacío: si viene, se usa;
@@ -484,8 +467,7 @@ publicDeveloperRouter.post('/comprobantes/build', async (req, res) => {
     } catch (e) {
       return res.status(400).json({ ok: false, error: e.message });
     }
-    // Restricciones de plan gratuito: si llega una gratuita (no debería
-    // porque ya validamos arriba, pero por seguridad) solo se permite Moderna.
+    // En el plan gratuito se mantiene disponible la plantilla Moderna.
     if (auth.tipoPlan === 'gratis' && normalized.templateId !== 'moderna') {
       return res.status(403).json({ ok: false, error: 'Plan gratuito solo permite plantilla Moderna.' });
     }
@@ -534,16 +516,6 @@ publicDeveloperRouter.post('/comprobantes/preview', async (req, res) => {
   try {
     const auth = await authenticateByApiKey(req, res);
     if (!auth) return;
-    if (auth.tipoPlan === 'gratis') {
-      return res.status(403).json({
-        ok: false,
-        error: 'La API está disponible solo para planes pagos. Actualiza tu plan.',
-        code: 'PLAN_REQUIRED'
-      });
-    }
-    if (auth.planStatus !== 'active') {
-      return res.status(403).json({ ok: false, error: 'Plan no activo.' });
-    }
     let normalized;
     try {
       normalized = publicNormalizePayload(req.body || {});
@@ -581,16 +553,6 @@ publicDeveloperRouter.post('/comprobantes/pdf', async (req, res) => {
   try {
     const auth = await authenticateByApiKey(req, res);
     if (!auth) return;
-    if (auth.tipoPlan === 'gratis') {
-      return res.status(403).json({
-        ok: false,
-        error: 'La API está disponible solo para planes pagos. Actualiza tu plan.',
-        code: 'PLAN_REQUIRED'
-      });
-    }
-    if (auth.planStatus !== 'active') {
-      return res.status(403).json({ ok: false, error: 'Plan no activo.' });
-    }
 
     // Verificar límite (idéntico a plantillas.js)
     const userRef = db.collection('usuarios').doc(auth.uid);

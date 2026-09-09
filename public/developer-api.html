@@ -728,19 +728,13 @@ curl_close($ch);</pre>
         }
 
         function showPlanGate(plan) {
-            const isPaid = plan && plan.tipoPlan && plan.tipoPlan !== 'gratis' && plan.planStatus === 'active';
-            createBtn.disabled = isPaid ? !nameInput.value.trim() : true;
-            if (!isPaid) {
-                planBanner.style.display = 'flex';
-                planBanner.classList.remove('allowed');
-                planBannerTitle.textContent = 'La API requiere un plan de pago';
-                planBannerText.textContent = 'Tu plan actual es "' + (plan?.planNombre || 'Gratuito') + '". Actualiza a Prueba Corta o cualquier plan superior para crear API Keys.';
-            } else {
-                planBanner.style.display = 'flex';
-                planBanner.classList.add('allowed');
-                planBannerTitle.textContent = 'Plan activo: ' + plan.planNombre;
-                planBannerText.textContent = 'Tienes disponible la autogestión de API Keys. Máximo 5 activas en simultáneo.';
-            }
+            // La creación de API Keys depende únicamente de que exista una sesión.
+            const isAuthenticated = Boolean(plan);
+            createBtn.disabled = !isAuthenticated || !nameInput.value.trim();
+            planBanner.style.display = 'flex';
+            planBanner.classList.add('allowed');
+            planBannerTitle.textContent = 'API disponible';
+            planBannerText.textContent = 'Puedes crear y probar tu API Key. Máximo 5 activas en simultáneo.';
         }
 
         async function loadKeys() {
