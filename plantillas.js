@@ -997,5 +997,13 @@ router.get('/health', (req, res) => {
   res.json({ ok: true, service: 'plantillas-comprobantes' });
 });
 
-export { TEMPLATE_REGISTRY, normalizePayload };
+export {
+  TEMPLATE_REGISTRY,
+  PLANTILLAS_PLAN_GRATIS,
+  normalizePayload,
+  renderVoucherHtml,
+  buildPdfBuffer,
+  verificarLimite,
+  incrementarRecibos
+};
 export default router;
