@@ -74,37 +74,73 @@
         #sidebar-overlay.opacity-100 { opacity: 1; }
         #sidebar { position: fixed; top: 0; left: 0; height: 100%; width: 290px; background: linear-gradient(180deg, #0A1628 0%, #0F1F3D 100%); border-right: 1px solid var(--border-active); z-index: 60; transform: translateX(-100%); transition: transform .35s; display: flex; flex-direction: column; box-shadow: 8px 0 40px rgba(0,0,0,0.5); }
         #sidebar.open { transform: translateX(0); }
-        .sb-header { padding: 32px 20px 20px; background: linear-gradient(160deg, #0A1628 0%, #0F1F3D 100%); border-bottom: 1px solid var(--border-active); text-align: center; flex-shrink: 0; }
-        .sb-logo-box { width: 68px; height: 68px; margin: 0 auto 12px; border-radius: 18px; overflow: hidden; border: 2px solid var(--emerald-glow); background: white; display: flex; align-items: center; justify-content: center; }
-        .sb-logo-box img { width: 100%; height: 100%; object-fit: contain; }
-        .sb-brand { font-family: var(--font-display); font-weight: 700; font-size: 22px; color: white; letter-spacing: -0.02em; }
-        .sb-tagline { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.16em; margin-top: 4px; }
-        .sb-scroll-area { flex: 1; overflow-y: auto; padding: 16px 0; }
-        .sb-scroll-area nav { padding: 0 12px; }
-        .sb-cat { font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-subtle); padding: 14px 12px 6px; }
+        .sb-header {
+            padding: 32px 20px 20px;
+            background: linear-gradient(160deg, #0A1628 0%, #0F1F3D 100%);
+            border-bottom: 1px solid var(--border-active);
+            text-align: center; position: relative; overflow: hidden; flex-shrink: 0;
+        }
+        .sb-header::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--emerald), var(--gold), transparent);
+            animation: shimmerHeader 3s infinite;
+        }
+        .sb-logo-box {
+            width: 68px; height: 68px; margin: 0 auto 12px; border-radius: 18px; overflow: hidden;
+            border: 2px solid var(--border-active); box-shadow: 0 0 25px var(--emerald-glow);
+            background: rgba(0,200,83,0.05); transition: transform .3s ease;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .sb-logo-box:hover { transform: scale(1.1) rotate(5deg); }
+        .sb-logo-box img { width: 100%; height: 100%; object-fit: cover; }
+        .sb-brand {
+            font-family: var(--font-family); font-weight: 800; font-size: 20px;
+            color: var(--gold); letter-spacing: 0.14em; text-transform: uppercase;
+            text-shadow: 0 0 20px rgba(255,215,0,0.4);
+        }
+        .sb-tagline { font-size: 11px; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.16em; margin-top: 6px; }
+        .sb-scroll-area { flex: 1; overflow-y: auto; padding: 8px 0; }
+        .sb-scroll-area::-webkit-scrollbar { width: 3px; }
+        .sb-scroll-area::-webkit-scrollbar-track { background: transparent; }
+        .sb-scroll-area::-webkit-scrollbar-thumb { background: var(--emerald-dark); border-radius: 3px; }
+        .sb-scroll-area nav { padding: 0 4px; }
+        .sb-cat { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; color: var(--emerald); padding: 14px 20px 8px; }
         .sb-scroll-area nav a {
             display: flex; align-items: center; gap: 12px;
-            padding: 11px 14px; margin-bottom: 2px; border-radius: 12px;
+            padding: 12px 20px; margin-bottom: 2px;
             color: var(--text-primary); text-decoration: none; font-size: 14px; font-weight: 500;
-            transition: background .2s, color .2s;
+            position: relative; overflow: hidden; cursor: pointer;
+            transition: background .25s ease, color .25s ease, transform .25s ease;
         }
-        .sb-scroll-area nav a:hover { background: rgba(255,255,255,0.04); color: var(--emerald-light); }
-        .sb-scroll-area nav a.active { background: linear-gradient(135deg, var(--emerald-dark), var(--emerald)); color: white; box-shadow: var(--shadow-emerald); }
-        .sb-icon { width: 18px; text-align: center; }
-        .sb-footer { padding: 16px; border-top: 1px solid var(--border-subtle); display: flex; justify-content: center; gap: 12px; }
-        .sb-footer a { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 10px; color: var(--text-muted); transition: all .2s; text-decoration: none; }
-        .sb-footer a:hover { background: rgba(0,200,83,0.1); color: var(--emerald-light); }
+        .sb-scroll-area nav a::before {
+            content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+            background: var(--emerald); transform: scaleY(0); transition: transform .25s ease;
+        }
+        .sb-scroll-area nav a:hover { background: rgba(0,200,83,0.08); color: var(--emerald-light); transform: translateX(4px); }
+        .sb-scroll-area nav a:hover::before { transform: scaleY(1); }
+        .sb-scroll-area nav a.active {
+            background: linear-gradient(90deg, rgba(0,200,83,0.12) 0%, transparent 100%);
+            color: var(--emerald); font-weight: 700; box-shadow: none;
+        }
+        .sb-scroll-area nav a.active::before { transform: scaleY(1); }
+        .sb-icon { width: 18px; text-align: center; color: var(--text-muted); transition: color .25s ease; }
+        .sb-scroll-area nav a:hover .sb-icon, .sb-scroll-area nav a.active .sb-icon { color: var(--emerald); }
+        .sb-footer { padding: 16px 20px; border-top: 1px solid var(--border-subtle); display: flex; justify-content: center; gap: 16px; background: rgba(0,0,0,0.2); flex-shrink: 0; }
+        .sb-footer a { color: var(--text-muted); font-size: 18px; transition: all .25s ease; text-decoration: none; }
+        .sb-footer a:hover { color: var(--emerald); transform: translateY(-3px); }
 
         /* ═══ TOPBAR ═══ */
         #menu-toggle {
-            position: fixed; top: 18px; left: 18px; z-index: 65;
+            position: fixed; top: 16px; left: 16px; z-index: 100;
             width: 44px; height: 44px; border-radius: 12px;
-            background: linear-gradient(135deg, var(--navy-card), var(--navy-surface));
-            color: var(--emerald-light); border: 1px solid var(--border-active);
+            background: rgba(15, 31, 61, 0.9);
+            color: var(--emerald); border: 1px solid var(--border-active);
             display: flex; align-items: center; justify-content: center; cursor: pointer;
-            box-shadow: var(--shadow-card); transition: all .2s;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.3); transition: all .3s ease;
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
         }
-        #menu-toggle:hover { transform: scale(1.05); box-shadow: var(--shadow-emerald); }
+        #menu-toggle:hover { transform: scale(1.08); background: rgba(0,200,83,0.1); box-shadow: 0 6px 20px var(--emerald-glow); }
+        #menu-toggle i { color: var(--emerald); font-size: 1.2rem; }
         .topbar-spacer { height: 60px; }
 
         /* ═══ MAIN ═══ */
@@ -670,6 +706,18 @@ curl_close($ch);</pre>
         const planBannerTitle = document.getElementById('planBannerTitle');
         const planBannerText = document.getElementById('planBannerText');
         const authGate = document.getElementById('authGate');
+        const authGateSection = authGate ? authGate.closest('section') : null;
+        const apiKeyManagerSection = document.getElementById('apiKeyManager');
+
+        // 🆕 Controla la visibilidad real de las secciones según el estado de sesión.
+        // Antes, el atributo inline "style=display:none" de estas secciones tenía más
+        // especificidad que las reglas CSS de las clases (.auth-only / .requires-auth),
+        // así que aunque el usuario estuviera autenticado la sección de "Tus API Keys"
+        // nunca llegaba a mostrarse (por eso el botón "Ir a Crear API Key" no hacía nada).
+        function setAuthVisibility(isAuthenticated) {
+            if (authGateSection) authGateSection.style.display = isAuthenticated ? 'none' : 'block';
+            if (apiKeyManagerSection) apiKeyManagerSection.style.display = isAuthenticated ? 'block' : 'none';
+        }
 
         nameInput.addEventListener('input', () => { createBtn.disabled = !nameInput.value.trim(); });
 
@@ -714,15 +762,19 @@ curl_close($ch);</pre>
                 if (!sess || !sess.authenticated) {
                     document.body.classList.add('logged-out');
                     document.body.classList.remove('auth-ready');
+                    setAuthVisibility(false);
                     return null;
                 }
                 document.body.classList.remove('logged-out');
                 document.body.classList.add('auth-ready');
+                setAuthVisibility(true);
+                // Se consulta el plan del usuario autenticado (misma cuenta que la cookie de sesión)
                 const plan = await fetchJSON('/api/user/plan?uid=' + encodeURIComponent(sess.uid));
                 return plan;
             } catch (e) {
                 document.body.classList.add('logged-out');
                 document.body.classList.remove('auth-ready');
+                setAuthVisibility(false);
                 return null;
             }
         }
@@ -733,7 +785,10 @@ curl_close($ch);</pre>
             createBtn.disabled = !isAuthenticated || !nameInput.value.trim();
             planBanner.style.display = 'flex';
             planBanner.classList.add('allowed');
-            planBannerTitle.textContent = 'API disponible';
+            // 🆕 Se muestra el plan real de la cuenta autenticada, para confirmar
+            // que la información visible corresponde al usuario que inició sesión.
+            const planNombre = plan && (plan.planNombre || plan.plan);
+            planBannerTitle.textContent = planNombre ? ('API disponible · Plan ' + planNombre) : 'API disponible';
             planBannerText.textContent = 'Puedes crear y probar tu API Key. Máximo 5 activas en simultáneo.';
         }
 
@@ -767,6 +822,7 @@ curl_close($ch);</pre>
                 if (/autenticado|logged/i.test(e.message)) {
                     document.body.classList.add('logged-out');
                     document.body.classList.remove('auth-ready');
+                    setAuthVisibility(false);
                     return;
                 }
                 keysTbody.innerHTML = '<tr><td colspan="7" class="empty-state"><i class="fas fa-times-circle" style="color:var(--ruby-light);"></i><br/>' + escapeHtml(e.message) + '</td></tr>';
