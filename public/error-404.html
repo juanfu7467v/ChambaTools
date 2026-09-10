@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Página no encontrada | Masitaprex</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            overflow-x: hidden;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+            /* Fondo de nebulosa profunda (visible a través del canvas transparente) */
+            background: radial-gradient(ellipse at 30% 40%, #1a0b2e 0%, #0b0018 35%, #020010 70%, #000008 100%);
+            background-attachment: fixed;
+        }
+
+        /* Canvas 3D galaxia — fondo absoluto, ahora con transparencia */
+        #galaxy-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* ── CONTENIDO PRINCIPAL (encima del canvas) ── */
+        .page-content {
+            position: relative;
+            z-index: 10;
+            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* ── Sección 404 Hero ── */
+        .hero-404 {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 60vh;
+            padding: 20px 20px;
+            text-align: center;
+            width: 100%;
+        }
+
+        .hero-404 h1 {
+            font-size: clamp(80px, 14vw, 140px);
+            margin: 0;
+            color: #e63946;
+            text-shadow: 0 0 40px rgba(230, 57, 70, 0.9), 0 0 80px rgba(200, 40, 50, 0.6);
+            animation: pulse-glow 3s ease-in-out infinite;
+            font-weight: 900;
+            letter-spacing: 0.02em;
+            line-height: 1;
+        }
+
+        .hero-404 p {
+            font-size: clamp(18px, 3vw, 26px);
+            margin: 10px 0 5px;
+            color: #e63946;
+            text-shadow: 0 2px 12px rgba(0, 0, 0, 0.7);
+            font-weight: 400;
+            opacity: 0.95;
+        }
+
+        .hero-404 .btn {
+            color: white;
+            text-decoration: none;
+            background: linear-gradient(135deg, rgba(0, 180, 80, 0.6), rgba(0, 140, 60, 0.5));
+            padding: 14px 32px;
+            border-radius: 50px;
+            display: inline-block;
+            margin-top: 16px;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 200, 100, 0.4);
+            font-weight: 600;
+            font-size: 16px;
+            letter-spacing: 0.03em;
+            box-shadow: 0 8px 32px rgba(0, 180, 80, 0.35);
+        }
+
+        .hero-404 .btn:hover {
+            background: linear-gradient(135deg, rgba(0, 200, 100, 0.75), rgba(0, 160, 70, 0.65));
+            border-color: rgba(0, 230, 120, 0.6);
+            box-shadow: 0 12px 40px rgba(0, 200, 100, 0.55);
+            transform: translateY(-3px);
+        }
+
+        @keyframes pulse-glow {
+            0%,
+            100% {
+                text-shadow: 0 0 40px rgba(230, 57, 70, 0.9), 0 0 80px rgba(200, 40, 50, 0.6);
+            }
+            50% {
+                text-shadow: 0 0 60px rgba(255, 80, 90, 1), 0 0 120px rgba(220, 50, 60, 0.85);
+            }
+        }
+
+        /* ── Flecha scroll-down ── */
+        .scroll-hint {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: bounce-down 2s ease-in-out infinite;
+            z-index: 11;
+            opacity: 0.7;
+            pointer-events: none;
+        }
+        .scroll-hint i {
+            font-size: 28px;
+            color: rgba(255, 255, 255, 0.7);
+            text-shadow: 0 0 18px rgba(0, 200, 100, 0.6);
+        }
+        @keyframes bounce-down {
+            0%,
+            100% {
+                transform: translateX(-50%) translateY(0);
+            }
+            50% {
+                transform: translateX(-50%) translateY(14px);
+            }
+        }
+
+        /* ── SECCIÓN DE SERVICIOS ── */
+        .services-section {
+            width: 100%;
+            padding: 40px 0 60px;
+            position: relative;
+            z-index: 10;
+            /* Fondo degradado blanco y azul (oscuro arriba para legibilidad del texto blanco) */
+            background: linear-gradient(to bottom, #0a1628 0%, #1e3a5f 40%, #c8dff5 100%);
+        }
+
+        .services-label {
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 13px;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.6);
+            font-weight: 500;
+        }
+
+        .services-title {
+            text-align: center;
+            font-size: clamp(22px, 4vw, 32px);
+            font-weight: 800;
+            margin-bottom: 30px;
+            letter-spacing: 0.04em;
+            background: linear-gradient(135deg, #a0e8b0, #7ec8f8, #b0f0c0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: none;
+        }
+
+        /* Carrusel horizontal */
+        .carousel-container {
+            width: 100%;
+            overflow-x: auto;
+            overflow-y: hidden;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            padding: 10px 0 20px;
+            cursor: grab;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.25) transparent;
+        }
+        .carousel-container::-webkit-scrollbar {
+            height: 5px;
+        }
+        .carousel-container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .carousel-container::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+        }
+        .carousel-container:active {
+            cursor: grabbing;
+        }
+
+        .carousel-track {
+            display: flex;
+            gap: 24px;
+            padding: 10px calc((100vw - 360px) / 2);
+            width: max-content;
+            min-width: 100%;
+        }
+
+        /* Tarjetas */
+        .service-card {
+            flex: 0 0 340px;
+            scroll-snap-align: center;
+            background: rgba(20, 10, 45, 0.55);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 24px;
+            color: white;
+            text-align: center;
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1.2);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35), 0 0 0 0 rgba(0, 180, 80, 0);
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            position: relative;
+            overflow: hidden;
+        }
+        .service-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 20%, rgba(0, 200, 100, 0.10) 0%, transparent 55%);
+            pointer-events: none;
+            transition: opacity 0.4s;
+            opacity: 0;
+            z-index: 1;
+        }
+        .service-card:hover::before {
+            opacity: 1;
+        }
+        .service-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(255, 255, 255, 0.25);
+            box-shadow: 0 24px 56px rgba(0, 0, 0, 0.45), 0 0 0 2px rgba(0, 200, 100, 0.18);
+        }
+
+        /* Imagen superior de la tarjeta */
+        .card-image {
+            width: 100%;
+            aspect-ratio: 1536 / 1024;
+            overflow: hidden;
+            border-radius: 24px 24px 0 0;
+            position: relative;
+            z-index: 1;
+        }
+        .card-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.4s;
+        }
+        .service-card:hover .card-image img {
+            transform: scale(1.03);
+        }
+
+        /* Contenido inferior de la tarjeta */
+        .card-content {
+            padding: 20px 26px 28px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+            position: relative;
+            z-index: 1;
+        }
+
+        .service-card h3 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            letter-spacing: 0.03em;
+        }
+        .service-card p {
+            font-size: 14px;
+            line-height: 1.7;
+            opacity: 0.8;
+            margin-bottom: 20px;
+            flex-grow: 1;
+            color: rgba(255, 255, 255, 0.85);
+        }
+
+        .card-btn {
+            display: inline-block;
+            padding: 11px 28px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 14px;
+            letter-spacing: 0.04em;
+            text-decoration: none;
+            color: white;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            background: linear-gradient(135deg, rgba(0, 180, 80, 0.6), rgba(0, 140, 60, 0.5));
+            box-shadow: 0 6px 22px rgba(0, 180, 80, 0.3);
+        }
+        .card-btn.btn-green {
+            background: linear-gradient(135deg, rgba(0, 180, 80, 0.6), rgba(0, 140, 60, 0.5));
+            box-shadow: 0 6px 22px rgba(0, 180, 80, 0.3);
+        }
+        .card-btn.btn-blue {
+            background: linear-gradient(135deg, rgba(0, 180, 80, 0.6), rgba(0, 140, 60, 0.5));
+            box-shadow: 0 6px 22px rgba(0, 180, 80, 0.3);
+        }
+        .card-btn.btn-teal {
+            background: linear-gradient(135deg, rgba(0, 180, 80, 0.6), rgba(0, 140, 60, 0.5));
+            box-shadow: 0 6px 22px rgba(0, 180, 80, 0.3);
+        }
+        .card-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 200, 100, 0.55);
+            border-color: rgba(255, 255, 255, 0.4);
+            color: #fff;
+            background: linear-gradient(135deg, rgba(0, 200, 100, 0.75), rgba(0, 160, 70, 0.65));
+        }
+
+        /* Indicadores de scroll (puntos) */
+        .carousel-dots {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .carousel-dots .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transition: all 0.35s;
+            cursor: pointer;
+        }
+        .carousel-dots .dot.active {
+            background: rgba(0, 200, 100, 0.9);
+            box-shadow: 0 0 14px rgba(0, 180, 80, 0.7);
+            width: 28px;
+            border-radius: 10px;
+        }
+
+        /* ── FOOTER ── */
+        .footer {
+            background: #000000;
+            color: #ccc;
+            text-align: center;
+            padding: 40px 20px 30px;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .footer p {
+            margin: 6px 0;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+        /* Enlaces generales del footer en blanco */
+        .footer a {
+            color: #ffffff;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        .footer a:hover {
+            color: #b0f0c0;
+            text-decoration: underline;
+        }
+        /* Enlaces legales específicos ahora en verde */
+        .footer a[href*="terminos"],
+        .footer a[href*="politica"],
+        .footer a[href*="disclaimer"],
+        .footer a[href*="aviso-legal"] {
+            color: #4caf50;
+        }
+        .footer a[href*="terminos"]:hover,
+        .footer a[href*="politica"]:hover,
+        .footer a[href*="disclaimer"]:hover,
+        .footer a[href*="aviso-legal"]:hover {
+            color: #81c784;
+        }
+        .footer .social-icons {
+            margin: 12px 0;
+            display: flex;
+            justify-content: center;
+            gap: 18px;
+        }
+        .footer .social-icons a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: rgba(0, 180, 80, 0.15);
+            color: #4caf50;
+            font-size: 20px;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+        .footer .social-icons a:hover {
+            background: rgba(0, 200, 100, 0.25);
+            color: #81c784;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(0, 180, 80, 0.4);
+        }
+        /* Elementos fuertes del footer en blanco */
+        .footer strong {
+            color: #ffffff;
+        }
+        .footer .legal-box {
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 12px;
+            text-align: left;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        /* Título del legal-box en blanco */
+        .footer .legal-box h4 {
+            font-weight: 800;
+            margin-bottom: 10px;
+            color: #ffffff;
+            font-size: 15px;
+        }
+        .footer .legal-box p {
+            font-size: 13px;
+            color: #aaa;
+            line-height: 1.7;
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 768px) {
+            .carousel-track {
+                padding: 10px 20px;
+                gap: 16px;
+            }
+            .service-card {
+                flex: 0 0 280px;
+                border-radius: 20px;
+            }
+            .card-image {
+                border-radius: 20px 20px 0 0;
+            }
+            .card-content {
+                padding: 16px 18px 22px;
+            }
+            .service-card h3 {
+                font-size: 17px;
+            }
+            .service-card p {
+                font-size: 13px;
+            }
+            .footer {
+                padding: 30px 15px 25px;
+            }
+            .footer .legal-box {
+                padding: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- FONDO 3D GALAXIA (WebGL) -->
+    <canvas id="galaxy-canvas"></canvas>
+
+    <!-- CONTENIDO COMPLETO ENCIMA DEL CANVAS -->
+    <div class="page-content">
+
+        <!-- HERO 404 -->
+        <div class="hero-404">
+            <h1>404</h1>
+            <p>¡Oops! La página que buscas no existe.</p>
+            <div>
+                <a href="/" class="btn">Volver al inicio</a>
+            </div>
+            <div class="scroll-hint">
+                <i class="fa-solid fa-chevron-down"></i>
+            </div>
+        </div>
+
+        <!-- SECCIÓN DE SERVICIOS - PUBLICIDAD ESTILO CHINO -->
+        <div class="services-section" id="servicios">
+            <div class="services-label">✦ Nuestros Servicios ✦</div>
+            <div class="services-title">Descubre todo lo que tenemos para ti</div>
+
+            <div class="carousel-container" id="carousel">
+                <div class="carousel-track">
+
+                    <!-- Tarjeta 2: Consulta PE -->
+                    <div class="service-card" data-index="1">
+                        <div class="card-image">
+                            <img src="https://i.postimg.cc/Jz3DWGxR/file-00000000bea4720e8bfc890b640fa490.png" alt="Consulta PE App">
+                        </div>
+                        <div class="card-content">
+                            <h3> Consulta PE LATAM</h3>
+                            <p>Plataforma web y APK de Masitaprex que facilita el acceso a información de fuentes públicas de Perú y Venezuela: RENIEC, SUNAT, SUNARP, búsqueda de personas venezolanas por cédula o nombre, y mucho más. Interfaz rápida y fácil de usar.</p>
+                            <a href="consultaPe-vercion-web" class="card-btn btn-blue">Probar Consulta Pe web<i class="fa-solid fa-arrow-right" style="margin-left:6px;"></i></a>
+                        </div>
+                    </div>
+
+                    <!-- Tarjeta 3: Infraestructura API -->
+                    <div class="service-card" data-index="2">
+                        <div class="card-image">
+                            <img src="https://i.postimg.cc/3wKyrYSs/file-000000005bf8720e8b1f287dad731da6.png" alt="APIs Masitaprex">
+                        </div>
+                        <div class="card-content">
+                            <h3>🚀 Infraestructura API</h3>
+                            <p>Operamos como intermediario tecnológico que facilita el acceso a información de fuentes públicas (RENIEC, SUNAT, SUNARP, etc.) a través de una plataforma moderna, segura y escalable.</p>
+                            <a href="api-key" class="card-btn btn-teal">Más información <i class="fa-solid fa-arrow-right" style="margin-left:6px;"></i></a>
+                        </div>
+                    </div>
+
+                    <!-- Tarjeta 1: PeliPREX -->
+                    <div class="service-card" data-index="0">
+                        <div class="card-image">
+                            <img src="https://i.postimg.cc/3xj4Hd18/file-00000000310c720eb88718362ca2d2d2.png" alt="PeliPREX">
+                        </div>
+                        <div class="card-content">
+                            <h3>🎬 PeliPREX</h3>
+                            <p>Accede a un mundo ilimitado de películas y series en HD. Disfruta de estrenos, clásicos y contenido exclusivo sin interrupciones.</p>
+                            <a href="actividad" class="card-btn btn-blue">Explorarlo ahora<i class="fa-solid fa-arrow-right" style="margin-left:6px;"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Indicadores de scroll -->
+            <div class="carousel-dots" id="carouselDots">
+                <span class="dot active" data-index="0"></span>
+                <span class="dot" data-index="1"></span>
+                <span class="dot" data-index="2"></span>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <footer class="footer">
+            <p><strong>Masitaprex</strong> © <span id="footer-year"></span> - Todos los derechos reservados</p>
+            <p>Infraestructura tecnológica funciona con apis externas. No somos responsables por el contenido o servicios ofrecidos por terceros.</p>
+            <p><strong>Consulta PE APK</strong> | <strong>PeliPREX HD</strong> | <strong>Masitaprex</strong></p>
+            <p>
+                <a href="terminos-condiciones">Términos y condiciones</a> |
+                <a href="politica-privacidad">Política de privacidad</a> |
+                <a href="disclaimer-apis">Aviso legal APIS</a> |
+                <a href="aviso-legal-peliprex">Aviso legal peliPREX</a>
+            </p>
+            <p>Síguenos en nuestras redes sociales para más información sobre <strong>Consulta PE</strong> y <strong>PeliPREX</strong></p>
+            <div class="social-icons">
+                <a href="https://m.facebook.com/61564349657272/" target="_blank" rel="noopener"><i class="fab fa-facebook"></i></a>
+                <a href="https://youtube.com/@eltiojota628?si=sZw2ZHHTUMdaR0nL" target="_blank" rel="noopener"><i class="fab fa-youtube"></i></a>
+            </div>
+            <div class="legal-box">
+                <h4>🛡️ Aviso de Transparencia y Naturaleza Jurídica</h4>
+                <p>Para los que exigen claridad: <strong>Consulta Pe no es una entidad gubernamental ni está vinculada al Estado.</strong> Somos una infraestructura tecnológica privada que actúa exclusivamente como intermediario técnico. Nuestra plataforma facilita el acceso a nodos de información pública, optimizando la visualización de datos de manera externa. No somos dueños de la información, somos los dueños de la mejor tecnología para encontrarla.</p>
+            </div>
+            <p style="margin-top:20px;font-size:14px;color:#ccc;">Masitaprex - consulta Pe - peliPREX | <strong>Cajamarca, Perú</strong> | <strong>Representante: JOSÉ RENÉ CUBAS PÉREZ | RUC: 10736224351</strong></p>
+        </footer>
+    </div>
+
+    <script>
+        /* ═══════════════════════════════════════════════
+           GALAXIA CÓSMICA 3D WebGL — Nebulosas y estrellas
+           ═══════════════════════════════════════════════ */
+        (function() {
+            const canvas = document.getElementById('galaxy-canvas');
+            // Contexto con transparencia para que se vea el fondo de nebulosa CSS
+            const gl = canvas.getContext('webgl', { alpha: true }) || canvas.getContext('experimental-webgl', { alpha: true });
+
+            if (!gl) {
+                document.body.style.background = 'linear-gradient(135deg, #0a0015 0%, #1a0035 50%, #0d0025 100%)';
+                return;
+            }
+
+            function resize() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+                gl.viewport(0, 0, canvas.width, canvas.height);
+            }
+            window.addEventListener('resize', resize);
+            resize();
+
+            const vsSource = `
+            attribute vec3  aPosition;
+            attribute float aSize;
+            attribute float aBrightness;
+            attribute float aColorVariant;
+
+            uniform mat4  uProjection;
+            uniform mat4  uView;
+            uniform float uTime;
+
+            varying float vBrightness;
+            varying float vColorVariant;
+
+            void main() {
+                float angle = uTime * 0.06 + aPosition.x * 0.0015 + aPosition.z * 0.0015;
+                float cosA  = cos(angle);
+                float sinA  = sin(angle);
+
+                vec3 pos = aPosition;
+                float x2 = pos.x * cosA - pos.z * sinA;
+                float z2 = pos.x * sinA + pos.z * cosA;
+                pos.x = x2;
+                pos.z = z2;
+
+                pos.y += sin(uTime * 0.25 + aPosition.x * 0.008 + aPosition.z * 0.008) * 1.2;
+
+                vec4 mvPos   = uView * vec4(pos, 1.0);
+                gl_Position  = uProjection * mvPos;
+
+                float dist   = length(mvPos.xyz);
+                gl_PointSize = aSize * (420.0 / dist);
+
+                vBrightness   = aBrightness;
+                vColorVariant = aColorVariant;
+            }
+        `;
+
+            const fsSource = `
+            precision mediump float;
+
+            varying float vBrightness;
+            varying float vColorVariant;
+
+            void main() {
+                vec2  uv = gl_PointCoord - 0.5;
+                float r  = length(uv);
+                if (r > 0.5) discard;
+
+                float alpha = (1.0 - r * 2.0) * vBrightness;
+
+                // Paleta de colores cósmicos: azul profundo, púrpura, magenta, rosa, dorado, cian
+                vec3 deepBlue = vec3(0.25, 0.35, 1.0);
+                vec3 purple   = vec3(0.65, 0.25, 1.0);
+                vec3 magenta  = vec3(1.0, 0.2, 0.7);
+                vec3 rose     = vec3(1.0, 0.45, 0.6);
+                vec3 gold     = vec3(1.0, 0.85, 0.3);
+                vec3 cyan     = vec3(0.2, 0.95, 1.0);
+
+                vec3 color;
+                float v = vColorVariant;
+                if      (v < 0.2)  color = mix(deepBlue, purple,  v * 5.0);
+                else if (v < 0.4)  color = mix(purple,   magenta, (v - 0.2) * 5.0);
+                else if (v < 0.6)  color = mix(magenta,  rose,    (v - 0.4) * 5.0);
+                else if (v < 0.8)  color = mix(rose,     gold,    (v - 0.6) * 5.0);
+                else               color = mix(gold,     cyan,    (v - 0.8) * 5.0);
+
+                gl_FragColor = vec4(color, alpha);
+            }
+        `;
+
+            function makeShader(type, src) {
+                const s = gl.createShader(type);
+                gl.shaderSource(s, src);
+                gl.compileShader(s);
+                if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
+                    console.error('Shader error:', gl.getShaderInfoLog(s));
+                    gl.deleteShader(s);
+                    return null;
+                }
+                return s;
+            }
+            const prog = gl.createProgram();
+            gl.attachShader(prog, makeShader(gl.VERTEX_SHADER, vsSource));
+            gl.attachShader(prog, makeShader(gl.FRAGMENT_SHADER, fsSource));
+            gl.linkProgram(prog);
+            gl.useProgram(prog);
+
+            // Más partículas para una galaxia más rica
+            const N = 28000;
+            const positions = new Float32Array(N * 3);
+            const sizes = new Float32Array(N);
+            const brights = new Float32Array(N);
+            const colors = new Float32Array(N);
+
+            function rnd(a, b) { return a + Math.random() * (b - a); }
+
+            for (let i = 0; i < N; i++) {
+                const i3 = i * 3;
+                const type = Math.random();
+
+                if (type < 0.55) {
+                    // Brazos espirales coloridos
+                    const arm = Math.floor(Math.random() * 4);
+                    const base = (arm / 4) * Math.PI * 2;
+                    const t = Math.pow(Math.random(), 0.55) * 95;
+                    const spiral = base + t * 0.04;
+                    const spread = rnd(0.2, 2.0) * (1 - t / 110);
+                    positions[i3] = Math.cos(spiral) * t + rnd(-spread, spread);
+                    positions[i3 + 1] = rnd(-4, 4) * (1 - t / 110);
+                    positions[i3 + 2] = Math.sin(spiral) * t + rnd(-spread, spread);
+                    sizes[i] = rnd(0.7, 2.6);
+                    brights[i] = rnd(0.5, 1.0);
+                    colors[i] = Math.random();
+                } else if (type < 0.78) {
+                    // Núcleo galáctico denso
+                    const r = Math.pow(Math.random(), 2.5) * 30;
+                    const θ = rnd(0, Math.PI * 2);
+                    const φ = rnd(-Math.PI / 8, Math.PI / 8);
+                    positions[i3] = r * Math.cos(θ) * Math.cos(φ);
+                    positions[i3 + 1] = r * Math.sin(φ) * 0.5;
+                    positions[i3 + 2] = r * Math.sin(θ) * Math.cos(φ);
+                    sizes[i] = rnd(1.2, 4.0);
+                    brights[i] = rnd(0.6, 1.0);
+                    colors[i] = rnd(0.2, 0.9); // tonos cálidos y rosas
+                } else if (type < 0.92) {
+                    // Nebulosas difusas (partículas grandes, opacidad baja)
+                    const r = rnd(20, 140);
+                    const θ = rnd(0, Math.PI * 2);
+                    const φ = rnd(-Math.PI / 3, Math.PI / 3);
+                    positions[i3] = r * Math.cos(θ) * Math.cos(φ);
+                    positions[i3 + 1] = r * Math.sin(φ) * 0.7;
+                    positions[i3 + 2] = r * Math.sin(θ) * Math.cos(φ);
+                    sizes[i] = rnd(3.0, 8.0);
+                    brights[i] = rnd(0.08, 0.25);
+                    colors[i] = rnd(0.1, 0.8);
+                } else {
+                    // Estrellas lejanas de fondo
+                    const r = rnd(100, 350);
+                    const θ = rnd(0, Math.PI * 2);
+                    const φ = rnd(-Math.PI / 2, Math.PI / 2);
+                    positions[i3] = r * Math.cos(θ) * Math.cos(φ);
+                    positions[i3 + 1] = r * Math.sin(φ);
+                    positions[i3 + 2] = r * Math.sin(θ) * Math.cos(φ);
+                    sizes[i] = rnd(0.2, 1.2);
+                    brights[i] = rnd(0.1, 0.55);
+                    colors[i] = Math.random();
+                }
+            }
+
+            function buf(data) {
+                const b = gl.createBuffer();
+                gl.bindBuffer(gl.ARRAY_BUFFER, b);
+                gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
+                return b;
+            }
+            const bPos = buf(positions);
+            const bSiz = buf(sizes);
+            const bBri = buf(brights);
+            const bCol = buf(colors);
+
+            const lPos = gl.getAttribLocation(prog, 'aPosition');
+            const lSiz = gl.getAttribLocation(prog, 'aSize');
+            const lBri = gl.getAttribLocation(prog, 'aBrightness');
+            const lCol = gl.getAttribLocation(prog, 'aColorVariant');
+            const uProj = gl.getUniformLocation(prog, 'uProjection');
+            const uView = gl.getUniformLocation(prog, 'uView');
+            const uTime = gl.getUniformLocation(prog, 'uTime');
+
+            function perspective(fov, asp, near, far) {
+                const f = 1 / Math.tan(fov / 2);
+                const nf = 1 / (near - far);
+                return new Float32Array([
+                    f / asp, 0, 0, 0,
+                    0, f, 0, 0,
+                    0, 0, (far + near) * nf, -1,
+                    0, 0, 2 * far * near * nf, 0
+                ]);
+            }
+
+            function norm(v) {
+                const l = Math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+                return [v[0] / l, v[1] / l, v[2] / l];
+            }
+
+            function sub(a, b) { return [a[0] - b[0], a[1] - b[1], a[2] - b[2]]; }
+
+            function cross(a, b) { return [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] *
+                    b[0]
+                ]; }
+
+            function dot(a, b) { return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]; }
+
+            function lookAt(eye, ctr, up) {
+                const z = norm(sub(eye, ctr));
+                const x = norm(cross(up, z));
+                const y = cross(z, x);
+                return new Float32Array([
+                    x[0], y[0], z[0], 0,
+                    x[1], y[1], z[1], 0,
+                    x[2], y[2], z[2], 0,
+                    -dot(x, eye), -dot(y, eye), -dot(z, eye), 1
+                ]);
+            }
+
+            function bind(b, loc, sz) {
+                gl.bindBuffer(gl.ARRAY_BUFFER, b);
+                gl.enableVertexAttribArray(loc);
+                gl.vertexAttribPointer(loc, sz, gl.FLOAT, false, 0, 0);
+            }
+
+            let mx = 0,
+                my = 0;
+            window.addEventListener('mousemove', e => {
+                mx = (e.clientX / window.innerWidth - 0.5) * 2;
+                my = (e.clientY / window.innerHeight - 0.5) * 2;
+            });
+
+            gl.enable(gl.BLEND);
+            gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+            // Limpiar con color transparente para que se vea el fondo CSS
+            gl.clearColor(0.0, 0.0, 0.0, 0.0);
+
+            const t0 = performance.now();
+
+            function render() {
+                requestAnimationFrame(render);
+
+                const t = (performance.now() - t0) * 0.001;
+                const asp = canvas.width / canvas.height;
+
+                gl.clear(gl.COLOR_BUFFER_BIT);
+
+                const camR = 130 + Math.sin(t * 0.06) * 18;
+                const camAng = t * 0.035 + mx * 0.12;
+                const camY = 38 + Math.sin(t * 0.04) * 12 + my * 7;
+
+                const eye = [Math.cos(camAng) * camR, camY, Math.sin(camAng) * camR];
+
+                gl.uniformMatrix4fv(uProj, false, perspective(Math.PI / 3.4, asp, 0.5, 900));
+                gl.uniformMatrix4fv(uView, false, lookAt(eye, [0, 0, 0], [0, 1, 0]));
+                gl.uniform1f(uTime, t);
+
+                bind(bPos, lPos, 3);
+                bind(bSiz, lSiz, 1);
+                bind(bBri, lBri, 1);
+                bind(bCol, lCol, 1);
+
+                gl.drawArrays(gl.POINTS, 0, N);
+            }
+
+            render();
+        })();
+
+        /* ═══════════════════════════════════════════════
+           INTERACTIVIDAD DEL CARRUSEL
+           ═══════════════════════════════════════════════ */
+        (function() {
+            const carousel = document.getElementById('carousel');
+            const dots = document.querySelectorAll('#carouselDots .dot');
+            const cards = document.querySelectorAll('.service-card');
+
+            function updateActiveDot() {
+                const scrollLeft = carousel.scrollLeft;
+                const cardWidth = cards[0] ? cards[0].offsetWidth + 24 : 340 + 24; // ancho + gap
+                const index = Math.round(scrollLeft / cardWidth);
+                dots.forEach((dot, i) => {
+                    dot.classList.toggle('active', i === index);
+                });
+            }
+
+            carousel.addEventListener('scroll', updateActiveDot, { passive: true });
+
+            dots.forEach(dot => {
+                dot.addEventListener('click', () => {
+                    const index = parseInt(dot.getAttribute('data-index'));
+                    const cardWidth = cards[0] ? cards[0].offsetWidth + 24 : 340 + 24;
+                    carousel.scrollTo({
+                        left: index * cardWidth - (carousel.offsetWidth - cards[0].offsetWidth) / 2,
+                        behavior: 'smooth'
+                    });
+                });
+            });
+
+            // Actualizar dots al cargar
+            updateActiveDot();
+            window.addEventListener('resize', updateActiveDot);
+        })();
+
+        // Año automático del footer
+        document.getElementById('footer-year').textContent = new Date().getFullYear();
+    </script>
+</body>
+</html>
