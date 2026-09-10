@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estado de tu Cuenta - Masitaprex</title>
+    <style>
+        body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f7f9; color: #1a1a1a; }
+        .container { max-width: 600px; margin: 20px auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .header { background: #000000; padding: 40px 20px; text-align: center; }
+        .logo { color: #00d2ff; font-size: 28px; font-weight: 800; letter-spacing: 4px; text-transform: uppercase; margin: 0; }
+        .subtitle { color: #ffffff; font-size: 11px; letter-spacing: 3px; margin-top: 5px; opacity: 0.8; }
+        .content { padding: 40px 30px; line-height: 1.6; }
+        .greeting { font-size: 24px; font-weight: 700; color: #111; margin-bottom: 20px; border-left: 4px solid #00d2ff; padding-left: 15px; }
+        .text { font-size: 16px; color: #4a4a4a; margin-bottom: 25px; }
+        
+        /* Estilo de la Tabla de Detalles */
+        .info-table { width: 100%; background: #ffffff; border: 2px solid #00d2ff; border-radius: 10px; border-collapse: separate; border-spacing: 0; overflow: hidden; margin-bottom: 25px; }
+        .info-table td { padding: 15px; border-bottom: 1px solid #f0f0f0; font-size: 15px; }
+        .info-table tr:last-child td { border-bottom: none; }
+        .label { font-weight: 700; color: #555; text-transform: uppercase; font-size: 12px; width: 40%; }
+        .value { color: #000; font-weight: 600; text-align: right; }
+        .highlight { color: #00c853; } /* Color verde para "Ilimitado" o valores positivos */
+        .alert-text { color: #ff5252; font-weight: 700; }
+
+        .button-container { text-align: center; margin: 35px 0; }
+        .button { background-color: #00d2ff; color: #000000 !important; padding: 16px 32px; text-decoration: none; border-radius: 6px; font-weight: 800; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; display: inline-block; }
+        .footer { background: #f9f9f9; padding: 25px; text-align: center; font-size: 12px; color: #888; border-top: 1px solid #eeeeee; }
+        .footer a { color: #00d2ff; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="logo">Masitaprex</h1>
+            <div class="subtitle">INFRAESTRUCTURA Y SERVICIOS DIGITALES</div>
+        </div>
+        
+        <div class="content">
+            <div class="greeting">Estado de tu Suscripción.</div>
+            <p class="text">Hola <strong>{{nombre}}</strong>,</p>
+            <p class="text">
+                Te enviamos este resumen detallado sobre el estado actual de tus servicios en <strong>Masitaprex</strong> para que puedas mantener tu operatividad sin interrupciones.
+            </p>
+
+            {{#if plan_creditos}}
+            <table class="info-table">
+                <tr>
+                    <td class="label">Plan:</td>
+                    <td class="value">CRÉDITOS</td>
+                </tr>
+                <tr>
+                    <td class="label">Créditos Restantes:</td>
+                    <td class="value alert-text">{{creditos_restantes}}</td>
+                </tr>
+            </table>
+            {{/if}}
+
+            {{#if plan_ilimitado}}
+            <table class="info-table">
+                <tr>
+                    <td class="label">Plan:</td>
+                    <td class="value highlight">ILIMITADO</td>
+                </tr>
+                <tr>
+                    <td class="label">Acceso hasta:</td>
+                    <td class="value">{{fecha_vencimiento}}</td>
+                </tr>
+                <tr>
+                    <td class="label">Quedan:</td>
+                    <td class="value alert-text">{{dias_restantes}} días</td>
+                </tr>
+            </table>
+            {{/if}}
+            
+            <p class="text">
+                Recuerda que tu acceso incluye los módulos de <strong>Peliprex</strong>, <strong>Consulta PE</strong> y nuestras <strong>APIs</strong> de infraestructura. Puedes gestionar tu renovación desde el panel principal.
+            </p>
+            
+            <div class="button-container">
+                <a href="https://masitaprex.com/planes" class="button">Renovar suscripción</a>
+            </div>
+            
+            <p class="text" style="font-size: 13px; color: #999;">
+                Este es un aviso automático de control de cuenta. Si has realizado una gestión recientemente, la actualización se reflejará en breve.
+            </p>
+        </div>
+        
+        <div class="footer">
+            <p>Masitaprex Project - Soporte de Infraestructura</p>
+            <p>© 2026 Masitaprex - Gestión de Servicios Digitales</p>
+            <div style="margin-top: 15px; font-size: 10px; line-height: 1.4; color: #aaa;">
+                Recibes esta notificación informativa como usuario de <a href="https://masitaprex.com">masitaprex.com</a>.<br>
+                Tu privacidad es nuestra prioridad.
+            </div>
+        </div>
+    </div>
+</body>
+</html>
