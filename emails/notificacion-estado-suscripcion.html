@@ -3,19 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Estado de tu Cuenta - Masitaprex</title>
+    <title>Estado de tu cuenta - FacilitoTools</title>
     <style>
-        body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f7f9; color: #1a1a1a; }
+        body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f7f9; color: #0A1628; }
         .container { max-width: 600px; margin: 20px auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        .header { background: #000000; padding: 40px 20px; text-align: center; }
-        .logo { color: #00d2ff; font-size: 28px; font-weight: 800; letter-spacing: 4px; text-transform: uppercase; margin: 0; }
+        .header { background: #0A1628; padding: 40px 20px; text-align: center; }
+        .logo { color: #00C853; font-size: 28px; font-weight: 800; letter-spacing: 4px; text-transform: uppercase; margin: 0; }
         .subtitle { color: #ffffff; font-size: 11px; letter-spacing: 3px; margin-top: 5px; opacity: 0.8; }
         .content { padding: 40px 30px; line-height: 1.6; }
-        .greeting { font-size: 24px; font-weight: 700; color: #111; margin-bottom: 20px; border-left: 4px solid #00d2ff; padding-left: 15px; }
+        .greeting { font-size: 24px; font-weight: 700; color: #111; margin-bottom: 20px; border-left: 4px solid #00C853; padding-left: 15px; }
         .text { font-size: 16px; color: #4a4a4a; margin-bottom: 25px; }
         
         /* Estilo de la Tabla de Detalles */
-        .info-table { width: 100%; background: #ffffff; border: 2px solid #00d2ff; border-radius: 10px; border-collapse: separate; border-spacing: 0; overflow: hidden; margin-bottom: 25px; }
+        .info-table { width: 100%; background: #ffffff; border: 2px solid #00C853; border-radius: 10px; border-collapse: separate; border-spacing: 0; overflow: hidden; margin-bottom: 25px; }
         .info-table td { padding: 15px; border-bottom: 1px solid #f0f0f0; font-size: 15px; }
         .info-table tr:last-child td { border-bottom: none; }
         .label { font-weight: 700; color: #555; text-transform: uppercase; font-size: 12px; width: 40%; }
@@ -24,33 +24,33 @@
         .alert-text { color: #ff5252; font-weight: 700; }
 
         .button-container { text-align: center; margin: 35px 0; }
-        .button { background-color: #00d2ff; color: #000000 !important; padding: 16px 32px; text-decoration: none; border-radius: 6px; font-weight: 800; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; display: inline-block; }
+        .button { background-color: #00C853; color: #0A1628 !important; padding: 16px 32px; text-decoration: none; border-radius: 6px; font-weight: 800; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; display: inline-block; }
         .footer { background: #f9f9f9; padding: 25px; text-align: center; font-size: 12px; color: #888; border-top: 1px solid #eeeeee; }
-        .footer a { color: #00d2ff; text-decoration: none; }
+        .footer a { color: #00C853; text-decoration: none; }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1 class="logo">Masitaprex</h1>
-            <div class="subtitle">INFRAESTRUCTURA Y SERVICIOS DIGITALES</div>
+            <h1 class="logo">FacilitoTools</h1>
+            <div class="subtitle">GENERACIÓN DE COMPROBANTES Y VALIDACIÓN DE CLIENTES</div>
         </div>
         
         <div class="content">
-            <div class="greeting">Estado de tu Suscripción.</div>
+            <div class="greeting">Estado de tu cuenta.</div>
             <p class="text">Hola <strong>{{nombre}}</strong>,</p>
             <p class="text">
-                Te enviamos este resumen detallado sobre el estado actual de tus servicios en <strong>Masitaprex</strong> para que puedas mantener tu operatividad sin interrupciones.
+                Te compartimos un resumen del estado actual de tu cuenta en <strong>FacilitoTools</strong> y de las herramientas disponibles para tu negocio.
             </p>
 
             {{#if plan_creditos}}
             <table class="info-table">
                 <tr>
                     <td class="label">Plan:</td>
-                    <td class="value">CRÉDITOS</td>
+                    <td class="value">SALDO DISPONIBLE</td>
                 </tr>
                 <tr>
-                    <td class="label">Créditos Restantes:</td>
+                    <td class="label">Usos disponibles:</td>
                     <td class="value alert-text">{{creditos_restantes}}</td>
                 </tr>
             </table>
@@ -60,10 +60,10 @@
             <table class="info-table">
                 <tr>
                     <td class="label">Plan:</td>
-                    <td class="value highlight">ILIMITADO</td>
+                    <td class="value highlight">PLAN ACTIVO</td>
                 </tr>
                 <tr>
-                    <td class="label">Acceso hasta:</td>
+                    <td class="label">Vigente hasta:</td>
                     <td class="value">{{fecha_vencimiento}}</td>
                 </tr>
                 <tr>
@@ -74,11 +74,11 @@
             {{/if}}
             
             <p class="text">
-                Recuerda que tu acceso incluye los módulos de <strong>Peliprex</strong>, <strong>Consulta PE</strong> y nuestras <strong>APIs</strong> de infraestructura. Puedes gestionar tu renovación desde el panel principal.
+                Tu cuenta te permite generar boletas y facturas, así como validar DNI, RUC y teléfonos según los límites de tu plan. Puedes revisar las opciones disponibles y ampliar tu plan desde la sección de planes.
             </p>
             
             <div class="button-container">
-                <a href="https://masitaprex.com/planes" class="button">Renovar suscripción</a>
+                <a href="https://facilitotools.com/planes" class="button">Ver planes</a>
             </div>
             
             <p class="text" style="font-size: 13px; color: #999;">
@@ -87,11 +87,11 @@
         </div>
         
         <div class="footer">
-            <p>Masitaprex Project - Soporte de Infraestructura</p>
-            <p>© 2026 Masitaprex - Gestión de Servicios Digitales</p>
+            <p>FacilitoTools · Generación de comprobantes y validación de clientes</p>
+            <p>© 2026 FacilitoTools - Gestión de Servicios Digitales</p>
             <div style="margin-top: 15px; font-size: 10px; line-height: 1.4; color: #aaa;">
-                Recibes esta notificación informativa como usuario de <a href="https://masitaprex.com">masitaprex.com</a>.<br>
-                Tu privacidad es nuestra prioridad.
+                Recibes esta notificación informativa como usuario de <a href="https://facilitotools.com">facilitotools.com</a>.<br>
+                ¿Necesitas ayuda? Escríbenos a <a href="mailto:soporte@facilitotools.com">soporte@facilitotools.com</a>.
             </div>
         </div>
     </div>

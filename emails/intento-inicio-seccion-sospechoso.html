@@ -3,40 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alerta de Seguridad - Masitaprex</title>
+    <title>Aviso de seguridad - FacilitoTools</title>
     <style>
-        body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f7f9; color: #1a1a1a; }
+        body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f7f9; color: #0A1628; }
         .container { max-width: 600px; margin: 20px auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        .header { background: #000000; padding: 40px 20px; text-align: center; }
-        .logo { color: #ff4b2b; font-size: 28px; font-weight: 800; letter-spacing: 4px; text-transform: uppercase; margin: 0; }
+        .header { background: #0A1628; padding: 40px 20px; text-align: center; }
+        .logo { color: #E53935; font-size: 28px; font-weight: 800; letter-spacing: 4px; text-transform: uppercase; margin: 0; }
         .subtitle { color: #ffffff; font-size: 11px; letter-spacing: 3px; margin-top: 5px; opacity: 0.8; }
         .content { padding: 40px 30px; line-height: 1.6; }
-        .greeting { font-size: 24px; font-weight: 700; color: #d32f2f; margin-bottom: 20px; border-left: 4px solid #ff4b2b; padding-left: 15px; }
+        .greeting { font-size: 24px; font-weight: 700; color: #C62828; margin-bottom: 20px; border-left: 4px solid #E53935; padding-left: 15px; }
         .text { font-size: 16px; color: #4a4a4a; margin-bottom: 25px; }
         .alert-box { background: #fff5f5; padding: 20px; border-radius: 8px; margin-bottom: 25px; border: 1px solid #feb2b2; }
         .alert-box ul { margin: 0; padding-left: 20px; color: #4a4a4a; font-size: 14px; list-style-type: none; padding-left: 0; }
         .alert-box li { margin-bottom: 8px; }
         .button-container { text-align: center; margin: 35px 0; }
-        .button { background-color: #ff4b2b; color: #ffffff !important; padding: 16px 32px; text-decoration: none; border-radius: 6px; font-weight: 800; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; display: inline-block; }
+        .button { background-color: #E53935; color: #ffffff !important; padding: 16px 32px; text-decoration: none; border-radius: 6px; font-weight: 800; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; display: inline-block; }
         .footer { background: #f9f9f9; padding: 25px; text-align: center; font-size: 12px; color: #888; border-top: 1px solid #eeeeee; }
-        .footer a { color: #ff4b2b; text-decoration: none; }
+        .footer a { color: #E53935; text-decoration: none; }
         .legal { margin-top: 15px; font-size: 10px; line-height: 1.4; color: #aaa; }
-        .status-tag { display: inline-block; background: #d32f2f; color: white; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; margin-bottom: 10px; }
+        .status-tag { display: inline-block; background: #C62828; color: white; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; margin-bottom: 10px; }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1 class="logo">Masitaprex</h1>
-            <div class="subtitle">SEGURIDAD DE INFRAESTRUCTURA</div>
+            <h1 class="logo">FacilitoTools</h1>
+            <div class="subtitle">SEGURIDAD DE TU CUENTA</div>
         </div>
         
         <div class="content">
             <div class="status-tag">ACCESO RESTRINGIDO</div>
-            <div class="greeting">Actividad Sospechosa Detectada.</div>
+            <div class="greeting">Revisa un inicio de sesión inusual.</div>
             <p class="text">Hola <strong>{{nombre}}</strong>,</p>
             <p class="text">
-                Nuestro sistema de seguridad perimetral ha detectado un intento de inicio de sesión inusual en tu cuenta. Como medida preventiva, (hemos suspendido el acceso a tu perfil por un lapso de 6 horas).
+                Detectamos un intento de inicio de sesión inusual en tu cuenta. Si no reconoces esta actividad, revisa tu contraseña y protege tu acceso cuanto antes.
             </p>
             
             <div class="alert-box">
@@ -52,24 +52,24 @@
             </div>
             
             <p class="text">
-                Si no fuiste tú quien intentó acceder, te recomendamos utilizar el siguiente botón para verificar tu identidad y restablecer tus credenciales de seguridad inmediatamente.
+                Si no fuiste tú, utiliza el botón para restablecer tu contraseña desde el flujo seguro de FacilitoTools.
             </p>
             
             <div class="button-container">
-                <a href="https://masitaprex.com/recuperar-cuenta.html" class="button">Recuperar mi Cuenta</a>
+                <a href="https://facilitotools.com/reset-password" class="button">Restablecer contraseña</a>
             </div>
             
             <p class="text" style="font-size: 13px; color: #999; font-style: italic;">
-                Nota: Esta restricción se levantará automáticamente en 6 horas, pero te sugerimos cambiar tu contraseña por seguridad.
+                Si reconoces el acceso, puedes ignorar este aviso. Si necesitas ayuda, escríbenos a <a href="mailto:soporte@facilitotools.com">soporte@facilitotools.com</a>.
             </p>
         </div>
         
         <div class="footer">
-            <p>Masitaprex Security Team - Centro de Operaciones de Seguridad (SOC)</p>
-            <p>© 2026 Masitaprex - Todos los derechos reservados.</p>
+            <p>FacilitoTools · Seguridad de la cuenta</p>
+            <p>© 2026 FacilitoTools - Todos los derechos reservados.</p>
             <div class="legal">
                 Este es un mensaje automático generado por nuestro sistema de protección de identidad.<br>
-                Si necesitas ayuda inmediata, contacta a soporte técnico.
+                Si necesitas ayuda, escríbenos a <a href="mailto:soporte@facilitotools.com">soporte@facilitotools.com</a>.
             </div>
         </div>
     </div>
