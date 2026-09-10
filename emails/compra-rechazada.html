@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Actualización de suscripción - Masitaprex</title>
+    <style>
+        body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f7f9; color: #1a1a1a; }
+        .container { max-width: 600px; margin: 20px auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .header { background: #000000; padding: 40px 20px; text-align: center; }
+        .logo { color: #00d2ff; font-size: 28px; font-weight: 800; letter-spacing: 4px; text-transform: uppercase; margin: 0; }
+        .subtitle { color: #ffffff; font-size: 11px; letter-spacing: 3px; margin-top: 5px; opacity: 0.8; }
+        .content { padding: 40px 30px; line-height: 1.6; }
+        .greeting { font-size: 24px; font-weight: 700; color: #111; margin-bottom: 20px; border-left: 4px solid #fbd38d; padding-left: 15px; }
+        .text { font-size: 15px; color: #4a4a4a; margin-bottom: 25px; }
+        
+        /* Caja de Estado */
+        .status-box { background: #fffaf0; padding: 25px; border-radius: 8px; margin-bottom: 25px; border: 1px solid #feebc8; }
+        .status-title { margin-top: 0; font-weight: 700; color: #744210; border-bottom: 1px solid #fbd38d; padding-bottom: 10px; margin-bottom: 15px; font-size: 14px; text-transform: uppercase; }
+        .detail-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; }
+        .label { color: #718096; }
+        .value { color: #1a202c; font-weight: 600; text-align: right; }
+        
+        /* Botón de Acción */
+        .button-container { text-align: center; margin: 30px 0; }
+        .button { background-color: #00d2ff; color: #000000 !important; padding: 16px 32px; text-decoration: none; border-radius: 8px; font-weight: 800; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; display: inline-block; transition: background 0.3s ease; }
+        
+        .footer { background: #f9f9f9; padding: 25px; text-align: center; font-size: 12px; color: #888; border-top: 1px solid #eeeeee; }
+        .footer a { color: #00d2ff; text-decoration: none; }
+        
+        .help-box { margin-top: 25px; padding: 15px; border-radius: 6px; background-color: #edf2f7; font-size: 13px; color: #4a5568; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="logo">Masitaprex</h1>
+            <div class="subtitle">SISTEMAS E INFRAESTRUCTURA DIGITAL</div>
+        </div>
+        
+        <div class="content">
+            <div class="greeting">Trámite pendiente de concluir.</div>
+            <p class="text">Estimado(a) <strong>{{nombre}}</strong>,</p>
+            <p class="text">
+                Te informamos que la solicitud de renovación para tus servicios en <strong>Masitaprex</strong> no ha podido completarse debido a un inconveniente con el método de pago seleccionado (fondos insuficientes o restricción bancaria).
+            </p>
+            
+            <div class="status-box">
+                <p class="status-title">Detalle de la suscripción</p>
+                <div class="detail-row">
+                    <span class="label">Servicio:</span>
+                    <span class="value">{{descripcion}}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="label">Referencia:</span>
+                    <span class="value">#{{orderId}}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="label">Monto:</span>
+                    <span class="value">S/ {{monto}}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="label">Estado actual:</span>
+                    <span class="value" style="color: #c05621;">● Esperando actualización</span>
+                </div>
+            </div>
+            
+            <p class="text" style="text-align: center;">
+                Para mantener tus beneficios activos y evitar la suspensión de tus recursos tecnológicos, por favor intenta realizar el proceso nuevamente:
+            </p>
+
+            <div class="button-container">
+                <a href="https://www.masitaprex.com/planes" class="button">Actualizar método de pago</a>
+            </div>
+
+            <div class="help-box">
+                <strong>¿Necesitas ayuda?</strong><br>
+                Verifica que tu tarjeta tenga habilitadas las compras por internet o contacta a tu entidad financiera.
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Masitaprex Project - Departamento de Facturación y Sistemas</p>
+            <p>© 2026 Masitaprex - Todos los derechos reservados.</p>
+            <div style="margin-top: 15px; font-size: 10px; color: #aaa;">
+                Recibes este correo informativo por una gestión iniciada en <a href="https://masitaprex.com">masitaprex.com</a>.<br>
+                Este es un mensaje automático, por favor no respondas a esta dirección.
+            </div>
+        </div>
+    </div>
+</body>
+</html>
