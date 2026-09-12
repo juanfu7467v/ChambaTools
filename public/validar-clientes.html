@@ -2071,8 +2071,8 @@
             try {
                 localStorage.setItem('ft_magic_customer', JSON.stringify({ ...payload, ts: Date.now() }));
             } catch (e) { console.error('No se pudo guardar el traspaso de datos', e); }
-            showToast('Enviando datos a Generar Boletas…', 'fa-wand-magic-sparkles');
-            setTimeout(() => { window.location.href = '/generar-boletas?magic=1'; }, 450);
+            showToast('Procesando...', 'fa-wand-magic-sparkles');
+            setTimeout(() => { window.location.href = '/comprobantes?magic=1'; }, 450);
         }
 
         function attachResultActions(container, tipo, data) {
