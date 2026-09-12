@@ -857,6 +857,18 @@
             color: var(--text-muted);
             line-height: 1.5;
         }
+        .panel-subtitle .api-link {
+            color: var(--emerald);
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            border-bottom: 1px solid transparent;
+            transition: border-color 0.2s ease, color 0.2s ease;
+        }
+        .panel-subtitle .api-link:hover {
+            color: var(--emerald-dark);
+            border-bottom-color: var(--emerald-dark);
+        }
         .form-wrap {
             padding: 0 0 20px 0;
         }
@@ -1947,7 +1959,7 @@
                     <section class="panel">
                         <div class="panel-header">
                             <h2 class="panel-title">Configuración del comprobante</h2>
-                            <p class="panel-subtitle">Completa los datos y genera tu comprobante profesional.</p>
+                            <p class="panel-subtitle">Completa los datos y genera tu comprobante profesional. Si eres desarrollador o deseas automatizar el proceso, <a href="developer-api" class="api-link">ingresa aquí</a> y consúmelo mediante nuestra API.</p>
                         </div>
 
                         <div class="form-wrap">
