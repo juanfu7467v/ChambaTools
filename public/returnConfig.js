@@ -10,10 +10,11 @@ const ReturnConfig = {
      */
     protectedPaths: [
         '/actividad.html',
-        '/ayuda.html',
         '/checkout.html',
         '/generar-boletas.html',
         '/validar-clientes.html',
+        '/developer-api.html',
+        '/comprobantes.html',
         '/verificacion.html'
     ],
     isProtectedPage: function(pathname = window.location.pathname) {
