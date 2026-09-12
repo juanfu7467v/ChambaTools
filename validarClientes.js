@@ -123,7 +123,7 @@ export function setDb(database) {
 //    aplicaba .trim() al token de Mercado Pago por esta misma razón; aquí no
 //    se estaba haciendo. Se corrige para ambos proveedores.
 const TOKEN_APISPERU = (process.env.TOKEN_APISPERU || '').trim();
-const TOKEN_MASITAPREX = (process.env.TOKEN_MASITAPREX || '').trim();
+const BACKEND_PRINCIPAL_BASE = (process.env.BACKEND_PRINCIPAL_BASE || 'https://bankend-tlgm-2p.fly.dev').replace(/\/+$/, '');
 
 // Diagnóstico de arranque (NUNCA se loguea el valor del token, solo si está
 // presente y su longitud, para poder detectar en los logs de Fly.io casos
@@ -133,17 +133,7 @@ if (!TOKEN_APISPERU) {
 } else {
   logger.info('VALIDAR_CLIENTES_CONFIG', 'TOKEN_APISPERU cargado', { length: TOKEN_APISPERU.length });
 }
-if (!TOKEN_MASITAPREX) {
-  logger.warn('VALIDAR_CLIENTES_CONFIG', 'TOKEN_MASITAPREX no está configurado: cédula/telefonía fallarán con 500.');
-} else {
-  logger.info('VALIDAR_CLIENTES_CONFIG', 'TOKEN_MASITAPREX cargado', { length: TOKEN_MASITAPREX.length });
-}
-// Según la documentación oficial (masitaprex.com/API-Docs.html), el token
-// se envía SIEMPRE como header "x-api-key", sin esquema/prefijo.
-const MASITAPREX_AUTH_HEADER = process.env.MASITAPREX_AUTH_HEADER || 'x-api-key';
-const MASITAPREX_AUTH_SCHEME = process.env.MASITAPREX_AUTH_SCHEME !== undefined
-  ? process.env.MASITAPREX_AUTH_SCHEME
-  : '';
+logger.info('VALIDAR_CLIENTES_CONFIG', 'Backend principal configurado', { baseUrl: BACKEND_PRINCIPAL_BASE });
 
 // Las APIs externas (APISPERU y Masitaprex) pueden tardar hasta ~50s en
 // responder consultas pesadas. El timeout debe dar margen suficiente para
@@ -151,16 +141,21 @@ const MASITAPREX_AUTH_SCHEME = process.env.MASITAPREX_AUTH_SCHEME !== undefined
 const EXTERNAL_TIMEOUT_MS = Number(process.env.VALIDAR_CLIENTES_TIMEOUT_MS) || 60000;
 
 const APISPERU_BASE = 'https://dniruc.apisperu.com/api/v1';
-const MASITAPREX_BASE = 'https://api.masitaprex.com/v3';
-
-function masitaprexHeaders() {
-  const headers = { 'Content-Type': 'application/json' };
-  if (TOKEN_MASITAPREX) {
-    headers[MASITAPREX_AUTH_HEADER] = MASITAPREX_AUTH_SCHEME
-      ? `${MASITAPREX_AUTH_SCHEME} ${TOKEN_MASITAPREX}`.trim()
-      : TOKEN_MASITAPREX;
+function backendPrincipalUrl(path, params = {}) {
+  const url = new URL(`${BACKEND_PRINCIPAL_BASE}${path}`);
+  for (const [key, value] of Object.entries(params)) {
+    if (value !== undefined && value !== null && value !== '') {
+      url.searchParams.set(key, value);
+    }
   }
-  return headers;
+  return url.toString();
+}
+
+function backendPrincipalHeaders() {
+  return {
+    'Accept': 'application/json',
+    'User-Agent': 'axios/1.6.0'
+  };
 }
 
 // ----------------------------------------------------------------
@@ -508,16 +503,12 @@ router.post('/cedula', requireAuth, async (req, res) => {
   if (!/^[VE]?-?\d{5,9}$/.test(cedula)) {
     return res.status(400).json({ success: false, error: 'Ingresa una cédula válida (ej: V12345678).' });
   }
-  if (!TOKEN_MASITAPREX) {
-    return res.status(500).json({ success: false, error: 'Servicio de validación de cédula no configurado.' });
-  }
-
   await ejecutarConsulta({
     req, res, tipo: 'cedula', contexto: 'VALIDAR_CEDULA',
     fetchFn: () => callExternal(
-      `${MASITAPREX_BASE}/consulta/cedula`,
-      { method: 'POST', headers: masitaprexHeaders(), body: JSON.stringify({ cedula }) },
-      'Masitaprex (Cédula)'
+      backendPrincipalUrl('/cedula', { cedula }),
+      { method: 'GET', headers: backendPrincipalHeaders() },
+      'Backend principal (Cédula)'
     )
   });
 });
@@ -530,16 +521,12 @@ router.post('/buscar-cedula', requireAuth, async (req, res) => {
   if (query.length < 3) {
     return res.status(400).json({ success: false, error: 'Ingresa nombres y apellidos completos (mínimo 3 caracteres).' });
   }
-  if (!TOKEN_MASITAPREX) {
-    return res.status(500).json({ success: false, error: 'Servicio de búsqueda no configurado.' });
-  }
-
   await ejecutarConsulta({
     req, res, tipo: 'cedula', contexto: 'BUSCAR_CEDULA',
     fetchFn: () => callExternal(
-      `${MASITAPREX_BASE}/consulta/buscar-cedula`,
-      { method: 'POST', headers: masitaprexHeaders(), body: JSON.stringify({ query }) },
-      'Masitaprex (Buscar cédula)'
+      backendPrincipalUrl('/venezolanos_nombres', { query }),
+      { method: 'GET', headers: backendPrincipalHeaders() },
+      'Backend principal (Buscar cédula)'
     )
   });
 });
@@ -555,20 +542,12 @@ router.post('/buscar-dni', requireAuth, async (req, res) => {
   if (nombres.length < 2 || apepaterno.length < 2) {
     return res.status(400).json({ success: false, error: 'Ingresa al menos nombres y apellido paterno.' });
   }
-  if (!TOKEN_MASITAPREX) {
-    return res.status(500).json({ success: false, error: 'Servicio de búsqueda no configurado.' });
-  }
-
   await ejecutarConsulta({
     req, res, tipo: 'dniNombres', contexto: 'BUSCAR_DNI',
     fetchFn: () => callExternal(
-      `${MASITAPREX_BASE}/consulta/buscar-dni`,
-      {
-        method: 'POST',
-        headers: masitaprexHeaders(),
-        body: JSON.stringify({ nombres, apepaterno, ...(apematerno ? { apematerno } : {}) })
-      },
-      'Masitaprex (Buscar DNI)'
+      backendPrincipalUrl('/dni_nombres', { nombres, apepaterno, apematerno }),
+      { method: 'GET', headers: backendPrincipalHeaders() },
+      'Backend principal (Buscar DNI)'
     )
   });
 });
@@ -581,16 +560,12 @@ router.post('/telefonia-doc', requireAuth, async (req, res) => {
   if (!/^\d{8}$|^\d{11}$/.test(documento)) {
     return res.status(400).json({ success: false, error: 'Ingresa un DNI (8 dígitos) o RUC (11 dígitos) válido.' });
   }
-  if (!TOKEN_MASITAPREX) {
-    return res.status(500).json({ success: false, error: 'Servicio de telefonía no configurado.' });
-  }
-
   await ejecutarConsulta({
     req, res, tipo: 'telefono', contexto: 'TELEFONIA_DOC',
     fetchFn: () => callExternal(
-      `${MASITAPREX_BASE}/consulta/telefonia-doc`,
-      { method: 'POST', headers: masitaprexHeaders(), body: JSON.stringify({ documento }) },
-      'Masitaprex (Telefonía por documento)'
+      backendPrincipalUrl('/telefonia-doc', { documento }),
+      { method: 'GET', headers: backendPrincipalHeaders() },
+      'Backend principal (Telefonía por documento)'
     )
   });
 });
@@ -603,18 +578,12 @@ router.post('/telefonia-numero', requireAuth, async (req, res) => {
   if (!/^\d{9}$/.test(numero)) {
     return res.status(400).json({ success: false, error: 'Ingresa un número telefónico de 9 dígitos.' });
   }
-  if (!TOKEN_MASITAPREX) {
-    return res.status(500).json({ success: false, error: 'Servicio de telefonía no configurado.' });
-  }
-
   await ejecutarConsulta({
     req, res, tipo: 'telefono', contexto: 'TELEFONIA_NUMERO',
-    // OJO: el endpoint real documentado es "telefonia-num" (sin "ero").
-    // Usar "telefonia-numero" devuelve 404 en la API de Masitaprex.
     fetchFn: () => callExternal(
-      `${MASITAPREX_BASE}/consulta/telefonia-num`,
-      { method: 'POST', headers: masitaprexHeaders(), body: JSON.stringify({ numero }) },
-      'Masitaprex (Telefonía por número)'
+      backendPrincipalUrl('/telefonia-num', { numero }),
+      { method: 'GET', headers: backendPrincipalHeaders() },
+      'Backend principal (Telefonía por número)'
     )
   });
 });
