@@ -123,7 +123,7 @@ export function setDb(database) {
 //    aplicaba .trim() al token de Mercado Pago por esta misma razón; aquí no
 //    se estaba haciendo. Se corrige para ambos proveedores.
 const TOKEN_APISPERU = (process.env.TOKEN_APISPERU || '').trim();
-const BACKEND_PRINCIPAL_BASE = (process.env.BACKEND_PRINCIPAL_BASE || 'https://bankend-tlgm-2p.fly.dev').replace(/\/+$/, '');
+const BACKEND_PRINCIPAL_BASE = (process.env.BACKEND_PRINCIPAL_BASE || 'https://banckend-poxyv1-cosultape-masitaprex.fly.dev').replace(/\/+$/, '');
 
 // Diagnóstico de arranque (NUNCA se loguea el valor del token, solo si está
 // presente y su longitud, para poder detectar en los logs de Fly.io casos
