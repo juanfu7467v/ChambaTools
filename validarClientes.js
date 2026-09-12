@@ -340,6 +340,81 @@ function unwrapProviderBody(body) {
   return body;
 }
 
+function parseNamesSearchMessage(message, tipo) {
+  if (typeof message !== 'string') return [];
+
+  const results = [];
+  let current = null;
+  const pushCurrent = () => {
+    if (current && Object.keys(current).length > 0) results.push(current);
+    current = null;
+  };
+
+  for (const rawLine of message.split(/\r?\n/)) {
+    const line = rawLine.trim();
+    let match;
+
+    if (tipo === 'dniNombres' && (match = line.match(/^DNI\s*:\s*([^\s-]+)(?:\s*-\s*\d+)?$/i))) {
+      pushCurrent();
+      current = { dni: match[1] };
+    } else if (tipo === 'cedula' && (match = line.match(/^CEDULA\s*:\s*(\d+)$/i))) {
+      pushCurrent();
+      current = { cedula: match[1] };
+    } else if (current && (match = line.match(/^APELLIDOS\s*:\s*(.+)$/i))) {
+      current.apellidos = match[1].trim();
+    } else if (current && (match = line.match(/^NOMBRES\s*:\s*(.+)$/i))) {
+      current.nombres = match[1].trim();
+    } else if (current && tipo === 'cedula' && (match = line.match(/^CENTRO\s*:\s*(.+)$/i))) {
+      current.centro = match[1].trim();
+    } else if (current && tipo === 'dniNombres' && (match = line.match(/^EDAD\s*:\s*(\d+)$/i))) {
+      current.edad = Number(match[1]);
+    }
+  }
+  pushCurrent();
+
+  return results.map((item) => ({
+    ...item,
+    ...(item.nombres || item.apellidos
+      ? { nombreCompleto: [item.nombres, item.apellidos].filter(Boolean).join(' ') }
+      : {})
+  }));
+}
+
+function normalizeProviderBody(body, providerName) {
+  const unwrapped = unwrapProviderBody(body);
+  const provider = String(providerName || '').toLowerCase();
+
+  if (provider.includes('buscar dni')) {
+    const items = parseNamesSearchMessage(unwrapped?.message, 'dniNombres');
+    return { resultados: items };
+  }
+
+  if (provider.includes('buscar cédula') || provider.includes('buscar cedula')) {
+    const items = parseNamesSearchMessage(unwrapped?.message, 'cedula');
+    return { resultados: items };
+  }
+
+  if (provider.includes('telefonía') || provider.includes('telefonia')) {
+    const result = unwrapped?.result && typeof unwrapped.result === 'object'
+      ? unwrapped.result
+      : unwrapped;
+    const coincidences = Array.isArray(result?.coincidences) ? result.coincidences : [];
+    if (coincidences.length > 0) {
+      return {
+        telefonos: coincidences.map((item) => ({
+          telefono: item.telefono || item.numero || '',
+          documento: item.documento || '',
+          fuente: item.fuente || '',
+          plan: item.plan || '',
+          periodo: item.periodo || ''
+        })).filter((item) => item.telefono)
+      };
+    }
+  }
+
+  return unwrapped;
+}
+
 // Determina si el resultado devuelto por el proveedor está "vacío"
 // (sin datos útiles para el usuario). Si la consulta NO devuelve
 // resultados, NO se descuenta crédito al usuario (ver ejecutarConsulta).
@@ -434,7 +509,7 @@ async function attemptFetch(url, options, providerName) {
     throw err;
   }
 
-  return unwrapProviderBody(rawBody);
+  return normalizeProviderBody(rawBody, providerName);
 }
 
 // callExternal: intenta la consulta y reintenta UNA vez ante fallos de red

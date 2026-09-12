@@ -1751,6 +1751,59 @@
             `;
         }
 
+        function parseSearchMessage(message, tipo) {
+            if (typeof message !== 'string') return [];
+            const items = [];
+            let current = null;
+            const pushCurrent = () => {
+                if (current && Object.keys(current).length) items.push(current);
+                current = null;
+            };
+
+            for (const rawLine of message.split(/\r?\n/)) {
+                const line = rawLine.trim();
+                let match;
+                if (tipo === 'buscar-dni' && (match = line.match(/^DNI\s*:\s*([^\s-]+)(?:\s*-\s*\d+)?$/i))) {
+                    pushCurrent();
+                    current = { dni: match[1] };
+                } else if (tipo === 'buscar-cedula' && (match = line.match(/^CEDULA\s*:\s*(\d+)$/i))) {
+                    pushCurrent();
+                    current = { cedula: match[1] };
+                } else if (current && (match = line.match(/^APELLIDOS\s*:\s*(.+)$/i))) {
+                    current.apellidos = match[1].trim();
+                } else if (current && (match = line.match(/^NOMBRES\s*:\s*(.+)$/i))) {
+                    current.nombres = match[1].trim();
+                } else if (current && tipo === 'buscar-cedula' && (match = line.match(/^CENTRO\s*:\s*(.+)$/i))) {
+                    current.centro = match[1].trim();
+                } else if (current && tipo === 'buscar-dni' && (match = line.match(/^EDAD\s*:\s*(\d+)$/i))) {
+                    current.edad = Number(match[1]);
+                }
+            }
+            pushCurrent();
+            return items.map(item => ({
+                ...item,
+                ...(item.nombres || item.apellidos
+                    ? { nombreCompleto: [item.nombres, item.apellidos].filter(Boolean).join(' ') }
+                    : {})
+            }));
+        }
+
+        function normalizeValidationResponse(tipo, data) {
+            if (!data || typeof data !== 'object') return data;
+            if (!['buscar-dni', 'buscar-cedula'].includes(tipo)) {
+                if (tipo === 'telefonia-doc' && data.result?.coincidences) {
+                    return { telefonos: data.result.coincidences };
+                }
+                return data;
+            }
+
+            if (Array.isArray(data)) return { resultados: data };
+            if (Array.isArray(data.resultados)) return { resultados: data.resultados };
+            if (Array.isArray(data.results)) return { resultados: data.results };
+            const items = parseSearchMessage(data.message, tipo);
+            return { resultados: items };
+        }
+
         // Campos de cada tipo de consulta. Se usan tanto para el resultado principal como para
         // el detalle expandible del historial, así ambos siempre muestran exactamente lo mismo.
         const fieldsBuilders = {
@@ -1810,7 +1863,7 @@
                     </div>`).join('')}</div>`;
             },
             'buscar-dni'(data) {
-                const items = Array.isArray(data) ? data : (data.resultados || data.results || [data]);
+                const items = Array.isArray(data) ? data : (data.resultados || data.results || []);
                 if (!items.length || !items[0]) {
                     return `<div class="vc-empty"><i class="fas fa-user-slash"></i>No se encontraron coincidencias para ese nombre.</div>`;
                 }
@@ -1824,7 +1877,7 @@
                     </div>`).join('')}</div>`;
             },
             'telefonia-doc'(data) {
-                const items = Array.isArray(data) ? data : (data.lineas || data.telefonos || data.resultados || [data]);
+                const items = Array.isArray(data) ? data : (data.lineas || data.telefonos || data.resultados || []);
                 if (!items.length || !items[0]) {
                     return `<div class="vc-empty"><i class="fas fa-phone-slash"></i>No se encontraron números asociados a este documento.</div>`;
                 }
@@ -1836,7 +1889,7 @@
                     <div class="vc-list-item">
                         <div class="vc-list-item-info">
                             <span class="doc"><i class="fas fa-phone" style="margin-right:8px;color:var(--emerald);"></i>${esc(t.numero || t.telefono)}</span>
-                            <span class="who">${esc(t.operador || '')}${t.tipo ? ' · ' + esc(t.tipo) : ''}${t.estado ? ' · ' + esc(t.estado) : ''}</span>
+                            <span class="who">${esc([t.fuente || t.operador, t.plan, t.periodo].filter(Boolean).join(' · '))}</span>
                         </div>
                         <button type="button" class="vc-list-magic-btn" data-list-idx="${idx}" title="Usar estos datos en Generar Boletas"><i class="fas fa-wand-magic-sparkles"></i></button>
                     </div>`).join('')}</div>`;
@@ -1881,7 +1934,7 @@
                 attachResultActions(container, 'buscar-cedula', data);
             },
             'buscar-dni'(container, data) {
-                const items = Array.isArray(data) ? data : (data.resultados || data.results || [data]);
+                const items = Array.isArray(data) ? data : (data.resultados || data.results || []);
                 if (!items.length || !items[0]) {
                     container.innerHTML = `<div class="vc-empty"><i class="fas fa-user-slash"></i>No se encontraron coincidencias para ese nombre.</div>`;
                     return;
@@ -1890,7 +1943,7 @@
                 attachResultActions(container, 'buscar-dni', data);
             },
             'telefonia-doc'(container, data) {
-                const items = Array.isArray(data) ? data : (data.lineas || data.telefonos || data.resultados || [data]);
+                const items = Array.isArray(data) ? data : (data.lineas || data.telefonos || data.resultados || []);
                 if (!items.length || !items[0]) {
                     container.innerHTML = `<div class="vc-empty"><i class="fas fa-phone-slash"></i>No se encontraron números asociados a este documento.</div>`;
                     return;
@@ -2116,8 +2169,9 @@
                     }
 
                     const renderer = renderers[endpoint];
+                    const cleanedData = normalizeValidationResponse(endpoint, json.data);
                     if (renderer) {
-                        renderer(resultEl, json.data);
+                        renderer(resultEl, cleanedData);
                         renderHistory(endpoint);
                     }
                     showToast('Consulta realizada con éxito');
