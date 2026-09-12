@@ -401,13 +401,13 @@ function normalizeProviderBody(body, providerName) {
     const coincidences = Array.isArray(result?.coincidences) ? result.coincidences : [];
     if (coincidences.length > 0) {
       return {
-        telefonos: coincidences.map((item) => ({
-          telefono: item.telefono || item.numero || '',
-          documento: item.documento || '',
-          fuente: item.fuente || '',
-          plan: item.plan || '',
-          periodo: item.periodo || ''
-        })).filter((item) => item.telefono)
+        telefonos: coincidences
+          .filter((item) => item && typeof item === 'object')
+          .map((item) => ({
+            ...item,
+            telefono: item.telefono || item.numero || ''
+          }))
+          .filter((item) => item.telefono)
       };
     }
   }

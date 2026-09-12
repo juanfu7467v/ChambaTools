@@ -1545,6 +1545,32 @@
             return `<div class="vc-data-item"><div class="k">${esc(label)}</div><div class="v ${mono ? 'mono' : ''}">${esc(value)}</div></div>`;
         }
 
+        function displayFieldLabel(key) {
+            return String(key)
+                .replace(/([a-z])([A-Z])/g, '$1 $2')
+                .replace(/[_-]+/g, ' ')
+                .replace(/^./, char => char.toUpperCase());
+        }
+
+        function displayFieldValue(value) {
+            if (value === null || value === undefined || value === '') return '';
+            if (typeof value === 'object') return JSON.stringify(value);
+            return String(value);
+        }
+
+        function dynamicDataItems(data, excludedKeys = []) {
+            if (!data || typeof data !== 'object' || Array.isArray(data)) return '';
+            const excluded = new Set(excludedKeys);
+            return Object.entries(data)
+                .filter(([key, value]) => !excluded.has(key) && value !== null && value !== undefined && value !== '')
+                .map(([key, value]) => dataItem(displayFieldLabel(key), displayFieldValue(value)))
+                .join('');
+        }
+
+        function dynamicListItemFields(item, excludedKeys = []) {
+            return dynamicDataItems(item, excludedKeys);
+        }
+
         function renderSkeleton(container) {
             container.innerHTML = `<div class="vc-skeleton">${Array(6).fill('<div class="bar"></div>').join('')}</div>
                 <div class="vc-hint" style="text-align:center;margin-top:10px;"><i class="fas fa-circle-info"></i> Esta consulta puede tardar hasta 50 segundos. Por favor espera, no cierres ni recargues la página.</div>`;
@@ -1585,9 +1611,10 @@
 
         // Devuelve nombre y documento representativos de un registro, para el resumen del historial y el buscador
         function getHistorySummary(d) {
-            let nombre = d.nombres || d.razonSocial || d.titular || d.nombreCompleto || 'Sin nombre';
+            const firstItem = d?.resultados?.[0] || d?.telefonos?.[0] || d?.coincidencias?.[0] || d;
+            let nombre = firstItem?.nombres || firstItem?.razonSocial || firstItem?.titular || firstItem?.nombreCompleto || firstItem?.fuente || 'Sin nombre';
             if (typeof nombre === 'object') nombre = JSON.stringify(nombre);
-            let doc = d.dni || d.ruc || d.cedula || d.documento || d.numero || d.busqueda || '—';
+            let doc = firstItem?.dni || firstItem?.ruc || firstItem?.cedula || firstItem?.documento || firstItem?.telefono || firstItem?.numero || firstItem?.busqueda || '—';
             if (typeof doc === 'object') doc = JSON.stringify(doc);
             return { nombre, doc };
         }
@@ -1791,8 +1818,10 @@
         function normalizeValidationResponse(tipo, data) {
             if (!data || typeof data !== 'object') return data;
             if (!['buscar-dni', 'buscar-cedula'].includes(tipo)) {
-                if (tipo === 'telefonia-doc' && data.result?.coincidences) {
-                    return { telefonos: data.result.coincidences };
+                if (['telefonia-doc', 'telefonia-numero'].includes(tipo)) {
+                    const coincidences = data.result?.coincidences || data.coincidences;
+                    if (Array.isArray(coincidences)) return { telefonos: coincidences };
+                    if (Array.isArray(data.telefonos)) return data;
                 }
                 return data;
             }
@@ -1814,6 +1843,7 @@
                     ${dataItem('Apellido paterno', data.apellidoPaterno)}
                     ${dataItem('Apellido materno', data.apellidoMaterno)}
                     ${dataItem('Dígito verificador', data.codVerificaLetra || data.codVerifica, true)}
+                    ${dynamicDataItems(data, ['dni', 'nombres', 'apellidoPaterno', 'apellidoMaterno', 'codVerificaLetra', 'codVerifica'])}
                 `;
             },
             ruc(data) {
@@ -1829,6 +1859,7 @@
                         <div class="k">Dirección</div>
                         <div class="v">${esc(data.direccion)}</div>
                     </div>
+                    ${dynamicDataItems(data, ['ruc', 'nombreComercial', 'condicion', 'departamento', 'provincia', 'distrito', 'ubigeo', 'direccion'])}
                 `;
             },
             cedula(data) {
@@ -1846,6 +1877,7 @@
                         <div class="k">Dirección</div>
                         <div class="v">${esc(data.direccion)}</div>
                     </div>
+                    ${dynamicDataItems(data, ['cedula', 'nombres', 'apellidos', 'estado', 'estado_civil', 'sexo', 'fecha_nacimiento', 'lugar_nacimiento', 'fecha_expedicion', 'direccion'])}
                 `;
             },
             'buscar-cedula'(data) {
@@ -1858,6 +1890,7 @@
                         <div class="vc-list-item-info">
                             <span class="who">${esc(p.nombreCompleto || p.nombres_completos || [p.nombres, p.apellidos].filter(Boolean).join(' '))}</span>
                             <span class="doc">${esc(p.cedula)}</span>
+                            ${dynamicListItemFields(p, ['nombreCompleto', 'nombres_completos', 'nombres', 'apellidos', 'cedula'])}
                         </div>
                         <button type="button" class="vc-list-magic-btn" data-list-idx="${idx}" title="Usar estos datos en Generar Boletas"><i class="fas fa-wand-magic-sparkles"></i></button>
                     </div>`).join('')}</div>`;
@@ -1872,38 +1905,41 @@
                         <div class="vc-list-item-info">
                             <span class="who">${esc(p.nombreCompleto || p.nombres_completos || [p.nombres, p.apellidoPaterno, p.apellidoMaterno].filter(Boolean).join(' '))}</span>
                             <span class="doc">${esc(p.dni)}${p.departamento ? ' · ' + esc(p.departamento) : ''}</span>
+                            ${dynamicListItemFields(p, ['nombreCompleto', 'nombres_completos', 'nombres', 'apellidoPaterno', 'apellidoMaterno', 'dni', 'departamento'])}
                         </div>
                         <button type="button" class="vc-list-magic-btn" data-list-idx="${idx}" title="Usar estos datos en Generar Boletas"><i class="fas fa-wand-magic-sparkles"></i></button>
                     </div>`).join('')}</div>`;
             },
             'telefonia-doc'(data) {
-                const items = Array.isArray(data) ? data : (data.lineas || data.telefonos || data.resultados || []);
+                const items = Array.isArray(data) ? data : (data.lineas || data.telefonos || data.resultados || data.coincidencias || []);
                 if (!items.length || !items[0]) {
                     return `<div class="vc-empty"><i class="fas fa-phone-slash"></i>No se encontraron números asociados a este documento.</div>`;
                 }
-                let body = '';
-                if (data.titular) {
-                    body += `<div class="vc-data-item" style="grid-column:1/-1;margin-bottom:10px;"><div class="k">Titular</div><div class="v">${esc(data.titular)}</div></div>`;
-                }
-                body += `<div class="vc-list-results">${items.map((t, idx) => `
+                const parentFields = dynamicDataItems(data, ['lineas', 'telefonos', 'resultados', 'coincidencias']);
+                return `${parentFields}<div class="vc-list-results">${items.map((t, idx) => `
                     <div class="vc-list-item">
                         <div class="vc-list-item-info">
                             <span class="doc"><i class="fas fa-phone" style="margin-right:8px;color:var(--emerald);"></i>${esc(t.numero || t.telefono)}</span>
                             <span class="who">${esc([t.fuente || t.operador, t.plan, t.periodo].filter(Boolean).join(' · '))}</span>
+                            <div class="vc-data-item" style="grid-column:1/-1;">${dynamicListItemFields(t, ['numero', 'telefono', 'fuente', 'operador', 'plan', 'periodo'])}</div>
                         </div>
                         <button type="button" class="vc-list-magic-btn" data-list-idx="${idx}" title="Usar estos datos en Generar Boletas"><i class="fas fa-wand-magic-sparkles"></i></button>
                     </div>`).join('')}</div>`;
-                return body;
             },
             'telefonia-numero'(data) {
-                return `
-                    ${dataItem('Número', data.numero, true)}
-                    ${dataItem('Documento titular', data.documento, true)}
-                    ${dataItem('Operador', data.operador)}
-                    ${dataItem('Tipo de línea', data.tipo || data.tipoLinea)}
-                    ${dataItem('Departamento', data.departamento)}
-                    ${dataItem('Fecha de activación', data.fecha_activacion || data.fechaActivacion)}
-                `;
+                const items = Array.isArray(data) ? data : (data.lineas || data.telefonos || data.resultados || data.coincidencias || []);
+                if (items.length) {
+                    return `<div class="vc-list-results">${items.map((t, idx) => `
+                        <div class="vc-list-item">
+                            <div class="vc-list-item-info">
+                                <span class="doc"><i class="fas fa-phone" style="margin-right:8px;color:var(--emerald);"></i>${esc(t.telefono || t.numero)}</span>
+                                <span class="who">${esc([t.fuente || t.operador, t.plan, t.periodo].filter(Boolean).join(' · '))}</span>
+                                <div class="vc-data-item" style="grid-column:1/-1;">${dynamicListItemFields(t, ['telefono', 'numero', 'fuente', 'operador', 'plan', 'periodo'])}</div>
+                            </div>
+                            <button type="button" class="vc-list-magic-btn" data-list-idx="${idx}" title="Usar estos datos en Generar Boletas"><i class="fas fa-wand-magic-sparkles"></i></button>
+                        </div>`).join('')}</div>`;
+                }
+                return dynamicDataItems(data);
             }
         };
 
@@ -1952,8 +1988,8 @@
                 attachResultActions(container, 'telefonia-doc', data);
             },
             'telefonia-numero'(container, data) {
-                const status = (data.estado || '').toUpperCase() === 'ACTIVO' ? 'ok' : 'warn';
-                container.innerHTML = buildResultCard(fieldsBuilders['telefonia-numero'](data), data.titular || data.nombre || 'Número consultado', status);
+                const items = Array.isArray(data) ? data : (data.lineas || data.telefonos || data.resultados || data.coincidencias || []);
+                container.innerHTML = buildResultCard(fieldsBuilders['telefonia-numero'](data), `${items.length || 1} coincidencia${items.length === 1 ? '' : 's'}`, 'ok');
                 attachResultActions(container, 'telefonia-numero', data);
             }
         };
@@ -2017,11 +2053,11 @@
 
         function getResultItems(tipo, data) {
             if (['buscar-cedula', 'buscar-dni'].includes(tipo)) {
-                return Array.isArray(data) ? data : (data.resultados || data.results || (tipo === 'buscar-dni' ? [data] : []));
+                return Array.isArray(data) ? data : (data.resultados || data.results || []);
             }
-            if (tipo === 'telefonia-doc') {
-                const items = Array.isArray(data) ? data : (data.lineas || data.telefonos || data.resultados || [data]);
-                // Cada línea hereda el titular/documento general de la consulta, si no lo trae ya.
+            if (['telefonia-doc', 'telefonia-numero'].includes(tipo)) {
+                const items = Array.isArray(data) ? data : (data.lineas || data.telefonos || data.resultados || data.coincidencias || []);
+                // Cada línea hereda los datos generales de la consulta si no los trae ya.
                 return items.map(t => ({ ...t, titular: t.titular || data.titular, documento: t.documento || data.documento }));
             }
             return [data];
@@ -2170,10 +2206,11 @@
 
                     const renderer = renderers[endpoint];
                     const cleanedData = normalizeValidationResponse(endpoint, json.data);
+                    saveHistoryItem(endpoint, cleanedData);
                     if (renderer) {
                         renderer(resultEl, cleanedData);
-                        renderHistory(endpoint);
                     }
+                    renderHistory(endpoint);
                     showToast('Consulta realizada con éxito');
                     loadCupo();
                 } catch (err) {
