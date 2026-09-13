@@ -601,7 +601,7 @@
             line-height: 1.5;
         }
 
-        /* ═══ RECARGAS (Tabla de validación de clientes) ═══ */
+        /* ═══ RECARGAS (Tarjetas de validación de clientes) ═══ */
         .recargas-container {
             margin-top: 28px;
         }
@@ -613,75 +613,127 @@
             margin: 0 auto 24px;
             text-align: center;
         }
-        .recargas-table-wrap {
+        .recargas-cards-wrap {
+            position: relative;
+        }
+        .recargas-cards {
+            display: flex;
+            gap: 16px;
             overflow-x: auto;
-            border-radius: var(--radius);
-            border: 1px solid var(--border-subtle);
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            padding: 6px 4px 20px;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .recargas-cards::-webkit-scrollbar { display: none; }
+        .recarga-card {
+            flex: 0 0 auto;
+            scroll-snap-align: start;
+            width: min(78vw, 280px);
             background: var(--navy-card);
-            box-shadow: 0 8px 30px rgba(0,0,0,0.35);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius);
+            padding: 22px 20px;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
         }
-        .recargas-table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 560px;
+        .recarga-card:hover {
+            transform: translateY(-6px);
+            border-color: var(--border-active);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.5), 0 4px 20px rgba(0,200,83,0.1);
         }
-        .recargas-table th {
-            background: rgba(0,200,83,0.08);
-            color: var(--emerald);
-            font-size: 0.78rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
-            padding: 14px 12px;
+        .recarga-card-header {
             text-align: center;
+            margin-bottom: 16px;
+            padding-bottom: 16px;
             border-bottom: 1px solid var(--border-subtle);
-            white-space: nowrap;
         }
-        .recargas-table td {
-            padding: 14px 12px;
-            text-align: center;
-            border-bottom: 1px solid rgba(148,163,184,0.12);
-            font-size: 0.88rem;
-            color: var(--text-primary);
-        }
-        .recargas-table tr:last-child td { border-bottom: none; }
-        .recargas-table tr:hover td {
-            background: rgba(0,114,255,0.06);
-            transition: background 0.2s ease;
-        }
-        .recargas-table .recarga-name {
+        .recarga-card-name {
+            font-size: 1.05rem;
             font-weight: 700;
             color: var(--white);
-            white-space: nowrap;
-            text-align: left;
+            font-family: var(--font-display);
+            margin-bottom: 8px;
         }
-        .recargas-table .recarga-precio {
+        .recarga-card-price {
+            font-size: 1.9rem;
             font-weight: 800;
             color: var(--gold);
             font-family: var(--font-display);
-            font-size: 1.05rem;
-            white-space: nowrap;
+            line-height: 1;
         }
-        .recargas-table .recarga-btn {
-            display: inline-block;
-            background: linear-gradient(135deg, var(--emerald), var(--emerald-dark));
-            color: #000;
-            font-weight: 800;
-            font-size: 0.78rem;
-            padding: 8px 20px;
-            border-radius: 24px;
-            border: none;
+        .recarga-card-features {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 20px 0;
+            flex-grow: 1;
+        }
+        .recarga-card-features li {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 12px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+        .recarga-card-features li i {
+            color: var(--emerald);
+            font-size: 0.9rem;
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+        .recarga-card-features li strong {
+            color: var(--text-primary);
+        }
+        .recarga-card-btn {
+            display: block;
+            width: 100%;
+            padding: 13px;
+            background: transparent;
+            border: 1px solid var(--border-active);
+            color: var(--emerald);
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 0.88rem;
+            text-align: center;
             cursor: pointer;
             transition: all 0.3s ease;
-            white-space: nowrap;
-            font-family: var(--font-body);
+            font-family: var(--font-display);
+            letter-spacing: 0.03em;
+            margin-top: auto;
         }
-        .recargas-table .recarga-btn:hover {
+        .recarga-card-btn:hover {
+            background: var(--emerald);
+            color: #000;
+            border-color: var(--emerald);
             transform: translateY(-2px);
-            box-shadow: 0 6px 18px var(--emerald-glow);
+            box-shadow: 0 6px 20px var(--emerald-glow);
         }
-        @media (max-width: 640px) {
-            .recargas-table th, .recargas-table td { padding: 10px 8px; font-size: 0.8rem; }
+        .recargas-progress-track {
+            width: 100%;
+            max-width: 240px;
+            height: 4px;
+            margin: 0 auto;
+            background: var(--border-subtle);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .recargas-progress-fill {
+            height: 100%;
+            width: 30%;
+            background: linear-gradient(90deg, var(--emerald-dark), var(--emerald));
+            border-radius: 4px;
+            transform: translateX(0);
+            transition: transform 0.15s ease-out, width 0.15s ease-out;
+        }
+        @media (min-width: 640px) {
+            .recarga-card { width: 260px; }
+        }
+        @media (min-width: 1024px) {
+            .recarga-card { width: 240px; }
         }
 
         .advantage-grid {
@@ -1179,67 +1231,77 @@
                 <p class="section-body">¿Te quedaste sin consultas a mitad de tu suscripción? Recarga cupos de validación de clientes al instante, sin cambiar tu plan actual.</p>
                 <div class="recargas-container">
                     <p class="recargas-intro">Las recargas suman <strong>consultas de validación de clientes</strong> (DNI/RUC, teléfonos, DNI por nombres y cédula venezolana). Son compatibles con cualquier plan activo y no modifican tu suscripción.</p>
-                    <div class="recargas-table-wrap">
-                        <table class="recargas-table">
-                            <thead>
-                                <tr>
-                                    <th>Recarga</th>
-                                    <th>Precio</th>
-                                    <th>Teléfonos</th>
-                                    <th>DNI por Nombres</th>
-                                    <th>Cédulas</th>
-                                    <th>Consultas DNI / RUC</th>
-                                    <th></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td class="recarga-name">Recarga Básica</td>
-                                    <td class="recarga-precio">S/22</td>
-                                    <td>20 Teléfonos</td>
-                                    <td>33 DNI por Nombre</td>
-                                    <td>50 Cédulas</td>
-                                    <td><strong>110</strong> consultas de DNI y RUC</td>
-                                    <td><button class="recarga-btn" onclick="handlePlanSelection('recarga_basica')">Elegir</button></td>
-                                </tr>
-                                <tr>
-                                    <td class="recarga-name">Recarga Estándar</td>
-                                    <td class="recarga-precio">S/35</td>
-                                    <td>31 Teléfonos</td>
-                                    <td>51 DNI por Nombre</td>
-                                    <td>77 Cédulas</td>
-                                    <td><strong>300</strong> consultas de DNI y RUC</td>
-                                    <td><button class="recarga-btn" onclick="handlePlanSelection('recarga_estandar')">Elegir</button></td>
-                                </tr>
-                                <tr>
-                                    <td class="recarga-name">Recarga Avanzada</td>
-                                    <td class="recarga-precio">S/45</td>
-                                    <td>42 Teléfonos</td>
-                                    <td>70 DNI por Nombre</td>
-                                    <td>105 Cédulas</td>
-                                    <td><strong>500</strong> consultas de DNI y RUC</td>
-                                    <td><button class="recarga-btn" onclick="handlePlanSelection('recarga_avanzada')">Elegir</button></td>
-                                </tr>
-                                <tr>
-                                    <td class="recarga-name">Recarga Pro</td>
-                                    <td class="recarga-precio">S/55</td>
-                                    <td>53 Teléfonos</td>
-                                    <td>88 DNI por Nombre</td>
-                                    <td>132 Cédulas</td>
-                                    <td><strong>1,000</strong> consultas de DNI y RUC</td>
-                                    <td><button class="recarga-btn" onclick="handlePlanSelection('recarga_pro')">Elegir</button></td>
-                                </tr>
-                                <tr>
-                                    <td class="recarga-name">Recarga Máxima</td>
-                                    <td class="recarga-precio">S/65</td>
-                                    <td>65 Teléfonos</td>
-                                    <td>108 DNI por Nombre</td>
-                                    <td>162 Cédulas</td>
-                                    <td><strong>1,500</strong> consultas de DNI y RUC</td>
-                                    <td><button class="recarga-btn" onclick="handlePlanSelection('recarga_maxima')">Elegir</button></td>
-                                </tr>
-                            </tbody>
-                        </table>
+                    <div class="recargas-cards-wrap">
+                        <div class="recargas-cards" id="recargasCards">
+                            <div class="recarga-card">
+                                <div class="recarga-card-header">
+                                    <h3 class="recarga-card-name">Recarga Básica</h3>
+                                    <div class="recarga-card-price">S/22</div>
+                                </div>
+                                <ul class="recarga-card-features">
+                                    <li><i class="fas fa-phone"></i> 20 Teléfonos</li>
+                                    <li><i class="fas fa-id-card"></i> 33 DNI por Nombre</li>
+                                    <li><i class="fas fa-address-card"></i> 50 Cédulas</li>
+                                    <li><i class="fas fa-check-circle"></i> <strong>110</strong> consultas de DNI y RUC</li>
+                                </ul>
+                                <button class="recarga-card-btn" onclick="handlePlanSelection('recarga_basica')">Elegir</button>
+                            </div>
+                            <div class="recarga-card">
+                                <div class="recarga-card-header">
+                                    <h3 class="recarga-card-name">Recarga Estándar</h3>
+                                    <div class="recarga-card-price">S/35</div>
+                                </div>
+                                <ul class="recarga-card-features">
+                                    <li><i class="fas fa-phone"></i> 31 Teléfonos</li>
+                                    <li><i class="fas fa-id-card"></i> 51 DNI por Nombre</li>
+                                    <li><i class="fas fa-address-card"></i> 77 Cédulas</li>
+                                    <li><i class="fas fa-check-circle"></i> <strong>300</strong> consultas de DNI y RUC</li>
+                                </ul>
+                                <button class="recarga-card-btn" onclick="handlePlanSelection('recarga_estandar')">Elegir</button>
+                            </div>
+                            <div class="recarga-card">
+                                <div class="recarga-card-header">
+                                    <h3 class="recarga-card-name">Recarga Avanzada</h3>
+                                    <div class="recarga-card-price">S/45</div>
+                                </div>
+                                <ul class="recarga-card-features">
+                                    <li><i class="fas fa-phone"></i> 42 Teléfonos</li>
+                                    <li><i class="fas fa-id-card"></i> 70 DNI por Nombre</li>
+                                    <li><i class="fas fa-address-card"></i> 105 Cédulas</li>
+                                    <li><i class="fas fa-check-circle"></i> <strong>500</strong> consultas de DNI y RUC</li>
+                                </ul>
+                                <button class="recarga-card-btn" onclick="handlePlanSelection('recarga_avanzada')">Elegir</button>
+                            </div>
+                            <div class="recarga-card">
+                                <div class="recarga-card-header">
+                                    <h3 class="recarga-card-name">Recarga Pro</h3>
+                                    <div class="recarga-card-price">S/55</div>
+                                </div>
+                                <ul class="recarga-card-features">
+                                    <li><i class="fas fa-phone"></i> 53 Teléfonos</li>
+                                    <li><i class="fas fa-id-card"></i> 88 DNI por Nombre</li>
+                                    <li><i class="fas fa-address-card"></i> 132 Cédulas</li>
+                                    <li><i class="fas fa-check-circle"></i> <strong>1,000</strong> consultas de DNI y RUC</li>
+                                </ul>
+                                <button class="recarga-card-btn" onclick="handlePlanSelection('recarga_pro')">Elegir</button>
+                            </div>
+                            <div class="recarga-card">
+                                <div class="recarga-card-header">
+                                    <h3 class="recarga-card-name">Recarga Máxima</h3>
+                                    <div class="recarga-card-price">S/65</div>
+                                </div>
+                                <ul class="recarga-card-features">
+                                    <li><i class="fas fa-phone"></i> 65 Teléfonos</li>
+                                    <li><i class="fas fa-id-card"></i> 108 DNI por Nombre</li>
+                                    <li><i class="fas fa-address-card"></i> 162 Cédulas</li>
+                                    <li><i class="fas fa-check-circle"></i> <strong>1,500</strong> consultas de DNI y RUC</li>
+                                </ul>
+                                <button class="recarga-card-btn" onclick="handlePlanSelection('recarga_maxima')">Elegir</button>
+                            </div>
+                        </div>
+                        <div class="recargas-progress-track">
+                            <div class="recargas-progress-fill" id="recargasProgressFill"></div>
+                        </div>
                     </div>
                     <p style="font-size: 0.78rem; color: var(--text-subtle); margin-top: 14px; text-align: center;">⏱️ La recarga se activa de inmediato y es acumulable con lo que te quede del plan.</p>
                 </div>
@@ -1478,6 +1540,38 @@
                 if (sidebar.classList.contains('open')) toggleMenu();
             });
         });
+
+        // ========== RECARGAS: INDICADOR DE PROGRESO (scroll horizontal) ==========
+        (function() {
+            const track = document.getElementById('recargasCards');
+            const fill = document.getElementById('recargasProgressFill');
+            if (!track || !fill) return;
+
+            function updateProgress() {
+                const maxScroll = track.scrollWidth - track.clientWidth;
+                if (maxScroll <= 0) {
+                    fill.style.width = '100%';
+                    fill.style.transform = 'translateX(0)';
+                    return;
+                }
+                const visibleRatio = Math.min(track.clientWidth / track.scrollWidth, 1);
+                const progress = track.scrollLeft / maxScroll;
+                const trackWidth = track_progress_width();
+                const fillWidth = trackWidth * visibleRatio;
+                const maxTranslate = trackWidth - fillWidth;
+                fill.style.width = fillWidth + 'px';
+                fill.style.transform = 'translateX(' + (progress * maxTranslate) + 'px)';
+            }
+
+            function track_progress_width() {
+                const trackEl = fill.parentElement;
+                return trackEl ? trackEl.clientWidth : 0;
+            }
+
+            track.addEventListener('scroll', updateProgress, { passive: true });
+            window.addEventListener('resize', updateProgress);
+            updateProgress();
+        })();
 
         // ========== FAQ ACORDEÓN ==========
         window.toggleFaq = function(element) {
