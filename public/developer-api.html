@@ -146,20 +146,12 @@
         /* ═══ MAIN ═══ */
         main { padding: 0 24px 80px; max-width: 1200px; margin: 0 auto; }
         .hero {
-            padding: 48px 32px; border-radius: var(--radius);
-            background: linear-gradient(160deg, var(--navy-card), var(--navy-surface));
-            border: 1px solid var(--border-active);
-            position: relative; overflow: hidden; margin-bottom: 32px;
-        }
-        .hero::before {
-            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
-            background: linear-gradient(90deg, transparent, var(--emerald), var(--gold), transparent);
-            animation: shimmerHeader 3s infinite;
+            padding: 48px 32px; margin-bottom: 32px; text-align: center;
         }
         @keyframes shimmerHeader { 0%,100%{transform:translateX(-100%);} 50%{transform:translateX(100%);} }
         .hero h1 { font-family: var(--font-display); font-size: 38px; font-weight: 800; margin-bottom: 12px; letter-spacing: -0.02em; }
         .hero h1 span.gradient { background: linear-gradient(135deg, var(--emerald-light), var(--tech-blue-light)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
-        .hero .lead { font-size: 16px; color: var(--text-muted); max-width: 720px; line-height: 1.6; }
+        .hero .lead { font-size: 16px; color: var(--text-muted); max-width: 720px; line-height: 1.6; margin: 0 auto; }
 
         /* Don’t-show-when-logged-out marker (igual patrón que otras páginas) */
         .auth-only { display: none; }
@@ -203,6 +195,35 @@
         .btn-ghost { background: transparent; color: var(--text-muted); border: 1px solid var(--border-subtle); }
         .btn-ghost:hover { color: var(--emerald-light); border-color: var(--border-active); }
         .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        /* Botones del panel "Inicia sesión para obtener tu API Key" */
+        .authgate-actions { margin-top: 14px; display: flex; flex-direction: column; gap: 10px; }
+        .btn-block { display: flex; width: 100%; justify-content: center; }
+        .btn-outline-blue { background: transparent; color: var(--tech-blue); border: 1px solid var(--tech-blue); }
+        .btn-outline-blue:hover { background: rgba(0,191,255,0.08); }
+
+        /* Efecto de destello + sacudida sutil para llamar la atención en "Iniciar sesión" */
+        .btn-attention { position: relative; overflow: hidden; animation: btnAttentionShake 6s ease-in-out infinite; }
+        .btn-attention::after {
+            content: '';
+            position: absolute; top: 0; left: -60%; width: 40%; height: 100%;
+            background: linear-gradient(120deg, transparent, rgba(255,255,255,0.55), transparent);
+            transform: skewX(-20deg);
+            animation: btnAttentionShine 5s ease-in-out infinite;
+        }
+        @keyframes btnAttentionShine {
+            0% { left: -60%; }
+            22% { left: 130%; }
+            100% { left: 130%; }
+        }
+        @keyframes btnAttentionShake {
+            0%, 90%, 100% { transform: translateX(0); }
+            91% { transform: translateX(-3px); }
+            92.5% { transform: translateX(3px); }
+            94% { transform: translateX(-2px); }
+            95.5% { transform: translateX(2px); }
+            97% { transform: translateX(0); }
+        }
 
         /* Secret reveal banner */
         .secret-banner {
@@ -388,7 +409,10 @@
                 <i class="fas fa-lock"></i>
                 <h3 class="section-title" style="margin-top:10px;">Inicia sesión para obtener tu API Key</h3>
                 <p>La API para developers está disponible para usuarios con plan activo.</p>
-                <p style="margin-top:14px;"><a href="/login" class="btn btn-primary">Iniciar sesión</a> &nbsp; <a href="/planes" class="btn btn-ghost">Ver planes</a></p>
+                <div class="authgate-actions">
+                    <a href="/login" class="btn btn-primary btn-block btn-attention">Iniciar sesión</a>
+                    <a href="/planes" class="btn btn-block btn-outline-blue">Ver planes</a>
+                </div>
             </div>
         </section>
 
