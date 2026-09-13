@@ -910,40 +910,6 @@
         .footer-content a { color: var(--emerald-light); text-decoration: none; transition: color 0.2s; font-weight: 600; }
         .footer-content a:hover { color: var(--emerald); }
 
-        /* ═══ BANNER COMPARTIR ═══ */
-        .banner {
-            width: 100%; max-width: 480px;
-            background: var(--navy-card);
-            border: 1px solid var(--border-active);
-            color: var(--white);
-            position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
-            padding: 28px;
-            border-top-left-radius: 20px; border-top-right-radius: 20px;
-            box-shadow: 0 -8px 40px rgba(0,0,0,0.6);
-            display: none; flex-direction: column; align-items: center;
-            text-align: center; z-index: 9999;
-        }
-        .banner-title { font-size: 1.1rem; font-weight: 700; color: var(--emerald); margin-bottom: 12px; }
-        .banner-description { font-size: 0.9rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 20px; }
-        .cta-button {
-            width: 100%; padding: 14px;
-            background: linear-gradient(135deg, var(--emerald), var(--emerald-dark));
-            color: #000;
-            border-radius: 60px; font-size: 0.95rem; font-weight: 700;
-            text-decoration: none; display: block; margin-bottom: 10px;
-            transition: all 0.3s ease;
-            border: none; cursor: pointer;
-        }
-        .cta-button:hover { transform: translateY(-2px); }
-        .close-modal {
-            width: 100%; padding: 12px; background: transparent;
-            color: var(--text-muted); border: 1px solid var(--border-subtle);
-            border-radius: 8px; font-size: 0.9rem; font-weight: 500;
-            cursor: pointer; text-align: center; text-decoration: none;
-            display: block; transition: all 0.2s; font-family: var(--font-family);
-        }
-        .close-modal:hover { border-color: var(--border-active); color: var(--white); }
-
         /* ═══ WHATSAPP ═══ */
         .chat-bubble {
             position: fixed; bottom: 24px; right: 24px;
@@ -1381,14 +1347,6 @@
         <p>¿Necesitas ayuda? Escríbenos a <a href="mailto:soporte@facilitotools.com">soporte@facilitotools.com</a></p>
     </footer>
 
-    <!-- ═══ BANNER COMPARTIR ═══ -->
-    <div class="banner" id="banner">
-        <div class="banner-title"><i class="fas fa-heart" style="margin-right:8px;"></i> Pequeño favorcito</div>
-        <div class="banner-description"><p>Comparte esta página con tus contactos en Facebook y WhatsApp. 📲</p><p>Ayúdanos a crecer para seguir mejorando juntos.</p></div>
-        <button class="cta-button" onclick="sharePage()"><i class="fas fa-share-alt" style="margin-right:8px;"></i> Compartir ahora</button>
-        <button class="close-modal" onclick="closeBanner()">Quizás más tarde</button>
-    </div>
-
     <!-- ═══ WHATSAPP ═══ -->
     <button class="chat-bubble" onclick="goToWhatsApp()" aria-label="Contactar por WhatsApp"><i class="fab fa-whatsapp"></i></button>
     <div class="chat-text" id="chatText" onclick="goToWhatsApp()"></div>
@@ -1520,38 +1478,6 @@
                 if (sidebar.classList.contains('open')) toggleMenu();
             });
         });
-
-        // ========== COMPARTIR Y BANNER ==========
-        function sharePage() {
-            const url = "https://facilitotools.com/";
-            if (navigator.share) {
-                navigator.share({
-                    title: "FacilitoTools",
-                    text: "¡Genera comprobantes y valida clientes con FacilitoTools!",
-                    url
-                }).catch(e => console.log(e));
-            } else {
-                navigator.clipboard?.writeText(url).then(() => {
-                    alert('Enlace copiado al portapapeles. ¡Compártelo con tus contactos!');
-                }).catch(() => {
-                    window.open(url, "_blank");
-                });
-            }
-        }
-
-        function closeBanner() {
-            document.getElementById('banner').style.display = 'none';
-            localStorage.setItem('bannerClosed', 'true');
-        }
-
-        (function() {
-            if (!localStorage.getItem('bannerClosed')) {
-                const banner = document.getElementById('banner');
-                setTimeout(() => {
-                    banner.style.display = 'flex';
-                }, 10000);
-            }
-        })();
 
         // ========== FAQ ACORDEÓN ==========
         window.toggleFaq = function(element) {
