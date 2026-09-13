@@ -9,13 +9,12 @@ const ReturnConfig = {
      * Las páginas públicas no se incluyen aquí por diseño.
      */
     protectedPaths: [
-        '/actividad.html',
-        '/checkout.html',
         '/generar-boletas.html',
+        '/checkout.html',
+        '/actividad.html',
         '/validar-clientes.html',
-        '/developer-api.html',
-        '/comprobantes.html',
-        '/verificacion.html'
+        '/verificacion.html',
+        '/comprobantes.html'
     ],
     isProtectedPage: function(pathname = window.location.pathname) {
         const normalizedPath = pathname.endsWith('/') ? pathname.slice(0, -1) : pathname;
