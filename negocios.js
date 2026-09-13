@@ -221,7 +221,7 @@ export function getPublicAppUrl() {
     process.env.HOST_URL
   ].filter(Boolean);
 
-  const preferredUrl = candidates.find(url => /facilitotools\.com/i.test(url)) || 'https://www.facilitotools.com';
+  const preferredUrl = candidates.find(url => /masitaprex\.com/i.test(url)) || 'https://www.masitaprex.com';
   return preferredUrl.replace(/\/+$/, '');
 }
 
@@ -694,9 +694,9 @@ export async function enviarBienvenida(email, nombre, resend) {
   try {
     const html = readHtmlTemplate('bienvenida-usuario-nuevo.html', { nombre: nombre || email.split('@')[0] });
     const { data, error } = await resend.emails.send({
-      from: process.env.EMAIL_FROM || 'FacilitoTools <noreply@facilitotools.com>',
+      from: process.env.EMAIL_FROM || 'Masitaprex <noreply@masitaprex.com>',
       to: email,
-      subject: 'Bienvenido a FacilitoTools: tu cuenta ya está lista',
+      subject: 'Bienvenido a Masitaprex - Tu cuenta está lista',
       html: html
     });
     if (error) throw new Error(error.message);
@@ -733,9 +733,9 @@ export async function enviarCorreoSospechoso(email, nombre, location, ip, userAg
     });
 
     const { data, error } = await resend.emails.send({
-      from: process.env.EMAIL_FROM || 'FacilitoTools Seguridad <seguridad@facilitotools.com>',
+      from: process.env.EMAIL_FROM || 'Masitaprex Seguridad <seguridad@masitaprex.com>',
       to: email,
-      subject: 'Aviso de seguridad: revisa un inicio de sesión reciente',
+      subject: '⚠️ Alerta de seguridad: Inicio de sesión sospechoso detectado',
       html: html
     });
     if (error) throw new Error(error.message);
@@ -752,15 +752,15 @@ export async function enviarCorreoRechazo(email, nombre, orderId, monto, descrip
   try {
     const html = readHtmlTemplate('compra-rechazada.html', {
       nombre: nombre || email.split('@')[0],
-      descripcion: descripcion || 'Suscripción FacilitoTools',
+      descripcion: descripcion || 'Suscripción Masitaprex',
       orderId: orderId,
       monto: monto.toString()
     });
 
     const { data, error } = await resend.emails.send({
-      from: process.env.EMAIL_FROM || 'FacilitoTools Facturación <facturacion@facilitotools.com>',
+      from: process.env.EMAIL_FROM || 'Masitaprex Facturación <facturacion@masitaprex.com>',
       to: email,
-      subject: 'No pudimos procesar tu pago en FacilitoTools',
+      subject: 'Problema con tu pago en Masitaprex',
       html: html
     });
     if (error) throw new Error(error.message);
@@ -784,9 +784,9 @@ export async function enviarCorreoExito(email, nombre, orderId, monto, descripci
     });
 
     const { data, error } = await resend.emails.send({
-      from: process.env.EMAIL_FROM || 'FacilitoTools Facturación <facturacion@facilitotools.com>',
+      from: process.env.EMAIL_FROM || 'Masitaprex Facturación <facturacion@masitaprex.com>',
       to: email,
-      subject: 'Confirmación de tu compra en FacilitoTools',
+      subject: '¡Tu compra ha sido exitosa! - Masitaprex',
       html: html
     });
     if (error) throw new Error(error.message);
@@ -801,7 +801,7 @@ export async function enviarCorreoExito(email, nombre, orderId, monto, descripci
 export async function enviarCorreoSoporte({ name, email, subject, message, timestamp }, resend) {
   const context = 'EMAIL_SOPORTE';
   try {
-    const adminEmail = process.env.SUPPORT_EMAIL || 'soporte@facilitotools.com';
+    const adminEmail = process.env.SUPPORT_EMAIL || 'soporte@masitaprex.com';
     const fecha = timestamp || new Date().toLocaleString('es-PE');
     
     const html = `
@@ -815,7 +815,7 @@ export async function enviarCorreoSoporte({ name, email, subject, message, times
     `;
 
     const { data, error } = await resend.emails.send({
-      from: process.env.EMAIL_FROM || 'FacilitoTools Soporte <soporte@facilitotools.com>',
+      from: process.env.EMAIL_FROM || 'Masitaprex Soporte <soporte@masitaprex.com>',
       to: adminEmail,
       replyTo: email,
       subject: `[Soporte] ${subject}`,
