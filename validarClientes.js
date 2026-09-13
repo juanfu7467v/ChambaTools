@@ -2,9 +2,9 @@
 // 🛡️ VALIDAR CLIENTES — Router seguro (DNI, RUC, Cédula, Teléfonos)
 // ================================================================
 // Este módulo expone endpoints backend que actúan como PROXY hacia
-// APISPERU (DNI/RUC) y MASITAPREX (cédula, búsquedas, telefonía).
+// UQPFACT (DNI/RUC) y MASITAPREX (cédula, búsquedas, telefonía).
 //
-// - Los tokens (TOKEN_APISPERU, TOKEN_MASITAPREX) viven SOLO en el
+// - Los tokens (TOKEN_UQPFACT, TOKEN_MASITAPREX) viven SOLO en el
 //   servidor (variables de entorno / secrets). Nunca se envían al navegador.
 // - Cada request exige sesión activa (cookie httpOnly user_uid, la
 //   misma que usa el resto de la app) y se asocia siempre al uid real.
@@ -30,7 +30,7 @@
 //   app.use('/api/validar', validarClientesRouter);
 //
 // Variables de entorno requeridas:
-//   TOKEN_APISPERU        -> token JWT de apisperu.com (DNI y RUC)
+//   TOKEN_UQPFACT         -> token Bearer de apis.aqpfact.pe (DNI y RUC)
 //   TOKEN_MASITAPREX      -> API key de masitaprex.com
 //   MASITAPREX_AUTH_HEADER (opcional, por defecto "x-api-key")
 //   MASITAPREX_AUTH_SCHEME (opcional, por defecto "" -> sin prefijo)
@@ -39,7 +39,7 @@
 //        ningún otro prefijo). Ajusta estas variables sólo si Masitaprex
 //        cambia su esquema de autenticación en el futuro.
 //   VALIDAR_CLIENTES_TIMEOUT_MS (opcional, por defecto 60000)
-//     -> Tanto APISPERU como Masitaprex pueden tardar hasta ~50s en
+//   -> UQPFACT y Masitaprex pueden tardar hasta ~50s en
 //        responder en consultas pesadas (huellas, firma, cruces de
 //        RENIEC/SUNAT, etc). El timeout debe ser siempre mayor a ese
 //        margen para no cortar respuestas válidas antes de tiempo.
@@ -63,8 +63,8 @@
 //    terminaba leyendo "data.cedula" en vez de "data.data.cedula" y
 //    todos los campos llegaban "undefined" -> tarjetas vacías.
 //    Ahora se desenvuelve automáticamente el "data" interno de Masitaprex
-//    antes de responder al navegador (ver unwrapProviderBody). APISPERU
-//    (DNI/RUC) no usa este formato, así que no se ve afectado.
+//    antes de responder al navegador (ver unwrapProviderBody).
+//    Las consultas no afectadas conservan su formato y flujo actuales.
 //
 // 4) Timeout de 15s demasiado corto: las APIs externas pueden tardar hasta
 //    ~50s. Un timeout tan corto abortaba la petición antes de tiempo,
@@ -72,14 +72,14 @@
 //    Se sube a 60s (configurable) + 1 reintento automático ante fallos de
 //    red/timeout.
 //
-// 5) Tokens sin "trim()": TOKEN_APISPERU y TOKEN_MASITAPREX se usaban tal
+// 5) Tokens sin "trim()": TOKEN_UQPFACT y TOKEN_MASITAPREX se usaban tal
 //    cual llegaban de las variables de entorno. Un espacio o salto de línea
 //    de más en el secret (común al copiar/pegar o al setearlo con
 //    "fly secrets set" desde archivo) invalida el token silenciosamente:
 //    la API responde HTTP 200 con success:false en vez de un 401 explícito.
 //    Esto coincide exactamente con el log real observado en producción:
 //    "[ERROR] [VALIDAR_DNI] Error consultando proveedor externo Error:
-//    APISPERU (DNI) devolvió success:false - Stack: undefined". Se corrige
+//    UQPFACT (DNI) devolvió success:false - Stack: undefined". Se corrige
 //    aplicando .trim() a ambos tokens (igual que ya se hacía con el token de
 //    Mercado Pago en index.js) y se agrega un log de arranque que confirma
 //    si el token quedó cargado y con qué longitud (nunca su valor).
@@ -112,7 +112,7 @@ export function setDb(database) {
 // 🐞 BUG ADICIONAL CORREGIDO (causaba "success:false" en TODAS las consultas
 // de DNI/RUC, ver log [ERROR] [VALIDAR_DNI] ... devolvió success:false):
 //
-// 5) Tokens sin "trim()": si el secret TOKEN_APISPERU (o TOKEN_MASITAPREX) se
+// 5) Tokens sin "trim()": si el secret TOKEN_UQPFACT (o TOKEN_MASITAPREX) se
 //    configuró en Fly.io con un espacio, tabulador o salto de línea de más al
 //    final (algo muy común al copiar/pegar el valor o al setearlo desde un
 //    archivo con "fly secrets set"), el token enviado a la API externa deja
@@ -122,25 +122,25 @@ export function setDb(database) {
 //    en los logs: la consulta "falla" sin más explicación. index.js ya
 //    aplicaba .trim() al token de Mercado Pago por esta misma razón; aquí no
 //    se estaba haciendo. Se corrige para ambos proveedores.
-const TOKEN_APISPERU = (process.env.TOKEN_APISPERU || '').trim();
+const TOKEN_UQPFACT = (process.env.TOKEN_UQPFACT || '').trim();
 const BACKEND_PRINCIPAL_BASE = (process.env.BACKEND_PRINCIPAL_BASE || 'https://banckend-poxyv1-cosultape-masitaprex.fly.dev').replace(/\/+$/, '');
 
 // Diagnóstico de arranque (NUNCA se loguea el valor del token, solo si está
 // presente y su longitud, para poder detectar en los logs de Fly.io casos
 // como "el secret quedó vacío" o "el secret trae espacios" sin exponerlo).
-if (!TOKEN_APISPERU) {
-  logger.warn('VALIDAR_CLIENTES_CONFIG', 'TOKEN_APISPERU no está configurado: las consultas de DNI/RUC fallarán con 500.');
+if (!TOKEN_UQPFACT) {
+  logger.warn('VALIDAR_CLIENTES_CONFIG', 'TOKEN_UQPFACT no está configurado: las consultas de DNI/RUC fallarán con 500.');
 } else {
-  logger.info('VALIDAR_CLIENTES_CONFIG', 'TOKEN_APISPERU cargado', { length: TOKEN_APISPERU.length });
+  logger.info('VALIDAR_CLIENTES_CONFIG', 'TOKEN_UQPFACT cargado', { length: TOKEN_UQPFACT.length });
 }
 logger.info('VALIDAR_CLIENTES_CONFIG', 'Backend principal configurado', { baseUrl: BACKEND_PRINCIPAL_BASE });
 
-// Las APIs externas (APISPERU y Masitaprex) pueden tardar hasta ~50s en
+// Las APIs externas (UQPFACT y Masitaprex) pueden tardar hasta ~50s en
 // responder consultas pesadas. El timeout debe dar margen suficiente para
 // no cortar respuestas válidas antes de tiempo.
 const EXTERNAL_TIMEOUT_MS = Number(process.env.VALIDAR_CLIENTES_TIMEOUT_MS) || 60000;
 
-const APISPERU_BASE = 'https://dniruc.apisperu.com/api/v1';
+const UQPFACT_BASE = 'https://apis.aqpfact.pe/api';
 function backendPrincipalUrl(path, params = {}) {
   const url = new URL(`${BACKEND_PRINCIPAL_BASE}${path}`);
   for (const [key, value] of Object.entries(params)) {
@@ -326,12 +326,10 @@ async function ejecutarConsulta({ req, res, tipo, contexto, fetchFn }) {
   }
 }
 
-// Algunos proveedores (Masitaprex) envuelven siempre la respuesta real en
-// { success: true, data: {...}, meta: {...} }. Otros (APISPERU) devuelven
-// los campos directamente en la raíz (a veces junto a un "success": true,
-// pero SIN una clave "data" anidada). Esta función normaliza ambos casos
-// para que el frontend siempre reciba los campos reales en el primer nivel,
-// evitando el bug de "tarjetas vacías" por doble anidado.
+// Algunos proveedores (Masitaprex y UQPFACT) envuelven la respuesta real en
+// { success: true, data: {...}, meta: {...} }, mientras otros devuelven los
+// campos directamente en la raíz. Esta función normaliza ambos casos para que
+// el frontend siempre reciba los campos reales en el primer nivel.
 function unwrapProviderBody(body) {
   if (body && typeof body === 'object' && body.success === true &&
       body.data && typeof body.data === 'object') {
@@ -485,7 +483,7 @@ async function attemptFetch(url, options, providerName) {
     err.statusCode = 404;
     err.providerMessage = providerMessage;
     err.providerRaw = rawBody;
-    // Mensajes típicos de APISPERU que indican un problema de CONFIGURACIÓN
+    // Mensajes típicos de UQPFACT que indican un problema de CONFIGURACIÓN
     // (token inválido/vencido o sin créditos) en vez de "dato no encontrado".
     // Distinguirlos evita decirle al usuario "no se encontraron resultados"
     // cuando en realidad el servicio está mal configurado.
@@ -526,47 +524,77 @@ async function callExternal(url, options, providerName) {
   }
 }
 
+function normalizeUqpFactDocument(body, tipo, documento) {
+  let data = unwrapProviderBody(body);
+  if (data && typeof data === 'object' && data.data && typeof data.data === 'object' && !Array.isArray(data.data)) {
+    data = data.data;
+  }
+  if (Array.isArray(data)) data = data[0];
+  if (!data || typeof data !== 'object') return data;
+
+  const normalized = { ...data };
+  const pick = (...keys) => keys.map((key) => data[key]).find((value) => value !== undefined && value !== null && value !== '');
+
+  if (tipo === 'dni') {
+    normalized.dni = pick('dni', 'numero_documento', 'numeroDocumento', 'documento') || documento;
+    normalized.nombres = pick('nombres', 'nombre', 'names') || '';
+    normalized.apellidoPaterno = pick('apellidoPaterno', 'apellido_paterno', 'apepaterno', 'apellido paterno') || '';
+    normalized.apellidoMaterno = pick('apellidoMaterno', 'apellido_materno', 'apematerno', 'apellido materno') || '';
+  } else {
+    normalized.ruc = pick('ruc', 'numero_ruc', 'numeroRuc', 'numero_documento', 'numeroDocumento') || documento;
+    normalized.razonSocial = pick('razonSocial', 'razon_social', 'razonSocialContribuyente', 'nombre_o_razon_social', 'nombre') || '';
+    normalized.nombreComercial = pick('nombreComercial', 'nombre_comercial') || '';
+    normalized.condicion = pick('condicion', 'condicionContribuyente', 'estado_contribuyente') || '';
+    normalized.direccion = pick('direccion', 'direccionFiscal', 'direccion_fiscal') || '';
+    normalized.departamento = pick('departamento') || '';
+    normalized.provincia = pick('provincia') || '';
+    normalized.distrito = pick('distrito') || '';
+    normalized.ubigeo = pick('ubigeo') || '';
+  }
+  return normalized;
+}
+
 // ================================================================
-// 📄 DNI — APISPERU
+// 📄 DNI — UQPFACT
 // ================================================================
 router.get('/dni/:dni', requireAuth, async (req, res) => {
   const dni = String(req.params.dni || '').trim();
   if (!/^\d{8}$/.test(dni)) {
     return res.status(400).json({ success: false, error: 'El DNI debe tener 8 dígitos numéricos.' });
   }
-  if (!TOKEN_APISPERU) {
+  if (!TOKEN_UQPFACT) {
     return res.status(500).json({ success: false, error: 'Servicio de validación de DNI no configurado.' });
   }
 
   await ejecutarConsulta({
     req, res, tipo: 'documento', contexto: 'VALIDAR_DNI',
     fetchFn: () => callExternal(
-      `${APISPERU_BASE}/dni/${dni}?token=${encodeURIComponent(TOKEN_APISPERU)}`,
-      { method: 'GET', headers: { 'Accept': 'application/json' } },
-      'APISPERU (DNI)'
-    )
+      `${UQPFACT_BASE}/dni/${dni}`,
+      { method: 'GET', headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${TOKEN_UQPFACT}` } },
+      'UQPFACT (DNI)'
+    ).then((body) => normalizeUqpFactDocument(body, 'dni', dni))
   });
 });
 
 // ================================================================
-// 🏢 RUC — APISPERU
+// 🏢 RUC — UQPFACT
 // ================================================================
 router.get('/ruc/:ruc', requireAuth, async (req, res) => {
   const ruc = String(req.params.ruc || '').trim();
   if (!/^\d{11}$/.test(ruc)) {
     return res.status(400).json({ success: false, error: 'El RUC debe tener 11 dígitos numéricos.' });
   }
-  if (!TOKEN_APISPERU) {
+  if (!TOKEN_UQPFACT) {
     return res.status(500).json({ success: false, error: 'Servicio de validación de RUC no configurado.' });
   }
 
   await ejecutarConsulta({
     req, res, tipo: 'documento', contexto: 'VALIDAR_RUC',
     fetchFn: () => callExternal(
-      `${APISPERU_BASE}/ruc/${ruc}?token=${encodeURIComponent(TOKEN_APISPERU)}`,
-      { method: 'GET', headers: { 'Accept': 'application/json' } },
-      'APISPERU (RUC)'
-    )
+      `${UQPFACT_BASE}/ruc/${ruc}`,
+      { method: 'GET', headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${TOKEN_UQPFACT}` } },
+      'UQPFACT (RUC)'
+    ).then((body) => normalizeUqpFactDocument(body, 'ruc', ruc))
   });
 });
 
