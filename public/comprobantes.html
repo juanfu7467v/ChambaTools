@@ -2254,6 +2254,13 @@
     </template>
 
     <script>
+        // ========== PROTECCIÓN DE SESIÓN (returnConfig) ==========
+        // Igual que en las demás interfaces protegidas: si no hay sesión activa,
+        // ReturnConfig redirige automáticamente a login.html conservando el returnTo.
+        if (typeof ReturnConfig !== 'undefined') {
+            ReturnConfig.enforceAuth();
+        }
+
         // ========== FIREBASE CONFIGURACIÓN (común) ==========
         let auth;
 
