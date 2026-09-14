@@ -674,6 +674,14 @@ export async function otorgarBeneficio(uid, email, montoPagado, processor, payme
 // 📧 FUNCIONES DE ENVÍO DE CORREOS (sin créditos)
 // ================================================================
 
+function getEmailError(error) {
+  if (error instanceof Error) return error;
+  if (typeof error === 'string') return new Error(error);
+
+  const message = error?.message || error?.error || error?.name || (error ? JSON.stringify(error) : 'Error desconocido al enviar el correo');
+  return new Error(String(message));
+}
+
 function readHtmlTemplate(templateName, replacements = {}) {
   const templatePath = path.join(__dirname, 'emails', templateName);
   try {
@@ -699,12 +707,13 @@ export async function enviarBienvenida(email, nombre, resend) {
       subject: 'Bienvenido a FacilitoTools: tu cuenta ya está lista',
       html: html
     });
-    if (error) throw new Error(error.message);
+    if (error) throw getEmailError(error);
     logger.info(context, 'Correo de bienvenida enviado', { email, messageId: data?.id });
     return { success: true, messageId: data?.id };
   } catch (error) {
-    logger.error(context, 'Error enviando correo de bienvenida', { email, error: error.message });
-    return { success: false, error: error.message };
+    const emailError = getEmailError(error);
+    logger.error(context, 'Error enviando correo de bienvenida', emailError, { email });
+    return { success: false, error: emailError.message };
   }
 }
 
@@ -738,12 +747,13 @@ export async function enviarCorreoSospechoso(email, nombre, location, ip, userAg
       subject: 'Aviso de seguridad: revisa un inicio de sesión reciente',
       html: html
     });
-    if (error) throw new Error(error.message);
+    if (error) throw getEmailError(error);
     logger.info(context, 'Correo sospechoso enviado', { email, ip, messageId: data?.id });
     return { success: true, messageId: data?.id };
   } catch (error) {
-    logger.error(context, 'Error enviando correo sospechoso', { email, error: error.message });
-    return { success: false, error: error.message };
+    const emailError = getEmailError(error);
+    logger.error(context, 'Error enviando correo sospechoso', emailError, { email, ip });
+    return { success: false, error: emailError.message };
   }
 }
 
@@ -763,12 +773,13 @@ export async function enviarCorreoRechazo(email, nombre, orderId, monto, descrip
       subject: 'No pudimos procesar tu pago en FacilitoTools',
       html: html
     });
-    if (error) throw new Error(error.message);
+    if (error) throw getEmailError(error);
     logger.info(context, 'Correo de rechazo enviado', { email, orderId, messageId: data?.id });
     return { success: true, messageId: data?.id };
   } catch (error) {
-    logger.error(context, 'Error enviando correo de rechazo', { email, error: error.message });
-    return { success: false, error: error.message };
+    const emailError = getEmailError(error);
+    logger.error(context, 'Error enviando correo de rechazo', emailError, { email, orderId });
+    return { success: false, error: emailError.message };
   }
 }
 
@@ -789,12 +800,13 @@ export async function enviarCorreoExito(email, nombre, orderId, monto, descripci
       subject: 'Confirmación de tu compra en FacilitoTools',
       html: html
     });
-    if (error) throw new Error(error.message);
+    if (error) throw getEmailError(error);
     logger.info(context, 'Correo de éxito enviado', { email, orderId, messageId: data?.id });
     return { success: true, messageId: data?.id };
   } catch (error) {
-    logger.error(context, 'Error enviando correo de éxito', { email, error: error.message });
-    return { success: false, error: error.message };
+    const emailError = getEmailError(error);
+    logger.error(context, 'Error enviando correo de éxito', emailError, { email, orderId });
+    return { success: false, error: emailError.message };
   }
 }
 
@@ -821,12 +833,13 @@ export async function enviarCorreoSoporte({ name, email, subject, message, times
       subject: `[Soporte] ${subject}`,
       html: html
     });
-    if (error) throw new Error(error.message);
+    if (error) throw getEmailError(error);
     logger.info(context, 'Correo de soporte enviado al administrador', { from: email, subject, messageId: data?.id });
     return { success: true, messageId: data?.id };
   } catch (error) {
-    logger.error(context, 'Error enviando correo de soporte', { email, error: error.message });
-    return { success: false, error: error.message };
+    const emailError = getEmailError(error);
+    logger.error(context, 'Error enviando correo de soporte', emailError, { email });
+    return { success: false, error: emailError.message };
   }
 }
 
