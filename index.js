@@ -1133,34 +1133,52 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Error interno del servidor' });
 });
 
-//  SOLUCIÓN: Esperar la inicialización de Firebase antes de abrir el puerto
+//  SOLUCIÓN: abrir el puerto INMEDIATAMENTE, sin esperar a Firebase ni a
+//  ninguna otra tarea de inicialización pesada. Fly.io "duerme" la máquina
+//  cuando no hay tráfico (autostop) y la vuelve a levantar (autostart) al
+//  llegar una petición; mientras el proceso no escuche en 0.0.0.0:PORT, el
+//  proxy de Fly no puede enrutar esa primera petición y el usuario percibe
+//  una demora larga. Antes, este bloque hacía `await initFirebase(...)`
+//  ANTES de `app.listen(...)`, lo cual retrasaba innecesariamente la
+//  apertura del puerto (Firebase ya se inicializa de forma asíncrona más
+//  arriba, ver sección "🔥 INICIALIZACIÓN DE FIREBASE"). Ahora el servidor
+//  escucha primero y la verificación de Firebase ocurre en segundo plano.
 const PORT = process.env.PORT || 8080;
 
-async function arrancarServidor() {
+const server = app.listen(PORT, "0.0.0.0", () => {
+  logger.info('SERVER', `🚀 Servidor escuchando en el puerto ${PORT} (Firebase inicializándose en segundo plano)`, { version: '3.6.1' });
+});
+
+// Las consultas de /api/validar/* (DNI, RUC, cédula, telefonía) pueden
+// tardar hasta ~50-60s en proveedores externos (APISPERU/Masitaprex).
+// Se amplían los timeouts del servidor HTTP para no cortar esas
+// respuestas antes de tiempo (los valores por defecto de Node ya son
+// generosos, pero se fijan explícitamente para evitar sorpresas según
+// el entorno de despliegue).
+server.requestTimeout = 120000;   // 120s máximo por request completa
+server.headersTimeout = 125000;   // debe ser mayor que requestTimeout
+server.keepAliveTimeout = 65000;  // > timeout típico de proxies (fly.dev, etc.)
+
+// La inicialización de Firebase ya se dispara al cargar el módulo (arriba).
+// Aquí solo verificamos, sin bloquear el arranque del servidor, que haya
+// terminado correctamente, dejando constancia en los logs.
+async function verificarInicializacionFirebase() {
   try {
-    await initFirebase(serviceAccount); 
-    
+    if (!serviceAccount) {
+      logger.error('SERVER', '❌ Firebase no se pudo inicializar: Service account no disponible');
+      return;
+    }
     if (!db) {
       await new Promise(resolve => setTimeout(resolve, 1500));
     }
-
-    const server = app.listen(PORT, "0.0.0.0", () => {
-      logger.info('SERVER', `🚀 Servidor iniciado con base de datos vinculada en puerto ${PORT}`, { version: '3.6.1' });
-    });
-
-    // Las consultas de /api/validar/* (DNI, RUC, cédula, telefonía) pueden
-    // tardar hasta ~50-60s en proveedores externos (APISPERU/Masitaprex).
-    // Se amplían los timeouts del servidor HTTP para no cortar esas
-    // respuestas antes de tiempo (los valores por defecto de Node ya son
-    // generosos, pero se fijan explícitamente para evitar sorpresas según
-    // el entorno de despliegue).
-    server.requestTimeout = 120000;   // 120s máximo por request completa
-    server.headersTimeout = 125000;   // debe ser mayor que requestTimeout
-    server.keepAliveTimeout = 65000;  // > timeout típico de proxies (fly.dev, etc.)
+    if (db) {
+      logger.info('SERVER', '✅ Base de datos vinculada correctamente', { version: '3.6.1' });
+    } else {
+      logger.error('SERVER', '⚠️ Firebase todavía no está disponible tras la espera de verificación');
+    }
   } catch (error) {
-    logger.error('SERVER', '❌ Fallo crítico: No se pudo arrancar el servidor por error en Firebase', error);
-    process.exit(1);
+    logger.error('SERVER', '❌ Error verificando inicialización de Firebase', error);
   }
 }
 
-arrancarServidor();
+verificarInicializacionFirebase();
