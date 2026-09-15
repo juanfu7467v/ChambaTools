@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recuperar Cuenta - Masitaprex</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+
+        /* ─────────────────────────────────────────────
+           GALAXY 3D BACKGROUND
+           ───────────────────────────────────────────── */
+        #galaxy-canvas {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Deep space gradient behind the canvas */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 80% 50% at 20% 20%, #0d0221 0%, transparent 60%),
+                radial-gradient(ellipse 60% 80% at 80% 80%, #020d1a 0%, transparent 60%),
+                radial-gradient(ellipse 100% 100% at 50% 50%, #050014 0%, #000000 100%);
+            z-index: 0;
+        }
+
+        /* Nebula colour clouds */
+        .nebula {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.18;
+            animation: nebulaDrift 20s ease-in-out infinite alternate;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .nebula-1 {
+            width: 500px; height: 400px;
+            top: -100px; left: -100px;
+            background: radial-gradient(circle, #6e00ff, #c400c4, transparent);
+            animation-delay: 0s;
+        }
+        .nebula-2 {
+            width: 400px; height: 500px;
+            bottom: -120px; right: -80px;
+            background: radial-gradient(circle, #003cff, #00b4ff, transparent);
+            animation-delay: -7s;
+            animation-duration: 25s;
+        }
+        .nebula-3 {
+            width: 350px; height: 350px;
+            top: 40%; left: 30%;
+            background: radial-gradient(circle, #ff006e, #6e00ff, transparent);
+            opacity: 0.10;
+            animation-delay: -12s;
+            animation-duration: 18s;
+        }
+        @keyframes nebulaDrift {
+            0%   { transform: translate(0, 0) scale(1); }
+            50%  { transform: translate(40px, 30px) scale(1.08); }
+            100% { transform: translate(-20px, 50px) scale(0.95); }
+        }
+
+        /* Floating 3D bubbles */
+        .bubble {
+            position: fixed;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 1;
+            animation: floatBubble linear infinite;
+        }
+        .bubble::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.55), transparent 60%);
+        }
+
+        @keyframes floatBubble {
+            0%   { transform: translateY(110vh) rotate(0deg); opacity: 0; }
+            5%   { opacity: 1; }
+            95%  { opacity: 0.7; }
+            100% { transform: translateY(-20vh) rotate(720deg); opacity: 0; }
+        }
+
+        /* Card sits above everything */
+        .card-wrapper {
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Subtle card glow */
+        .main-card {
+            box-shadow:
+                0 0 0 1px rgba(255,255,255,0.06),
+                0 25px 60px rgba(0,0,0,0.7),
+                0 0 80px rgba(110,0,255,0.12);
+            backdrop-filter: blur(2px);
+        }
+
+        /* ─────────────────────────────────────────────
+           HELP MODAL
+           ───────────────────────────────────────────── */
+        #help-modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: rgba(0,0,0,0.65);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            justify-content: center;
+            align-items: flex-end;   /* bottom-sheet on mobile */
+        }
+        #help-modal-overlay.active {
+            display: flex;
+        }
+        @media (min-width: 640px) {
+            #help-modal-overlay {
+                align-items: center; /* centred on desktop */
+            }
+            #help-modal-box {
+                border-radius: 20px !important;
+                max-width: 420px;
+            }
+        }
+
+        #help-modal-box {
+            background: #ffffff;
+            width: 100%;
+            max-width: 480px;
+            border-radius: 24px 24px 0 0;
+            padding: 10px 24px 40px;
+            animation: sheetSlideUp 0.38s cubic-bezier(0.34, 1.36, 0.64, 1) forwards;
+            position: relative;
+        }
+        @keyframes sheetSlideUp {
+            from { transform: translateY(100%); opacity: 0; }
+            to   { transform: translateY(0);    opacity: 1; }
+        }
+
+        /* Drag handle */
+        .modal-handle {
+            width: 40px; height: 5px;
+            background: #e2e8f0;
+            border-radius: 99px;
+            margin: 0 auto 22px;
+        }
+
+        /* Icon badge */
+        .modal-icon-wrap {
+            width: 64px; height: 64px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6e00ff22, #003cff22);
+            border: 2px solid #6e00ff33;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+        }
+        .modal-icon-wrap i {
+            font-size: 28px;
+            background: linear-gradient(135deg, #6e00ff, #003cff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .modal-title {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: #0f172a;
+            text-align: center;
+            margin-bottom: 12px;
+        }
+
+        .modal-body {
+            font-size: 0.93rem;
+            color: #475569;
+            line-height: 1.65;
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .modal-body strong {
+            color: #0f172a;
+        }
+
+        /* Security badge */
+        .modal-security-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #f0fdf4;
+            border: 1px solid #86efac;
+            border-radius: 10px;
+            padding: 10px 14px;
+            margin-bottom: 20px;
+            font-size: 0.82rem;
+            color: #166534;
+            font-weight: 600;
+        }
+        .modal-security-badge i {
+            font-size: 16px;
+            color: #16a34a;
+            flex-shrink: 0;
+        }
+
+        .modal-close-btn {
+            width: 100%;
+            padding: 13px;
+            border-radius: 14px;
+            border: none;
+            background: linear-gradient(90deg, #6e00ff, #003cff);
+            color: #ffffff;
+            font-size: 0.97rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.15s;
+            box-shadow: 0 4px 16px rgba(110,0,255,0.35);
+        }
+        .modal-close-btn:active {
+            opacity: 0.85;
+            transform: scale(0.98);
+        }
+
+        /* Help icon button */
+        .help-icon-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px; height: 18px;
+            border-radius: 50%;
+            border: 1.5px solid #9ca3af;
+            background: transparent;
+            color: #6b7280;
+            font-size: 10px;
+            font-weight: 800;
+            cursor: pointer;
+            margin-left: 5px;
+            vertical-align: middle;
+            line-height: 1;
+            transition: border-color 0.2s, color 0.2s, background 0.2s;
+            position: relative;
+            top: -1px;
+        }
+        .help-icon-btn:hover {
+            border-color: #ef4444;
+            color: #ef4444;
+            background: #fef2f2;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <!-- ── GALAXY NEBULA LAYERS ── -->
+    <div class="nebula nebula-1"></div>
+    <div class="nebula nebula-2"></div>
+    <div class="nebula nebula-3"></div>
+
+    <!-- ── STAR CANVAS ── -->
+    <canvas id="galaxy-canvas"></canvas>
+
+    <!-- ── HELP MODAL ── -->
+    <div id="help-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="helpModalTitle">
+        <div id="help-modal-box">
+            <div class="modal-handle"></div>
+
+            <div class="modal-icon-wrap">
+                <i class="ri-shield-lock-line"></i>
+            </div>
+
+            <p class="modal-title" id="helpModalTitle">¿Por qué debo ingresar mi correo?</p>
+
+            <p class="modal-body">
+                Por seguridad, no podemos autocompletar tu correo electrónico.
+                Esto es para asegurarnos de que eres el <strong>propietario de la cuenta</strong>.<br><br>
+                Por favor, ingresa tu correo manualmente y revisa tu bandeja de entrada,
+                ya que te enviaremos un <strong>enlace de recuperación</strong>.
+            </p>
+
+            <div class="modal-security-badge">
+                <i class="ri-shield-check-fill"></i>
+                <span>Este proceso está protegido por Masitaprex Security Team (SOC)</span>
+            </div>
+
+            <button class="modal-close-btn" onclick="closeHelpModal()">
+                Entendido
+            </button>
+        </div>
+    </div>
+
+    <!-- ── MAIN CARD ── -->
+    <div class="card-wrapper max-w-md w-full bg-white rounded-2xl main-card overflow-hidden">
+        <div class="bg-black p-8 text-center">
+            <h1 class="text-3xl font-extrabold text-white tracking-widest uppercase">Masitaprex</h1>
+            <p class="text-gray-400 text-xs mt-2 tracking-widest">SEGURIDAD DE INFRAESTRUCTURA</p>
+        </div>
+        
+        <div class="p-8">
+            <div id="initial-state">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center text-red-600">
+                        <i class="ri-shield-keyhole-line text-2xl"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold text-gray-900">Recuperar cuenta</h2>
+                        <p class="text-sm text-gray-500">Restablece tu contraseña de forma segura</p>
+                    </div>
+                </div>
+
+                <form id="recovery-form" class="space-y-4">
+                    <div>
+                        <!-- ✅ Label con icono de ayuda -->
+                        <label for="email" class="block text-sm font-medium text-gray-700 mb-1">
+                            Correo electrónico
+                            <button type="button" class="help-icon-btn" onclick="openHelpModal()" aria-label="Ayuda sobre el correo electrónico" title="¿Por qué debo ingresar mi correo?">?</button>
+                        </label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+                                <i class="ri-mail-line"></i>
+                            </span>
+                            <input type="email" id="email" required 
+                                class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 text-gray-900"
+                                placeholder="tu@ejemplo.com">
+                        </div>
+                    </div>
+
+                    <button type="submit" id="submit-btn"
+                        class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-lg transition duration-200 flex items-center justify-center gap-2">
+                        <span>Enviar enlace de recuperación</span>
+                        <i class="ri-arrow-right-line"></i>
+                    </button>
+                </form>
+
+                <div class="mt-6 text-center">
+                    <a href="/login.html" class="text-sm text-gray-600 hover:text-red-600 transition">
+                        <i class="ri-arrow-left-s-line"></i> Volver al inicio de sesión
+                    </a>
+                </div>
+            </div>
+
+            <div id="success-state" class="hidden text-center py-4">
+                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center text-green-600 mx-auto mb-4">
+                    <i class="ri-checkbox-circle-line text-4xl"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-900 mb-2">¡Correo enviado!</h2>
+                <p class="text-gray-600 mb-6">
+                    Hemos enviado un enlace para restablecer tu contraseña a <strong id="sent-email"></strong>. 
+                    Por favor, revisa tu bandeja de entrada y la carpeta de spam.
+                </p>
+                <button onclick="location.reload()" class="text-red-600 font-semibold hover:underline">
+                    Intentar con otro correo
+                </button>
+            </div>
+        </div>
+        
+        <div class="bg-gray-50 p-4 text-center border-t border-gray-100">
+            <p class="text-xs text-gray-400 italic">
+                Protegido por Masitaprex Security Team (SOC)
+            </p>
+        </div>
+    </div>
+
+    <!-- ── GALAXY + BUBBLES SCRIPT ── -->
+    <script>
+    /* ============================================================
+       GALAXY CANVAS — stars with depth/parallax feel
+       ============================================================ */
+    (function () {
+        const canvas = document.getElementById('galaxy-canvas');
+        const ctx    = canvas.getContext('2d');
+        let W, H, stars = [], shooting = [], raf;
+
+        function resize() {
+            W = canvas.width  = window.innerWidth;
+            H = canvas.height = window.innerHeight;
+        }
+
+        function rand(a, b) { return Math.random() * (b - a) + a; }
+
+        /* ── Star generation ── */
+        function makeStars(n) {
+            stars = [];
+            for (let i = 0; i < n; i++) {
+                const depth = rand(0.1, 1);       // 1 = close, 0.1 = far
+                stars.push({
+                    x: rand(0, W),
+                    y: rand(0, H),
+                    r: rand(0.3, 1.6) * depth,
+                    alpha: rand(0.3, 1) * depth,
+                    twinkleSpeed: rand(0.005, 0.025),
+                    twinkleDir: Math.random() < 0.5 ? 1 : -1,
+                    hue: Math.random() < 0.15
+                            ? (Math.random() < 0.5 ? 220 : 280)  // blue / purple tinted
+                            : 0,
+                    sat: Math.random() < 0.15 ? rand(60, 100) : 0,
+                    depth
+                });
+            }
+        }
+
+        /* ── Shooting stars ── */
+        function spawnShooting() {
+            shooting.push({
+                x: rand(W * 0.1, W * 0.9),
+                y: rand(0, H * 0.4),
+                len: rand(80, 200),
+                speed: rand(6, 14),
+                alpha: 1,
+                angle: rand(Math.PI / 8, Math.PI / 4),
+                life: 1
+            });
+        }
+
+        /* ── Draw frame ── */
+        function draw(t) {
+            ctx.clearRect(0, 0, W, H);
+
+            /* stars */
+            for (const s of stars) {
+                s.alpha += s.twinkleSpeed * s.twinkleDir;
+                if (s.alpha >= 1)   { s.alpha = 1;   s.twinkleDir = -1; }
+                if (s.alpha <= 0.1) { s.alpha = 0.1; s.twinkleDir =  1; }
+
+                ctx.save();
+                ctx.globalAlpha = s.alpha;
+                if (s.sat > 0) {
+                    ctx.fillStyle = `hsl(${s.hue}, ${s.sat}%, 90%)`;
+                } else {
+                    ctx.fillStyle = '#ffffff';
+                }
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+                ctx.fill();
+
+                /* soft glow for brighter stars */
+                if (s.r > 1.1) {
+                    ctx.globalAlpha = s.alpha * 0.25;
+                    const g = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, s.r * 4);
+                    g.addColorStop(0, s.sat > 0 ? `hsl(${s.hue},${s.sat}%,80%)` : '#aad4ff');
+                    g.addColorStop(1, 'transparent');
+                    ctx.fillStyle = g;
+                    ctx.beginPath();
+                    ctx.arc(s.x, s.y, s.r * 4, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.restore();
+            }
+
+            /* shooting stars */
+            for (let i = shooting.length - 1; i >= 0; i--) {
+                const s = shooting[i];
+                s.x += Math.cos(s.angle) * s.speed;
+                s.y += Math.sin(s.angle) * s.speed;
+                s.life -= 0.018;
+
+                if (s.life <= 0) { shooting.splice(i, 1); continue; }
+
+                ctx.save();
+                ctx.globalAlpha = s.life;
+                const gx = ctx.createLinearGradient(
+                    s.x, s.y,
+                    s.x - Math.cos(s.angle) * s.len,
+                    s.y - Math.sin(s.angle) * s.len
+                );
+                gx.addColorStop(0, 'rgba(255,255,255,0.9)');
+                gx.addColorStop(1, 'rgba(180,140,255,0)');
+                ctx.strokeStyle = gx;
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.moveTo(s.x, s.y);
+                ctx.lineTo(s.x - Math.cos(s.angle) * s.len, s.y - Math.sin(s.angle) * s.len);
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            raf = requestAnimationFrame(draw);
+        }
+
+        /* ── Init ── */
+        resize();
+        makeStars(Math.min(350, Math.floor(W * H / 5000)));
+        draw();
+
+        /* Spawn shooting stars randomly */
+        setInterval(() => {
+            if (Math.random() < 0.4) spawnShooting();
+        }, 2800);
+
+        window.addEventListener('resize', () => {
+            resize();
+            makeStars(Math.min(350, Math.floor(W * H / 5000)));
+        });
+    })();
+
+    /* ============================================================
+       FLOATING 3D BUBBLES
+       ============================================================ */
+    (function () {
+        const BUBBLE_COLORS = [
+            ['rgba(110,0,255,0.25)',  'rgba(110,0,255,0.08)'],
+            ['rgba(0,60,255,0.25)',   'rgba(0,60,255,0.08)'],
+            ['rgba(255,0,110,0.22)', 'rgba(255,0,110,0.07)'],
+            ['rgba(0,180,255,0.22)', 'rgba(0,180,255,0.07)'],
+            ['rgba(180,0,255,0.20)', 'rgba(120,0,200,0.06)'],
+        ];
+        const total = window.innerWidth < 480 ? 10 : 16;
+
+        for (let i = 0; i < total; i++) spawnBubble(true);
+
+        function spawnBubble(initial) {
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble';
+
+            const size  = 20 + Math.random() * 70;          // 20–90 px
+            const col   = BUBBLE_COLORS[Math.floor(Math.random() * BUBBLE_COLORS.length)];
+            const left  = Math.random() * 95;                // % from left
+            const dur   = 12 + Math.random() * 18;          // 12–30s
+            const delay = initial ? -(Math.random() * dur) : 0;
+
+            bubble.style.cssText = `
+                width: ${size}px;
+                height: ${size}px;
+                left: ${left}%;
+                background: radial-gradient(circle at 35% 35%, ${col[0]}, ${col[1]});
+                border: 1px solid rgba(255,255,255,0.18);
+                animation-duration: ${dur}s;
+                animation-delay: ${delay}s;
+                box-shadow: inset 0 0 ${size * 0.3}px rgba(255,255,255,0.12),
+                            0 0 ${size * 0.5}px ${col[1]};
+            `;
+
+            document.body.appendChild(bubble);
+
+            /* Remove and recreate after animation ends */
+            bubble.addEventListener('animationend', () => {
+                bubble.remove();
+                spawnBubble(false);
+            });
+        }
+    })();
+
+    /* ============================================================
+       HELP MODAL — open / close
+       ============================================================ */
+    function openHelpModal() {
+        const overlay = document.getElementById('help-modal-overlay');
+        overlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeHelpModal() {
+        const overlay = document.getElementById('help-modal-overlay');
+        overlay.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    /* Close on backdrop click */
+    document.getElementById('help-modal-overlay').addEventListener('click', function (e) {
+        if (e.target === this) closeHelpModal();
+    });
+
+    /* Close on Escape key */
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') closeHelpModal();
+    });
+    </script>
+
+    <!-- Firebase SDK — unchanged -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
+        import { getAuth, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
+
+        async function init() {
+            try {
+                const response = await fetch('/api/config');
+                const config = await response.json();
+                
+                const app = initializeApp(config.firebaseConfig);
+                const auth = getAuth(app);
+                auth.languageCode = 'es';
+
+                const form = document.getElementById('recovery-form');
+                const submitBtn = document.getElementById('submit-btn');
+                const initialState = document.getElementById('initial-state');
+                const successState = document.getElementById('success-state');
+                const sentEmailText = document.getElementById('sent-email');
+
+                form.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const email = document.getElementById('email').value;
+                    
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i class="ri-loader-4-line animate-spin"></i> Enviando...';
+
+                    try {
+                        await sendPasswordResetEmail(auth, email);
+                        
+                        sentEmailText.textContent = email;
+                        initialState.classList.add('hidden');
+                        successState.classList.remove('hidden');
+                    } catch (error) {
+                        console.error("Error en recuperación:", error);
+                        let message = "Ocurrió un error al enviar el correo.";
+                        
+                        if (error.code === 'auth/user-not-found') {
+                            message = "No existe ninguna cuenta con este correo.";
+                        } else if (error.code === 'auth/invalid-email') {
+                            message = "El formato del correo no es válido.";
+                        } else if (error.code === 'auth/too-many-requests') {
+                            message = "Demasiados intentos. Inténtalo más tarde.";
+                        }
+                        
+                        alert(message);
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = '<span>Enviar enlace de recuperación</span><i class="ri-arrow-right-line"></i>';
+                    }
+                });
+            } catch (err) {
+                console.error("Error inicializando Firebase:", err);
+                alert("Error de conexión con el servidor de seguridad.");
+            }
+        }
+
+        init();
+    </script>
+</body>
+</html>
