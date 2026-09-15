@@ -149,7 +149,7 @@ function traducirErrorMercadoPago(error) {
 
   if (textoParaBuscar.includes('cannot infer payment method')) {
     return {
-      mensajeUsuario: 'No pudimos reconocer el método de pago con los datos ingresados. Verifica que la tarjeta usada sea válida para el entorno actual (pruebas o producción) e inténtalo nuevamente.',
+      mensajeUsuario: 'No pudimos validar los datos del pago. Verifica la información ingresada e inténtalo nuevamente o elige otro método de pago.',
       detalleTecnico: causaCruda || error?.message
     };
   }

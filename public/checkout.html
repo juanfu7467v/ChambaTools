@@ -926,7 +926,7 @@
         const MENSAJES_ERROR_CONOCIDOS = [
             {
                 match: /cannot infer payment method/i,
-                message: 'No pudimos reconocer el método de pago con los datos ingresados. Esto suele ocurrir al usar una tarjeta que no es válida para el entorno actual (pruebas o producción). Verifica que estés usando una tarjeta de prueba oficial de Mercado Pago, o inténtalo con otra tarjeta.'
+                message: 'No pudimos validar los datos del pago. Verifica la información ingresada e inténtalo nuevamente o elige otro método de pago.'
             },
             {
                 match: /invalid token|token.*(expired|invalid)/i,
@@ -955,7 +955,7 @@
 
             // Si el backend ya envía un mensaje en español claro, lo respetamos tal cual.
             const pareceEspanolClaro = /[áéíóúñ¿¡]/i.test(rawMessage) || /^[a-záéíóúñ0-9\s.,:;()¿¡'"-]+$/i.test(rawMessage);
-            if (pareceEspanolClaro && rawMessage.length < 200) {
+            if (pareceEspanolClaro && rawMessage.length < 200 && !/pruebas|producción|entorno actual|cannot infer|payment method/i.test(rawMessage)) {
                 return rawMessage;
             }
 
