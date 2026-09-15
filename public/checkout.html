@@ -914,9 +914,85 @@
             window.location.href = cleanUrl.toString();
         }
 
+        // ================================================================
+        // TRADUCCIÓN DE ERRORES TÉCNICOS A MENSAJES ENTENDIBLES
+        // ================================================================
+        // Mercado Pago (y nuestro propio backend) a veces devuelven mensajes
+        // técnicos en inglés (p. ej. "Cannot infer Payment Method") que no
+        // significan nada para la persona que está pagando. Esta función
+        // traduce los mensajes más comunes a explicaciones claras en
+        // español y, si el mensaje no es reconocido, muestra un texto
+        // genérico pero útil en vez del texto técnico crudo.
+        const MENSAJES_ERROR_CONOCIDOS = [
+            {
+                match: /cannot infer payment method/i,
+                message: 'No pudimos reconocer el método de pago con los datos ingresados. Esto suele ocurrir al usar una tarjeta que no es válida para el entorno actual (pruebas o producción). Verifica que estés usando una tarjeta de prueba oficial de Mercado Pago, o inténtalo con otra tarjeta.'
+            },
+            {
+                match: /invalid token|token.*(expired|invalid)/i,
+                message: 'Los datos de la tarjeta no pudieron validarse a tiempo. Vuelve a ingresar los datos de tu tarjeta e inténtalo nuevamente.'
+            },
+            {
+                match: /invalid.*payer|payer.*(required|invalid)/i,
+                message: 'Faltan datos del comprador para procesar el pago. Verifica tu correo electrónico e inténtalo de nuevo.'
+            },
+            {
+                match: /invalid.*plan|plan.*(inválido|invalid)/i,
+                message: 'El plan seleccionado no es válido o ya no está disponible. Vuelve a la página de planes y elige nuevamente.'
+            },
+            {
+                match: /mercado pago not configured|not configured/i,
+                message: 'La plataforma de pagos no está disponible en este momento. Por favor, inténtalo más tarde o contacta con soporte.'
+            }
+        ];
+
+        function translateCheckoutError(rawMessage) {
+            if (!rawMessage) {
+                return 'No pudimos procesar tu pago. Por favor, verifica los datos ingresados e inténtalo nuevamente.';
+            }
+            const found = MENSAJES_ERROR_CONOCIDOS.find(entry => entry.match.test(rawMessage));
+            if (found) return found.message;
+
+            // Si el backend ya envía un mensaje en español claro, lo respetamos tal cual.
+            const pareceEspanolClaro = /[áéíóúñ¿¡]/i.test(rawMessage) || /^[a-záéíóúñ0-9\s.,:;()¿¡'"-]+$/i.test(rawMessage);
+            if (pareceEspanolClaro && rawMessage.length < 200) {
+                return rawMessage;
+            }
+
+            // Mensaje técnico no reconocido: no lo mostramos tal cual, damos una
+            // explicación general y útil en su lugar.
+            return 'No pudimos procesar tu pago debido a un problema con la plataforma de pagos. Verifica los datos de tu tarjeta o intenta con otro método. Si el problema continúa, contacta con soporte.';
+        }
+
+        // Traduce los "status_detail" que envía Mercado Pago cuando un pago
+        // es rechazado o cancelado, para dar una razón concreta y accionable.
+        const DETALLES_RECHAZO = {
+            cc_rejected_bad_filled_card_number: 'Revisa el número de tarjeta ingresado, parece incorrecto.',
+            cc_rejected_bad_filled_date: 'Revisa la fecha de vencimiento de tu tarjeta.',
+            cc_rejected_bad_filled_other: 'Revisa que todos los datos de la tarjeta sean correctos.',
+            cc_rejected_bad_filled_security_code: 'Revisa el código de seguridad (CVV) de tu tarjeta.',
+            cc_rejected_blacklist: 'Tu tarjeta no pudo ser procesada. Intenta con otro medio de pago.',
+            cc_rejected_call_for_authorize: 'Tu banco requiere que autorices este pago. Comunícate con tu banco o usa otra tarjeta.',
+            cc_rejected_card_disabled: 'Tu tarjeta está deshabilitada. Llama a tu banco para activarla o usa otra tarjeta.',
+            cc_rejected_card_error: 'No pudimos procesar tu tarjeta. Intenta nuevamente o usa otra tarjeta.',
+            cc_rejected_duplicated_payment: 'Ya existe un pago con estos mismos datos. Revisa si ya se realizó antes de intentar de nuevo.',
+            cc_rejected_high_risk: 'El pago fue rechazado por seguridad. Intenta con otro método de pago.',
+            cc_rejected_insufficient_amount: 'Tu tarjeta no tiene fondos suficientes para esta compra.',
+            cc_rejected_invalid_installments: 'El número de cuotas no es válido para esta tarjeta.',
+            cc_rejected_max_attempts: 'Alcanzaste el límite de intentos permitidos. Intenta con otra tarjeta.',
+            cc_rejected_other_reason: 'Tu banco rechazó el pago sin especificar el motivo. Intenta con otra tarjeta.'
+        };
+
+        function translateRejectionDetail(statusDetail, methodLabel) {
+            if (statusDetail && DETALLES_RECHAZO[statusDetail]) {
+                return DETALLES_RECHAZO[statusDetail];
+            }
+            return `El pago con ${methodLabel} fue rechazado. Intenta con otro método o revisa tus datos.`;
+        }
+
         function setErrorScreenState({ title = 'Pago Fallido', message, showRetry = true, secondaryText = 'Cancelar y volver' }) {
             document.getElementById('failed-title').textContent = title;
-            document.getElementById('error-message').textContent = message;
+            document.getElementById('error-message').textContent = translateCheckoutError(message);
             document.getElementById('retryPaymentBtn').style.display = showRetry ? 'block' : 'none';
             document.getElementById('secondaryErrorBtn').textContent = secondaryText;
             showScreen('failedScreen');
@@ -1129,7 +1205,7 @@
                 hideLoading();
                 setErrorScreenState({
                     title: 'Pago Fallido',
-                    message: `El pago con ${methodLabel} fue rechazado. Intenta con otro método o revisa tus datos.`
+                    message: translateRejectionDetail(result.status_detail, methodLabel)
                 });
                 return;
             }
