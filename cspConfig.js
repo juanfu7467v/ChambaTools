@@ -1,5 +1,5 @@
 // ================================================================
-// 🔒 CONFIGURACIÓN CSP (Content Security Policy)
+// 🔒 CONFIGURACIÓN CSP (Content Security Policy) CORREGIDA
 // ================================================================
 
 const unique = (values) => [...new Set(values.filter(Boolean))];
@@ -7,6 +7,10 @@ const unique = (values) => [...new Set(values.filter(Boolean))];
 export const corsAllowedOrigins = [
   'https://facilitoTools.com',
   'https://www.facilitoTools.com',
+  'https://facilitotools.com',
+  'https://www.facilitotools.com',
+  'https://auth.facilitotools.com',
+  'https://api.facilitotools.com',
   'https://facilitotools.firebaseapp.com',
   'https://facilitotools.firebasestorage.app',
   'https://facilitotools.fly.dev'
@@ -15,8 +19,10 @@ export const corsAllowedOrigins = [
 const appOrigins = [
   'https://facilitoTools.com',
   'https://www.facilitoTools.com',
-  'https://auth.facilitoTools.com',
-  'https://api.facilitoTools.com',
+  'https://facilitotools.com',
+  'https://www.facilitotools.com',
+  'https://auth.facilitotools.com',
+  'https://api.facilitotools.com',
   'https://facilitotools.fly.dev',
   'https://facilitotools.firebaseapp.com',
   'https://facilitotools.firebasestorage.app'
@@ -27,6 +33,7 @@ const googleAndFirebaseOrigins = [
   'https://apis.google.com',
   'https://firestore.googleapis.com',
   'https://firebase.googleapis.com',
+  'https://firebasestorage.googleapis.com',
   'https://fonts.googleapis.com',
   'https://fonts.gstatic.com',
   'https://generativelanguage.googleapis.com',
@@ -40,6 +47,7 @@ const googleAndFirebaseOrigins = [
   'https://www.google-analytics.com',
   'https://region1.google-analytics.com',
   'https://*.firebaseio.com',
+  'https://*.firebaseapp.com',
   'https://*.googleapis.com',
   'https://www.recaptcha.net'
 ];
@@ -86,7 +94,7 @@ const externalServiceOrigins = [
   'https://api.github.com',
   'https://img.utdstc.com',
   'https://stc.utdstc.com',
-  'https://*.effectivegatecpm.com',
+  'https://*.effectivegatecpm.com'
 ];
 
 export const cspDomains = unique([
@@ -101,13 +109,39 @@ export const cspDomains = unique([
 ]);
 
 const commonRemoteSources = unique(cspDomains.filter(source => !['data:', 'blob:'].includes(source)));
+
 const scriptSources = unique(["'self'", "'unsafe-inline'", "'unsafe-eval'", ...commonRemoteSources]);
 const styleSources = unique(["'self'", "'unsafe-inline'", ...commonRemoteSources]);
-const imageSources = unique(["'self'", 'data:', 'blob:', ...commonRemoteSources]);
-const fontSources = unique(["'self'", 'data:', ...commonRemoteSources]);
-const connectSources = unique(["'self'", 'blob:', ...commonRemoteSources]);
-const frameSources = unique(["'self'", ...commonRemoteSources]);
-const mediaSources = unique(["'self'", 'blob:', ...commonRemoteSources]);
+const imageSources = unique(["'self'", 'data:', 'blob:', 'https:', ...commonRemoteSources]);
+const fontSources = unique(["'self'", 'data:', 'https:', ...commonRemoteSources]);
+
+// 💡 CORRECCIÓN DE REGISTRO / AUTH: Se agregan endpoints clave para peticiones Fetch/XHR y OAuth
+const connectSources = unique([
+  "'self'",
+  'data:',
+  'blob:',
+  'wss:',
+  'https://github.com',
+  'https://api.github.com',
+  ...commonRemoteSources
+]);
+
+// 💡 CORRECCIÓN DE AUTH: Permitir que los Popups/Iframes de Google y Firebase carguen
+const frameSources = unique([
+  "'self'",
+  'https://accounts.google.com',
+  'https://facilitotools.firebaseapp.com',
+  ...commonRemoteSources
+]);
+
+// 💡 CORRECCIÓN DE AUDIO: 'data:' permite audios Base64 y 'https:' permite audios desde URLs externas / CDNs / Cloud Storage
+const mediaSources = unique([
+  "'self'",
+  'data:',
+  'blob:',
+  'https:',
+  ...commonRemoteSources
+]);
 
 export const helmetConfig = {
   contentSecurityPolicy: {
