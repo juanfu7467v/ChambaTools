@@ -112,6 +112,60 @@ const mpClient = MERCADOPAGO_ACCESS_TOKEN ? new MercadoPagoConfig({
   options: { timeout: 10000 }
 }) : null;
 
+// 🩺 Verificación de coherencia de credenciales de Mercado Pago.
+// La causa más común del error "Cannot infer Payment Method" (y de pagos
+// simulados que fallan aunque las credenciales "sean correctas") es mezclar
+// credenciales de PRUEBA con credenciales de PRODUCCIÓN: por ejemplo, generar
+// el token de la tarjeta con una Public Key de prueba (TEST-...) mientras el
+// backend usa un Access Token de producción (APP_USR-...), o viceversa.
+// Ambas credenciales deben pertenecer al MISMO modo (ambas de prueba o ambas
+// de producción) y, idealmente, a la MISMA cuenta/aplicación de Mercado Pago.
+(function verificarCoherenciaCredencialesMercadoPago() {
+  const accessToken = process.env.MERCADOPAGO_ACCESS_TOKEN || '';
+  const publicKey = process.env.MERCADOPAGO_PUBLIC_KEY || '';
+  if (!accessToken || !publicKey) return;
+
+  const accessEsPrueba = accessToken.trim().startsWith('TEST-');
+  const publicEsPrueba = publicKey.trim().startsWith('TEST-');
+
+  if (accessEsPrueba !== publicEsPrueba) {
+    logger.error('MERCADOPAGO_CONFIG',
+      '⚠️ Las credenciales de Mercado Pago no coinciden en modo (una es de PRUEBA y la otra de PRODUCCIÓN). ' +
+      'Esto provoca pagos simulados fallidos con errores como "Cannot infer Payment Method". ' +
+      'Revisa MERCADOPAGO_ACCESS_TOKEN y MERCADOPAGO_PUBLIC_KEY: ambas deben ser del mismo modo (TEST- o de producción) y de la misma aplicación.'
+    );
+  }
+})();
+
+// Traduce errores del SDK/API de Mercado Pago a mensajes claros en español
+// para el usuario, y conserva el detalle técnico original en los logs para
+// que el equipo pueda diagnosticar el problema real.
+function traducirErrorMercadoPago(error) {
+  const causaCruda = Array.isArray(error?.cause) && error.cause.length
+    ? error.cause.map(c => c.description || c.code).filter(Boolean).join(' | ')
+    : (error?.message || '');
+
+  const textoParaBuscar = `${error?.message || ''} ${causaCruda}`.toLowerCase();
+
+  if (textoParaBuscar.includes('cannot infer payment method')) {
+    return {
+      mensajeUsuario: 'No pudimos reconocer el método de pago con los datos ingresados. Verifica que la tarjeta usada sea válida para el entorno actual (pruebas o producción) e inténtalo nuevamente.',
+      detalleTecnico: causaCruda || error?.message
+    };
+  }
+  if (textoParaBuscar.includes('invalid') && textoParaBuscar.includes('token')) {
+    return {
+      mensajeUsuario: 'Los datos de la tarjeta no pudieron validarse. Vuelve a ingresarlos e inténtalo nuevamente.',
+      detalleTecnico: causaCruda || error?.message
+    };
+  }
+
+  return {
+    mensajeUsuario: 'No pudimos procesar tu pago en este momento. Verifica los datos ingresados o intenta con otro método.',
+    detalleTecnico: causaCruda || error?.message || 'Error desconocido de Mercado Pago'
+  };
+}
+
 // ================================================================
 // 🛣️ RUTAS DE LA API
 // ================================================================
@@ -723,37 +777,63 @@ app.post("/api/pay", async (req, res) => {
   const context = 'PAY_API';
   try {
     const { transaction_amount, token, description, installments, payment_method_id, payer, uid, planId } = req.body;
-    if (!mpClient) return res.status(503).json({ error: 'Mercado Pago not configured' });
+    if (!mpClient) return res.status(503).json({ error: 'La plataforma de pagos no está disponible en este momento. Inténtalo más tarde.' });
     if (!payer || !payer.email) {
       logger.error(context, 'Payer email missing in request body');
-      return res.status(400).json({ error: 'Payer email is required' });
+      return res.status(400).json({ error: 'Falta el correo electrónico del comprador.' });
     }
 
     // Validar que planId sea válido
     if (!planId || !PLANES_CONFIG[planId]) {
       logger.error(context, 'planId inválido o no proporcionado', { planId });
-      return res.status(400).json({ error: 'Invalid planId' });
+      return res.status(400).json({ error: 'El plan seleccionado no es válido o ya no está disponible. Vuelve a la página de planes.' });
+    }
+
+    // Validar que llegaron los datos mínimos que Mercado Pago necesita para
+    // poder identificar el método de pago. Si falta el token o el
+    // payment_method_id, Mercado Pago no puede "inferir" el método de pago
+    // y devuelve un error técnico poco claro ("Cannot infer Payment Method").
+    // Detectarlo aquí antes de llamar a la API nos permite dar una respuesta
+    // clara e inmediata en vez de propagar ese mensaje técnico al usuario.
+    if (!token) {
+      logger.error(context, 'Falta el token de pago en la solicitud', { planId, uid });
+      return res.status(400).json({ error: 'No se recibieron los datos de la tarjeta correctamente. Vuelve a intentarlo.' });
+    }
+    if (!payment_method_id) {
+      logger.error(context, 'Falta payment_method_id en la solicitud', { planId, uid });
+      return res.status(400).json({ error: 'No pudimos identificar el método de pago. Verifica los datos de tu tarjeta e inténtalo nuevamente.' });
+    }
+    if (!transaction_amount || Number(transaction_amount) <= 0) {
+      logger.error(context, 'transaction_amount inválido', { planId, uid, transaction_amount });
+      return res.status(400).json({ error: 'El monto a pagar no es válido. Vuelve a la página de planes e inténtalo de nuevo.' });
     }
 
     const payment = new Payment(mpClient);
-    const result = await payment.create({
-      body: {
-        transaction_amount: Number(transaction_amount),
-        token,
-        description,
-        installments: Number(installments),
-        payment_method_id,
-        payer,
-        external_reference: uid,
-        notification_url: `${HOST_URL}/api/webhook/mercadopago`,
-        metadata: { 
-          uid, 
-          email: payer.email, 
-          amount: transaction_amount, 
-          plan_id: planId
+    let result;
+    try {
+      result = await payment.create({
+        body: {
+          transaction_amount: Number(transaction_amount),
+          token,
+          description,
+          installments: Number(installments),
+          payment_method_id,
+          payer,
+          external_reference: uid,
+          notification_url: `${HOST_URL}/api/webhook/mercadopago`,
+          metadata: { 
+            uid, 
+            email: payer.email, 
+            amount: transaction_amount, 
+            plan_id: planId
+          }
         }
-      }
-    });
+      });
+    } catch (mpError) {
+      const { mensajeUsuario, detalleTecnico } = traducirErrorMercadoPago(mpError);
+      logger.error(context, 'Error de la API de Mercado Pago al crear el pago', mpError, { planId, uid, detalleTecnico });
+      return res.status(400).json({ error: mensajeUsuario });
+    }
 
     if (result.status === 'rejected' || result.status === 'cancelled') {
       let userName = payer.email.split('@')[0];
