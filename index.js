@@ -7,6 +7,7 @@ import { MercadoPagoConfig, Payment } from "mercadopago";
 import path from "path";
 import { fileURLToPath } from "url";
 import fs from "fs";
+import { generateInvoicePDF } from './pdfGenerator.js';
 import { Resend } from "resend";
 import helmet from "helmet";
 import { helmetConfig, corsAllowedOrigins } from './cspConfig.js';
@@ -37,8 +38,6 @@ import {
   enviarCorreoRechazo,
   enviarCorreoSoporte,
   buildInvoiceProxyUrl,
-  resolveInvoiceStoragePath,
-  downloadInvoiceBufferFromStorage,
   otorgarBeneficio,          // <--- Importamos la nueva función
   PLANES_CONFIG              // <--- Opcional, para validar planes
 } from './negocios.js';
@@ -998,25 +997,28 @@ const handleInvoiceDownload = async (req, res) => {
       return res.status(404).json({ error: 'Pago no encontrado' });
     }
 
-    const data = pagoDoc.data();
-    const storagePath = resolveInvoiceStoragePath(paymentId, data);
-    const invoiceFile = await downloadInvoiceBufferFromStorage(storagePath);
-
-    if (!invoiceFile?.buffer) {
-      return res.status(404).json({ error: 'La boleta aún no está disponible. Intenta en unos segundos.' });
+        const data = pagoDoc.data();
+    const invoiceData = data.invoiceData;
+    if (!invoiceData || typeof invoiceData !== 'object') {
+      return res.status(404).json({ error: 'Los datos de la boleta aún no están disponibles.' });
     }
 
-    const fileName = `boleta-${paymentId}.pdf`;
+    const pdfPath = await generateInvoicePDF(invoiceData);
+    try {
+      const invoiceBuffer = fs.readFileSync(pdfPath);
+      const fileName = `boleta-${paymentId}.pdf`;
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Length', invoiceBuffer.length);
+      res.setHeader('Content-Disposition', `attachment; filename="${fileName}"; filename*=UTF-8''${encodeURIComponent(fileName)}`);
+      res.setHeader('Cache-Control', 'private, no-store, no-cache, must-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+      res.setHeader('X-Robots-Tag', 'noindex, nofollow, noarchive');
+      return res.send(invoiceBuffer);
+    } finally {
+      if (pdfPath && fs.existsSync(pdfPath)) fs.unlinkSync(pdfPath);
+    }
 
-    res.setHeader('Content-Type', invoiceFile.contentType || 'application/pdf');
-    res.setHeader('Content-Length', invoiceFile.size);
-    res.setHeader('Content-Disposition', `attachment; filename="${fileName}"; filename*=UTF-8''${encodeURIComponent(fileName)}`);
-    res.setHeader('Cache-Control', 'private, no-store, no-cache, must-revalidate');
-    res.setHeader('Pragma', 'no-cache');
-    res.setHeader('Expires', '0');
-    res.setHeader('X-Robots-Tag', 'noindex, nofollow, noarchive');
-
-    return res.send(invoiceFile.buffer);
   } catch (error) {
     logger.error(context, error);
     return res.status(500).json({ error: 'Error al obtener la boleta' });

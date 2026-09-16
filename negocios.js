@@ -1,12 +1,10 @@
 import admin from "firebase-admin";
 import { MercadoPagoConfig, Payment } from "mercadopago";
-import { generateInvoicePDF } from './pdfGenerator.js';
 import path from "path";
 import { fileURLToPath } from "url";
 import fs from "fs";
 import moment from "moment-timezone";
 import { logger } from './seguridad.js';
-import { createClient } from "@supabase/supabase-js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -62,51 +60,6 @@ export function buildServiceAccountFromEnv() {
 }
 
 export let db;
-
-// ----------------------------------------------------------------
-// supabaseClient: inicializado con las variables SUPABASE_*
-// ----------------------------------------------------------------
-function buildSupabaseClient() {
-  const context = 'SUPABASE_INIT';
-
-  const requiredVars = [
-    'SUPABASE_URL',
-    'SUPABASE_SERVICE_ROLE_KEY',
-    'SUPABASE_STORAGE_BUCKET'
-  ];
-
-  const missingVars = requiredVars.filter(v => !process.env[v]);
-  if (missingVars.length > 0) {
-    logger.error(context, `Variables de Supabase faltantes: ${missingVars.join(', ')}`);
-    return null;
-  }
-
-  try {
-    const client = createClient(
-      process.env.SUPABASE_URL,
-      process.env.SUPABASE_SERVICE_ROLE_KEY,
-      {
-        auth: {
-          persistSession: false,
-          autoRefreshToken: false
-        }
-      }
-    );
-
-    logger.info(context, 'Cliente Supabase inicializado correctamente', {
-      url: process.env.SUPABASE_URL,
-      bucket: process.env.SUPABASE_STORAGE_BUCKET
-    });
-
-    return client;
-
-  } catch (error) {
-    logger.error(context, 'Error inicializando cliente Supabase', error);
-    return null;
-  }
-}
-
-export let supabaseClient = buildSupabaseClient();
 
 // ================================================================
 // 🆕 CONFIGURACIÓN DE PLANES (basado en planes.html)
@@ -225,136 +178,8 @@ export function getPublicAppUrl() {
   return preferredUrl.replace(/\/+$/, '');
 }
 
-export function getInvoiceStoragePath(paymentId) {
-  return `invoices/${paymentId}.pdf`;
-}
-
 export function buildInvoiceProxyUrl(paymentId) {
   return `${getPublicAppUrl()}/boleta/${encodeURIComponent(paymentId)}.pdf`;
-}
-
-function extractStoragePathFromSupabaseUrl(fileUrl) {
-  if (!fileUrl) return null;
-
-  try {
-    const parsedUrl = new URL(fileUrl);
-    const bucket = process.env.SUPABASE_STORAGE_BUCKET;
-    const publicSegment = `/storage/v1/object/public/${bucket}/`;
-    const signSegment = `/storage/v1/object/sign/${bucket}/`;
-
-    if (parsedUrl.pathname.includes(publicSegment)) {
-      return decodeURIComponent(parsedUrl.pathname.split(publicSegment)[1] || '');
-    }
-
-    if (parsedUrl.pathname.includes(signSegment)) {
-      return decodeURIComponent(parsedUrl.pathname.split(signSegment)[1] || '');
-    }
-
-    return null;
-  } catch {
-    return null;
-  }
-}
-
-export function resolveInvoiceStoragePath(paymentId, paymentData = {}) {
-  return (
-    paymentData.pdfStoragePath ||
-    paymentData.storagePath ||
-    extractStoragePathFromSupabaseUrl(paymentData.pdfPublicUrl) ||
-    extractStoragePathFromSupabaseUrl(paymentData.pdfUrl) ||
-    getInvoiceStoragePath(paymentId)
-  );
-}
-
-export async function downloadInvoiceBufferFromStorage(storagePath) {
-  const context = 'STORAGE_DOWNLOAD';
-
-  if (!supabaseClient) {
-    logger.error(context, 'Supabase no está inicializado');
-    return null;
-  }
-
-  const bucket = process.env.SUPABASE_STORAGE_BUCKET;
-
-  try {
-    const { data, error } = await supabaseClient.storage
-      .from(bucket)
-      .download(storagePath);
-
-    if (error) {
-      logger.error(context, 'Error descargando PDF desde Supabase Storage', error, { storagePath });
-      return null;
-    }
-
-    const arrayBuffer = await data.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-
-    logger.info(context, 'PDF obtenido correctamente desde Supabase Storage', {
-      storagePath,
-      size: buffer.length
-    });
-
-    return {
-      buffer,
-      size: buffer.length,
-      contentType: data.type || 'application/pdf'
-    };
-  } catch (error) {
-    logger.error(context, 'Error descargando PDF desde Supabase Storage', error, { storagePath });
-    return null;
-  }
-}
-
-export async function uploadPDFToStorage(pdfPath, paymentId) {
-  const context = 'STORAGE_UPLOAD';
-
-  if (!supabaseClient) {
-    logger.error(context, 'Supabase no está inicializado');
-    return null;
-  }
-
-  const bucket = process.env.SUPABASE_STORAGE_BUCKET;
-  const fileName = getInvoiceStoragePath(paymentId);
-
-  try {
-    const fileBuffer = fs.readFileSync(pdfPath);
-
-    const { error } = await supabaseClient.storage
-      .from(bucket)
-      .upload(fileName, fileBuffer, {
-        contentType: 'application/pdf',
-        upsert: true,
-        cacheControl: '3600'
-      });
-
-    if (error) {
-      logger.error(context, '❌ Error subiendo PDF a Supabase Storage', error, { paymentId });
-      return null;
-    }
-
-    const { data: urlData } = supabaseClient.storage
-      .from(bucket)
-      .getPublicUrl(fileName);
-
-    const publicUrl = urlData.publicUrl;
-    const proxyUrl = buildInvoiceProxyUrl(paymentId);
-
-    logger.info(context, '✅ PDF subido exitosamente a Supabase Storage', {
-      fileName,
-      publicUrl,
-      proxyUrl
-    });
-
-    return {
-      storagePath: fileName,
-      publicUrl,
-      proxyUrl
-    };
-
-  } catch (error) {
-    logger.error(context, '❌ Error subiendo PDF a Supabase Storage', error, { paymentId });
-    return null;
-  }
 }
 
 // ================================================================
@@ -597,29 +422,23 @@ export async function otorgarBeneficio(uid, email, montoPagado, processor, payme
       };
     });
 
-    // Generación de PDF y envío de correo (fuera de la transacción)
+    // Guardar los datos de la boleta en Firestore. El PDF se genera
+    // únicamente cuando el usuario solicita su descarga.
     try {
       const invoiceData = {
         orderId: paymentRefString,
         date: new Date().toLocaleString('es-PE'),
         email: email || 'cliente@example.com',
         amount: montoPagado || 0,
-        credits: 0, // Ya no se usan créditos
+        credits: 0,
         description: result.descripcion || 'Compra de plan',
         type: 'boleta'
       };
-
-      const pdfPath = await generateInvoicePDF(invoiceData);
-      const uploadResult = await uploadPDFToStorage(pdfPath, paymentRefString);
-      const proxyUrl = uploadResult?.proxyUrl || buildInvoiceProxyUrl(paymentRefString);
-      const publicUrl = uploadResult?.publicUrl || null;
-      const storagePath = uploadResult?.storagePath || getInvoiceStoragePath(paymentRefString);
+      const proxyUrl = buildInvoiceProxyUrl(paymentRefString);
 
       await pagoDoc.update({
         pdfUrl: proxyUrl,
-        pdfPublicUrl: publicUrl,
-        pdfStoragePath: storagePath,
-        invoiceData: invoiceData
+        invoiceData
       });
 
       result.pdfUrl = proxyUrl;
@@ -652,11 +471,8 @@ export async function otorgarBeneficio(uid, email, montoPagado, processor, payme
         ).catch(err => logger.error(context, 'Error en envío automático de email de éxito', err));
       }
 
-      // Limpiar archivo temporal
-      if (fs.existsSync(pdfPath)) fs.unlinkSync(pdfPath);
-
-    } catch (pdfError) {
-      logger.error(context, 'Error generando/subiendo PDF', pdfError);
+    } catch (invoiceError) {
+      logger.error(context, 'Error guardando datos de la boleta', invoiceError);
     }
 
     processedPaymentsCache.set(paymentRefString, { uid, ...result });
