@@ -3,7 +3,7 @@ import admin from "firebase-admin";
 import crypto from "crypto";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import { MercadoPagoConfig, Payment, Preference } from "mercadopago";
+import { MercadoPagoConfig, Payment } from "mercadopago";
 import path from "path";
 import { fileURLToPath } from "url";
 import fs from "fs";
@@ -730,66 +730,6 @@ app.post("/api/report-failed-login", async (req, res) => {
   } catch (error) {
     logger.error(context, 'Error reportando fallo', error);
     res.status(500).json({ success: false, error: 'Internal server error' });
-  }
-});
-
-// Precios autoritativos para checkout: nunca se toma el monto desde el navegador.
-const CHECKOUT_PRICES = Object.freeze({
-  semanal: 10,
-  mensual: 22,
-  bimestral: 35,
-  recarga_basica: 22,
-  recarga_estandar: 35,
-  recarga_avanzada: 45,
-  recarga_pro: 55,
-  recarga_maxima: 65
-});
-
-// Checkout alojado para métodos alternativos habilitados en la cuenta de Mercado Pago.
-// Mantiene la confirmación en el webhook y funciona aunque Fly.io se duerma entre solicitudes.
-app.post("/api/checkout-preference", async (req, res) => {
-  const context = 'CHECKOUT_PREFERENCE_API';
-  try {
-    const { uid, email, planId } = req.body || {};
-    if (!mpClient) return res.status(503).json({ error: 'Mercado Pago not configured' });
-    if (!uid || !email || !planId || !PLANES_CONFIG[planId]) {
-      return res.status(400).json({ error: 'Datos de checkout inválidos' });
-    }
-
-    const plan = PLANES_CONFIG[planId];
-    const amount = CHECKOUT_PRICES[planId];
-    if (!Number.isFinite(amount) || amount <= 0) {
-      return res.status(400).json({ error: 'El plan no tiene un precio válido' });
-    }
-
-    const returnUrl = `${HOST_URL}/checkout.html?planId=${encodeURIComponent(planId)}&uid=${encodeURIComponent(uid)}&email=${encodeURIComponent(email)}`;
-    const preference = new Preference(mpClient);
-    const result = await preference.create({
-      body: {
-        items: [{
-          id: planId,
-          title: plan.descripcion,
-          description: `Compra FacilitoTools: ${plan.descripcion}`,
-          quantity: 1,
-          currency_id: 'PEN',
-          unit_price: amount
-        }],
-        payer: { email },
-        external_reference: uid,
-        metadata: { uid, email, plan_id: planId, amount },
-        notification_url: `${HOST_URL}/api/webhook/mercadopago`,
-        back_urls: { success: returnUrl, pending: returnUrl, failure: returnUrl },
-        auto_return: 'approved',
-        expires: true,
-        expiration_date_from: new Date().toISOString(),
-        expiration_date_to: new Date(Date.now() + 30 * 60 * 1000).toISOString()
-      }
-    });
-
-    return res.json({ id: result.id, init_point: result.init_point, sandbox_init_point: result.sandbox_init_point });
-  } catch (error) {
-    logger.error(context, 'Error creando preferencia de checkout', error);
-    return res.status(400).json({ error: error.message || 'No se pudo iniciar el checkout alternativo' });
   }
 });
 
