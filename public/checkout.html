@@ -315,7 +315,7 @@
 
         .method-segmented-control {
             display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
+            grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 10px;
             width: 100%;
             background: rgba(255, 255, 255, 0.06);
@@ -711,6 +711,7 @@
                 <div class="method-segmented-control" id="paymentMethodControl">
                     <button type="button" class="method-pill active" data-method="card">Tarjeta</button>
                     <button type="button" class="method-pill" data-method="yape">Yape</button>
+                    <button type="button" class="method-pill" data-method="alternative">Plin / otros</button>
                 </div>
             </div>
 
@@ -738,6 +739,14 @@
                         <button type="submit" class="yape-submit-btn" id="yapeSubmitBtn">Pagar con Yape</button>
                     </form>
                     <p class="payment-helper-note">Procesamos tu pago de forma segura con Mercado Pago.</p>
+                </section>
+
+                <section class="payment-method-panel" id="alternativePanel" data-panel="alternative">
+                    <div class="payment-status-chip">Plin y otros medios</div>
+                    <h3 class="method-panel-title">Paga desde el checkout seguro</h3>
+                    <p class="method-panel-subtitle">Abre el checkout alojado de Mercado Pago para ver los medios alternativos habilitados para tu cuenta, como pagos en efectivo u otras opciones disponibles.</p>
+                    <button type="button" class="yape-submit-btn" id="alternativeSubmitBtn">Continuar con otros medios</button>
+                    <p class="payment-helper-note">La disponibilidad de Plin depende del proveedor y de la configuración de tu cuenta. No se aceptan transferencias manuales sin confirmación automática.</p>
                 </section>
             </div>
 
@@ -1031,6 +1040,34 @@
             if (method === 'card' && brickControllers.card) return;
             if (method === 'card') {
                 await renderCardBrick();
+            }
+        }
+
+        async function handleAlternativeCheckout() {
+            const submitBtn = document.getElementById('alternativeSubmitBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Abriendo checkout...';
+            try {
+                showLoading('Preparando otros medios de pago...');
+                const result = await fetchJSON('/api/checkout-preference', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ uid, email, planId })
+                });
+                if (!result.init_point) {
+                    throw new Error('Mercado Pago no devolvió una URL de checkout válida.');
+                }
+                window.location.assign(result.init_point);
+            } catch (error) {
+                console.error('Error en checkout alternativo:', error);
+                hideLoading();
+                setErrorScreenState({
+                    title: 'Método no disponible',
+                    message: error.message || 'No pudimos abrir los otros medios de pago.'
+                });
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Continuar con otros medios';
             }
         }
 
@@ -1499,6 +1536,7 @@
                 initCarousel();
                 setupMethodSelector();
                 document.getElementById('yapeForm').addEventListener('submit', handleYapeSubmit);
+                document.getElementById('alternativeSubmitBtn').addEventListener('click', handleAlternativeCheckout);
                 setupVoucherDownload();
 
                 const config = await fetchJSON('/api/config');
