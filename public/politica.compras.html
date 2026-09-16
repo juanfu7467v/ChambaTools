@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -47,7 +48,7 @@
     <title>Política de Reembolsos y Devoluciones - FacilitoTools</title>
 </head>
 <body ondragstart="return false" onselectstart="return false" oncontextmenu="return false">
-
+    
         <h1>POLÍTICA DE REEMBOLSOS Y DEVOLUCIONES</h1>
         <p style="text-align: center;"><strong>Plataforma Digital FacilitoTools</strong></p>
         <p style="text-align: center;">Titular: José René Cubas Pérez</p>
@@ -116,9 +117,13 @@
         </ul>
 
         <footer>
-            <p>© 2026 FacilitoTools | Plataforma Digital de Verificación y Validación de Datos</p>
+            <p>© <span id="currentYear"></span> FacilitoTools | Plataforma Digital de Verificación y Validación de Datos</p>
             <p><strong>Titular:</strong> José René Cubas Pérez | <strong>RUC:</strong> 10736224350 | Perú</p>
         </footer>
     </div>
+
+    <script>
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+    </script>
 </body>
 </html>
