@@ -136,6 +136,75 @@
         }
         #menu-toggle i { color: var(--emerald); font-size: 1.3rem; }
 
+        /* ═══ BOTÓN VOLVER ARRIBA ═══ */
+        #scrollTopBtn {
+            position: fixed;
+            right: 22px;
+            bottom: 22px;
+            z-index: 90;
+            width: 52px;
+            height: 52px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(160deg, rgba(21,41,74,0.92), rgba(10,22,40,0.92));
+            border: 1px solid var(--border-active);
+            color: var(--emerald);
+            cursor: pointer;
+            box-shadow: 0 8px 28px rgba(0,0,0,0.45), 0 0 0 rgba(0,200,83,0);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(16px) scale(0.9);
+            transition: opacity .35s ease, transform .35s cubic-bezier(.34,1.56,.64,1), box-shadow .3s ease, background .3s ease, border-color .3s ease, visibility .35s;
+        }
+        #scrollTopBtn::before {
+            content: '';
+            position: absolute; inset: -1px;
+            border-radius: 17px;
+            padding: 1px;
+            background: linear-gradient(135deg, var(--emerald), transparent 45%, var(--gold) 100%);
+            -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: .55;
+            pointer-events: none;
+        }
+        #scrollTopBtn i {
+            font-size: 1.15rem;
+            transition: transform .3s ease;
+            position: relative;
+        }
+        #scrollTopBtn.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0) scale(1);
+            animation: scrollTopPulse 2.6s ease-in-out infinite;
+        }
+        #scrollTopBtn:hover {
+            background: linear-gradient(160deg, rgba(0,200,83,0.18), rgba(21,41,74,0.95));
+            border-color: var(--emerald);
+            box-shadow: 0 10px 32px var(--emerald-glow);
+            transform: translateY(-4px) scale(1.06);
+            animation-play-state: paused;
+        }
+        #scrollTopBtn:hover i { transform: translateY(-2px); }
+        #scrollTopBtn:active { transform: translateY(-1px) scale(0.96); }
+        @keyframes scrollTopPulse {
+            0%, 100% { box-shadow: 0 8px 28px rgba(0,0,0,0.45), 0 0 0 0 rgba(0,200,83,0.25); }
+            50% { box-shadow: 0 8px 28px rgba(0,0,0,0.45), 0 0 0 8px rgba(0,200,83,0); }
+        }
+        @media (max-width: 640px) {
+            #scrollTopBtn { right: 16px; bottom: 16px; width: 46px; height: 46px; border-radius: 14px; }
+            #scrollTopBtn i { font-size: 1.05rem; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            #scrollTopBtn { transition: opacity .2s ease, visibility .2s ease; animation: none !important; }
+            #scrollTopBtn.show { animation: none; }
+        }
+
         main { position: relative; z-index: 1; width: 100%; }
 
         /* ═══ LOGIN GATE ═══ */
@@ -1302,6 +1371,11 @@
 
     <div class="vc-toast-wrap" id="toastWrap"></div>
 
+    <!-- ═══ BOTÓN VOLVER ARRIBA ═══ -->
+    <button id="scrollTopBtn" type="button" aria-label="Volver arriba" title="Volver arriba">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
     <script>
         // ========== TRANSICIÓN BIENVENIDA → APP ==========
         const welcomeScreen = document.getElementById('welcome-screen');
@@ -2294,6 +2368,33 @@
                 else form.dispatchEvent(new Event('submit', { cancelable: true }));
             }, 500);
         }
+
+        // ========== BOTÓN VOLVER ARRIBA ==========
+        (function() {
+            const btn = document.getElementById('scrollTopBtn');
+            if (!btn) return;
+            const SHOW_AFTER = 400; // px de scroll antes de mostrar el botón
+            let ticking = false;
+
+            function toggleVisibility() {
+                const shouldShow = (window.scrollY || document.documentElement.scrollTop) > SHOW_AFTER;
+                btn.classList.toggle('show', shouldShow);
+                ticking = false;
+            }
+
+            window.addEventListener('scroll', () => {
+                if (!ticking) {
+                    window.requestAnimationFrame(toggleVisibility);
+                    ticking = true;
+                }
+            }, { passive: true });
+
+            btn.addEventListener('click', () => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+
+            toggleVisibility();
+        })();
 
         // ========== INIT ==========
         async function initApp() {
