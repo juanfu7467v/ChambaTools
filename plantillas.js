@@ -1134,9 +1134,12 @@ async function buildPdfBuffer(data, plan = PLAN_GRATIS_ID) {
     const bottomBlockH = 118;
 
     // Observaciones (izquierda)
+    // La barra decorativa se coloca DENTRO del contenedor (55 en vez de 40) y
+    // alineada verticalmente con el texto del título, evitando que quede sobre
+    // la esquina redondeada del contenedor.
     doc.roundedRect(40, y, 235, bottomBlockH, 14).fillAndStroke(theme.panel, theme.line);
-    doc.rect(40, y, 3, 18).fill(theme.accent);
-    doc.fillColor(theme.accent).font('Helvetica-Bold').fontSize(8).text('OBSERVACIONES', 55, y + 12, { characterSpacing: 1.2 });
+    doc.rect(55, y + 13, 3, 10).fill(theme.accent);
+    doc.fillColor(theme.accent).font('Helvetica-Bold').fontSize(8).text('OBSERVACIONES', 64, y + 12, { characterSpacing: 1.2 });
     doc.font('Helvetica').fillColor(theme.ink).fontSize(8.5).text(
       notes || 'Puedes usar este espacio para garantía, condiciones, método de entrega o agradecimiento al cliente.',
       55,
@@ -1179,10 +1182,13 @@ async function buildPdfBuffer(data, plan = PLAN_GRATIS_ID) {
     doc.fillColor(theme.muted).font('Helvetica-Bold').fontSize(6.5).text('QR DE VALIDACIÓN', 40, y + 92, { width: 100, align: 'center', characterSpacing: 1.2 });
 
     // Panel derecho
+    // La barra decorativa se coloca DENTRO del contenedor (170 en vez de 155) y
+    // alineada verticalmente con el texto del título, evitando que quede sobre
+    // la esquina redondeada del contenedor.
     doc.roundedRect(155, y, 400, 100, 14).fillAndStroke(theme.panel, theme.line);
-    doc.rect(155, y, 3, 20).fill(theme.accent);
+    doc.rect(170, y + 15, 3, 10).fill(theme.accent);
 
-    doc.fillColor(theme.accent).font('Helvetica-Bold').fontSize(7.5).text('REPRESENTACIÓN PROFESIONAL DEL COMPROBANTE', 170, y + 14, { width: 370, characterSpacing: 0.8 });
+    doc.fillColor(theme.accent).font('Helvetica-Bold').fontSize(7.5).text('REPRESENTACIÓN PROFESIONAL DEL COMPROBANTE', 179, y + 14, { width: 361, characterSpacing: 0.8 });
     doc.font('Helvetica').fillColor('#475569').fontSize(8).text(
       `Documento: ${title} · ${numbering.full}\n` +
       `Precios ${data.pricesIncludeTax ? 'con' : 'sin'} IGV incluido. Pago: ${paymentMethod || 'Pago único'}.\n` +
