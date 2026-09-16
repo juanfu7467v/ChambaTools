@@ -864,9 +864,6 @@ async function buildPdfBuffer(data, plan = PLAN_GRATIS_ID) {
   // Marca de agua para plan gratuito
   const esGratuito = plan === PLAN_GRATIS_ID;
 
-  // Paleta extendida para el PDF (versiones más ricas derivadas del acento)
-  const accentDark = '#0f172a';
-
   return new Promise((resolve, reject) => {
     const doc = new PDFDocument({ size: 'A4', margin: 40 });
     const chunks = [];
@@ -887,7 +884,7 @@ async function buildPdfBuffer(data, plan = PLAN_GRATIS_ID) {
     }
 
     // ================================================================
-    // HERO (cabecera con gradiente simulado en 3 capas de bandas)
+    // HERO — ALTURA DINÁMICA Y CONTENIDO CENTRADO VERTICALMENTE
     // ================================================================
     const issuerMetaLines = [
       issuer.documentNumber ? `Documento: ${issuer.documentNumber}` : '',
@@ -897,12 +894,9 @@ async function buildPdfBuffer(data, plan = PLAN_GRATIS_ID) {
     ].filter(Boolean);
 
     const heroTop = 40;
-    const heroTitleY = 74; // debajo del eyebrow
-    const heroLineHeight = 12.5;
-    const heroTitleToMetaGap = 12;
-    const heroBottomPadding = 22;
-    const heroMinHeight = 110;
+    const heroYPadding = 24;
 
+    // --- Lado izquierdo: datos del emisor ---
     let issuerTextX = 60;
     let issuerTextWidth = 270;
     if (issuer.logoDataUrl) {
@@ -910,17 +904,60 @@ async function buildPdfBuffer(data, plan = PLAN_GRATIS_ID) {
       issuerTextWidth = 200;
     }
 
-    // Medir altura del nombre del negocio para evitar superposición
-    doc.font('Helvetica-Bold').fontSize(19);
+    const eyebrowFontSize = 7;
+    const eyebrowBlockHeight = 14;
+    const brandTitleFontSize = 19;
+    const brandTitleGap = 10;
+    const metaFontSize = 8.5;
+    const metaLineHeight = 12.5;
+
+    doc.font('Helvetica-Bold').fontSize(brandTitleFontSize);
     const businessNameHeight = doc.heightOfString(issuer.businessName, { width: issuerTextWidth });
-    const heroMetaStartY = heroTitleY + businessNameHeight + heroTitleToMetaGap;
 
-    const heroHeight = Math.max(
-      heroMinHeight,
-      (heroMetaStartY - heroTop) + issuerMetaLines.length * heroLineHeight + heroBottomPadding
-    );
+    const leftLogoBlockHeight = issuer.logoDataUrl ? 72 : 0;
+    const leftContentHeight =
+      leftLogoBlockHeight +
+      eyebrowBlockHeight +
+      businessNameHeight +
+      brandTitleGap +
+      issuerMetaLines.length * metaLineHeight;
 
-    // Bandas superpuestas para simular gradiente (más oscuro a la derecha)
+    // --- Lado derecho: doc-card (medición real por wrap) ---
+    const docCardW = 195;
+    const docCardX = 40 + 515 - docCardW - 20; // = 340
+    const docCardInnerPaddingX = 16;
+    const docCardInnerPaddingY = 16;
+    const dmLabelW = 52;
+    const dmValueW = docCardW - docCardInnerPaddingX * 2 - dmLabelW;
+    const dmRowGap = 6;
+
+    const dmRows = [
+      ['Fecha', formatDateTime(issueDate)],
+      ['Moneda', currency],
+      ['Plantilla', template.name],
+      ['Pago', paymentMethod || 'Pago único']
+    ];
+
+    doc.font('Helvetica-Bold').fontSize(7.5);
+    const dmRowHeights = dmRows.map(([k, v]) => {
+      return Math.max(9, doc.heightOfString(v, { width: dmValueW, align: 'right' }));
+    });
+    const dmRowsTotalHeight = dmRowHeights.reduce((sum, h) => sum + h + dmRowGap, 0) - dmRowGap;
+
+    // Header del doc-card: "TIPO DE DOCUMENTO" + título + número + separador
+    const docCardHeaderHeight = 66;
+    const docCardContentHeight = docCardHeaderHeight + dmRowsTotalHeight;
+    const docCardH = docCardContentHeight + docCardInnerPaddingY * 2;
+
+    // --- Altura final del hero: max de ambos lados + padding ---
+    const maxContentHeight = Math.max(leftContentHeight, docCardH);
+    const heroHeight = Math.max(maxContentHeight + heroYPadding * 2, 150);
+
+    // Posición vertical inicial para centrar ambos lados
+    const leftContentStartY = heroTop + (heroHeight - leftContentHeight) / 2;
+    const docCardY = heroTop + (heroHeight - docCardH) / 2;
+
+    // --- Fondo del hero (gradiente simulado en bandas) ---
     doc.roundedRect(40, heroTop, 515, heroHeight, 18).fill(theme.accent);
     doc.save();
     doc.roundedRect(40, heroTop, 515, heroHeight, 18).clip();
@@ -928,64 +965,71 @@ async function buildPdfBuffer(data, plan = PLAN_GRATIS_ID) {
     doc.rect(360, heroTop, 195, heroHeight).fillOpacity(0.22).fill('#000000').fillOpacity(1);
     doc.restore();
 
-    // Círculos decorativos sutiles (esquina derecha)
+    // Círculos decorativos
     doc.save();
     doc.roundedRect(40, heroTop, 515, heroHeight, 18).clip();
     doc.circle(535, heroTop + heroHeight + 30, 90).fillOpacity(0.08).fill('#ffffff').fillOpacity(1);
     doc.circle(500, heroTop - 20, 60).fillOpacity(0.06).fill('#ffffff').fillOpacity(1);
     doc.restore();
 
-    // Logo
+    // --- Lado izquierdo (centrado vertical) ---
+    let leftY = leftContentStartY;
+
     if (issuer.logoDataUrl) {
       try {
-        doc.roundedRect(55, 60, 60, 60, 14).fillOpacity(0.18).fillAndStroke('#ffffff', '#ffffff').fillOpacity(1);
-        doc.image(issuer.logoDataUrl, 60, 65, { fit: [50, 50], align: 'center', valign: 'center' });
+        doc.roundedRect(issuerTextX - 5, leftY, 60, 60, 14).fillOpacity(0.18).fillAndStroke('#ffffff', '#ffffff').fillOpacity(1);
+        doc.image(issuer.logoDataUrl, issuerTextX, leftY + 5, { fit: [50, 50], align: 'center', valign: 'center' });
       } catch (logoError) {
         // Si el logo no es válido, se omite silenciosamente
       }
+      leftY += 72;
     }
 
-    // Eyebrow
-    doc.fillColor('#ffffff').font('Helvetica-Bold').fontSize(7).text('COMPROBANTE DE PAGO', issuerTextX, heroTitleY - 16, { width: issuerTextWidth, characterSpacing: 2 });
+    doc.fillColor('#ffffff').font('Helvetica-Bold').fontSize(eyebrowFontSize)
+      .text('COMPROBANTE DE PAGO', issuerTextX, leftY, { width: issuerTextWidth, characterSpacing: 2 });
+    leftY += eyebrowBlockHeight;
 
-    // Nombre del negocio
-    doc.fillColor('#ffffff').font('Helvetica-Bold').fontSize(19).text(issuer.businessName, issuerTextX, heroTitleY, { width: issuerTextWidth });
+    doc.fillColor('#ffffff').font('Helvetica-Bold').fontSize(brandTitleFontSize)
+      .text(issuer.businessName, issuerTextX, leftY, { width: issuerTextWidth });
+    leftY += businessNameHeight + brandTitleGap;
 
-    // Datos del emisor
-    doc.font('Helvetica').fontSize(8.5);
-    let issuerMetaY = heroMetaStartY;
+    doc.font('Helvetica').fontSize(metaFontSize);
     issuerMetaLines.forEach((line) => {
-      doc.fillColor('#ffffff').text(line, issuerTextX, issuerMetaY, { width: 240 });
-      issuerMetaY += heroLineHeight;
+      doc.fillColor('#ffffff').text(line, issuerTextX, leftY, { width: 240 });
+      leftY += metaLineHeight;
     });
 
-    // Tarjeta del documento (lado derecho, glass)
-    const docCardX = 340;
-    const docCardY = heroTop + 16;
-    const docCardW = 195;
-    const docCardH = heroHeight - 32;
-    doc.roundedRect(docCardX, docCardY, docCardW, docCardH, 16).fillOpacity(0.14).fillAndStroke('#ffffff', 'rgba(255,255,255,0.35)').fillOpacity(1);
+    // --- Doc-card (derecho, centrado vertical) ---
+    doc.roundedRect(docCardX, docCardY, docCardW, docCardH, 16)
+      .fillOpacity(0.14).fillAndStroke('#ffffff', 'rgba(255,255,255,0.35)').fillOpacity(1);
 
-    doc.fillColor('#ffffff').font('Helvetica-Bold').fontSize(7).text('TIPO DE DOCUMENTO', docCardX + 16, docCardY + 14, { width: docCardW - 32, characterSpacing: 1.6 });
-    doc.font('Helvetica-Bold').fontSize(9).text(title, docCardX + 16, docCardY + 26, { width: docCardW - 32 });
+    let dcY = docCardY + docCardInnerPaddingY;
 
-    doc.font('Helvetica-Bold').fontSize(15).text(numbering.full, docCardX + 16, docCardY + 44, { width: docCardW - 32 });
+    doc.fillColor('#ffffff').font('Helvetica-Bold').fontSize(7)
+      .text('TIPO DE DOCUMENTO', docCardX + docCardInnerPaddingX, dcY, { width: docCardW - docCardInnerPaddingX * 2, characterSpacing: 1.6 });
+    dcY += 14;
+
+    doc.font('Helvetica-Bold').fontSize(9)
+      .text(title, docCardX + docCardInnerPaddingX, dcY, { width: docCardW - docCardInnerPaddingX * 2 });
+    dcY += 16;
+
+    doc.font('Helvetica-Bold').fontSize(15)
+      .text(numbering.full, docCardX + docCardInnerPaddingX, dcY, { width: docCardW - docCardInnerPaddingX * 2 });
+    dcY += 24;
 
     // Separador
-    doc.moveTo(docCardX + 16, docCardY + 68).lineTo(docCardX + docCardW - 16, docCardY + 68).strokeOpacity(0.25).strokeColor('#ffffff').lineWidth(0.6).stroke().strokeOpacity(1);
+    doc.moveTo(docCardX + docCardInnerPaddingX, dcY).lineTo(docCardX + docCardW - docCardInnerPaddingX, dcY)
+      .strokeOpacity(0.25).strokeColor('#ffffff').lineWidth(0.6).stroke().strokeOpacity(1);
+    dcY += 12;
 
-    doc.font('Helvetica').fontSize(7.5);
-    let dmY = docCardY + 76;
-    const dmRows = [
-      ['Fecha', formatDateTime(issueDate)],
-      ['Moneda', currency],
-      ['Plantilla', template.name],
-      ['Pago', paymentMethod || 'Pago único']
-    ];
-    dmRows.forEach(([k, v]) => {
-      doc.fillColor('#ffffff').font('Helvetica').text(k, docCardX + 16, dmY, { width: 60 });
-      doc.font('Helvetica-Bold').text(v, docCardX + 76, dmY, { width: docCardW - 92, align: 'right' });
-      dmY += 12;
+    // Filas de metadatos (con altura dinámica por wrap)
+    dmRows.forEach(([k, v], idx) => {
+      const rowH = dmRowHeights[idx];
+      doc.fillColor('#ffffff').font('Helvetica').fontSize(7.5)
+        .text(k, docCardX + docCardInnerPaddingX, dcY, { width: dmLabelW });
+      doc.font('Helvetica-Bold')
+        .text(v, docCardX + docCardInnerPaddingX + dmLabelW, dcY, { width: dmValueW, align: 'right' });
+      dcY += rowH + dmRowGap;
     });
 
     // ================================================================
