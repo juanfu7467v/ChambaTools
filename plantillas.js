@@ -273,6 +273,9 @@ async function getQrDataUrl(text) {
   });
 }
 
+/* ============================================================
+   REDISEÑO PROFESIONAL (inspirado en comprobantes asiáticos)
+   ============================================================ */
 function buildTemplateCss(theme) {
   return `
     :root {
@@ -286,88 +289,165 @@ function buildTemplateCss(theme) {
       --success: ${theme.success};
     }
     * { box-sizing: border-box; }
-    body {
+    html, body {
       margin: 0;
-      padding: 24px;
-      background: #eef2f7;
+      padding: 0;
+    }
+    body {
+      padding: 32px 16px;
+      background:
+        radial-gradient(circle at 15% 10%, rgba(37, 99, 235, 0.06) 0%, transparent 45%),
+        radial-gradient(circle at 85% 90%, rgba(15, 118, 110, 0.06) 0%, transparent 45%),
+        #eef2f7;
       color: var(--ink);
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+      font-feature-settings: 'tnum' 1, 'lnum' 1;
+      -webkit-font-smoothing: antialiased;
     }
     .voucher {
-      max-width: 980px;
+      max-width: 860px;
       margin: 0 auto;
       background: #ffffff;
-      border-radius: 24px;
+      border-radius: 28px;
       overflow: hidden;
-      box-shadow: 0 24px 80px rgba(15, 23, 42, 0.14);
+      box-shadow:
+        0 1px 2px rgba(15, 23, 42, 0.04),
+        0 30px 70px -20px rgba(15, 23, 42, 0.22),
+        0 8px 24px -10px rgba(15, 23, 42, 0.12);
       border: 1px solid rgba(148, 163, 184, 0.18);
     }
+
+    /* ===== HERO / CABECERA ===== */
     .hero {
-      background: linear-gradient(135deg, var(--accent) 0%, #1e293b 100%);
-      color: white;
-      padding: 28px 32px;
+      position: relative;
+      background:
+        radial-gradient(circle at 88% 15%, rgba(255,255,255,0.18) 0%, transparent 45%),
+        linear-gradient(135deg, var(--accent) 0%, #0f172a 130%);
+      color: #ffffff;
+      padding: 34px 36px 30px;
       display: grid;
-      grid-template-columns: 1.3fr 0.7fr;
-      gap: 20px;
+      grid-template-columns: 1.35fr 0.85fr;
+      gap: 22px;
       align-items: start;
+      overflow: hidden;
+    }
+    .hero::after {
+      content: '';
+      position: absolute;
+      right: -80px;
+      bottom: -80px;
+      width: 220px;
+      height: 220px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.14);
+      pointer-events: none;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      right: -30px;
+      top: -60px;
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.06);
+      pointer-events: none;
+    }
+    .brand-logo {
+      max-width: 84px;
+      max-height: 84px;
+      border-radius: 16px;
+      background: #ffffff;
+      padding: 8px;
+      margin-bottom: 16px;
+      object-fit: contain;
+      box-shadow: 0 10px 30px -8px rgba(0,0,0,0.35);
+      display: block;
+    }
+    .brand-eyebrow {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      opacity: 0.75;
+      margin-bottom: 10px;
     }
     .brand-title {
-      font-size: 28px;
+      font-size: 30px;
       font-weight: 800;
-      line-height: 1.1;
-      margin-bottom: 10px;
+      line-height: 1.08;
+      margin-bottom: 16px;
       letter-spacing: -0.02em;
     }
-    .brand-meta,
-    .doc-meta,
-    .small-box,
-    .legal,
-    .totals table,
-    .items th,
-    .items td,
-    .summary-pill,
-    .section-title,
-    .empty-note {
-      font-size: 14px;
+    .brand-meta {
+      display: grid;
+      gap: 6px;
+      font-size: 13px;
+      opacity: 0.95;
+      line-height: 1.5;
     }
-    .brand-meta div,
-    .doc-meta div { margin-bottom: 6px; opacity: 0.96; }
+    .brand-meta .row { display: flex; gap: 8px; align-items: baseline; }
+    .brand-meta .row .k {
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      opacity: 0.7;
+      min-width: 78px;
+      font-weight: 700;
+    }
     .doc-card {
-      background: rgba(255,255,255,0.14);
-      backdrop-filter: blur(8px);
-      border: 1px solid rgba(255,255,255,0.18);
-      border-radius: 20px;
-      padding: 18px 20px;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.12);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.22);
+      border-radius: 22px;
+      padding: 22px 22px 20px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), 0 12px 30px -12px rgba(0,0,0,0.35);
+      position: relative;
+      z-index: 1;
     }
     .doc-type {
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      opacity: 0.8;
-      margin-bottom: 10px;
-    }
-    .doc-number {
-      font-size: 28px;
+      font-size: 10px;
       font-weight: 800;
-      line-height: 1.1;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      opacity: 0.85;
       margin-bottom: 12px;
     }
+    .doc-number {
+      font-size: 26px;
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: 14px;
+      letter-spacing: -0.02em;
+      font-variant-numeric: tabular-nums;
+    }
+    .doc-meta {
+      display: grid;
+      gap: 6px;
+      font-size: 12px;
+      opacity: 0.95;
+    }
+    .doc-meta .row { display: flex; justify-content: space-between; gap: 10px; }
+    .doc-meta .row .k { opacity: 0.75; }
+    .doc-meta .row .v { font-weight: 700; }
+
+    /* ===== CONTENIDO ===== */
     .content {
-      padding: 28px 32px 18px;
+      padding: 30px 36px 8px;
     }
     .grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 18px;
-      margin-bottom: 20px;
+      margin-bottom: 24px;
     }
     .box {
       border: 1px solid var(--line);
-      border-radius: 18px;
-      background: var(--panel);
-      padding: 18px;
+      border-radius: 20px;
+      background: linear-gradient(180deg, #ffffff 0%, var(--panel) 100%);
+      padding: 20px 22px;
+      box-shadow: 0 1px 0 rgba(255,255,255,0.8) inset;
     }
     .section-title {
       display: inline-flex;
@@ -375,17 +455,38 @@ function buildTemplateCss(theme) {
       gap: 8px;
       color: var(--accent);
       font-weight: 800;
-      margin-bottom: 12px;
+      margin-bottom: 14px;
       text-transform: uppercase;
-      letter-spacing: 0.08em;
-      font-size: 12px;
+      letter-spacing: 0.14em;
+      font-size: 11px;
     }
-    .small-box div { margin-bottom: 8px; }
+    .section-title::before {
+      content: '';
+      width: 4px;
+      height: 14px;
+      border-radius: 4px;
+      background: var(--accent);
+      display: inline-block;
+    }
+    .info-list { display: grid; gap: 10px; }
+    .info-list .info-row { display: grid; grid-template-columns: 96px 1fr; gap: 10px; font-size: 13px; align-items: baseline; }
+    .info-list .info-row .k {
+      color: var(--muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: 10px;
+    }
+    .info-list .info-row .v { color: var(--ink); font-weight: 600; word-break: break-word; }
+
+    /* ===== TABLA DE ÍTEMS ===== */
     .items-wrap {
       border: 1px solid var(--line);
       border-radius: 20px;
       overflow: hidden;
-      margin-bottom: 20px;
+      margin-bottom: 24px;
+      background: #ffffff;
+      box-shadow: 0 1px 0 rgba(255,255,255,0.8) inset;
     }
     .items {
       width: 100%;
@@ -393,30 +494,44 @@ function buildTemplateCss(theme) {
       background: white;
     }
     .items thead th {
-      background: var(--accent-soft);
+      background: linear-gradient(180deg, var(--accent-soft) 0%, rgba(255,255,255,0.4) 100%);
       color: var(--accent);
       text-align: left;
-      padding: 14px 16px;
-      font-size: 12px;
-      letter-spacing: 0.08em;
+      padding: 15px 18px;
+      font-size: 10.5px;
+      letter-spacing: 0.14em;
       text-transform: uppercase;
+      font-weight: 800;
+      border-bottom: 1px solid var(--line);
     }
     .items tbody td {
-      padding: 14px 16px;
+      padding: 16px 18px;
       border-top: 1px solid var(--line);
       vertical-align: top;
+      font-size: 13px;
+      color: var(--ink);
     }
+    .items tbody tr:first-child td { border-top: none; }
     .items tbody tr:nth-child(even) td {
       background: var(--panel);
     }
-    .item-name { font-weight: 700; }
-    .item-sku { color: var(--muted); font-size: 12px; margin-top: 4px; }
+    .item-name { font-weight: 700; line-height: 1.4; }
+    .item-sku {
+      color: var(--muted);
+      font-size: 11px;
+      margin-top: 5px;
+      letter-spacing: 0.02em;
+    }
+    .num { text-align: right; font-variant-numeric: tabular-nums; }
+    .center { text-align: center; }
+
+    /* ===== TOTALES Y RESUMEN ===== */
     .totals-area {
       display: grid;
-      grid-template-columns: 1fr minmax(280px, 360px);
-      gap: 18px;
+      grid-template-columns: 1fr minmax(300px, 380px);
+      gap: 20px;
       align-items: start;
-      margin-bottom: 24px;
+      margin-bottom: 26px;
     }
     .summary-pills {
       display: flex;
@@ -425,48 +540,93 @@ function buildTemplateCss(theme) {
     }
     .summary-pill {
       border: 1px solid var(--line);
-      padding: 12px 14px;
+      padding: 10px 16px;
       border-radius: 999px;
-      background: white;
+      background: #ffffff;
       font-weight: 600;
       color: var(--muted);
+      font-size: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .summary-pill::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      display: inline-block;
+    }
+    .notes-box {
+      margin-top: 16px;
+      border-radius: 18px;
+      border: 1px dashed var(--line);
+      background: var(--panel);
+      padding: 16px 18px;
+      color: var(--muted);
+      font-size: 12.5px;
+      line-height: 1.65;
+    }
+    .notes-box strong { color: var(--ink); }
+    .empty-note {
+      margin-top: 16px;
+      padding: 16px 18px;
+      background: var(--accent-soft);
+      border-radius: 18px;
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 12.5px;
     }
     .totals {
       border: 1px solid var(--line);
-      border-radius: 18px;
+      border-radius: 20px;
       overflow: hidden;
-      background: white;
+      background: #ffffff;
+      box-shadow: 0 1px 0 rgba(255,255,255,0.8) inset;
     }
-    .totals table {
-      width: 100%;
-      border-collapse: collapse;
-    }
+    .totals table { width: 100%; border-collapse: collapse; }
     .totals td {
-      padding: 14px 16px;
+      padding: 16px 20px;
       border-top: 1px solid var(--line);
+      font-size: 13px;
     }
     .totals tr:first-child td { border-top: none; }
-    .totals td:last-child { text-align: right; font-weight: 700; }
-    .totals .grand td {
-      background: var(--accent);
-      color: white;
-      font-size: 18px;
+    .totals td:first-child { color: var(--muted); }
+    .totals td:last-child {
+      text-align: right;
+      font-weight: 700;
+      color: var(--ink);
+      font-variant-numeric: tabular-nums;
     }
+    .totals .grand td {
+      background: linear-gradient(135deg, var(--accent) 0%, #0f172a 130%);
+      color: #ffffff;
+      font-size: 17px;
+      font-weight: 800;
+      padding: 20px;
+      letter-spacing: -0.01em;
+    }
+    .totals .grand td:first-child { color: rgba(255,255,255,0.85); font-weight: 700; }
+    .totals .grand td:last-child { color: #ffffff; }
+
+    /* ===== FOOTER ===== */
     .footer {
       display: grid;
-      grid-template-columns: 140px 1fr;
-      gap: 18px;
+      grid-template-columns: 150px 1fr;
+      gap: 22px;
       border-top: 1px solid var(--line);
-      padding: 24px 32px 32px;
+      padding: 26px 36px 34px;
       align-items: start;
-      background: linear-gradient(180deg, #fff 0%, var(--panel) 100%);
+      background: linear-gradient(180deg, #ffffff 0%, var(--panel) 100%);
     }
     .qr-box {
       border: 1px solid var(--line);
-      border-radius: 16px;
-      background: white;
-      padding: 10px;
+      border-radius: 18px;
+      background: #ffffff;
+      padding: 12px;
       text-align: center;
+      box-shadow: 0 1px 0 rgba(255,255,255,0.8) inset;
     }
     .qr-box img {
       width: 100%;
@@ -474,20 +634,43 @@ function buildTemplateCss(theme) {
       display: block;
       margin: 0 auto 8px;
     }
-    .legal {
+    .qr-box .qr-label {
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
       color: var(--muted);
-      line-height: 1.7;
-    }
-    .legal strong { color: var(--ink); }
-    .empty-note {
-      padding: 14px 16px;
-      background: var(--accent-soft);
-      border-radius: 14px;
-      color: var(--accent);
       font-weight: 700;
     }
+    .legal {
+      color: var(--muted);
+      line-height: 1.75;
+      font-size: 12.5px;
+    }
+    .legal strong { color: var(--ink); }
+    .legal .legal-title {
+      display: inline-block;
+      color: var(--accent);
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      font-size: 10.5px;
+      margin-bottom: 6px;
+    }
+    .legal .qr-chain {
+      display: block;
+      margin-top: 10px;
+      padding: 10px 12px;
+      background: #ffffff;
+      border: 1px dashed var(--line);
+      border-radius: 12px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 10.5px;
+      color: var(--muted);
+      word-break: break-all;
+    }
+
     @media (max-width: 840px) {
-      body { padding: 10px; }
+      body { padding: 14px 10px; }
       .hero,
       .grid,
       .totals-area,
@@ -496,11 +679,11 @@ function buildTemplateCss(theme) {
       }
       .content,
       .hero,
-      .footer { padding-left: 18px; padding-right: 18px; }
-      .doc-number { font-size: 24px; }
+      .footer { padding-left: 20px; padding-right: 20px; }
+      .doc-number { font-size: 22px; }
       .brand-title { font-size: 24px; }
       .items-wrap { overflow-x: auto; }
-      .items { min-width: 720px; }
+      .items { min-width: 700px; }
     }
   `;
 }
@@ -511,20 +694,20 @@ async function renderVoucherHtml(data, plan = PLAN_GRATIS_ID) {
   const title = documentType === 'factura' ? 'Factura electrónica' : 'Boleta de venta';
   const paymentLabel = paymentMethod || 'Pago único';
   const watermarkHtml = plan === PLAN_GRATIS_ID
-    ? `<div style="position:fixed;top:45%;left:50%;transform:translate(-50%,-50%) rotate(-30deg);font-size:64px;font-weight:800;color:rgba(15,23,42,0.08);pointer-events:none;white-space:nowrap;z-index:999;">FacilitoTools</div>`
+    ? `<div style="position:fixed;top:45%;left:50%;transform:translate(-50%,-50%) rotate(-30deg);font-size:64px;font-weight:800;color:rgba(15,23,42,0.08);pointer-events:none;white-space:nowrap;z-index:999;letter-spacing:0.05em;">FacilitoTools</div>`
     : '';
 
   const rows = items.map((item) => `
       <tr>
-        <td>${item.index}</td>
+        <td class="center" style="width:38px;font-variant-numeric:tabular-nums;">${item.index}</td>
         <td>
           <div class="item-name">${escapeHtml(item.description)}</div>
           ${item.sku ? `<div class="item-sku">SKU: ${escapeHtml(item.sku)}</div>` : ''}
         </td>
-        <td>${escapeHtml(item.unitLabel)}</td>
-        <td>${item.quantity}</td>
-        <td>${formatMoney(item.unitTotal, currency)}</td>
-        <td>${formatMoney(item.total, currency)}</td>
+        <td class="center" style="width:70px;">${escapeHtml(item.unitLabel)}</td>
+        <td class="num" style="width:70px;">${item.quantity}</td>
+        <td class="num" style="width:110px;">${formatMoney(item.unitTotal, currency)}</td>
+        <td class="num" style="width:120px;font-weight:700;">${formatMoney(item.total, currency)}</td>
       </tr>
     `).join('');
 
@@ -541,45 +724,50 @@ async function renderVoucherHtml(data, plan = PLAN_GRATIS_ID) {
     <article class="voucher">
       <header class="hero">
         <div>
-          ${issuer.logoDataUrl ? `<img src="${issuer.logoDataUrl}" alt="Logo" style="max-width:96px;max-height:96px;border-radius:12px;background:#fff;padding:6px;margin-bottom:12px;object-fit:contain;" />` : ''}
+          ${issuer.logoDataUrl ? `<img src="${issuer.logoDataUrl}" alt="Logo" class="brand-logo" />` : ''}
+          <div class="brand-eyebrow">Comprobante de pago</div>
           <div class="brand-title">${escapeHtml(issuer.businessName)}</div>
           <div class="brand-meta">
-            ${issuer.documentNumber ? `<div><strong>Documento:</strong> ${escapeHtml(issuer.documentNumber)}</div>` : ''}
-            ${issuer.address ? `<div><strong>Dirección:</strong> ${escapeHtml(issuer.address)}</div>` : ''}
-            ${issuer.phone ? `<div><strong>Teléfono:</strong> ${escapeHtml(issuer.phone)}</div>` : ''}
-            ${issuer.email ? `<div><strong>Email:</strong> ${escapeHtml(issuer.email)}</div>` : ''}
-            ${issuer.website ? `<div><strong>Web:</strong> ${escapeHtml(issuer.website)}</div>` : ''}
+            ${issuer.documentNumber ? `<div class="row"><span class="k">Documento</span><span>${escapeHtml(issuer.documentNumber)}</span></div>` : ''}
+            ${issuer.address ? `<div class="row"><span class="k">Dirección</span><span>${escapeHtml(issuer.address)}</span></div>` : ''}
+            ${issuer.phone ? `<div class="row"><span class="k">Teléfono</span><span>${escapeHtml(issuer.phone)}</span></div>` : ''}
+            ${issuer.email ? `<div class="row"><span class="k">Email</span><span>${escapeHtml(issuer.email)}</span></div>` : ''}
+            ${issuer.website ? `<div class="row"><span class="k">Web</span><span>${escapeHtml(issuer.website)}</span></div>` : ''}
           </div>
         </div>
         <div class="doc-card">
           <div class="doc-type">${escapeHtml(title)}</div>
           <div class="doc-number">${escapeHtml(numbering.full)}</div>
           <div class="doc-meta">
-            <div><strong>Fecha:</strong> ${escapeHtml(formatDateTime(issueDate))}</div>
-            <div><strong>Moneda:</strong> ${escapeHtml(currency)}</div>
-            <div><strong>Plantilla:</strong> ${escapeHtml(template.name)}</div>
-            <div><strong>Pago:</strong> ${escapeHtml(paymentLabel)}</div>
+            <div class="row"><span class="k">Fecha</span><span class="v">${escapeHtml(formatDateTime(issueDate))}</span></div>
+            <div class="row"><span class="k">Moneda</span><span class="v">${escapeHtml(currency)}</span></div>
+            <div class="row"><span class="k">Plantilla</span><span class="v">${escapeHtml(template.name)}</span></div>
+            <div class="row"><span class="k">Pago</span><span class="v">${escapeHtml(paymentLabel)}</span></div>
           </div>
         </div>
       </header>
 
       <section class="content">
         <div class="grid">
-          <div class="box small-box">
-            <div class="section-title">Cliente</div>
-            <div><strong>Nombre:</strong> ${escapeHtml(customer.name)}</div>
-            <div><strong>${escapeHtml(customer.documentType || 'Documento')}:</strong> ${escapeHtml(customer.documentNumber || '-')}</div>
-            ${customer.email ? `<div><strong>Email:</strong> ${escapeHtml(customer.email)}</div>` : ''}
-            ${customer.phone ? `<div><strong>Teléfono:</strong> ${escapeHtml(customer.phone)}</div>` : ''}
-            ${customer.address ? `<div><strong>Dirección:</strong> ${escapeHtml(customer.address)}</div>` : ''}
+          <div class="box">
+            <div class="section-title">Datos del cliente</div>
+            <div class="info-list">
+              <div class="info-row"><span class="k">Nombre</span><span class="v">${escapeHtml(customer.name)}</span></div>
+              <div class="info-row"><span class="k">${escapeHtml(customer.documentType || 'Documento')}</span><span class="v">${escapeHtml(customer.documentNumber || '-')}</span></div>
+              ${customer.email ? `<div class="info-row"><span class="k">Email</span><span class="v">${escapeHtml(customer.email)}</span></div>` : ''}
+              ${customer.phone ? `<div class="info-row"><span class="k">Teléfono</span><span class="v">${escapeHtml(customer.phone)}</span></div>` : ''}
+              ${customer.address ? `<div class="info-row"><span class="k">Dirección</span><span class="v">${escapeHtml(customer.address)}</span></div>` : ''}
+            </div>
           </div>
 
-          <div class="box small-box">
+          <div class="box">
             <div class="section-title">Resumen comercial</div>
-            <div><strong>Operación gravada:</strong> ${formatMoney(subtotal, currency)}</div>
-            <div><strong>IGV (${(taxRate * 100).toFixed(0)}%):</strong> ${formatMoney(tax, currency)}</div>
-            <div><strong>Total:</strong> ${formatMoney(total, currency)}</div>
-            <div><strong>Precios ingresados:</strong> ${pricesIncludeTax ? 'con IGV incluido' : 'sin IGV'}</div>
+            <div class="info-list">
+              <div class="info-row"><span class="k">Gravado</span><span class="v">${formatMoney(subtotal, currency)}</span></div>
+              <div class="info-row"><span class="k">IGV ${(taxRate * 100).toFixed(0)}%</span><span class="v">${formatMoney(tax, currency)}</span></div>
+              <div class="info-row"><span class="k">Total</span><span class="v" style="color:var(--accent);">${formatMoney(total, currency)}</span></div>
+              <div class="info-row"><span class="k">Precios</span><span class="v">${pricesIncludeTax ? 'Con IGV incluido' : 'Sin IGV'}</span></div>
+            </div>
           </div>
         </div>
 
@@ -587,12 +775,12 @@ async function renderVoucherHtml(data, plan = PLAN_GRATIS_ID) {
           <table class="items">
             <thead>
               <tr>
-                <th>#</th>
+                <th class="center">#</th>
                 <th>Descripción</th>
-                <th>Unidad</th>
-                <th>Cantidad</th>
-                <th>P. unitario</th>
-                <th>Importe</th>
+                <th class="center">Unidad</th>
+                <th class="num">Cant.</th>
+                <th class="num">P. unitario</th>
+                <th class="num">Importe</th>
               </tr>
             </thead>
             <tbody>
@@ -605,12 +793,12 @@ async function renderVoucherHtml(data, plan = PLAN_GRATIS_ID) {
           <div>
             <div class="summary-pills">
               <div class="summary-pill">${items.length} ítem(s)</div>
-              <div class="summary-pill">${escapeHtml(documentType === 'factura' ? 'Factura apta para venta empresarial' : 'Boleta apta para venta rápida')}</div>
+              <div class="summary-pill">${escapeHtml(documentType === 'factura' ? 'Factura empresarial' : 'Boleta de venta')}</div>
               <div class="summary-pill">Plantilla ${escapeHtml(template.name)}</div>
             </div>
-            <div style="margin-top:16px;">
-              ${notes ? `<div class="box legal"><strong>Observaciones:</strong><br/>${escapeHtml(notes)}</div>` : '<div class="empty-note">Puedes añadir observaciones, condiciones comerciales o mensaje de agradecimiento.</div>'}
-            </div>
+            ${notes
+              ? `<div class="notes-box"><strong>Observaciones:</strong><br/>${escapeHtml(notes)}</div>`
+              : `<div class="empty-note">Puedes añadir observaciones, condiciones comerciales o un mensaje de agradecimiento.</div>`}
           </div>
           <div class="totals">
             <table>
@@ -634,12 +822,12 @@ async function renderVoucherHtml(data, plan = PLAN_GRATIS_ID) {
       <footer class="footer">
         <div class="qr-box">
           <img src="${qrDataUrl}" alt="QR del comprobante" />
-          <div style="font-size:12px;color:var(--muted)">QR de validación</div>
+          <div class="qr-label">QR de validación</div>
         </div>
         <div class="legal">
-          <strong>Representación visual del comprobante</strong><br/>
-          Este documento ha sido generado para agilizar la emisión comercial de ventas por redes sociales y canales directos. Verifica siempre los datos fiscales del emisor y del cliente antes de compartir o descargar el PDF final.<br/><br/>
-          <strong>Cadena QR:</strong> ${escapeHtml(qrContent)}
+          <span class="legal-title">Representación profesional del comprobante</span><br/>
+          Este documento ha sido generado para agilizar la emisión comercial de ventas por redes sociales y canales directos. Verifica siempre los datos fiscales del emisor y del cliente antes de compartir o descargar el PDF final.
+          <span class="qr-chain"><strong>Cadena QR:</strong> ${escapeHtml(qrContent)}</span>
         </div>
       </footer>
     </article>
@@ -647,6 +835,9 @@ async function renderVoucherHtml(data, plan = PLAN_GRATIS_ID) {
 </html>`;
 }
 
+/* ============================================================
+   PDF — REDISEÑO PROFESIONAL
+   ============================================================ */
 function drawText(doc, text, x, y, options = {}) {
   doc.text(String(text ?? ''), x, y, options);
 }
@@ -673,6 +864,9 @@ async function buildPdfBuffer(data, plan = PLAN_GRATIS_ID) {
   // Marca de agua para plan gratuito
   const esGratuito = plan === PLAN_GRATIS_ID;
 
+  // Paleta extendida para el PDF (versiones más ricas derivadas del acento)
+  const accentDark = '#0f172a';
+
   return new Promise((resolve, reject) => {
     const doc = new PDFDocument({ size: 'A4', margin: 40 });
     const chunks = [];
@@ -687,15 +881,14 @@ async function buildPdfBuffer(data, plan = PLAN_GRATIS_ID) {
     if (esGratuito) {
       doc.fontSize(60)
         .fillColor('#cccccc')
-        .opacity(0.2)
-        .text('FacilitoTools', 150, 400, { align: 'center', angle: -30 })
+        .opacity(0.18)
+        .text('FacilitoTools', 120, 400, { align: 'center', angle: -30, width: 400 })
         .opacity(1);
     }
 
-    // --- Encabezado / contenedor azul con los datos del proveedor ---
-    // La altura del contenedor se calcula según la cantidad de líneas de
-    // información disponibles (Documento, Dirección, Teléfono, Email), para
-    // que ningún dato quede fuera del fondo azul ni pegado a su límite.
+    // ================================================================
+    // HERO (cabecera con gradiente simulado en 3 capas de bandas)
+    // ================================================================
     const issuerMetaLines = [
       issuer.documentNumber ? `Documento: ${issuer.documentNumber}` : '',
       issuer.address ? `Dirección: ${issuer.address}` : '',
@@ -704,23 +897,21 @@ async function buildPdfBuffer(data, plan = PLAN_GRATIS_ID) {
     ].filter(Boolean);
 
     const heroTop = 40;
-    const heroTitleY = 60; // posición vertical del nombre del negocio
-    const heroLineHeight = 13; // alto reservado por cada línea (evita que el texto quede pegado)
-    const heroTitleToMetaGap = 10; // espacio entre el nombre del negocio y los datos de contacto
-    const heroBottomPadding = 20; // margen inferior dentro del contenedor azul
-    const heroMinHeight = 90;
+    const heroTitleY = 74; // debajo del eyebrow
+    const heroLineHeight = 12.5;
+    const heroTitleToMetaGap = 12;
+    const heroBottomPadding = 22;
+    const heroMinHeight = 110;
 
     let issuerTextX = 60;
-    let issuerTextWidth = 280;
+    let issuerTextWidth = 270;
     if (issuer.logoDataUrl) {
       issuerTextX = 128;
-      issuerTextWidth = 210;
+      issuerTextWidth = 200;
     }
 
-    // Se mide la altura real del nombre del negocio (puede ocupar más de una
-    // línea si es largo) para que los datos de contacto nunca se superpongan
-    // con él, sin importar cuánto texto tenga el nombre comercial.
-    doc.font('Helvetica-Bold').fontSize(20);
+    // Medir altura del nombre del negocio para evitar superposición
+    doc.font('Helvetica-Bold').fontSize(19);
     const businessNameHeight = doc.heightOfString(issuer.businessName, { width: issuerTextWidth });
     const heroMetaStartY = heroTitleY + businessNameHeight + heroTitleToMetaGap;
 
@@ -729,62 +920,119 @@ async function buildPdfBuffer(data, plan = PLAN_GRATIS_ID) {
       (heroMetaStartY - heroTop) + issuerMetaLines.length * heroLineHeight + heroBottomPadding
     );
 
+    // Bandas superpuestas para simular gradiente (más oscuro a la derecha)
     doc.roundedRect(40, heroTop, 515, heroHeight, 18).fill(theme.accent);
+    doc.save();
+    doc.roundedRect(40, heroTop, 515, heroHeight, 18).clip();
+    doc.rect(220, heroTop, 335, heroHeight).fillOpacity(0.28).fill('#000000').fillOpacity(1);
+    doc.rect(360, heroTop, 195, heroHeight).fillOpacity(0.22).fill('#000000').fillOpacity(1);
+    doc.restore();
 
+    // Círculos decorativos sutiles (esquina derecha)
+    doc.save();
+    doc.roundedRect(40, heroTop, 515, heroHeight, 18).clip();
+    doc.circle(535, heroTop + heroHeight + 30, 90).fillOpacity(0.08).fill('#ffffff').fillOpacity(1);
+    doc.circle(500, heroTop - 20, 60).fillOpacity(0.06).fill('#ffffff').fillOpacity(1);
+    doc.restore();
+
+    // Logo
     if (issuer.logoDataUrl) {
       try {
-        doc.roundedRect(55, 55, 60, 60, 12).fillOpacity(0.16).fillAndStroke('#ffffff', '#ffffff').fillOpacity(1);
-        doc.image(issuer.logoDataUrl, 60, 60, { fit: [50, 50], align: 'center', valign: 'center' });
+        doc.roundedRect(55, 60, 60, 60, 14).fillOpacity(0.18).fillAndStroke('#ffffff', '#ffffff').fillOpacity(1);
+        doc.image(issuer.logoDataUrl, 60, 65, { fit: [50, 50], align: 'center', valign: 'center' });
       } catch (logoError) {
-        // Si el logo no es válido, se omite silenciosamente y se continúa sin él.
+        // Si el logo no es válido, se omite silenciosamente
       }
     }
 
-    doc.fillColor('#ffffff').font('Helvetica-Bold').fontSize(20).text(issuer.businessName, issuerTextX, heroTitleY, { width: issuerTextWidth });
-    doc.font('Helvetica').fontSize(9);
+    // Eyebrow
+    doc.fillColor('#ffffff').font('Helvetica-Bold').fontSize(7).text('COMPROBANTE DE PAGO', issuerTextX, heroTitleY - 16, { width: issuerTextWidth, characterSpacing: 2 });
+
+    // Nombre del negocio
+    doc.fillColor('#ffffff').font('Helvetica-Bold').fontSize(19).text(issuer.businessName, issuerTextX, heroTitleY, { width: issuerTextWidth });
+
+    // Datos del emisor
+    doc.font('Helvetica').fontSize(8.5);
     let issuerMetaY = heroMetaStartY;
     issuerMetaLines.forEach((line) => {
-      doc.text(line, issuerTextX, issuerMetaY, { width: 260 });
+      doc.fillColor('#ffffff').text(line, issuerTextX, issuerMetaY, { width: 240 });
       issuerMetaY += heroLineHeight;
     });
 
-    doc.roundedRect(350, 55, 180, 60, 14).fillOpacity(0.12).fillAndStroke('#ffffff', '#ffffff').fillOpacity(1);
-    doc.fillColor('#ffffff').font('Helvetica-Bold').fontSize(10).text(title, 365, 68, { width: 150, align: 'center' });
-    doc.fontSize(18).text(numbering.full, 365, 84, { width: 150, align: 'center' });
+    // Tarjeta del documento (lado derecho, glass)
+    const docCardX = 340;
+    const docCardY = heroTop + 16;
+    const docCardW = 195;
+    const docCardH = heroHeight - 32;
+    doc.roundedRect(docCardX, docCardY, docCardW, docCardH, 16).fillOpacity(0.14).fillAndStroke('#ffffff', 'rgba(255,255,255,0.35)').fillOpacity(1);
 
-    // --- Contenedores "Datos del cliente" y "Detalle de emisión" ---
-    // Altura calculada para las 3 filas (título + 3 pares label/valor) con
-    // un margen inferior adecuado, evitando que el campo Email quede
-    // demasiado pegado o fuera del límite del contenedor.
-    const infoBoxTop = heroTop + heroHeight + 20;
-    const infoBoxRowGap = 30;
-    const infoBoxFirstRowOffset = 35;
-    const infoBoxRowBlockHeight = 25; // alto ocupado por cada par label/valor
-    const infoBoxBottomPadding = 20;
-    const infoBoxHeight =
-      infoBoxFirstRowOffset + 2 * infoBoxRowGap + infoBoxRowBlockHeight + infoBoxBottomPadding;
+    doc.fillColor('#ffffff').font('Helvetica-Bold').fontSize(7).text('TIPO DE DOCUMENTO', docCardX + 16, docCardY + 14, { width: docCardW - 32, characterSpacing: 1.6 });
+    doc.font('Helvetica-Bold').fontSize(9).text(title, docCardX + 16, docCardY + 26, { width: docCardW - 32 });
 
-    doc.roundedRect(40, infoBoxTop, 250, infoBoxHeight, 14).fill(theme.panel).stroke(theme.line);
-    doc.roundedRect(305, infoBoxTop, 250, infoBoxHeight, 14).fill(theme.panel).stroke(theme.line);
+    doc.font('Helvetica-Bold').fontSize(15).text(numbering.full, docCardX + 16, docCardY + 44, { width: docCardW - 32 });
 
-    const infoBoxTitleY = infoBoxTop + 15;
-    const infoBoxRow1Y = infoBoxTop + infoBoxFirstRowOffset;
-    const infoBoxRow2Y = infoBoxRow1Y + infoBoxRowGap;
-    const infoBoxRow3Y = infoBoxRow2Y + infoBoxRowGap;
+    // Separador
+    doc.moveTo(docCardX + 16, docCardY + 68).lineTo(docCardX + docCardW - 16, docCardY + 68).strokeOpacity(0.25).strokeColor('#ffffff').lineWidth(0.6).stroke().strokeOpacity(1);
 
-    doc.fillColor(theme.accent).font('Helvetica-Bold').fontSize(10).text('DATOS DEL CLIENTE', 55, infoBoxTitleY);
-    drawLabelValue(doc, 'Nombre', customer.name, 55, infoBoxRow1Y, 210);
-    drawLabelValue(doc, customer.documentType || 'Documento', customer.documentNumber || '-', 55, infoBoxRow2Y, 210);
-    drawLabelValue(doc, 'Email', customer.email || '-', 55, infoBoxRow3Y, 210);
+    doc.font('Helvetica').fontSize(7.5);
+    let dmY = docCardY + 76;
+    const dmRows = [
+      ['Fecha', formatDateTime(issueDate)],
+      ['Moneda', currency],
+      ['Plantilla', template.name],
+      ['Pago', paymentMethod || 'Pago único']
+    ];
+    dmRows.forEach(([k, v]) => {
+      doc.fillColor('#ffffff').font('Helvetica').text(k, docCardX + 16, dmY, { width: 60 });
+      doc.font('Helvetica-Bold').text(v, docCardX + 76, dmY, { width: docCardW - 92, align: 'right' });
+      dmY += 12;
+    });
 
-    doc.fillColor(theme.accent).font('Helvetica-Bold').fontSize(10).text('DETALLE DE EMISIÓN', 320, infoBoxTitleY);
-    drawLabelValue(doc, 'Fecha', formatDateTime(issueDate), 320, infoBoxRow1Y, 210);
-    drawLabelValue(doc, 'Plantilla', template.name, 320, infoBoxRow2Y, 210);
-    drawLabelValue(doc, 'Pago', paymentMethod || 'Pago único', 320, infoBoxRow3Y, 210);
+    // ================================================================
+    // TARJETAS INFO: Cliente / Detalle emisión
+    // ================================================================
+    const infoBoxTop = heroTop + heroHeight + 22;
+    const infoBoxW = 250;
+    const infoBoxH = 118;
+    const infoBoxGap = 15;
 
-    let y = infoBoxTop + infoBoxHeight + 27;
-    doc.roundedRect(40, y, 515, 28, 10).fill(theme.accentSoft);
-    doc.fillColor(theme.accent).font('Helvetica-Bold').fontSize(9);
+    // Card cliente
+    doc.roundedRect(40, infoBoxTop, infoBoxW, infoBoxH, 14).fillAndStroke(theme.panel, theme.line);
+    // Card emisión
+    doc.roundedRect(40 + infoBoxW + infoBoxGap, infoBoxTop, infoBoxW, infoBoxH, 14).fillAndStroke(theme.panel, theme.line);
+
+    // Títulos con barrita de acento
+    function drawSectionHeader(x, y, label) {
+      doc.rect(x, y + 1, 3, 10).fill(theme.accent);
+      doc.fillColor(theme.accent).font('Helvetica-Bold').fontSize(8).text(label, x + 9, y, { characterSpacing: 1.2 });
+    }
+
+    drawSectionHeader(55, infoBoxTop + 14, 'DATOS DEL CLIENTE');
+    drawSectionHeader(40 + infoBoxW + infoBoxGap + 15, infoBoxTop + 14, 'DETALLE DE EMISIÓN');
+
+    // Filas cliente
+    const rowStartY = infoBoxTop + 36;
+    const rowGap = 24;
+    drawLabelValue(doc, 'Nombre', customer.name, 55, rowStartY, infoBoxW - 30);
+    drawLabelValue(doc, customer.documentType || 'Documento', customer.documentNumber || '-', 55, rowStartY + rowGap, infoBoxW - 30);
+    drawLabelValue(doc, 'Email', customer.email || '-', 55, rowStartY + rowGap * 2, infoBoxW - 30);
+
+    // Filas emisión
+    const emissionX = 40 + infoBoxW + infoBoxGap + 15;
+    drawLabelValue(doc, 'Fecha', formatDateTime(issueDate), emissionX, rowStartY, infoBoxW - 30);
+    drawLabelValue(doc, 'Plantilla', template.name, emissionX, rowStartY + rowGap, infoBoxW - 30);
+    drawLabelValue(doc, 'Pago', paymentMethod || 'Pago único', emissionX, rowStartY + rowGap * 2, infoBoxW - 30);
+
+    // ================================================================
+    // TABLA DE ÍTEMS
+    // ================================================================
+    let y = infoBoxTop + infoBoxH + 26;
+
+    // Barra de cabecera de tabla
+    const tableHeaderH = 30;
+    doc.roundedRect(40, y, 515, tableHeaderH, 10).fill(theme.accentSoft);
+    doc.fillColor(theme.accent).font('Helvetica-Bold').fontSize(8);
+
     const columns = {
       index: 50,
       desc: 78,
@@ -794,66 +1042,118 @@ async function buildPdfBuffer(data, plan = PLAN_GRATIS_ID) {
       amount: 495
     };
 
-    drawText(doc, '#', columns.index, y + 9);
-    drawText(doc, 'DESCRIPCIÓN', columns.desc, y + 9);
-    drawText(doc, 'UND', columns.unit, y + 9);
-    drawText(doc, 'CANT', columns.qty, y + 9);
-    drawText(doc, 'P. UNIT', columns.unitPrice, y + 9);
-    drawText(doc, 'IMPORTE', columns.amount, y + 9);
-    y += 38;
+    drawText(doc, '#', columns.index, y + 11, { characterSpacing: 0.8 });
+    drawText(doc, 'DESCRIPCIÓN', columns.desc, y + 11, { characterSpacing: 0.8 });
+    drawText(doc, 'UND', columns.unit, y + 11, { characterSpacing: 0.8 });
+    drawText(doc, 'CANT.', columns.qty, y + 11, { characterSpacing: 0.8 });
+    drawText(doc, 'P. UNIT', columns.unitPrice, y + 11, { characterSpacing: 0.8 });
+    drawText(doc, 'IMPORTE', columns.amount, y + 11, { characterSpacing: 0.8 });
 
-    items.forEach((item) => {
+    y += tableHeaderH;
+
+    // Filas de la tabla
+    items.forEach((item, idx) => {
       const descHeight = doc.heightOfString(item.description, { width: 220, align: 'left' });
-      const rowHeight = Math.max(26, descHeight + 10);
+      const rowHeight = Math.max(30, descHeight + 14);
       y = ensureSpace(doc, y, rowHeight + 20);
 
-      doc.roundedRect(40, y - 4, 515, rowHeight, 10).fillOpacity(0.08).fill(theme.panelStrong).fillOpacity(1);
+      // Fondo alternado
+      if (idx % 2 === 0) {
+        doc.rect(40, y, 515, rowHeight).fillOpacity(0.55).fill(theme.panel).fillOpacity(1);
+      }
+
+      // Línea inferior sutil
+      doc.moveTo(40, y + rowHeight).lineTo(555, y + rowHeight).strokeOpacity(0.35).strokeColor(theme.line).lineWidth(0.5).stroke().strokeOpacity(1);
+
       doc.fillColor(theme.ink).font('Helvetica').fontSize(9);
-      drawText(doc, item.index, columns.index, y + 6);
-      drawText(doc, item.description, columns.desc, y + 6, { width: 220 });
-      drawText(doc, item.unitLabel, columns.unit, y + 6);
-      drawText(doc, item.quantity, columns.qty, y + 6);
-      drawText(doc, formatMoney(item.unitTotal, currency), columns.unitPrice, y + 6);
-      drawText(doc, formatMoney(item.total, currency), columns.amount, y + 6);
-      y += rowHeight + 8;
+      drawText(doc, item.index, columns.index, y + 9);
+      drawText(doc, item.description, columns.desc, y + 9, { width: 220 });
+      drawText(doc, item.unitLabel, columns.unit, y + 9);
+      drawText(doc, item.quantity, columns.qty, y + 9);
+      drawText(doc, formatMoney(item.unitTotal, currency), columns.unitPrice, y + 9);
+      doc.font('Helvetica-Bold');
+      drawText(doc, formatMoney(item.total, currency), columns.amount, y + 9);
+      doc.font('Helvetica');
+
+      y += rowHeight;
     });
 
-    y += 10;
-    y = ensureSpace(doc, y, 160);
+    // Cierre inferior de la tabla
+    doc.moveTo(40, y).lineTo(555, y).strokeOpacity(0.35).strokeColor(theme.line).lineWidth(0.5).stroke().strokeOpacity(1);
 
-    doc.roundedRect(40, y, 235, 110, 14).fill(theme.panel).stroke(theme.line);
-    doc.fillColor(theme.accent).font('Helvetica-Bold').fontSize(10).text('OBSERVACIONES', 55, y + 15);
-    doc.font('Helvetica').fillColor(theme.ink).fontSize(9).text(notes || 'Puedes usar este espacio para garantía, condiciones, método de entrega o agradecimiento al cliente.', 55, y + 34, {
-      width: 205,
-      align: 'left'
-    });
+    y += 22;
+    y = ensureSpace(doc, y, 170);
 
-    doc.roundedRect(300, y, 255, 110, 14).fill('#ffffff').stroke(theme.line);
-    doc.fillColor(theme.ink).font('Helvetica').fontSize(10);
-    doc.text('Subtotal', 318, y + 20);
-    doc.font('Helvetica-Bold').text(formatMoney(subtotal, currency), 455, y + 20, { width: 80, align: 'right' });
-    doc.font('Helvetica').text(`IGV (${(taxRate * 100).toFixed(0)}%)`, 318, y + 45);
-    doc.font('Helvetica-Bold').text(formatMoney(tax, currency), 455, y + 45, { width: 80, align: 'right' });
-    doc.roundedRect(315, y + 72, 225, 26, 10).fill(theme.accent);
-    doc.fillColor('#ffffff').font('Helvetica-Bold').fontSize(12).text('TOTAL', 330, y + 80);
-    doc.text(formatMoney(total, currency), 430, y + 80, { width: 95, align: 'right' });
+    // ================================================================
+    // OBSERVACIONES + TOTALES
+    // ================================================================
+    const bottomBlockH = 118;
 
-    y += 135;
+    // Observaciones (izquierda)
+    doc.roundedRect(40, y, 235, bottomBlockH, 14).fillAndStroke(theme.panel, theme.line);
+    doc.rect(40, y, 3, 18).fill(theme.accent);
+    doc.fillColor(theme.accent).font('Helvetica-Bold').fontSize(8).text('OBSERVACIONES', 55, y + 12, { characterSpacing: 1.2 });
+    doc.font('Helvetica').fillColor(theme.ink).fontSize(8.5).text(
+      notes || 'Puedes usar este espacio para garantía, condiciones, método de entrega o agradecimiento al cliente.',
+      55,
+      y + 34,
+      { width: 205, align: 'left', lineGap: 2 }
+    );
+
+    // Totales (derecha) — estilo tarjeta con fila destacada
+    const totalsX = 300;
+    const totalsW = 255;
+    doc.roundedRect(totalsX, y, totalsW, bottomBlockH, 14).fillAndStroke('#ffffff', theme.line);
+
+    // Subtotal
+    doc.fillColor(theme.muted).font('Helvetica').fontSize(9);
+    doc.text('Subtotal', totalsX + 18, y + 20);
+    doc.fillColor(theme.ink).font('Helvetica-Bold').text(formatMoney(subtotal, currency), totalsX + 18, y + 20, { width: totalsW - 36, align: 'right' });
+
+    // IGV
+    doc.fillColor(theme.muted).font('Helvetica');
+    doc.text(`IGV (${(taxRate * 100).toFixed(0)}%)`, totalsX + 18, y + 42);
+    doc.fillColor(theme.ink).font('Helvetica-Bold').text(formatMoney(tax, currency), totalsX + 18, y + 42, { width: totalsW - 36, align: 'right' });
+
+    // Línea separadora
+    doc.moveTo(totalsX + 16, y + 64).lineTo(totalsX + totalsW - 16, y + 64).strokeOpacity(0.4).strokeColor(theme.line).lineWidth(0.6).stroke().strokeOpacity(1);
+
+    // Total destacado
+    doc.roundedRect(totalsX + 14, y + 76, totalsW - 28, 32, 10).fill(theme.accent);
+    doc.fillColor('#ffffff').font('Helvetica-Bold').fontSize(9).text('TOTAL', totalsX + 26, y + 86);
+    doc.font('Helvetica-Bold').fontSize(13).text(formatMoney(total, currency), totalsX + 14, y + 84, { width: totalsW - 28, align: 'right' });
+
+    // ================================================================
+    // FOOTER: QR + Información
+    // ================================================================
+    y += bottomBlockH + 22;
     y = ensureSpace(doc, y, 130);
 
-    doc.roundedRect(40, y, 100, 100, 14).fill('#ffffff').stroke(theme.line);
+    // QR
+    doc.roundedRect(40, y, 100, 100, 14).fillAndStroke('#ffffff', theme.line);
     doc.image(qrDataUrl, 50, y + 10, { width: 80 });
+    doc.fillColor(theme.muted).font('Helvetica-Bold').fontSize(6.5).text('QR DE VALIDACIÓN', 40, y + 92, { width: 100, align: 'center', characterSpacing: 1.2 });
 
-    doc.roundedRect(155, y, 400, 100, 14).fill(theme.panel).stroke(theme.line);
-    doc.fillColor(theme.ink).font('Helvetica-Bold').fontSize(9).text('Representación profesional del comprobante', 170, y + 16);
+    // Panel derecho
+    doc.roundedRect(155, y, 400, 100, 14).fillAndStroke(theme.panel, theme.line);
+    doc.rect(155, y, 3, 20).fill(theme.accent);
+
+    doc.fillColor(theme.accent).font('Helvetica-Bold').fontSize(7.5).text('REPRESENTACIÓN PROFESIONAL DEL COMPROBANTE', 170, y + 14, { width: 370, characterSpacing: 0.8 });
     doc.font('Helvetica').fillColor('#475569').fontSize(8).text(
       `Documento: ${title} · ${numbering.full}\n` +
-      `QR: ${qrContent}\n` +
       `Precios ${data.pricesIncludeTax ? 'con' : 'sin'} IGV incluido. Pago: ${paymentMethod || 'Pago único'}.\n` +
       `Este archivo está pensado para ventas rápidas por Instagram, Facebook, WhatsApp y atención directa.`,
       170,
-      y + 34,
+      y + 30,
       { width: 370, lineGap: 2 }
+    );
+
+    // Cadena QR en una línea aparte
+    doc.font('Helvetica').fillColor(theme.muted).fontSize(7).text(
+      `QR: ${qrContent}`,
+      170,
+      y + 78,
+      { width: 370 }
     );
 
     doc.restore();
