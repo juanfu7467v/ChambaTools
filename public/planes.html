@@ -992,6 +992,73 @@
         .footer-content a { color: var(--emerald-light); text-decoration: none; transition: color 0.2s; font-weight: 600; }
         .footer-content a:hover { color: var(--emerald); }
 
+        /* ═══ NUEVA SECCIÓN: MÉTODOS DE PAGO (footer) ═══ */
+        .payment-methods {
+            margin: 24px 0 16px;
+            padding: 20px 16px;
+            border-top: 1px solid var(--border-subtle);
+            border-bottom: 1px solid var(--border-subtle);
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .payment-text {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 14px;
+            font-weight: 500;
+            letter-spacing: 0.02em;
+        }
+        .payment-icons {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 14px;
+        }
+        .payment-icons i {
+            font-size: 2rem;
+            color: var(--text-muted);
+            transition: all 0.25s ease;
+            cursor: pointer;
+            line-height: 1;
+        }
+        .payment-icons i:hover {
+            color: var(--white);
+            transform: translateY(-3px);
+            filter: drop-shadow(0 4px 10px rgba(0,200,83,0.35));
+        }
+        .yape-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #7B2FBE, #5A1F8F);
+            color: #ffffff;
+            font-weight: 900;
+            font-size: 0.78rem;
+            padding: 0 14px;
+            border-radius: 8px;
+            letter-spacing: 0.06em;
+            box-shadow: 0 3px 10px rgba(123, 47, 190, 0.35);
+            transition: all 0.25s ease;
+            cursor: pointer;
+            height: 34px;
+            min-width: 62px;
+            font-family: var(--font-display);
+            text-transform: uppercase;
+        }
+        .yape-badge:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(123, 47, 190, 0.55);
+            background: linear-gradient(135deg, #8A3DD1, #6B2AA5);
+        }
+        @media (max-width: 480px) {
+            .payment-icons { gap: 10px; }
+            .payment-icons i { font-size: 1.6rem; }
+            .yape-badge { height: 30px; font-size: 0.7rem; padding: 0 10px; min-width: 54px; }
+            .payment-text { font-size: 0.78rem; }
+        }
+
         /* ═══ WHATSAPP ═══ */
         .chat-bubble {
             position: fixed; bottom: 24px; right: 24px;
@@ -1417,7 +1484,24 @@
             <a href="https://m.facebook.com/61564349657272/" target="_blank" rel="noopener noreferrer"><i class="fab fa-facebook-f"></i></a>
             <a href="https://youtube.com/@eltiojota628?si=sZw2ZHHTUMdaR0nL" target="_blank" rel="noopener noreferrer"><i class="fab fa-youtube"></i></a>
         </div>
-        <p>FacilitoTools.com · Generación de comprobantes y validación de clientes © 2026</p>
+
+        <!-- ═══ MÉTODOS DE PAGO ═══ -->
+        <div class="payment-methods">
+            <p class="payment-text">Aceptamos todas las tarjetas y Yape</p>
+            <div class="payment-icons">
+                <i class="fab fa-cc-visa" title="Visa"></i>
+                <i class="fab fa-cc-mastercard" title="Mastercard"></i>
+                <i class="fab fa-cc-amex" title="American Express"></i>
+                <i class="fab fa-cc-discover" title="Discover"></i>
+                <i class="fab fa-cc-diners-club" title="Diners Club"></i>
+                <i class="fab fa-cc-jcb" title="JCB"></i>
+                <i class="fab fa-cc-paypal" title="PayPal"></i>
+                <i class="fab fa-cc-stripe" title="Stripe"></i>
+                <span class="yape-badge" title="Yape">Yape</span>
+            </div>
+        </div>
+
+        <p>FacilitoTools.com · Generación de comprobantes y validación de clientes © <span id="footer-year">2026</span></p>
         <p><a href="terminos-condiciones">Términos y condiciones</a> · <a href="politica-privacidad">Política de privacidad</a> · <a href="politica.compras.html">Política de compras y reembolsos</a></p>
         <p>¿Necesitas ayuda? Escríbenos a <a href="mailto:soporte@facilitotools.com">soporte@facilitotools.com</a></p>
     </footer>
@@ -1428,6 +1512,14 @@
 
     <!-- ═══ SCRIPTS ═══ -->
     <script>
+        // ========== AÑO AUTOMÁTICO EN EL FOOTER ==========
+        (function setFooterYear() {
+            const yearEl = document.getElementById('footer-year');
+            if (yearEl) {
+                yearEl.textContent = new Date().getFullYear();
+            }
+        })();
+
         // ========== FIREBASE CONFIGURACIÓN ==========
         let auth;
 
