@@ -68,7 +68,8 @@
         <p><strong>Control del Usuario:</strong> El Usuario conserva el control absoluto sobre dicho historial local, pudiendo filtrarlo o eliminarlo en cualquier momento. Si el Usuario limpia la caché o datos de navegación de su explorador, dicho historial se borrará de forma definitiva sin posibilidad de recuperación.</p>
 
         <h3>B. Generación de Comprobantes de Venta</h3>
-        <p><strong>Procesamiento Cliente (Client-Side):</strong> La información utilizada para la confección de boletas de venta se procesa únicamente en la memoria local del navegador del Usuario. La Plataforma no almacena copia ni registro contable de los comprobantes maquetados por el Usuario.</p>
+        <p><strong>Datos del Emisor (Base de Datos):</strong> La información del negocio o emisor (razón social o nombre comercial, RUC/DNI, dirección, plantilla seleccionada y logo, entre otros datos configurados por el Usuario en "Datos del emisor") se almacena de forma segura en la base de datos Google Firebase Firestore, asociada a la cuenta del Usuario, con la finalidad de completarse automáticamente en cada comprobante que genere y de estar disponible al consumir el servicio a través de nuestra API.</p>
+        <p><strong>Procesamiento Cliente (Client-Side):</strong> El resto de la información utilizada para la confección de cada boleta o factura —datos del cliente, productos o servicios, impuestos y notas— se procesa únicamente en la memoria local del navegador del Usuario. La Plataforma no almacena copia ni registro contable de dicha información en sus servidores.</p>
 
         <h2>3. Datos Personales Recopilados y Almacenamiento en la Nube</h2>
         <p>Para la gestión de cuentas, autenticación de usuarios y administración del servicio, el Titular recopila únicamente la información estrictamente necesaria.</p>
@@ -97,7 +98,7 @@
         <ul>
             <li><strong>Google Cloud / Firebase:</strong> Alojamiento de la base de datos de usuarios y autenticación.</li>
             <li><strong>Mercado Pago:</strong> Procesamiento seguro de pagos en línea.</li>
-            <li><strong>Proveedores de APIs de Consulta (APISPERU y fuentes oficiales):</strong> Canalización de peticiones en tiempo real para la obtención de respuestas públicas.</li>
+            <li><strong>Proveedores de APIs de Consulta (Masitaprex y fuentes oficiales):</strong> Canalización de peticiones en tiempo real para la obtención de respuestas públicas.</li>
         </ul>
 
         <h2>6. Ejercicio de Derechos ARCO</h2>
