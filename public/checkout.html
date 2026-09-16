@@ -159,6 +159,8 @@
             position: relative;
             z-index: 1;
             padding-bottom: 40px;
+            display: flex;
+            flex-direction: column;
         }
 
         .header {
@@ -171,6 +173,7 @@
             z-index: 10;
             max-width: 1200px;
             margin: 0 auto;
+            width: 100%;
         }
 
         .back-btn {
@@ -514,6 +517,164 @@
             font-size: 16px;
         }
 
+        /* ============================================================
+           NUEVO: FOOTER PROFESIONAL (soporte + política de reembolsos)
+           ============================================================ */
+        .checkout-footer {
+            width: 100%;
+            max-width: 1200px;
+            margin: 40px auto 0;
+            padding: 28px 24px 24px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            background: linear-gradient(180deg, rgba(15, 23, 42, 0.35) 0%, rgba(10, 15, 30, 0.5) 100%);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 18px 18px 0 0;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .checkout-footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 15%;
+            right: 15%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--primary-blue), transparent);
+            opacity: 0.7;
+        }
+
+        .footer-support-block {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            background: rgba(0, 114, 255, 0.08);
+            border: 1px solid rgba(0, 114, 255, 0.2);
+            border-radius: 999px;
+            margin-bottom: 18px;
+            transition: all 0.25s ease;
+            text-decoration: none;
+        }
+
+        .footer-support-block:hover {
+            background: rgba(0, 114, 255, 0.14);
+            border-color: rgba(0, 114, 255, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 114, 255, 0.2);
+        }
+
+        .footer-support-block .support-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 16px;
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(0, 114, 255, 0.35);
+        }
+
+        .footer-support-block .support-text-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            text-align: left;
+        }
+
+        .footer-support-block .support-label {
+            font-size: 11px;
+            color: var(--text-gray);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .footer-support-block .support-email {
+            font-size: 14px;
+            color: var(--text-dark);
+            font-weight: 700;
+            letter-spacing: 0.01em;
+        }
+
+        .footer-policies {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 8px 18px;
+            margin: 6px 0 16px;
+        }
+
+        .footer-policies a {
+            color: var(--text-gray);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            transition: color 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .footer-policies a i {
+            font-size: 11px;
+            color: var(--primary-blue);
+            opacity: 0.8;
+        }
+
+        .footer-policies a:hover {
+            color: var(--text-dark);
+        }
+
+        .footer-policies .separator {
+            color: rgba(255, 255, 255, 0.15);
+            font-size: 12px;
+        }
+
+        .footer-bottom-note {
+            font-size: 12px;
+            color: var(--text-gray);
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        .footer-bottom-note strong {
+            color: var(--text-dark);
+            font-weight: 600;
+        }
+
+        @media (max-width: 540px) {
+            .checkout-footer {
+                padding: 22px 16px 20px;
+                margin-top: 32px;
+            }
+            .footer-support-block {
+                padding: 10px 16px;
+                gap: 10px;
+            }
+            .footer-support-block .support-icon {
+                width: 32px;
+                height: 32px;
+                font-size: 14px;
+            }
+            .footer-support-block .support-email {
+                font-size: 13px;
+            }
+            .footer-policies {
+                gap: 6px 12px;
+            }
+            .footer-policies a {
+                font-size: 12px;
+            }
+        }
+
         /* Pantallas de resultado */
         .result-screen {
             position: fixed;
@@ -745,6 +906,37 @@
                 <i class="fas fa-shield-check"></i>
                 <span>Pago encriptado y procesado por Mercado Pago</span>
             </div>
+
+            <!-- ============================================================
+                 NUEVO: FOOTER PROFESIONAL (soporte + políticas)
+                 ============================================================ -->
+            <footer class="checkout-footer">
+                <a href="mailto:soporte@facilitotools.com" class="footer-support-block" aria-label="Contactar a soporte">
+                    <span class="support-icon"><i class="fas fa-headset"></i></span>
+                    <span class="support-text-wrap">
+                        <span class="support-label">¿Necesitas ayuda?</span>
+                        <span class="support-email">soporte@facilitotools.com</span>
+                    </span>
+                </a>
+
+                <div class="footer-policies">
+                    <a href="politica.compras.html">
+                        <i class="fas fa-file-contract"></i> Política de compras y reembolsos
+                    </a>
+                    <span class="separator">•</span>
+                    <a href="terminos-condiciones">
+                        <i class="fas fa-file-shield"></i> Términos y condiciones
+                    </a>
+                    <span class="separator">•</span>
+                    <a href="politica-privacidad">
+                        <i class="fas fa-user-shield"></i> Política de privacidad
+                    </a>
+                </div>
+
+                <p class="footer-bottom-note">
+                    FacilitoTools.com · <strong>Pago seguro</strong> procesado por Mercado Pago © 2026
+                </p>
+            </footer>
         </div>
 
         <div id="successScreen" class="result-screen hidden">
