@@ -1,7 +1,7 @@
 {
-  "name": "pago-planes-consulta-pe",
+  "name": "facilitotools-server",
   "version": "1.0.0",
-  "description": "Servidor para procesar pagos y otorgar créditos en Consulta PE con MercadoPago y Flow",
+  "description": "Servidor para procesar pagos y otorgar créditos en FacilitoTools con MercadoPago y Flow",
   "main": "index.js",
   "type": "module",
   "scripts": {
