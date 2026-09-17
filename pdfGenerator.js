@@ -39,7 +39,7 @@ export async function generateInvoicePDF(data) {
 
             const emisor = {
                 razonSocial: 'CUBAS PEREZ JOSE RENE',
-                ruc: '10736224351',
+                ruc: '10736224350',
                 direccion: 'Caserío Pajonal, Cajamarca',
                 tipoDoc: 'BOLETA DE VENTA ELECTRÓNICA',
                 serie: 'B001'
@@ -80,7 +80,7 @@ export async function generateInvoicePDF(data) {
             const sunatQR = `${emisor.ruc}|03|${emisor.serie}|${correlativo}|${igv.toFixed(2)}|${montoTotal.toFixed(2)}|${fechaQR}|${tipoDocAdq}|${numDocAdq}|`;
             
             // URL de verificación para validez y respaldo
-            const hostUrl = process.env.HOST_URL || 'https://comprar-creditos-consulta-pe.fly.dev';
+            const hostUrl = process.env.HOST_URL || 'https://www.facilitotools.com';
             const verificationUrl = `${hostUrl}/verify.html?id=${orderId}`;
             
             // Generar QR que contiene la URL de verificación (que a su vez muestra los datos reales)
@@ -152,7 +152,7 @@ export async function generateInvoicePDF(data) {
             doc.text('IMPORTE', 480, tableY + 6);
 
             // Descripción con altura dinámica
-            const descripcionTexto = description || 'Servicio de Acceso a Infraestructura Digital';
+            const descripcionTexto = description || 'Suscripción FacilitoTools';
             const descripcionWidth = 280; // Ancho disponible para descripción
             const descripcionLineHeight = 12;
             
@@ -199,13 +199,14 @@ export async function generateInvoicePDF(data) {
             // RENUNCIA DE RESPONSABILIDAD / PRIVACIDAD
             doc.font('Helvetica-Bold').text('CLÁUSULA DE PROTECCIÓN DE DATOS:', 140, footerY + 40);
             doc.font('Helvetica').fontSize(6).text(
-                'De acuerdo a la Ley N° 29733, el usuario autoriza a CONSULTA PE al tratamiento de sus datos personales para fines de facturación y soporte técnico. ' +
+                'De acuerdo a la Ley N° 29733, el usuario autoriza a FACILITOTOOLS al tratamiento de sus datos personales para fines de facturación y soporte técnico. ' +
                 'Este documento no es canjeable por dinero. El acceso al servicio es personal e intransferible. ' +
-                'CONSULTA PE no se responsabiliza por el mal uso de los datos obtenidos a través de la plataforma por parte del usuario.', 
+                'FACILITOTOOLS no se responsabiliza por el mal uso de los datos obtenidos a través de la plataforma por parte del usuario.', 
                 140, footerY + 50, { width: 380, align: 'justify' }
             );
 
-            doc.font('Helvetica-Bold').fontSize(9).fillColor(colors.black).text('¡Gracias por confiar en Consulta PE!', 140, footerY + 80);
+            doc.font('Helvetica-Bold').fontSize(9).fillColor(colors.black).text('¡Gracias por confiar en FacilitoTools!', 140, footerY + 80);
+            doc.font('Helvetica').fontSize(7).fillColor('#666666').text('¿Dudas sobre tu comprobante? Escríbenos a soporte@facilitotools.com', 140, footerY + 93);
 
             doc.end();
             stream.on('finish', () => resolve(filePath));
