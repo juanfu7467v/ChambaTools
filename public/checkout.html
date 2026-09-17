@@ -518,7 +518,7 @@
         }
 
         /* ============================================================
-           NUEVO: FOOTER PROFESIONAL (soporte + políticas + métodos de pago)
+           NUEVO: FOOTER PROFESIONAL (soporte + política de reembolsos)
            ============================================================ */
         .checkout-footer {
             width: 100vw;
@@ -603,67 +603,6 @@
             letter-spacing: 0.01em;
         }
 
-        /* ============================================================
-           NUEVO: MÉTODOS DE PAGO (tarjetas + Yape)
-           ============================================================ */
-        .payment-methods {
-            margin: 4px auto 16px;
-            padding: 18px 16px;
-            max-width: 620px;
-            border-top: 1px solid rgba(255, 255, 255, 0.06);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-        }
-        .payment-text {
-            font-size: 13px;
-            color: var(--text-gray);
-            margin-bottom: 14px;
-            font-weight: 600;
-            letter-spacing: 0.02em;
-        }
-        .payment-icons {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 14px;
-        }
-        .payment-icons i {
-            font-size: 1.9rem;
-            color: var(--text-gray);
-            transition: all 0.25s ease;
-            cursor: pointer;
-            line-height: 1;
-        }
-        .payment-icons i:hover {
-            color: var(--text-dark);
-            transform: translateY(-3px);
-            filter: drop-shadow(0 4px 10px rgba(0, 114, 255, 0.35));
-        }
-        .yape-badge {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, #7B2FBE, #5A1F8F);
-            color: #ffffff;
-            font-weight: 900;
-            font-size: 0.78rem;
-            padding: 0 14px;
-            border-radius: 8px;
-            letter-spacing: 0.06em;
-            box-shadow: 0 3px 10px rgba(123, 47, 190, 0.35);
-            transition: all 0.25s ease;
-            cursor: pointer;
-            height: 34px;
-            min-width: 62px;
-            text-transform: uppercase;
-            font-family: 'Inter', sans-serif;
-        }
-        .yape-badge:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(123, 47, 190, 0.55);
-            background: linear-gradient(135deg, #8A3DD1, #6B2AA5);
-        }
-
         .footer-policies {
             display: flex;
             flex-wrap: wrap;
@@ -727,24 +666,6 @@
             }
             .footer-support-block .support-email {
                 font-size: 13px;
-            }
-            .payment-methods {
-                padding: 14px 8px;
-            }
-            .payment-icons {
-                gap: 10px;
-            }
-            .payment-icons i {
-                font-size: 1.55rem;
-            }
-            .yape-badge {
-                height: 30px;
-                font-size: 0.7rem;
-                padding: 0 10px;
-                min-width: 54px;
-            }
-            .payment-text {
-                font-size: 12px;
             }
             .footer-policies {
                 gap: 6px 12px;
@@ -987,7 +908,7 @@
             </div>
 
             <!-- ============================================================
-                 NUEVO: FOOTER PROFESIONAL (soporte + métodos de pago + políticas)
+                 NUEVO: FOOTER PROFESIONAL (soporte + políticas)
                  ============================================================ -->
             <footer class="checkout-footer">
                 <a href="mailto:soporte@facilitotools.com" class="footer-support-block" aria-label="Contactar a soporte">
@@ -997,22 +918,6 @@
                         <span class="support-email">soporte@facilitotools.com</span>
                     </span>
                 </a>
-
-                <!-- MÉTODOS DE PAGO: tarjetas + Yape -->
-                <div class="payment-methods">
-                    <p class="payment-text">Aceptamos todas las tarjetas y Yape</p>
-                    <div class="payment-icons">
-                        <i class="fab fa-cc-visa" title="Visa"></i>
-                        <i class="fab fa-cc-mastercard" title="Mastercard"></i>
-                        <i class="fab fa-cc-amex" title="American Express"></i>
-                        <i class="fab fa-cc-discover" title="Discover"></i>
-                        <i class="fab fa-cc-diners-club" title="Diners Club"></i>
-                        <i class="fab fa-cc-jcb" title="JCB"></i>
-                        <i class="fab fa-cc-paypal" title="PayPal"></i>
-                        <i class="fab fa-cc-stripe" title="Stripe"></i>
-                        <span class="yape-badge" title="Yape">Yape</span>
-                    </div>
-                </div>
 
                 <div class="footer-policies">
                     <a href="politica-privacidad">
@@ -1779,7 +1684,7 @@
                 setupVoucherDownload();
 
                 const config = await fetchJSON('/api/config');
-                mp = new MercadoPago(config.mercadopublicKey, { locale: 'es-PE' });
+                mp = new MercadoPago(config.mercadopagoPublicKey, { locale: 'es-PE' });
                 bricksBuilder = mp.bricks();
 
                 updateSegmentedControl('card');
