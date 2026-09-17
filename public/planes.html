@@ -831,6 +831,28 @@
             color: var(--white);
         }
 
+        /* ═══ VIDEO "CÓMO EMPEZAR" (reemplaza la lista de pasos) ═══ */
+        .how-it-works-video-frame {
+            width: 100%;
+            max-width: 420px;
+            margin: 0 auto;
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            background: #0a1628;
+            border: 1px solid var(--border-subtle);
+            box-shadow: var(--shadow-card);
+        }
+        .how-it-works-video-frame video {
+            display: block;
+            width: 100%;
+            height: auto;
+            /* Bloquea toda interacción del cursor: clic, clic derecho, arrastre */
+            pointer-events: none;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+        }
+
         .pricing-section {
             background: var(--navy-card);
             border: 1px solid var(--border-subtle);
@@ -1402,12 +1424,23 @@
                         <div><div class="pricing-section-title">Activación inmediata</div><div class="pricing-section-sub">Sin demoras ni papeleos</div></div>
                     </div>
                     <div style="padding: 16px 14px;">
-                        <ul class="instruction-list">
-                            <li data-step="1">Elige el plan que mejor se adapte a tu negocio.</li>
-                            <li data-step="2">Regístrate en FacilitoTools.com y accede al panel con tu plan gratuito.</li>
-                            <li data-step="3">Si deseas más funciones, selecciona un plan de pago y completa el proceso de compra.</li>
-                            <li data-step="4">Empieza a <strong>generar comprobantes y validar identidades.</strong></li>
-                        </ul>
+                        <div class="how-it-works-video-frame">
+                            <video
+                                src="/7ec35160-b2cf-11f1-9c7f-99396b7ad2ba.mp4"
+                                autoplay
+                                muted
+                                loop
+                                playsinline
+                                webkit-playsinline="true"
+                                disablePictureInPicture
+                                disableRemotePlayback
+                                preload="auto"
+                                controlsList="nodownload nofullscreen noremoteplayback noplaybackrate"
+                                oncontextmenu="return false;"
+                                draggable="false"
+                                aria-label="Animación: cómo empezar a usar FacilitoTools en 4 pasos">
+                            </video>
+                        </div>
                         <p style="font-size: 0.78rem; color: var(--text-subtle); margin-top: 12px;">⏱️ Tiempo de activación: Inmediato una vez confirmado el pago.</p>
                     </div>
                 </div>
