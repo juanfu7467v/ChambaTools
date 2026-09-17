@@ -1161,7 +1161,7 @@ app.use((err, req, res, next) => {
 //    public/error-404.html con status 404, en vez del "Cannot GET" por
 //    defecto de Express.
 app.use((req, res) => {
-  if (req.path.startsWith('/api/') || req.path.startsWith('/v1/')) {
+  if (req.path.startsWith('/api/') || req.path === '/v1' || req.path.startsWith('/v1/')) {
     return res.status(404).json({ success: false, error: 'Recurso no encontrado.' });
   }
   return res.status(404).sendFile(path.join(__dirname, 'public', 'error-404.html'));
