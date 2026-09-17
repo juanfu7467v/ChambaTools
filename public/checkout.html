@@ -521,15 +521,15 @@
            NUEVO: FOOTER PROFESIONAL (soporte + política de reembolsos)
            ============================================================ */
         .checkout-footer {
-            width: 100%;
-            max-width: 1200px;
-            margin: 40px auto 0;
+            width: 100vw;
+            max-width: 100vw;
+            margin: 40px calc(50% - 50vw) 0;
             padding: 28px 24px 24px;
             border-top: 1px solid rgba(255, 255, 255, 0.08);
             background: linear-gradient(180deg, rgba(15, 23, 42, 0.35) 0%, rgba(10, 15, 30, 0.5) 100%);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
-            border-radius: 18px 18px 0 0;
+            border-radius: 0;
             text-align: center;
             position: relative;
             z-index: 1;
@@ -613,7 +613,7 @@
         }
 
         .footer-policies a {
-            color: var(--text-gray);
+            color: var(--success-green);
             text-decoration: none;
             font-size: 13px;
             font-weight: 500;
@@ -630,7 +630,7 @@
         }
 
         .footer-policies a:hover {
-            color: var(--text-dark);
+            color: #34d399;
         }
 
         .footer-policies .separator {
@@ -921,15 +921,15 @@
 
                 <div class="footer-policies">
                     <a href="politica.compras.html">
-                        <i class="fas fa-file-contract"></i> Política de compras y reembolsos
+                        Política de compras y reembolsos
                     </a>
                     <span class="separator">•</span>
                     <a href="terminos-condiciones">
-                        <i class="fas fa-file-shield"></i> Términos y condiciones
+                        Términos y condiciones
                     </a>
                     <span class="separator">•</span>
                     <a href="politica-privacidad">
-                        <i class="fas fa-user-shield"></i> Política de privacidad
+                        Política de privacidad
                     </a>
                 </div>
 
