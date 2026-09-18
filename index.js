@@ -149,6 +149,7 @@ const PLAN_NOMBRES = {
 
 // Plantillas exclusivas del plan gratuito (deben coincidir con plantillas.js)
 const PLANTILLAS_PLAN_GRATIS = ['moderna'];
+const PLANTILLAS_PLAN_PAGO = ['moderna', 'elegante', 'corporativa', 'premium', 'sakura', 'imperial', 'jade', 'dragon'];
 
 // Endpoint: expone la sesión activa del usuario al frontend.
 // Las cookies 'user_uid' y 'user_email' se crean como httpOnly (ver /api/login-success),
@@ -229,7 +230,7 @@ app.get('/api/user/plan', async (req, res) => {
       permiteLogo: tipoPlan !== 'gratis',
       plantillasPermitidas: tipoPlan === 'gratis'
         ? PLANTILLAS_PLAN_GRATIS
-        : ['moderna', 'elegante', 'corporativa', 'premium']
+        : PLANTILLAS_PLAN_PAGO
     });
   } catch (error) {
     logger.error(context, 'Error obteniendo el plan del usuario', error);
@@ -322,7 +323,7 @@ app.get('/api/user/profile', async (req, res) => {
       permiteLogo: tipoPlan !== 'gratis',
       plantillasPermitidas: tipoPlan === 'gratis'
         ? PLANTILLAS_PLAN_GRATIS
-        : ['moderna', 'elegante', 'corporativa', 'premium'],
+        : PLANTILLAS_PLAN_PAGO,
       // Metadatos de cuenta
       createdAt: toISO(data.createdAt),
       lastLoginAt: toISO(data.lastLoginAt),
