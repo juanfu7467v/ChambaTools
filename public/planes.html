@@ -834,44 +834,18 @@
         /* ═══ VIDEO "CÓMO EMPEZAR" (reemplaza la lista de pasos) ═══ */
         .how-it-works-video {
             display: block;
-            width: 100%;
+            width: 100vw;
+            max-width: 100vw;
             height: auto;
+            margin-left: calc(50% - 50vw);
+            margin-right: calc(50% - 50vw);
+            -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 10%, black 90%, transparent 100%);
+            mask-image: linear-gradient(to bottom, transparent 0%, black 10%, black 90%, transparent 100%);
             /* Bloquea toda interacción del cursor: clic, clic derecho, arrastre */
             pointer-events: none;
             user-select: none;
             -webkit-user-select: none;
             -webkit-touch-callout: none;
-        }
-
-        .pricing-section {
-            background: var(--navy-card);
-            border: 1px solid var(--border-subtle);
-            border-radius: var(--radius);
-            overflow: hidden;
-        }
-        .pricing-section-header {
-            display: flex; align-items: center; gap: 14px;
-            padding: 16px 18px;
-            background: rgba(0,200,83,0.05);
-            border-bottom: 1px solid var(--border-subtle);
-        }
-        .pricing-section-icon {
-            width: 44px; height: 44px;
-            border-radius: 12px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.2rem;
-            background: rgba(0,200,83,0.1);
-            color: var(--emerald);
-        }
-        .pricing-section-icon.gold {
-            background: rgba(255,215,0,0.1);
-            color: var(--gold);
-        }
-        .pricing-section-title {
-            font-weight: 700; color: var(--white);
-        }
-        .pricing-section-sub {
-            font-size: 0.82rem; color: var(--text-muted);
         }
 
         .slider-container {
@@ -1408,31 +1382,22 @@
                 <span class="section-label">Proceso simple</span>
                 <h2 class="section-title">Cómo <em>empezar</em></h2>
                 <p class="section-body">Activa tu plan, accede al panel y comienza a generar comprobantes y validar clientes en minutos.</p>
-                <div class="pricing-section">
-                    <div class="pricing-section-header">
-                        <div class="pricing-section-icon gold"><i class="fas fa-rocket"></i></div>
-                        <div><div class="pricing-section-title">Activación inmediata</div><div class="pricing-section-sub">Sin demoras ni papeleos</div></div>
-                    </div>
-                    <video
-                        class="how-it-works-video"
-                        src="/7ec35160-b2cf-11f1-9c7f-99396b7ad2ba.mp4"
-                        autoplay
-                        muted
-                        loop
-                        playsinline
-                        webkit-playsinline="true"
-                        disablePictureInPicture
-                        disableRemotePlayback
-                        preload="auto"
-                        controlsList="nodownload nofullscreen noremoteplayback noplaybackrate"
-                        oncontextmenu="return false;"
-                        draggable="false"
-                        aria-label="Animación: cómo empezar a usar FacilitoTools en 4 pasos">
-                    </video>
-                    <div style="padding: 16px 14px;">
-                        <p style="font-size: 0.78rem; color: var(--text-subtle); margin-top: 12px;">⏱️ Tiempo de activación: Inmediato una vez confirmado el pago.</p>
-                    </div>
-                </div>
+                <video
+                    class="how-it-works-video"
+                    src="/7ec35160-b2cf-11f1-9c7f-99396b7ad2ba.mp4"
+                    autoplay
+                    muted
+                    loop
+                    playsinline
+                    webkit-playsinline="true"
+                    disablePictureInPicture
+                    disableRemotePlayback
+                    preload="auto"
+                    controlsList="nodownload nofullscreen noremoteplayback noplaybackrate"
+                    oncontextmenu="return false;"
+                    draggable="false"
+                    aria-label="Animación: cómo empezar a usar FacilitoTools en 4 pasos">
+                </video>
             </div>
         </section>
 
