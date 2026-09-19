@@ -520,13 +520,24 @@ curl_close($ch);
 var_dump($resp);</pre>
             </div>
 
+            <!-- /v1/profile -->
+            <div class="endpoint">
+                <div class="endpoint-head">
+                    <span class="endpoint-method method-get">GET</span>
+                    <span class="endpoint-path">/v1/profile</span>
+                </div>
+                <p class="endpoint-desc">Devuelve el perfil del emisor guardado en FacilitoTools para la API Key. Puedes usarlo para cargar automáticamente razón social, RUC/DNI, dirección, teléfono, email, web y logo en tus comprobantes.</p>
+<pre class="code" data-lang="curl"><span class="c-route">curl</span> https://facilitotools.com/v1/profile \
+  -H <span class="c-string">"Authorization: Bearer ft_live_TU_API_KEY"</span></pre>
+            </div>
+
             <!-- /v1/templates -->
             <div class="endpoint">
                 <div class="endpoint-head">
                     <span class="endpoint-method method-get">GET</span>
                     <span class="endpoint-path">/v1/templates</span>
                 </div>
-                <p class="endpoint-desc">Lista las plantillas disponibles (Moderna Azul, Elegante Grafito, Corporativa Índigo, Premium Esmeralda).</p>
+                <p class="endpoint-desc">Lista dinámicamente todas las plantillas disponibles para tu cuenta, incluidos su <code>id</code>, nombre, descripción, colores y layout. Usa el <code>id</code> devuelto en <code>templateId</code>; actualmente incluye Moderna Azul, Elegante Grafito, Corporativa Índigo, Premium Esmeralda, Sakura, Imperial, Jade Zen y Dragón Dorado.</p>
 <pre class="code" data-lang="curl"><span class="c-route">curl</span> https://facilitotools.com/v1/templates \
   -H <span class="c-string">"Authorization: Bearer ft_live_TU_API_KEY"</span></pre>
                 <div data-lang-blocks></div>
@@ -543,11 +554,20 @@ var_dump($resp);</pre>
   -H <span class="c-string">"Authorization: Bearer ft_live_TU_API_KEY"</span> \
   -H <span class="c-string">"Content-Type: application/json"</span> \
   -d <span class="c-string">'{
+    "useProfile": true,
     "documentType": "boleta",
-    "templateId": "moderna",
-    "issuer": { "businessName": "Mi Tienda", "documentNumber": "20123456789" },
-    "customer": { "name": "Juan Pérez", "documentType": "DNI", "documentNumber": "12345678" },
-    "items": [{ "description": "Servicio", "quantity": 1, "unitPrice": 100, "unitLabel": "UND" }]
+    "templateId": "elegante",
+    "series": "B001",
+    "correlative": "00000123",
+    "issueDate": "2026-09-19T15:30:00.000Z",
+    "paymentMethod": "Yape",
+    "taxRate": 0.18,
+    "pricesIncludeTax": true,
+    "currency": "PEN",
+    "notes": "Entrega inmediata. Gracias por tu compra.",
+    "issuer": { "businessName": "Mi Tienda", "documentNumber": "20123456789", "address": "Av. Principal 123", "phone": "987654321", "email": "ventas@mitienda.com", "website": "instagram.com/mitienda" },
+    "customer": { "name": "Juan Pérez", "documentType": "DNI", "documentNumber": "12345678", "email": "juan@example.com", "phone": "999888777", "address": "Jr. Cliente 456" },
+    "items": [{ "description": "Servicio", "quantity": 1, "unitPrice": 100, "unitLabel": "UND", "sku": "SRV-001" }]
   }'</span></pre>
                 <div data-lang-blocks></div>
             </div>
@@ -636,7 +656,8 @@ curl_close($ch);</pre>
                 <h3 style="margin-bottom:10px;font-family:var(--font-display);">Esquema del payload (común a los 3 endpoints de comprobantes)</h3>
 <pre class="code">{ <span class="c-comment">// Campos requeridos marcados con *</span>
   <span class="c-string">"documentType"</span>: <span class="c-string">"boleta"</span> | <span class="c-string">"factura"</span>,            <span class="c-comment">// *</span>
-  <span class="c-string">"templateId"</span>:  <span class="c-string">"moderna"</span> | <span class="c-string">"elegante"</span> | <span class="c-string">"corporativa"</span> | <span class="c-string">"premium"</span>,
+  <span class="c-string">"useProfile"</span>:      <span class="c-key">true</span>,                                  <span class="c-comment">// usa el perfil guardado; default true</span>
+  <span class="c-string">"templateId"</span>:  <span class="c-string">"moderna"</span> | <span class="c-string">"elegante"</span> | <span class="c-string">"corporativa"</span> | <span class="c-string">"premium"</span> | <span class="c-string">"sakura"</span> | <span class="c-string">"imperial"</span> | <span class="c-string">"jade"</span> | <span class="c-string">"dragon"</span>,
   <span class="c-string">"issuer"</span>: {
     <span class="c-string">"businessName"</span>:   <span class="c-string">"Razón social"</span>,                <span class="c-comment">// *</span>
     <span class="c-string">"documentNumber"</span>: <span class="c-string">"RUC o DNI"</span>,
@@ -661,7 +682,7 @@ curl_close($ch);</pre>
   <span class="c-string">"currency"</span>:        <span class="c-string">"PEN"</span>,
   <span class="c-string">"paymentMethod"</span>:   <span class="c-string">"Pago único"</span>,
   <span class="c-string">"notes"</span>:           <span class="c-string">"Observaciones opcionales"</span>,
-  <span class="c-string">"series"</span>, <span class="c-string">"correlative"</span>                                      <span class="c-comment">// opcionales, default B001 / F001</span>
+  <span class="c-string">"series"</span>: <span class="c-string">"B001"</span>, <span class="c-string">"correlative"</span>: <span class="c-string">"00000123"</span>          <span class="c-comment">// opcionales; si faltan se generan automáticamente</span>
 }</pre>
                 <p class="endpoint-desc" style="margin-top:10px;">
                     Los códigos de error más comunes:

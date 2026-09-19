@@ -12,7 +12,8 @@
 //   2) Endpoints PÚBLICOS para que los desarrolladores consuman desde
 //      sus propios sistemas usando el header `Authorization: Bearer <KEY>`:
 //        GET    /v1/me                   → info de la cuenta del dev (plan, cupo)
-//        GET    /v1/templates            → plantillas disponibles
+//        GET    /v1/profile              → perfil del emisor guardado
+//        GET    /v1/templates            → todas las plantillas disponibles
 //        POST   /v1/comprobantes/preview → vista previa (HTML, sin consumir cupo)
 //        POST   /v1/comprobantes/pdf     → PDF (consume 1 cupo del plan)
 //        POST   /v1/comprobantes/build   → datos normalizados (JSON) sin PDF
@@ -437,9 +438,63 @@ const PUBLIC_TEMPLATES = Object.values(PUBLIC_TEMPLATE_REGISTRY).map((t) => ({
   id: t.id,
   name: t.name,
   description: t.description,
-  accent: t.theme?.accent
+  accent: t.theme?.accent,
+  accentSoft: t.theme?.accentSoft,
+  layout: t.layout
 }));
 
+function profileIssuerFromUserData(data = {}) {
+  return {
+    businessName: data.businessName || '',
+    documentNumber: data.documentNumber || '',
+    address: data.address || '',
+    phone: data.phone || '',
+    email: data.email || '',
+    website: data.website || '',
+    logoDataUrl: data.logoDataUrl || ''
+  };
+}
+
+async function getDeveloperProfile(uid) {
+  if (!db) throw new Error('Servicio no disponible en este momento.');
+  const issuerDoc = await db.collection('emisores').doc(uid).get();
+  if (!issuerDoc.exists) return profileIssuerFromUserData({});
+  const issuer = profileIssuerFromUserData(issuerDoc.data() || {});
+  try {
+    const logoDoc = await db.collection('emisores_logos').doc(uid).get();
+    if (logoDoc.exists) issuer.logoDataUrl = logoDoc.data()?.logoDataUrl || '';
+  } catch (_) {
+    // El logo es opcional; el resto del perfil sigue disponible.
+  }
+  return issuer;
+}
+
+async function normalizeDeveloperPayload(auth, payload = {}) {
+  const input = { ...payload };
+  const requestedIssuer = input.issuer && typeof input.issuer === 'object' ? input.issuer : {};
+  if (input.useProfile !== false) {
+    const savedIssuer = await getDeveloperProfile(auth.uid);
+    input.issuer = { ...savedIssuer, ...requestedIssuer };
+  } else if (Object.keys(requestedIssuer).length) {
+    input.issuer = requestedIssuer;
+  }
+  delete input.useProfile;
+  return publicNormalizePayload(input);
+}
+
+// GET /v1/profile → perfil del emisor guardado para la API Key
+publicDeveloperRouter.get('/profile', async (req, res) => {
+  try {
+    const auth = await authenticateByApiKey(req, res);
+    if (!auth) return;
+    const issuer = await getDeveloperProfile(auth.uid);
+    res.json({ ok: true, issuer });
+  } catch (error) {
+    logger.error('DEVAPI_PROFILE', error);
+    const status = error.message === 'Usuario no encontrado.' ? 404 : 500;
+    res.status(status).json({ ok: false, error: error.message || 'Error interno del servidor.' });
+  }
+});
 // GET /v1/templates
 publicDeveloperRouter.get('/templates', async (req, res) => {
   try {
@@ -461,9 +516,9 @@ publicDeveloperRouter.post('/comprobantes/build', async (req, res) => {
     if (!auth) return;
     let normalized;
     try {
-      // El emisor opcionalmente puede venir vacío: si viene, se usa;
-      // si no, el integrador debería pasar su propio issuer completo.
-      normalized = publicNormalizePayload(req.body || {});
+      // Por defecto se completa el emisor desde el perfil guardado; usa
+      // useProfile:false para trabajar exclusivamente con tu propio issuer.
+      normalized = await normalizeDeveloperPayload(auth, req.body || {});
     } catch (e) {
       return res.status(400).json({ ok: false, error: e.message });
     }
@@ -518,7 +573,7 @@ publicDeveloperRouter.post('/comprobantes/preview', async (req, res) => {
     if (!auth) return;
     let normalized;
     try {
-      normalized = publicNormalizePayload(req.body || {});
+      normalized = await normalizeDeveloperPayload(auth, req.body || {});
     } catch (e) {
       return res.status(400).json({ ok: false, error: e.message });
     }
@@ -573,7 +628,7 @@ publicDeveloperRouter.post('/comprobantes/pdf', async (req, res) => {
 
     let normalized;
     try {
-      normalized = publicNormalizePayload(req.body || {});
+      normalized = await normalizeDeveloperPayload(auth, req.body || {});
     } catch (e) {
       return res.status(400).json({ ok: false, error: e.message });
     }
