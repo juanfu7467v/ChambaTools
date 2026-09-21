@@ -23,13 +23,12 @@ primary_region = 'iad'
   auto_start_machines = true
   min_machines_running = 0
   processes = ['app']
-  
-  # Opciones para extender la retención e inactividad
-  kill_signal = 'SIGTERM'
-  kill_timeout = '1200s' # 20 minutos (1200 segundos) de margen antes del apague total
+
+  # Margen de gracia corto para permitir un apagado limpio e inmediato (5 segundos)
+  kill_signal = 'SIGINT'
+  kill_timeout = '5s'
 
 [[vm]]
-  memory = '512mb'
   cpu_kind = 'shared'
   cpus = 1
-  memory_mb = 512
+  memory = '512mb'
