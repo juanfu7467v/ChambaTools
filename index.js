@@ -134,6 +134,25 @@ app.use('/api/validar', validarClientesRouter);
 app.use('/api/developer', developerApiRouter);
 app.use('/v1', publicDeveloperRouter);
 
+// ================================================================
+// 🔐 AUTENTICACIÓN DE PETICIONES EMITIDAS POR EL CLIENTE
+// ================================================================
+// Nunca confiar en uid/email/isNewUser enviados en el body. El cliente debe
+// enviar un ID token de Firebase y la identidad se deriva de sus claims.
+async function verifyFirebaseIdToken(idToken) {
+  if (typeof idToken !== 'string' || idToken.trim().length === 0) {
+    const error = new Error('Missing Firebase ID token');
+    error.code = 'auth/missing-id-token';
+    throw error;
+  }
+
+  return admin.auth().verifyIdToken(idToken.trim());
+}
+
+function isFirebaseAuthError(error) {
+  return typeof error?.code === 'string' && error.code.startsWith('auth/');
+}
+
 // Nombres comerciales de cada plan, usados solo para mostrarlos en la UI
 const PLAN_NOMBRES = {
   gratis: 'Gratuito',
@@ -440,8 +459,21 @@ app.put('/api/emisor', async (req, res) => {
 app.post("/api/login-success", async (req, res) => {
   const context = 'LOGIN_SUCCESS_API';
   try {
-    const { email, uid, displayName, isNewUser, idToken, deviceModel } = req.body;
-    if (!email) return res.status(400).json({ success: false, error: 'Email is required' });
+    const { idToken, deviceModel } = req.body || {};
+    let decodedToken;
+    try {
+      decodedToken = await verifyFirebaseIdToken(idToken);
+    } catch (tokenError) {
+      logger.warn(context, 'ID token de Firebase inválido o ausente', { code: tokenError.code });
+      return res.status(401).json({ success: false, error: 'Sesión de Firebase inválida o expirada.' });
+    }
+
+    const uid = decodedToken.uid;
+    const email = decodedToken.email;
+    const displayName = typeof decodedToken.name === 'string' ? decodedToken.name : null;
+    if (!uid || !email || decodedToken.email_verified !== true) {
+      return res.status(403).json({ success: false, error: 'La cuenta de Firebase no está verificada.' });
+    }
 
     try {
       if (db && uid) {
@@ -492,6 +524,9 @@ app.post("/api/login-success", async (req, res) => {
         const userRef = db.collection("usuarios").doc(uid);
         const userDoc = await userRef.get();
         const userData = userDoc.exists ? userDoc.data() : null;
+        // El estado de usuario nuevo se determina en el servidor. Nunca se
+        // acepta el booleano isNewUser enviado por el navegador.
+        const isNewUser = !userDoc.exists;
 
         // Datos base del plan gratis (según PLANES_CONFIG)
         const gratisConfig = PLANES_CONFIG.gratis;
@@ -567,6 +602,9 @@ app.post("/api/login-success", async (req, res) => {
     res.json({ success: true, message: 'Login success', timestamp: new Date().toISOString() });
   } catch (error) {
     logger.error(context, 'Error procesando login exitoso', error);
+    if (isFirebaseAuthError(error)) {
+      return res.status(401).json({ success: false, error: 'Sesión de Firebase inválida o expirada.' });
+    }
     res.status(500).json({ success: false, error: 'Internal server error' });
   }
 });
@@ -575,8 +613,21 @@ app.post("/api/login-success", async (req, res) => {
 app.post("/api/notify-verification", async (req, res) => {
   const context = 'NOTIFY_VERIFICATION';
   try {
-    const { uid, email, displayName } = req.body;
-    if (!uid || !email) return res.status(400).json({ success: false, error: 'Se requiere uid y email' });
+    const { idToken } = req.body || {};
+    let decodedToken;
+    try {
+      decodedToken = await verifyFirebaseIdToken(idToken);
+    } catch (tokenError) {
+      logger.warn(context, 'ID token de Firebase inválido o ausente', { code: tokenError.code });
+      return res.status(401).json({ success: false, error: 'Sesión de Firebase inválida o expirada.' });
+    }
+
+    const uid = decodedToken.uid;
+    const email = decodedToken.email;
+    const displayName = typeof decodedToken.name === 'string' ? decodedToken.name : null;
+    if (!uid || !email) {
+      return res.status(400).json({ success: false, error: 'La cuenta de Firebase no contiene un correo válido.' });
+    }
 
     let waitAttempts = 0;
     while (!db && waitAttempts < 10) {

@@ -842,11 +842,8 @@
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    email: user.email,
-                    uid: user.uid,
-                    displayName: user.displayName,
-                    idToken: idToken,
-                    deviceModel: deviceModel
+                    idToken,
+                    deviceModel
                 }),
                 keepalive: true
             });
@@ -1194,6 +1191,8 @@
                 return;
             }
 
+            const idToken = await user.getIdToken();
+
             // ✅ keepalive: true asegura que la petición NO se cancele al redirigir
             const fetchOptions = {
                 method: 'POST',
@@ -1201,11 +1200,7 @@
                     'Content-Type': 'application/json',
                     'Accept': 'application/json'
                 },
-                body: JSON.stringify({
-                    uid: user.uid,
-                    email: user.email,
-                    displayName: user.displayName || null
-                }),
+                body: JSON.stringify({ idToken }),
                 keepalive: signal ? false : true  // ✅ CLAVE: Mantiene la petición viva después de redirect
             };
             if (signal) fetchOptions.signal = signal;
@@ -1267,12 +1262,8 @@
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
-                            email: result.user.email,
-                            uid: result.user.uid,
-                            displayName: result.user.displayName,
-                            isNewUser: isNewUser,
-                            idToken: idToken,
-                            deviceModel: deviceModel
+                            idToken,
+                            deviceModel
                         }),
                         signal: controller.signal
                     });
@@ -1351,12 +1342,8 @@
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
-                            email: result.user.email,
-                            uid: result.user.uid,
-                            displayName: result.user.displayName,
-                            isNewUser: isNewUser,
-                            idToken: idToken,
-                            deviceModel: deviceModel
+                            idToken,
+                            deviceModel
                         }),
                         signal: controller.signal
                     });
