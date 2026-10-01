@@ -810,6 +810,161 @@
                 padding: 0 6px;
             }
         }
+
+        /* ============================================================
+           MEJORAS: carrusel compacto + diseño adaptable (PC/Laptop/Tablet/Móvil)
+           Solo se añaden reglas; los estilos anteriores permanecen intactos.
+           ============================================================ */
+        @supports (min-height: 100dvh) {
+            body { min-height: 100dvh; }
+            .iphone-container { min-height: 100dvh; }
+        }
+
+        /* --- Carrusel: altura reducida, sin deformar las imágenes --- */
+        .payment-carousel-section {
+            --carousel-h: clamp(140px, 30vw, 210px);
+        }
+
+        .horizontal-scroll {
+            padding: 4px 0 10px 0;
+        }
+
+        .carousel-item {
+            height: var(--carousel-h);
+            display: grid;
+            grid-template-columns: minmax(0, 1fr);
+            align-items: center;
+            justify-items: center;
+        }
+
+        .carousel-item img {
+            width: auto;
+            height: auto;
+            max-width: 100%;
+            max-height: var(--carousel-h);
+            object-fit: contain;
+            -webkit-user-drag: none;
+        }
+
+        .scroll-hint {
+            margin-top: 4px;
+        }
+
+        /* --- Tarjeta (Mercado Pago Brick): ocupar todo el ancho disponible --- */
+        #cardPaymentBrick_container,
+        #cardPaymentBrick_container > div,
+        #cardPaymentBrick_container form {
+            width: 100%;
+            max-width: 100%;
+        }
+
+        #cardPaymentBrick_container iframe {
+            max-width: 100%;
+        }
+
+        #cardPaymentBrick_container button[type="submit"],
+        #cardPaymentBrick_container form button[type="submit"] {
+            width: 100% !important;
+            max-width: 100% !important;
+            display: block;
+            box-sizing: border-box;
+        }
+
+        /* --- Formularios y botones --- */
+        .yape-field input {
+            font-size: 16px;
+        }
+
+        .security-badge {
+            text-align: center;
+        }
+
+        .footer-support-block {
+            max-width: 100%;
+        }
+
+        .footer-support-block .support-email {
+            overflow-wrap: anywhere;
+        }
+
+        .total-price {
+            font-size: clamp(28px, 7vw, 38px);
+        }
+
+        /* --- Pantallas de resultado: scroll si no caben y ancho controlado --- */
+        .result-screen {
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .result-screen > * {
+            flex-shrink: 0;
+        }
+
+        .result-screen > :not(.result-icon) {
+            width: 100%;
+            max-width: 480px;
+        }
+
+        /* --- Teléfonos pequeños --- */
+        @media (max-width: 380px) {
+            .header { padding: 16px; }
+            .content { padding: 0 12px; }
+            .payment-method-panel { padding: 14px; border-radius: 18px; }
+            .method-panel-title { font-size: 15px; }
+            .method-panel-subtitle { font-size: 12px; }
+            .result-screen { padding: 28px 16px; }
+        }
+
+        /* --- Tablet y superiores: columna centrada y proporcionada --- */
+        @media (min-width: 600px) {
+            .header,
+            .content {
+                max-width: 640px;
+            }
+
+            .header { padding: 24px; }
+            .content { padding: 0 24px; }
+
+            .payment-method-panel { padding: 24px; }
+
+            .yape-form {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 14px 16px;
+            }
+
+            .yape-submit-btn {
+                grid-column: 1 / -1;
+            }
+
+            .method-pill {
+                font-size: 14px;
+                min-height: 54px;
+            }
+        }
+
+        /* --- Laptop y PC --- */
+        @media (min-width: 1024px) {
+            .header,
+            .content {
+                max-width: 680px;
+            }
+
+            .payment-method-panel { padding: 28px; }
+
+            .yape-submit-btn:hover:not([disabled]) {
+                transform: translateY(-1px);
+                box-shadow: var(--shadow-active);
+            }
+        }
+
+        @media (min-width: 1600px) {
+            .header,
+            .content {
+                max-width: 720px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1674,6 +1829,50 @@
                 setPositionByIndex(currentIndex, false);
                 updateHint();
             });
+
+            /* ----- Avance automático (una imagen tras otra) ----- */
+            const AUTOPLAY_DELAY = 3500;
+            let autoplayTimer = null;
+            let userInteracting = false;
+
+            function stopAutoplay() {
+                if (autoplayTimer) {
+                    clearInterval(autoplayTimer);
+                    autoplayTimer = null;
+                }
+            }
+
+            function startAutoplay() {
+                stopAutoplay();
+                if (items.length < 2) return;
+                autoplayTimer = setInterval(() => {
+                    if (isDragging || document.hidden) return;
+                    setPositionByIndex((currentIndex + 1) % items.length, true);
+                    updateHint();
+                }, AUTOPLAY_DELAY);
+            }
+
+            function pauseForUser() {
+                userInteracting = true;
+                stopAutoplay();
+            }
+
+            function resumeAfterUser() {
+                if (!userInteracting) return;
+                userInteracting = false;
+                startAutoplay();
+            }
+
+            scrollContainer.addEventListener('mousedown', pauseForUser);
+            scrollContainer.addEventListener('touchstart', pauseForUser, { passive: true });
+            window.addEventListener('mouseup', resumeAfterUser);
+            scrollContainer.addEventListener('touchend', resumeAfterUser);
+            scrollContainer.addEventListener('touchcancel', () => {
+                dragEnd();
+                resumeAfterUser();
+            });
+
+            Promise.all(imageLoadPromises).then(startAutoplay);
         }
 
         async function initMercadoPago() {
@@ -1702,6 +1901,29 @@
         }
 
         window.addEventListener('DOMContentLoaded', initMercadoPago);
+
+        // Botón "Pagar" del formulario de tarjeta: siempre a todo el ancho de su contenedor.
+        window.addEventListener('DOMContentLoaded', () => {
+            const brickContainer = document.getElementById('cardPaymentBrick_container');
+            if (!brickContainer) return;
+
+            const stretchSubmitButton = () => {
+                brickContainer.querySelectorAll('button').forEach((btn) => {
+                    const isSubmit = btn.type === 'submit' || /pagar/i.test(btn.textContent || '');
+                    if (!isSubmit) return;
+                    btn.style.setProperty('width', '100%', 'important');
+                    btn.style.setProperty('max-width', '100%', 'important');
+                    btn.style.setProperty('box-sizing', 'border-box', 'important');
+                    const wrapper = btn.parentElement;
+                    if (wrapper && wrapper !== brickContainer) {
+                        wrapper.style.setProperty('width', '100%', 'important');
+                    }
+                });
+            };
+
+            new MutationObserver(stretchSubmitButton).observe(brickContainer, { childList: true, subtree: true });
+            stretchSubmitButton();
+        });
 
         // Año del footer: se actualiza solo cada año, sin tocar el código.
         window.addEventListener('DOMContentLoaded', () => {
