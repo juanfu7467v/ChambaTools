@@ -228,6 +228,82 @@ app.post('/api/logout', (req, res) => {
   res.status(200).json({ success: true });
 });
 
+// Baja definitiva de cuenta.
+// Requiere tanto la sesión httpOnly firmada como un ID token Firebase reciente:
+// borrar una cuenta es una operación sensible y Firebase exige reautenticación
+// cuando el login no es reciente.
+const ACCOUNT_DELETE_RECENT_AUTH_SECONDS = 5 * 60;
+const ACCOUNT_DELETE_COLLECTIONS = [
+  'usuarios', 'empresas', 'emisores', 'emisores_logos', 'api_keys'
+];
+
+async function deleteUserDocuments(uid) {
+  if (!db) throw new Error('Base de datos no disponible.');
+  const references = [];
+  for (const collectionName of ACCOUNT_DELETE_COLLECTIONS) {
+    references.push(db.collection(collectionName).doc(uid));
+  }
+  // También limpia registros indexados por uid sin asumir que todos existen.
+  for (const collectionName of ['pagos_registrados']) {
+    const snapshot = await db.collection(collectionName).where('uid', '==', uid).get();
+    snapshot.docs.forEach(doc => references.push(doc.ref));
+  }
+  for (let i = 0; i < references.length; i += 400) {
+    const batch = db.batch();
+    references.slice(i, i + 400).forEach(ref => batch.delete(ref));
+    await batch.commit();
+  }
+}
+
+app.post('/api/user/deactivate', authRateLimit, async (req, res) => {
+  const context = 'USER_DEACTIVATE_API';
+  try {
+    const sessionUid = getAuthenticatedUid(req);
+    if (!sessionUid) return res.status(401).json({ success: false, error: 'No autenticado.' });
+
+    const { idToken } = req.body || {};
+    let decodedToken;
+    try {
+      decodedToken = await verifyFirebaseIdToken(idToken);
+    } catch (error) {
+      return res.status(401).json({
+        success: false,
+        code: 'auth/requires-recent-login',
+        error: 'Vuelve a autenticarte para confirmar la eliminación de tu cuenta.'
+      });
+    }
+    if (decodedToken.uid !== sessionUid) {
+      return res.status(403).json({ success: false, error: 'La sesión no coincide con la cuenta.' });
+    }
+    const authTime = Number(decodedToken.auth_time || 0);
+    if (!authTime || (Date.now() / 1000) - authTime > ACCOUNT_DELETE_RECENT_AUTH_SECONDS) {
+      return res.status(401).json({
+        success: false,
+        code: 'auth/requires-recent-login',
+        error: 'Vuelve a autenticarte para confirmar la eliminación de tu cuenta.'
+      });
+    }
+    if (!db) return res.status(503).json({ success: false, error: 'Servicio no disponible.' });
+
+    // Primero elimina los datos del producto; si Firebase Auth falla, el
+    // usuario puede reintentar sin que el backend haya perdido la identidad.
+    await deleteUserDocuments(sessionUid);
+    await admin.auth().deleteUser(sessionUid);
+    logger.info(context, 'Cuenta y datos eliminados correctamente', { uid: sessionUid });
+    res.json({ success: true });
+  } catch (error) {
+    logger.error(context, 'Error eliminando cuenta', error, { uid: getAuthenticatedUid(req) });
+    if (error?.code === 'auth/requires-recent-login') {
+      return res.status(401).json({
+        success: false,
+        code: 'auth/requires-recent-login',
+        error: 'Vuelve a autenticarte para confirmar la eliminación de tu cuenta.'
+      });
+    }
+    res.status(500).json({ success: false, error: 'No se pudo eliminar la cuenta. Intenta nuevamente.' });
+  }
+});
+
 // Endpoint: información del plan activo del usuario (usado por generar-boletas.html)
 app.get('/api/user/plan', async (req, res) => {
   const context = 'USER_PLAN_API';

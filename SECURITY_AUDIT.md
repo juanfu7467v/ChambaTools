@@ -1,8 +1,18 @@
 
-## Incidente posterior: bucle login → actividad → login
+## Baja de cuenta desde actividad.html
 
-Los logs de Fly.io mostraron repetidamente `LOGIN_SUCCESS_API: ID token de Firebase inválido o ausente` y, durante el arranque, `Cannot read properties of undefined (reading 'cert')`. La causa era la actualización a `firebase-admin@14.5.0`: la aplicación seguía usando la API namespaced antigua (`admin.credential`, `admin.auth`, `admin.firestore`), mientras que esa versión expone las APIs como módulos (`firebase-admin/app`, `/auth`, `/firestore`). Firebase Admin no se inicializaba, por lo que `/api/login-success` no podía verificar el ID token ni emitir las cookies de sesión.
+Se corrigió el botón **Darme de baja**, que apuntaba a `/api/user/deactivate` aunque esa ruta no existía. Ahora el backend:
 
-Se añadió `firebaseCompat.js`, una fachada compatible basada en las APIs modulares actuales, y se migraron todos los módulos del servidor a ella. Además, `login.html` ahora espera y valida la respuesta de `/api/login-success`, incluye `credentials: 'same-origin'`, evita solicitudes duplicadas y no redirige a `actividad.html` si el backend no confirmó la sesión.
+- Exige la sesión firmada y un ID token Firebase del mismo usuario.
+- Comprueba que `auth_time` sea inferior a cinco minutos.
+- Devuelve `auth/requires-recent-login` cuando se necesita reautenticación.
+- Elimina los documentos de usuario, empresa, emisor, logos, API Keys y pagos asociados.
+- Elimina finalmente la cuenta de Firebase Authentication.
 
-La prueba de runtime confirmó que el servidor inicia, `/api` responde `200` y un `/api/login-success` sin token responde `401` controladamente, sin errores de compatibilidad Firebase.
+El frontend reautentica automáticamente según el proveedor:
+
+- Correo/contraseña: solicita la contraseña actual.
+- Google: abre reautenticación Google.
+- GitHub: abre reautenticación GitHub.
+
+Después de una reautenticación exitosa, reintenta la baja una sola vez y cierra correctamente la sesión. Los errores ya no muestran una instrucción genérica de contactar soporte cuando pueden resolverse desde la interfaz.

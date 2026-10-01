@@ -1132,7 +1132,45 @@
         }
     });
 
-    // Darme de baja: elimina la cuenta de forma permanente (requiere endpoint /api/user/deactivate)
+    // Darme de baja: requiere una autenticación Firebase reciente.
+    async function reauthenticateBeforeDeletion(user) {
+        const providers = (user.providerData || []).map(provider => provider.providerId);
+        if (providers.includes('password')) {
+            const password = window.prompt('Por seguridad, confirma tu contraseña para eliminar la cuenta:');
+            if (!password) {
+                const error = new Error('Reautenticación cancelada.');
+                error.code = 'auth/requires-recent-login';
+                throw error;
+            }
+            const credential = firebase.auth.EmailAuthProvider.credential(user.email, password);
+            await user.reauthenticateWithCredential(credential);
+            return;
+        }
+        if (providers.includes('google.com')) {
+            await user.reauthenticateWithPopup(new firebase.auth.GoogleAuthProvider());
+            return;
+        }
+        if (providers.includes('github.com')) {
+            await user.reauthenticateWithPopup(new firebase.auth.GithubAuthProvider());
+            return;
+        }
+        const error = new Error('Tu proveedor de inicio de sesión requiere una nueva autenticación.');
+        error.code = 'auth/requires-recent-login';
+        throw error;
+    }
+
+    async function requestAccountDeletion(user) {
+        const idToken = await user.getIdToken(true);
+        const response = await fetch('/api/user/deactivate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'same-origin',
+            body: JSON.stringify({ idToken })
+        });
+        const data = await response.json().catch(() => ({}));
+        return { response, data };
+    }
+
     if (btnDeleteAccountEl) {
         btnDeleteAccountEl.addEventListener('click', async () => {
             const confirmado = confirm('¿Estás seguro de que deseas darte de baja?\n\nEsta acción eliminará tu cuenta y todos tus datos de forma permanente y no se puede deshacer.');
@@ -1140,25 +1178,35 @@
 
             btnDeleteAccountEl.disabled = true;
             try {
-                const res = await fetch('/api/user/deactivate', {
-                    method: 'POST',
-                    credentials: 'same-origin'
-                });
-                const data = await res.json().catch(() => ({}));
-                if (!res.ok || !data.success) {
-                    throw new Error(data.error || 'No se pudo procesar la solicitud.');
-                }
                 if (!auth) await initFirebase();
+                const user = auth?.currentUser;
+                if (!user) throw new Error('La sesión de Firebase ya no está activa.');
+
+                let result = await requestAccountDeletion(user);
+                if (result.data.code === 'auth/requires-recent-login') {
+                    await reauthenticateBeforeDeletion(user);
+                    result = await requestAccountDeletion(user);
+                }
+                if (!result.response.ok || !result.data.success) {
+                    throw new Error(result.data.error || 'No se pudo procesar la solicitud.');
+                }
+
                 await Promise.all([
-                    auth ? auth.signOut().catch(() => {}) : Promise.resolve(),
+                    auth.signOut().catch(() => {}),
                     fetch('/api/logout', { method: 'POST', credentials: 'same-origin' }).catch(() => {})
                 ]);
                 localStorage.removeItem('user_uid');
-                window.location.replace('login.html');
+                window.location.replace('login.html?accountDeleted=1');
             } catch (err) {
                 console.error('Deactivate account error:', err);
                 closeAccountModal();
-                showAlert('No pudimos procesar tu baja automáticamente. Escríbenos a soporte@facilitotools.com y con gusto te ayudamos.', 'error');
+                if (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request') {
+                    showAlert('La reautenticación fue cancelada. La cuenta no se eliminó.', 'warn');
+                } else if (err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
+                    showAlert('La contraseña no es correcta. La cuenta no se eliminó.', 'error');
+                } else {
+                    showAlert(err.message || 'No se pudo eliminar la cuenta. Intenta nuevamente.', 'error');
+                }
             } finally {
                 btnDeleteAccountEl.disabled = false;
             }
