@@ -827,29 +827,31 @@
         return urlParams.get(name);
     }
 
-    // ✅ Función de redirección usando returnTo y sessionStorage
+    // ✅ Función de redirección usando returnTo y sessionStorage.
+    // La navegación solo ocurre después de que el backend confirme la cookie
+    // httpOnly firmada; de lo contrario actividad.html devolvería al login.
+    let sessionBootstrapPromise = null;
     async function redirectAfterAuth(user) {
         if (user && !user.emailVerified) {
             window.location.href = "verificacion.html";
             return;
         }
+        if (!user) return;
 
-        // Notificar login exitoso al backend con el modelo de dispositivo
-        try {
+        if (sessionBootstrapPromise) return sessionBootstrapPromise;
+        sessionBootstrapPromise = (async () => {
             const deviceModel = await getDeviceModel();
-            const idToken = await user.getIdToken();
-            await fetch('/api/login-success', {
+            const idToken = await user.getIdToken(true);
+            const response = await fetch('/api/login-success', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    idToken,
-                    deviceModel
-                }),
-                keepalive: true
+                credentials: 'same-origin',
+                body: JSON.stringify({ idToken, deviceModel })
             });
-        } catch (e) {
-            console.error('Error notificando login exitoso:', e);
-        }
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok || !data.success) {
+                throw new Error(data.error || 'El servidor no pudo crear la sesión.');
+            }
 
         let returnTo = getUrlParameter('returnTo');
         if (!returnTo || returnTo === 'null' || returnTo === 'undefined') {
@@ -874,7 +876,15 @@
             }
         }
         
-        window.location.href = "actividad";
+            window.location.href = "actividad";
+        })().catch(async (error) => {
+            console.error('Error creando la sesión del servidor:', error);
+            sessionBootstrapPromise = null;
+            try { await signOut(auth); } catch (_) {}
+            hideLoadingOverlay();
+            showMessageModal('No se pudo establecer la sesión. Intenta nuevamente en unos segundos.', 'error');
+        });
+        return sessionBootstrapPromise;
     }
 
     // Función para convertir errores técnicos a mensajes amigables

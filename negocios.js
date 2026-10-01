@@ -1,4 +1,4 @@
-import admin from "firebase-admin";
+import admin from "./firebaseCompat.js";
 import { MercadoPagoConfig, Payment } from "mercadopago";
 import path from "path";
 import { fileURLToPath } from "url";

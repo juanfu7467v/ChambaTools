@@ -1,7 +1,7 @@
 import express from 'express';
 import PDFDocument from 'pdfkit';
 import QRCode from 'qrcode';
-import admin from 'firebase-admin';
+import admin from './firebaseCompat.js';
 import { getAuthenticatedUid } from './seguridad.js';
 
 const router = express.Router();

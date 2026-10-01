@@ -95,7 +95,7 @@
 // ================================================================
 
 import express from 'express';
-import admin from 'firebase-admin';
+import admin from './firebaseCompat.js';
 import { logger, getClientIp, getAuthenticatedUid } from './seguridad.js';
 
 const router = express.Router();
