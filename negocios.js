@@ -187,7 +187,7 @@ export function buildInvoiceProxyUrl(paymentId) {
 // ================================================================
 
 export async function initFirebase(serviceAccount) {
-  if (serviceAccount && !admin.apps.length) {
+  if (serviceAccount && !admin.getApps().length) {
     try {
       logger.info('FIREBASE', 'Inicializando Firebase Admin...');
 
@@ -218,7 +218,7 @@ export async function initFirebase(serviceAccount) {
       });
       console.error('CRITICAL: Firebase no pudo inicializarse.');
     }
-  } else if (admin.apps.length) {
+  } else if (admin.getApps().length) {
     db = admin.firestore();
     logger.info('FIREBASE', 'Usando instancia existente de Firebase');
   }

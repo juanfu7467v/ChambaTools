@@ -1,6 +1,12 @@
 import crypto from "crypto";
 import axios from "axios";
 
+/** Devuelve únicamente la identidad establecida por una cookie firmada por el servidor. */
+export function getAuthenticatedUid(req) {
+  const uid = req.signedCookies?.user_uid;
+  return typeof uid === 'string' && /^[A-Za-z0-9._:-]{1,256}$/.test(uid) ? uid : null;
+}
+
 // ================================================================
 // 📋 LOGS MEJORADOS
 // ================================================================
@@ -28,10 +34,8 @@ export const logger = {
 // ================================================================
 
 export function getClientIp(req) {
-  const xForwardedFor = req.headers["x-forwarded-for"];
-  if (typeof xForwardedFor === "string" && xForwardedFor.length > 0) {
-    return xForwardedFor.split(",")[0].trim();
-  }
+  // Express normaliza req.ip usando trust proxy; no aceptar directamente un
+  // X-Forwarded-For enviado por el cliente porque puede falsificarse.
   return req.ip;
 }
 

@@ -10,6 +10,7 @@ import fs from "fs";
 import { generateInvoicePDF } from './pdfGenerator.js';
 import { Resend } from "resend";
 import helmet from "helmet";
+import rateLimit from 'express-rate-limit';
 import { helmetConfig, corsAllowedOrigins } from './cspConfig.js';
 import plantillasRouter, { setDb as setPlantillasDb } from './plantillas.js';
 import validarClientesRouter, { setDb as setValidarClientesDb } from './validarClientes.js';
@@ -21,6 +22,7 @@ import developerApiRouter, { publicDeveloperRouter, setDb as setDeveloperApiDb }
 import { 
   logger, 
   getClientIp, 
+  getAuthenticatedUid,
   checkLoginBlock, 
   registerFailedLogin, 
   resetLoginAttempts, 
@@ -46,6 +48,14 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+app.set('trust proxy', 1);
+
+// La identidad de sesión se firma con un secreto del servidor.
+const sessionCookieSecret = process.env.SESSION_COOKIE_SECRET || process.env.COOKIE_SECRET || crypto.randomBytes(32).toString('hex');
+if (!process.env.SESSION_COOKIE_SECRET && !process.env.COOKIE_SECRET && process.env.NODE_ENV === 'production') {
+  logger.warn('SESSION', 'SESSION_COOKIE_SECRET no configurado; las sesiones se invalidarán al reiniciar.');
+}
+
 app.disable('x-powered-by');
 
 // ================================================================
@@ -69,14 +79,31 @@ app.use(cors({
 }));
 
 app.use(express.json());
-app.use(cookieParser());
+app.use(cookieParser(sessionCookieSecret));
 app.use(helmet(helmetConfig));
+
+// Límites generales y específicos contra abuso de endpoints costosos.
+app.use(rateLimit({ windowMs: 15 * 60 * 1000, limit: 300, standardHeaders: 'draft-7', legacyHeaders: false }));
+const authRateLimit = rateLimit({ windowMs: 15 * 60 * 1000, limit: 30, standardHeaders: 'draft-7', legacyHeaders: false });
+
+// Defensa CSRF para peticiones mutables que llevan una sesión cookie.
+app.use('/api', (req, res, next) => {
+  const unsafe = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method);
+  const origin = req.get('origin');
+  if (unsafe && origin && !allowedOrigins.includes(origin) && req.signedCookies?.user_uid) {
+    return res.status(403).json({ success: false, error: 'Origen no permitido.' });
+  }
+  next();
+});
 
 // ================================================================
 // ✉️ CONFIGURACIÓN DE RESEND
 // ================================================================
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = process.env.RESEND_API_KEY
+  ? new Resend(process.env.RESEND_API_KEY.trim())
+  : null;
+if (!resend) logger.warn('EMAIL', 'RESEND_API_KEY no configurada; los correos salientes están deshabilitados.');
 
 // ================================================================
 // 🔥 INICIALIZACIÓN DE FIREBASE
@@ -176,8 +203,8 @@ const PLANTILLAS_PLAN_PAGO = ['moderna', 'elegante', 'corporativa', 'premium', '
 // Este endpoint permite que el navegador confirme la sesión sin exponer las cookies como httpOnly=false,
 // manteniendo la protección contra robo de sesión vía XSS.
 app.get('/api/session', (req, res) => {
-  const uid = req.cookies?.user_uid || null;
-  const email = req.cookies?.user_email || null;
+  const uid = getAuthenticatedUid(req);
+  const email = req.signedCookies?.user_email || null;
 
   if (!uid) {
     return res.status(200).json({ authenticated: false, uid: null, email: null });
@@ -195,7 +222,7 @@ app.get('/api/session', (req, res) => {
 // /api/session y /api/user/profile seguían reportando al usuario como
 // autenticado después de "cerrar sesión", ya que solo validan la cookie.
 app.post('/api/logout', (req, res) => {
-  const cookieOptions = { httpOnly: true, secure: true, sameSite: 'strict', path: '/' };
+  const cookieOptions = { httpOnly: true, secure: true, sameSite: 'strict', path: '/', signed: true };
   res.clearCookie('user_uid', cookieOptions);
   res.clearCookie('user_email', cookieOptions);
   res.status(200).json({ success: true });
@@ -205,9 +232,9 @@ app.post('/api/logout', (req, res) => {
 app.get('/api/user/plan', async (req, res) => {
   const context = 'USER_PLAN_API';
   try {
-    const { uid } = req.query;
+    const uid = getAuthenticatedUid(req);
     if (!uid) {
-      return res.status(400).json({ success: false, error: 'Se requiere uid.' });
+      return res.status(401).json({ success: false, error: 'No autenticado.' });
     }
     if (!db) {
       return res.status(503).json({ success: false, error: 'Servicio no disponible en este momento.' });
@@ -263,7 +290,7 @@ app.get('/api/user/profile', async (req, res) => {
   const context = 'USER_PROFILE_API';
   try {
     // Leer uid desde cookie httpOnly (mismo mecanismo que /api/session)
-    const uid = req.cookies?.user_uid || null;
+    const uid = getAuthenticatedUid(req);
     if (!uid) {
       return res.status(401).json({ success: false, error: 'No autenticado.' });
     }
@@ -313,7 +340,7 @@ app.get('/api/user/profile', async (req, res) => {
       success: true,
       uid,
       // Datos de identidad
-      email: data.email || req.cookies?.user_email || null,
+      email: data.email || req.signedCookies?.user_email || null,
       nombre: data.nombre || data.name || data.displayName || null,
       nombreNegocio: empresaData?.nombre || null,
       // Plan
@@ -366,7 +393,7 @@ const EMISOR_LOGO_MAX_CHARS = 900000; // ~675 KB en binario, margen bajo 1 MiB
 app.get('/api/emisor', async (req, res) => {
   const context = 'EMISOR_GET_API';
   try {
-    const uid = req.cookies?.user_uid || null;
+    const uid = getAuthenticatedUid(req);
     if (!uid) {
       return res.status(401).json({ success: false, error: 'No autenticado.' });
     }
@@ -408,7 +435,7 @@ app.get('/api/emisor', async (req, res) => {
 app.put('/api/emisor', async (req, res) => {
   const context = 'EMISOR_PUT_API';
   try {
-    const uid = req.cookies?.user_uid || null;
+    const uid = getAuthenticatedUid(req);
     if (!uid) {
       return res.status(401).json({ success: false, error: 'No autenticado.' });
     }
@@ -456,7 +483,7 @@ app.put('/api/emisor', async (req, res) => {
 });
 
 // Endpoint de login exitoso
-app.post("/api/login-success", async (req, res) => {
+app.post("/api/login-success", authRateLimit, async (req, res) => {
   const context = 'LOGIN_SUCCESS_API';
   try {
     const { idToken, deviceModel } = req.body || {};
@@ -594,7 +621,7 @@ app.post("/api/login-success", async (req, res) => {
     }
 
     const cookieOptions = {
-      httpOnly: true, secure: true, sameSite: 'strict', maxAge: 30 * 24 * 60 * 60 * 1000, path: '/'
+      httpOnly: true, secure: true, sameSite: 'strict', maxAge: 30 * 24 * 60 * 60 * 1000, path: '/', signed: true
     };
     res.cookie('user_email', email, cookieOptions);
     res.cookie('user_uid', uid, cookieOptions);
@@ -610,7 +637,7 @@ app.post("/api/login-success", async (req, res) => {
 });
 
 // Endpoint de notificación de verificación
-app.post("/api/notify-verification", async (req, res) => {
+app.post("/api/notify-verification", authRateLimit, async (req, res) => {
   const context = 'NOTIFY_VERIFICATION';
   try {
     const { idToken } = req.body || {};
@@ -731,7 +758,7 @@ app.get("/api/config", (req, res) => {
 // ================================================================
 
 // Endpoint de validación de reCAPTCHA
-app.post("/api/validate-recaptcha", async (req, res) => {
+app.post("/api/validate-recaptcha", authRateLimit, async (req, res) => {
   try {
     const { recaptchaResponse } = req.body;
     const result = await validateRecaptcha(recaptchaResponse, process.env.RECAPTCHA_CLAVE_SECRETA);
@@ -742,7 +769,7 @@ app.post("/api/validate-recaptcha", async (req, res) => {
 });
 
 // Endpoint de login con bloqueo
-app.post("/api/login", async (req, res) => {
+app.post("/api/login", authRateLimit, async (req, res) => {
   const context = 'LOGIN_API';
   try {
     const { email, recaptchaResponse, deviceId, deviceModel } = req.body;
@@ -765,7 +792,7 @@ app.post("/api/login", async (req, res) => {
 });
 
 // Endpoint para reportar login fallido
-app.post("/api/report-failed-login", async (req, res) => {
+app.post("/api/report-failed-login", authRateLimit, async (req, res) => {
   const context = 'REPORT_FAILED_LOGIN';
   try {
     const { email, deviceModel, errorType } = req.body;
@@ -788,11 +815,18 @@ app.post("/api/report-failed-login", async (req, res) => {
 app.post("/api/pay", async (req, res) => {
   const context = 'PAY_API';
   try {
-    const { transaction_amount, token, description, installments, payment_method_id, payer, uid, planId } = req.body;
+    const { transaction_amount, token, description, installments, payment_method_id, payer, planId } = req.body || {};
+    const uid = getAuthenticatedUid(req);
+    if (!uid) return res.status(401).json({ error: 'No autenticado.' });
     if (!mpClient) return res.status(503).json({ error: 'Mercado Pago not configured' });
-    if (!payer || !payer.email) {
-      logger.error(context, 'Payer email missing in request body');
+    if (!payer || !payer.email || typeof payer.email !== 'string' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(payer.email)) {
       return res.status(400).json({ error: 'Payer email is required' });
+    }
+    if (!Number.isFinite(Number(transaction_amount)) || Number(transaction_amount) <= 0 || Number(transaction_amount) > 100000) {
+      return res.status(400).json({ error: 'Invalid transaction amount' });
+    }
+    if (!Number.isInteger(Number(installments)) || Number(installments) < 1 || Number(installments) > 24) {
+      return res.status(400).json({ error: 'Invalid installments' });
     }
 
     // Validar que planId sea válido
@@ -986,6 +1020,8 @@ app.get("/api/payment-status/:paymentId", async (req, res) => {
     }
 
     const data = pagoDoc.data();
+    const uid = getAuthenticatedUid(req);
+    if (!uid || data.uid !== uid) return res.status(404).json({ error: 'Pago no encontrado' });
     res.json({
       status: data.estado || 'pending',
       processed: data.procesado || false,
@@ -1015,6 +1051,8 @@ app.get("/api/payment-reference/:externalRef", async (req, res) => {
 
     const doc = pagosQuery.docs[0];
     const data = doc.data();
+    const uid = getAuthenticatedUid(req);
+    if (!uid || data.uid !== uid) return res.status(404).json({ error: 'Pago no encontrado' });
     res.json({
       status: data.estado || 'pending',
       processed: data.procesado || false,
@@ -1050,6 +1088,9 @@ const handleInvoiceDownload = async (req, res) => {
     }
 
         const data = pagoDoc.data();
+    if (req.path.startsWith('/api/') && (!getAuthenticatedUid(req) || data.uid !== getAuthenticatedUid(req))) {
+      return res.status(404).json({ error: 'Pago no encontrado' });
+    }
     const invoiceData = data.invoiceData;
     if (!invoiceData || typeof invoiceData !== 'object') {
       return res.status(404).json({ error: 'Los datos de la boleta aún no están disponibles.' });
@@ -1088,6 +1129,8 @@ app.get("/api/payment/:paymentId", async (req, res) => {
     if (!pagoDoc.exists) return res.status(404).json({ error: 'Payment not found' });
     
     const data = pagoDoc.data();
+    const uid = getAuthenticatedUid(req);
+    if (!uid || data.uid !== uid) return res.status(404).json({ error: 'Payment not found' });
     const fecha = data.fechaRegistro?.toDate() || new Date();
     res.json({
       id: req.params.paymentId,
@@ -1111,6 +1154,8 @@ app.get("/api/payment/:paymentId", async (req, res) => {
 // ================================================================
 // SERVICIO DE ARCHIVOS ESTÁTICOS Y GA
 // ================================================================
+
+const PUBLIC_DIR = path.join(__dirname, 'public');
 
 const PUBLIC_ROUTES = ['/login', '/register', '/verify', '/reset-password', '/disclaimer-apis', '/API-Docs', '/developer-api'];
 
@@ -1154,7 +1199,8 @@ const serveHtmlWithGA = (req, res, next) => {
   }
 
   if (fileName) {
-    const filePath = path.join(__dirname, 'public', fileName);
+    const filePath = path.resolve(PUBLIC_DIR, fileName);
+    if (!filePath.startsWith(`${PUBLIC_DIR}${path.sep}`)) return next();
     if (fs.existsSync(filePath)) {
       try {
         let html = fs.readFileSync(filePath, 'utf8');

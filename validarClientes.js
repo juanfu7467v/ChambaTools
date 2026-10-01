@@ -96,7 +96,7 @@
 
 import express from 'express';
 import admin from 'firebase-admin';
-import { logger, getClientIp } from './seguridad.js';
+import { logger, getClientIp, getAuthenticatedUid } from './seguridad.js';
 
 const router = express.Router();
 
@@ -190,7 +190,7 @@ setInterval(() => {
 async function requireAuth(req, res, next) {
   const context = 'VALIDAR_CLIENTES_AUTH';
   try {
-    const uid = req.cookies?.user_uid || null;
+    const uid = getAuthenticatedUid(req);
     if (!uid) {
       return res.status(401).json({ success: false, error: 'Debes iniciar sesión para validar clientes.' });
     }

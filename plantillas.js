@@ -2,6 +2,7 @@ import express from 'express';
 import PDFDocument from 'pdfkit';
 import QRCode from 'qrcode';
 import admin from 'firebase-admin';
+import { getAuthenticatedUid } from './seguridad.js';
 
 const router = express.Router();
 router.use(express.json({ limit: '2mb' }));
@@ -207,9 +208,10 @@ function buildDocumentNumber(documentType, customSeries, customCorrelative) {
 
 function normalizeItems(rawItems = []) {
   const items = Array.isArray(rawItems) ? rawItems : [];
+  if (items.length > 200) throw new Error('No se permiten más de 200 ítems por comprobante.');
   const cleaned = items
     .map((item, index) => ({
-      description: String(item.description || '').trim(),
+      description: String(item.description || '').trim().slice(0, 500),
       quantity: Number(item.quantity),
       unitPrice: Number(item.unitPrice),
       unitLabel: String(item.unitLabel || 'UND').trim().toUpperCase(),
@@ -247,7 +249,9 @@ function normalizePayload(payload = {}) {
   const issueDate = payload.issueDate || new Date().toISOString();
   const pricesIncludeTax = payload.pricesIncludeTax !== false;
   const taxRate = Number.isFinite(Number(payload.taxRate)) ? Number(payload.taxRate) : IGV_DEFAULT;
-  const currency = payload.currency || CURRENCY;
+  if (taxRate < 0 || taxRate > 1) throw new Error('La tasa de impuesto debe estar entre 0 y 1.');
+  const currency = String(payload.currency || CURRENCY).toUpperCase();
+  if (!/^[A-Z]{3}$/.test(currency)) throw new Error('Moneda inválida.');
 
   const rawLogo = String(payload.issuer?.logoDataUrl || '').trim();
   const issuer = {
@@ -1977,7 +1981,16 @@ async function verificarLimite(uid) {
 async function incrementarRecibos(uid) {
   if (!dbInstance) throw new Error('Base de datos no disponible');
   const userRef = dbInstance.collection('usuarios').doc(uid);
-  await userRef.update({ comprobantesEmitidos: admin.firestore.FieldValue.increment(1) });
+  await dbInstance.runTransaction(async (tx) => {
+    const userDoc = await tx.get(userRef);
+    if (!userDoc.exists) throw new Error('Usuario no encontrado');
+    const data = userDoc.data();
+    const limite = Number.isFinite(Number(data.comprobantesLimite)) ? Number(data.comprobantesLimite) : 0;
+    const emitidos = Number(data.comprobantesEmitidos || 0);
+    if (data.planStatus && data.planStatus !== 'active') throw new Error('Tu plan no está activo.');
+    if (limite !== -1 && emitidos >= limite) throw new Error('Has alcanzado el límite de comprobantes de tu plan actual.');
+    tx.update(userRef, { comprobantesEmitidos: admin.firestore.FieldValue.increment(1) });
+  });
 }
 
 // ---------------------------------------------------------------
@@ -2001,8 +2014,9 @@ router.get('/templates', (req, res) => {
 
 router.post('/preview', async (req, res) => {
   try {
-    const { uid, ...payload } = req.body;
-    if (!uid) return res.status(401).json({ ok: false, message: 'Se requiere autenticación (uid).' });
+    const payload = req.body || {};
+    const uid = getAuthenticatedUid(req);
+    if (!uid) return res.status(401).json({ ok: false, message: 'No autenticado.' });
 
     const { plan } = await verificarLimite(uid);
     const normalized = normalizePayload(payload);
@@ -2037,8 +2051,9 @@ router.post('/preview', async (req, res) => {
 
 router.post('/pdf', async (req, res) => {
   try {
-    const { uid, ...payload } = req.body;
-    if (!uid) return res.status(401).json({ ok: false, message: 'Se requiere autenticación (uid).' });
+    const payload = req.body || {};
+    const uid = getAuthenticatedUid(req);
+    if (!uid) return res.status(401).json({ ok: false, message: 'No autenticado.' });
 
     const { plan } = await verificarLimite(uid);
     const normalized = normalizePayload(payload);

@@ -15,7 +15,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # 5️⃣ Instala las dependencias con seguridad
-RUN npm install --legacy-peer-deps --no-audit --no-fund
+RUN npm ci --omit=dev --no-audit --no-fund
 
 # 6️⃣ Copia el resto de los archivos del proyecto
 COPY . .

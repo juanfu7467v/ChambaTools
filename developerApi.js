@@ -29,7 +29,7 @@
 import express from 'express';
 import crypto from 'crypto';
 import admin from 'firebase-admin';
-import { logger, getClientIp } from './seguridad.js';
+import { logger, getClientIp, getAuthenticatedUid } from './seguridad.js';
 
 // ----------------------------------------------------------------
 // 🔌 Inyección de Firestore desde index.js (igual que plantillas.js
@@ -95,7 +95,7 @@ developerApiRouter.use(express.json({ limit: '1mb' }));
 
 // Lee uid desde cookie httpOnly (mismo mecanismo que el resto de la app)
 async function requireAuthFromCookie(req, res) {
-  const uid = req.cookies?.user_uid || null;
+  const uid = getAuthenticatedUid(req);
   if (!uid) {
     res.status(401).json({ success: false, error: 'No autenticado.' });
     return null;
@@ -317,7 +317,7 @@ publicDeveloperRouter.use(express.json({ limit: '2mb' }));
 // Cache de validación API Key → uid (TTL 5 min) para evitar ir a
 // Firestore en cada request.
 const apiKeyCache = new Map(); // keyHash → { uid, tipoPlan, planStatus, exp }
-const API_KEY_CACHE_TTL_MS = 5 * 60 * 1000;
+const API_KEY_CACHE_TTL_MS = 30 * 1000;
 
 async function authenticateByApiKey(req, res) {
   const ctx = 'DEVAPI_PUBLIC_AUTH';
