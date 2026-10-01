@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pago Seguro - FacilitoTools</title>
     <meta name="description" content="Completa el pago de tu plan o recarga de FacilitoTools de forma segura para seguir generando comprobantes y validando clientes.">
     <meta name="robots" content="noindex, nofollow">
@@ -810,6 +810,135 @@
                 padding: 0 6px;
             }
         }
+
+        /* Layout responsivo del checkout: conserva el ancho útil sin estirar controles. */
+        .content {
+            max-width: 960px;
+            min-width: 0;
+        }
+        .content > *,
+        .payment-method-stage,
+        .payment-method-panel,
+        #cardPaymentBrick_container,
+        #yapeForm,
+        .yape-field {
+            min-width: 0;
+            max-width: 100%;
+        }
+        #cardPaymentBrick_container,
+        #cardPaymentBrick_container form {
+            width: 100%;
+        }
+        #cardPaymentBrick_container button[type="submit"],
+        #cardPaymentBrick_container input[type="submit"] {
+            display: flex !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            justify-content: center;
+        }
+        .yape-field input,
+        #cardPaymentBrick_container input,
+        #cardPaymentBrick_container select,
+        #cardPaymentBrick_container button,
+        .yape-submit-btn {
+            max-width: 100%;
+        }
+        .horizontal-scroll {
+            max-width: 100%;
+            padding: 8px 0 12px;
+            border-radius: var(--radius-lg);
+        }
+        .slider-track {
+            height: clamp(190px, 35vw, 360px);
+        }
+        .carousel-item {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .carousel-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        .payment-method-panel {
+            padding: clamp(14px, 2.5vw, 22px);
+        }
+        .payment-method-switcher,
+        .payment-method-stage {
+            width: 100%;
+            max-width: 720px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .method-panel-title,
+        .method-panel-subtitle,
+        .payment-helper-note,
+        .security-badge span {
+            overflow-wrap: anywhere;
+        }
+        .result-screen {
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .checkout-pay-submit {
+            display: flex !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            justify-content: center !important;
+        }
+        @media (max-width: 768px) {
+            .content {
+                max-width: 720px;
+                padding-left: 20px;
+                padding-right: 20px;
+            }
+            .payment-method-panel {
+                border-radius: 18px;
+            }
+            .method-panel-title {
+                line-height: 1.35;
+            }
+        }
+        @media (max-width: 540px) {
+            .content {
+                padding-left: 16px;
+                padding-right: 16px;
+            }
+            .header {
+                padding: 16px;
+            }
+            .total-price {
+                font-size: clamp(28px, 8vw, 34px);
+            }
+            .slider-track {
+                height: clamp(180px, 55vw, 240px);
+            }
+            .payment-method-panel {
+                padding: 16px 14px;
+            }
+            .yape-field input,
+            #cardPaymentBrick_container input,
+            #cardPaymentBrick_container select {
+                font-size: 16px;
+            }
+            .security-badge {
+                align-items: flex-start;
+                text-align: left;
+            }
+            .security-badge i {
+                margin-top: 2px;
+                flex: 0 0 auto;
+            }
+            .footer-support-block {
+                max-width: 100%;
+            }
+            .footer-support-block .support-email {
+                overflow-wrap: anywhere;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1298,7 +1427,21 @@
                     }
                 }
             };
+            const cardPaymentContainer = document.getElementById('cardPaymentBrick_container');
+            const applyFullWidthPayButton = () => {
+                cardPaymentContainer.querySelectorAll('button, input[type="submit"]').forEach(button => {
+                    const label = (button.innerText || button.value || '').trim();
+                    if (/^Pagar(?:\s|$)/i.test(label)) button.classList.add('checkout-pay-submit');
+                });
+            };
+            applyFullWidthPayButton();
+            if (!cardPaymentContainer.dataset.payButtonObserver) {
+                const payButtonObserver = new MutationObserver(applyFullWidthPayButton);
+                payButtonObserver.observe(cardPaymentContainer, { childList: true, characterData: true, subtree: true });
+                cardPaymentContainer.dataset.payButtonObserver = 'active';
+            }
             brickControllers.card = await bricksBuilder.create('cardPayment', 'cardPaymentBrick_container', cardBrickSettings);
+            applyFullWidthPayButton();
         }
 
         async function handleYapeSubmit(event) {
@@ -1556,13 +1699,21 @@
         function initCarousel() {
             const scrollContainer = document.getElementById('imageScroll');
             const hintContainer = document.getElementById('scrollHint');
-            const items = Array.from(scrollContainer.querySelectorAll('.carousel-item'));
+            if (!scrollContainer || !hintContainer) return;
 
+            const items = Array.from(scrollContainer.querySelectorAll('.carousel-item'));
             if (items.length === 0) return;
 
             const track = document.createElement('div');
             track.classList.add('slider-track');
-            items.forEach(item => track.appendChild(item));
+            items.forEach(item => {
+                item.querySelectorAll('img').forEach(image => { image.loading = 'eager'; });
+                track.appendChild(item);
+            });
+            const firstSlideClone = items[0].cloneNode(true);
+            firstSlideClone.setAttribute('aria-hidden', 'true');
+            firstSlideClone.querySelectorAll('img').forEach(image => { image.loading = 'eager'; });
+            track.appendChild(firstSlideClone);
             scrollContainer.appendChild(track);
 
             const hintSpans = hintContainer.querySelectorAll('span');
@@ -1571,7 +1722,11 @@
             let currentTranslate = 0;
             let prevTranslate = 0;
             let isDragging = false;
+            let isPointerOverCarousel = false;
             let animationID = null;
+            let autoAdvanceTimeout = null;
+            const autoplayDelay = 5000;
+            const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
             function getContainerWidth() {
                 return scrollContainer.clientWidth;
@@ -1579,19 +1734,19 @@
 
             function setPositionByIndex(index, withTransition = true) {
                 if (index < 0) index = 0;
-                if (index > items.length - 1) index = items.length - 1;
+                if (index > items.length) index = items.length;
                 currentIndex = index;
-                const containerWidth = getContainerWidth();
-                const translateX = -index * containerWidth;
+                const translateX = -index * getContainerWidth();
                 currentTranslate = translateX;
                 prevTranslate = translateX;
-                track.style.transition = withTransition ? 'transform 0.45s cubic-bezier(0.23, 1, 0.32, 1)' : 'none';
+                track.style.transition = withTransition && !prefersReducedMotion ? 'transform 0.45s cubic-bezier(0.23, 1, 0.32, 1)' : 'none';
                 track.style.transform = `translateX(${translateX}px)`;
             }
 
             function updateHint() {
+                const visibleIndex = currentIndex % items.length;
                 hintSpans.forEach((span, idx) => {
-                    if (idx === currentIndex) {
+                    if (idx === visibleIndex) {
                         span.style.opacity = '1';
                         span.style.width = '12px';
                         span.style.backgroundColor = 'var(--primary-blue)';
@@ -1603,40 +1758,54 @@
                 });
             }
 
+            function scheduleAutoAdvance() {
+                clearTimeout(autoAdvanceTimeout);
+                if (prefersReducedMotion || document.hidden || isDragging || isPointerOverCarousel || items.length < 2) return;
+                autoAdvanceTimeout = setTimeout(() => {
+                    const nextIndex = currentIndex >= items.length - 1 ? items.length : currentIndex + 1;
+                    setPositionByIndex(nextIndex, true);
+                    updateHint();
+                    scheduleAutoAdvance();
+                }, autoplayDelay);
+            }
+
+            track.addEventListener('transitionend', event => {
+                if (event.target !== track || event.propertyName !== 'transform') return;
+                if (currentIndex === items.length) {
+                    setPositionByIndex(0, false);
+                    updateHint();
+                }
+            });
+
             function snapToNearest() {
                 const containerWidth = getContainerWidth();
                 const moveDistance = currentTranslate - prevTranslate;
                 const threshold = containerWidth / 4;
-
                 let newIndex = currentIndex;
                 if (moveDistance > threshold) {
                     newIndex = Math.max(currentIndex - 1, 0);
                 } else if (moveDistance < -threshold) {
                     newIndex = Math.min(currentIndex + 1, items.length - 1);
                 }
-
-                if (newIndex !== currentIndex) {
-                    setPositionByIndex(newIndex, true);
-                } else {
-                    setPositionByIndex(currentIndex, true);
-                }
+                setPositionByIndex(newIndex, true);
                 updateHint();
+                scheduleAutoAdvance();
             }
 
-            function dragStart(e) {
+            function dragStart(event) {
                 isDragging = true;
-                startX = e.type.includes('mouse') ? e.pageX : e.touches[0].pageX;
+                clearTimeout(autoAdvanceTimeout);
+                startX = event.type.includes('mouse') ? event.pageX : event.touches[0].pageX;
                 prevTranslate = currentTranslate;
                 track.style.transition = 'none';
                 cancelAnimationFrame(animationID);
             }
 
-            function dragMove(e) {
+            function dragMove(event) {
                 if (!isDragging) return;
-                e.preventDefault();
-                const currentX = e.type.includes('mouse') ? e.pageX : e.touches[0].pageX;
-                const delta = currentX - startX;
-                currentTranslate = prevTranslate + delta;
+                event.preventDefault();
+                const currentX = event.type.includes('mouse') ? event.pageX : event.touches[0].pageX;
+                currentTranslate = prevTranslate + currentX - startX;
                 track.style.transform = `translateX(${currentTranslate}px)`;
             }
 
@@ -1653,25 +1822,26 @@
             window.addEventListener('mouseup', dragEnd);
             scrollContainer.addEventListener('touchmove', dragMove, { passive: false });
             scrollContainer.addEventListener('touchend', dragEnd);
-
-            scrollContainer.querySelectorAll('img').forEach(img => img.addEventListener('dragstart', e => e.preventDefault()));
-
-            const images = Array.from(scrollContainer.querySelectorAll('img'));
-            const imageLoadPromises = images.map(img => {
-                if (img.complete) return Promise.resolve();
-                return new Promise(resolve => {
-                    img.addEventListener('load', resolve);
-                    img.addEventListener('error', resolve);
-                });
+            scrollContainer.addEventListener('mouseenter', () => {
+                isPointerOverCarousel = true;
+                clearTimeout(autoAdvanceTimeout);
             });
-
-            Promise.all(imageLoadPromises).then(() => {
-                setPositionByIndex(0, false);
-                updateHint();
+            scrollContainer.addEventListener('mouseleave', () => {
+                isPointerOverCarousel = false;
+                scheduleAutoAdvance();
             });
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden) clearTimeout(autoAdvanceTimeout);
+                else scheduleAutoAdvance();
+            });
+            scrollContainer.querySelectorAll('img').forEach(img => img.addEventListener('dragstart', event => event.preventDefault()));
+
+            setPositionByIndex(0, false);
+            updateHint();
+            scheduleAutoAdvance();
 
             window.addEventListener('resize', () => {
-                setPositionByIndex(currentIndex, false);
+                setPositionByIndex(Math.min(currentIndex, items.length - 1), false);
                 updateHint();
             });
         }
