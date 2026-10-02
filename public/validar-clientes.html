@@ -565,6 +565,8 @@
         }
         .h-magic:hover { background: rgba(255,215,0,0.18); border-color: var(--gold); box-shadow: 0 0 12px rgba(255,215,0,.25); }
         .h-magic:active { transform: scale(0.92); }
+        .h-magic.is-copy { background: rgba(0,200,83,0.08); border-color: var(--border-active); color: var(--emerald-light); }
+        .h-magic.is-copy:hover { background: rgba(0,200,83,0.16); border-color: var(--emerald); box-shadow: 0 0 12px var(--emerald-glow); }
 
         .h-toggle {
             background: transparent;
@@ -590,6 +592,15 @@
         .vc-history-details.open { max-height: 900px; margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border-subtle); }
         .vc-history-fields { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px 16px; margin-bottom: 12px; }
         .vc-history-fields > .vc-list-results { grid-column: 1 / -1; width: 100%; min-width: 0; }
+        .vc-history-fields .vc-list-item { align-items: flex-start; }
+        .vc-history-fields .vc-list-item-info { flex: 1; }
+        .vc-history-result-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+        .vc-history-result-action { flex-shrink: 0; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: .85rem; transition: all .2s ease; }
+        .vc-history-result-action.copy { background: rgba(255,255,255,0.05); border: 1px solid var(--border-subtle); color: var(--text-muted); }
+        .vc-history-result-action.copy:hover { background: rgba(0,200,83,0.1); border-color: var(--border-active); color: var(--emerald-light); }
+        .vc-history-result-action.delete { background: rgba(229,57,53,0.08); border: 1px solid var(--ruby-glow); color: var(--ruby-light); }
+        .vc-history-result-action.delete:hover { background: rgba(229,57,53,0.16); border-color: var(--ruby); }
+        .vc-history-result-action:active { transform: scale(0.92); }
 
         /* ===== BOTÓN ELIMINAR REGISTRO — OCUPA TODO EL ANCHO Y CENTRADO ===== */
         .h-del-full {
@@ -1724,6 +1735,63 @@
             localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
         }
 
+        const MULTI_RESULT_HISTORY_TYPES = new Set(['buscar-cedula', 'buscar-dni', 'telefonia-doc', 'telefonia-numero']);
+
+        function isMultiResultHistoryType(tipo) {
+            return MULTI_RESULT_HISTORY_TYPES.has(tipo);
+        }
+
+        async function copyTextToClipboard(text, successMessage = 'Resultado copiado al portapapeles') {
+            const copyWithFallback = () => {
+                const area = document.createElement('textarea');
+                area.value = text;
+                area.style.position = 'fixed';
+                area.style.opacity = '0';
+                document.body.appendChild(area);
+                area.select();
+                const copied = document.execCommand('copy');
+                area.remove();
+                return copied;
+            };
+
+            try {
+                if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(text);
+                else if (!copyWithFallback()) throw new Error('El navegador no pudo copiar el texto.');
+                showToast(successMessage, 'fa-copy');
+            } catch (error) {
+                try {
+                    if (copyWithFallback()) showToast(successMessage, 'fa-copy');
+                    else throw error;
+                } catch {
+                    showToast('No se pudo copiar al portapapeles', 'fa-triangle-exclamation');
+                }
+            }
+        }
+
+        function deleteHistoryResult(id, tipo, index) {
+            const record = getHistory().find(item => item.id === id && item.tipo === tipo);
+            if (!record) return false;
+
+            const keys = ['buscar-cedula', 'buscar-dni'].includes(tipo)
+                ? ['resultados', 'results']
+                : ['lineas', 'telefonos', 'resultados', 'coincidencias', 'coincidences'];
+            const containers = [record.data, record.data?.result].filter(Boolean);
+            let results = Array.isArray(record.data) ? record.data : null;
+            for (const container of containers) {
+                if (results) break;
+                results = keys.map(key => container[key]).find(Array.isArray) || null;
+            }
+            if (!results || index < 0 || index >= results.length) return false;
+
+            results.splice(index, 1);
+            const history = getHistory();
+            const recordIndex = history.findIndex(item => item.id === id && item.tipo === tipo);
+            if (recordIndex === -1) return false;
+            history[recordIndex] = record;
+            localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+            return true;
+        }
+
         // Devuelve nombre y documento representativos de un registro, para el resumen del historial y el buscador
         function getHistorySummary(d) {
             const firstItem = d?.resultados?.[0] || d?.telefonos?.[0] || d?.coincidencias?.[0] || d;
@@ -1753,7 +1821,8 @@
             const fecha = new Date(item.fecha);
             const tiempo = fecha.toLocaleString('es-ES', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
             const builder = fieldsBuilders[tipo];
-            const detailHtml = builder ? builder(item.data) : '<div class="vc-empty">Sin datos disponibles.</div>';
+            const showResultActions = isMultiResultHistoryType(tipo);
+            const detailHtml = builder ? builder(item.data, { historyActions: showResultActions }) : '<div class="vc-empty">Sin datos disponibles.</div>';
             return `
                 <div class="vc-history-item" data-id="${esc(item.id)}">
                     <div class="vc-history-row-top">
@@ -1763,8 +1832,8 @@
                     <div class="vc-history-row-bottom">
                         <span class="h-time"><i class="fas fa-clock"></i> ${esc(tiempo)}</span>
                         <div class="h-actions-right">
-                            <button class="h-magic" data-id="${esc(item.id)}" title="Usar estos datos en Generar Boletas" aria-label="Usar estos datos en Generar Boletas">
-                                <i class="fas fa-wand-magic-sparkles"></i>
+                            <button class="h-magic${showResultActions ? ' is-copy' : ''}" data-id="${esc(item.id)}" title="${showResultActions ? 'Copiar resultados' : 'Usar estos datos en Generar Boletas'}" aria-label="${showResultActions ? 'Copiar resultados' : 'Usar estos datos en Generar Boletas'}">
+                                <i class="fas ${showResultActions ? 'fa-copy' : 'fa-wand-magic-sparkles'}"></i>
                             </button>
                             <button class="h-toggle" data-id="${esc(item.id)}" aria-label="Ver resultado completo">
                                 <i class="fas fa-chevron-down"></i>
@@ -1846,6 +1915,11 @@
                     e.stopPropagation();
                     const id = btn.dataset.id;
                     const record = getHistory().find(h => h.id === id);
+                    if (isMultiResultHistoryType(tipo)) {
+                        if (!record) { showToast('No hay datos para copiar', 'fa-triangle-exclamation'); return; }
+                        copyTextToClipboard(JSON.stringify(record.data, null, 2), 'Consulta copiada al portapapeles');
+                        return;
+                    }
                     if (!record) { showToast('No hay datos para enviar', 'fa-triangle-exclamation'); return; }
                     const items = getResultItems(tipo, record.data);
                     if (!items.length || !items[0]) { showToast('No hay datos para enviar', 'fa-triangle-exclamation'); return; }
@@ -1854,6 +1928,32 @@
                         showToast('Se usó el primer resultado de la lista', 'fa-wand-magic-sparkles');
                     }
                     sendToBoletas(payload);
+                });
+            });
+
+            listEl.querySelectorAll('[data-history-result-action]').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const card = btn.closest('.vc-history-item');
+                    const id = card?.dataset.id;
+                    const record = getHistory().find(item => item.id === id && item.tipo === tipo);
+                    const index = Number(btn.dataset.historyResultIndex);
+                    const result = record ? getResultItems(tipo, record.data)[index] : null;
+                    if (!record || !result) { showToast('No se encontró ese resultado del historial', 'fa-triangle-exclamation'); return; }
+
+                    if (btn.dataset.historyResultAction === 'magic') {
+                        sendToBoletas(mapToCustomerPayload(tipo, result));
+                    } else if (btn.dataset.historyResultAction === 'copy') {
+                        copyTextToClipboard(JSON.stringify(result, null, 2), 'Resultado copiado al portapapeles');
+                    } else if (btn.dataset.historyResultAction === 'delete') {
+                        if (!confirm('¿Eliminar solo este resultado del historial?')) return;
+                        if (!deleteHistoryResult(id, tipo, index)) { showToast('No se pudo eliminar el resultado', 'fa-triangle-exclamation'); return; }
+                        renderHistory(tipo);
+                        const details = document.getElementById('details-' + id);
+                        details?.classList.add('open');
+                        details?.closest('.vc-history-item')?.querySelector('.h-toggle')?.classList.add('open');
+                        showToast('Resultado eliminado del historial', 'fa-trash-alt');
+                    }
                 });
             });
 
@@ -1950,6 +2050,17 @@
 
         // Campos de cada tipo de consulta. Se usan tanto para el resultado principal como para
         // el detalle expandible del historial, así ambos siempre muestran exactamente lo mismo.
+        function buildResultListActions(index, historyActions = false) {
+            if (!historyActions) {
+                return `<button type="button" class="vc-list-magic-btn" data-list-idx="${index}" title="Usar estos datos en Generar Boletas"><i class="fas fa-wand-magic-sparkles"></i></button>`;
+            }
+            return `<div class="vc-history-result-actions">
+                <button type="button" class="vc-list-magic-btn" data-history-result-action="magic" data-history-result-index="${index}" title="Usar este resultado en Generar Boletas" aria-label="Usar este resultado en Generar Boletas"><i class="fas fa-wand-magic-sparkles"></i></button>
+                <button type="button" class="vc-history-result-action copy" data-history-result-action="copy" data-history-result-index="${index}" title="Copiar este resultado" aria-label="Copiar este resultado"><i class="fas fa-copy"></i></button>
+                <button type="button" class="vc-history-result-action delete" data-history-result-action="delete" data-history-result-index="${index}" title="Eliminar este resultado del historial" aria-label="Eliminar este resultado del historial"><i class="fas fa-trash-alt"></i></button>
+            </div>`;
+        }
+
         const fieldsBuilders = {
             dni(data) {
                 return `
@@ -1995,7 +2106,8 @@
                     ${dynamicDataItems(data, ['cedula', 'nombres', 'apellidos', 'estado', 'estado_civil', 'sexo', 'fecha_nacimiento', 'lugar_nacimiento', 'fecha_expedicion', 'direccion'])}
                 `;
             },
-            'buscar-cedula'(data) {
+            'buscar-cedula'(data, options = {}) {
+                const historyActions = options.historyActions === true;
                 const items = Array.isArray(data) ? data : (data.resultados || data.results || []);
                 if (!items.length) {
                     return `<div class="vc-empty"><i class="fas fa-user-slash"></i>No se encontraron coincidencias para ese nombre.</div>`;
@@ -2007,10 +2119,11 @@
                             <span class="doc">${esc(p.cedula)}</span>
                             ${dynamicListItemFields(p, ['nombreCompleto', 'nombres_completos', 'nombres', 'apellidos', 'cedula'])}
                         </div>
-                        <button type="button" class="vc-list-magic-btn" data-list-idx="${idx}" title="Usar estos datos en Generar Boletas"><i class="fas fa-wand-magic-sparkles"></i></button>
+                        ${buildResultListActions(idx, historyActions)}
                     </div>`).join('')}</div>`;
             },
-            'buscar-dni'(data) {
+            'buscar-dni'(data, options = {}) {
+                const historyActions = options.historyActions === true;
                 const items = Array.isArray(data) ? data : (data.resultados || data.results || []);
                 if (!items.length || !items[0]) {
                     return `<div class="vc-empty"><i class="fas fa-user-slash"></i>No se encontraron coincidencias para ese nombre.</div>`;
@@ -2022,10 +2135,11 @@
                             <span class="doc">${esc(p.dni)}${p.departamento ? ' · ' + esc(p.departamento) : ''}</span>
                             ${dynamicListItemFields(p, ['nombreCompleto', 'nombres_completos', 'nombres', 'apellidoPaterno', 'apellidoMaterno', 'dni', 'departamento'])}
                         </div>
-                        <button type="button" class="vc-list-magic-btn" data-list-idx="${idx}" title="Usar estos datos en Generar Boletas"><i class="fas fa-wand-magic-sparkles"></i></button>
+                        ${buildResultListActions(idx, historyActions)}
                     </div>`).join('')}</div>`;
             },
-            'telefonia-doc'(data) {
+            'telefonia-doc'(data, options = {}) {
+                const historyActions = options.historyActions === true;
                 const items = Array.isArray(data) ? data : (data.lineas || data.telefonos || data.resultados || data.coincidencias || []);
                 if (!items.length || !items[0]) {
                     return `<div class="vc-empty"><i class="fas fa-phone-slash"></i>No se encontraron números asociados a este documento.</div>`;
@@ -2038,10 +2152,11 @@
                             <span class="who">${esc([t.fuente || t.operador, t.plan, t.periodo].filter(Boolean).join(' · '))}</span>
                             <div class="vc-data-item" style="grid-column:1/-1;">${dynamicListItemFields(t, ['numero', 'telefono', 'fuente', 'operador', 'plan', 'periodo'])}</div>
                         </div>
-                        <button type="button" class="vc-list-magic-btn" data-list-idx="${idx}" title="Usar estos datos en Generar Boletas"><i class="fas fa-wand-magic-sparkles"></i></button>
+                        ${buildResultListActions(idx, historyActions)}
                     </div>`).join('')}</div>`;
             },
-            'telefonia-numero'(data) {
+            'telefonia-numero'(data, options = {}) {
+                const historyActions = options.historyActions === true;
                 const items = Array.isArray(data) ? data : (data.lineas || data.telefonos || data.resultados || data.coincidencias || []);
                 if (items.length) {
                     return `<div class="vc-list-results">${items.map((t, idx) => `
@@ -2051,7 +2166,7 @@
                                 <span class="who">${esc([t.fuente || t.operador, t.plan, t.periodo].filter(Boolean).join(' · '))}</span>
                                 <div class="vc-data-item" style="grid-column:1/-1;">${dynamicListItemFields(t, ['telefono', 'numero', 'fuente', 'operador', 'plan', 'periodo'])}</div>
                             </div>
-                            <button type="button" class="vc-list-magic-btn" data-list-idx="${idx}" title="Usar estos datos en Generar Boletas"><i class="fas fa-wand-magic-sparkles"></i></button>
+                            ${buildResultListActions(idx, historyActions)}
                         </div>`).join('')}</div>`;
                 }
                 return dynamicDataItems(data);
