@@ -2498,9 +2498,12 @@
                 sessionStorage.setItem('ft_boleta_draft', JSON.stringify(draft));
             } catch (e) { console.error('No se pudo guardar el borrador del cliente', e); }
 
-            const url = value
-                ? `/validar-clientes?auto=${encodeURIComponent(endpoint)}&value=${encodeURIComponent(value)}`
-                : `/validar-clientes?tab=${encodeURIComponent(endpoint)}`;
+            const params = new URLSearchParams({ tab: endpoint });
+            if (value) {
+                params.set('auto', endpoint);
+                params.set('value', value);
+            }
+            const url = `/validar-clientes?${params.toString()}`;
             window.location.href = url;
         }
 

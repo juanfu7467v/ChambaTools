@@ -2483,11 +2483,25 @@
             'telefonia-numero': { input: 'telNumInput' }
         };
 
+        // Selecciona la pestaña solicitada sin esperar las comprobaciones asíncronas
+        // de sesión/cupo que, de otro modo, dejan visible por defecto la pestaña DNI.
+        function selectRequestedTabFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            const auto = params.get('auto');
+            const tab = params.get('tab');
+            const requestedTab = auto && AUTO_FIELD_MAP[auto] ? auto : tab;
+            if (requestedTab) activateTab(requestedTab);
+        }
+        selectRequestedTabFromUrl();
+
         function runAutoQueryFromUrl() {
             const params = new URLSearchParams(window.location.search);
             const auto = params.get('auto');
             const value = params.get('value');
             const tabOnly = params.get('tab');
+
+            const requestedTab = auto && AUTO_FIELD_MAP[auto] ? auto : tabOnly;
+            if (requestedTab) activateTab(requestedTab);
 
             if (!auto && tabOnly) {
                 if (activateTab(tabOnly)) {
