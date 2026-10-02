@@ -3,17 +3,53 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Validar Clientes — DNI, RUC, Cédula y Teléfonos | FacilitoTools</title>
+    <title>Consulta de DNI, RUC y teléfonos | FacilitoTools</title>
     <link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/apple-touch-icon.png" />
     <link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/assets/icons/favicon-16x16.png" />
     <link rel="shortcut icon" href="/assets/icons/favicon.ico" />
     <link rel="manifest" href="/assets/icons/site.webmanifest" />
-    <meta name="description" content="Valida DNI, RUC, cédula venezolana y números de teléfono de tus clientes al instante, de forma segura y profesional." />
+    <meta name="description" content="Consulta DNI y RUC, busca DNI o cédula venezolana por nombres y apellidos, y consulta teléfonos por número o DNI con FacilitoTools." />
+    <meta name="keywords" content="consulta de DNI, consulta de RUC, buscar DNI por nombres y apellidos, consultar teléfonos por DNI, consulta de teléfonos por número, buscar cédula por nombres y apellidos, validar clientes Perú" />
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href="https://facilitotools.com/validar-clientes" />
-
-
+    <meta property="og:title" content="Consulta DNI, RUC y teléfonos | FacilitoTools" />
+    <meta property="og:description" content="Busca DNI y cédulas por nombres y apellidos, consulta documentos y teléfonos por número o DNI en FacilitoTools." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://facilitotools.com/validar-clientes" />
+    <meta property="og:image" content="https://facilitotools.com/assets/icons/apple-touch-icon.png" />
+    <meta property="og:locale" content="es_PE" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Consulta DNI, RUC y teléfonos | FacilitoTools" />
+    <meta name="twitter:description" content="Busca DNI o cédula por nombres y consulta teléfonos por número o DNI." />
+    <meta name="twitter:image" content="https://facilitotools.com/assets/icons/apple-touch-icon.png" />
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "WebPage",
+            "name": "Consultas de DNI, RUC, teléfonos y documentos por nombres",
+            "url": "https://facilitotools.com/validar-clientes",
+            "description": "Herramientas de FacilitoTools para consultar DNI y RUC, buscar DNI o cédulas venezolanas por nombres y apellidos, y consultar teléfonos por número o documento.",
+            "inLanguage": "es-PE",
+            "isPartOf": {
+                "@type": "WebSite",
+                "name": "FacilitoTools",
+                "url": "https://facilitotools.com/"
+            },
+            "mainEntity": {
+                "@type": "ItemList",
+                "name": "Servicios de consulta de clientes",
+                "itemListElement": [
+                    { "@type": "ListItem", "position": 1, "name": "Consulta de DNI por número" },
+                    { "@type": "ListItem", "position": 2, "name": "Consulta de RUC por número" },
+                    { "@type": "ListItem", "position": 3, "name": "Búsqueda de DNI por nombres y apellidos" },
+                    { "@type": "ListItem", "position": 4, "name": "Búsqueda de cédula venezolana por nombres y apellidos" },
+                    { "@type": "ListItem", "position": 5, "name": "Consulta de teléfonos por número" },
+                    { "@type": "ListItem", "position": 6, "name": "Consulta de teléfonos por DNI o RUC" }
+                ]
+            }
+        }
+    </script>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="returnConfig.js"></script>
@@ -960,8 +996,8 @@
             <div class="w-shape s3"></div>
         </div>
         <div class="welcome-content">
-            <h1>Validar <em>clientes</em> en segundos</h1>
-            <p>Consulta DNI, RUC, cédula venezolana y números de teléfono de forma segura, sin exponer tus datos ni superar los límites de tu plan.</p>
+            <h1>Consulta de <em>DNI, RUC</em> y teléfonos para validar clientes</h1>
+            <p>Consulta DNI y RUC, busca DNI o cédula venezolana por nombres y apellidos, y consulta teléfonos por número o por DNI/RUC. FacilitoTools reúne estas opciones en un solo panel; revisa los <a href="/planes">planes y cupos disponibles</a>.</p>
             <button id="startAppBtn" class="welcome-cta"><span>Empezar ahora</span><i class="fas fa-arrow-right"></i></button>
             <div class="welcome-logos">
                 <span class="logos-caption">Datos verificados contra fuentes oficiales</span>
@@ -1105,17 +1141,17 @@
                     <button class="vc-tab active" data-tab="dni"><i class="fas fa-id-card"></i> DNI</button>
                     <button class="vc-tab" data-tab="ruc"><i class="fas fa-building"></i> RUC</button>
                     <button class="vc-tab" data-tab="cedula"><i class="fas fa-passport"></i> Cédula VE</button>
-                    <button class="vc-tab" data-tab="buscar-cedula"><i class="fas fa-search"></i> Buscar cédula</button>
-                    <button class="vc-tab" data-tab="buscar-dni"><i class="fas fa-search"></i> Buscar DNI</button>
-                    <button class="vc-tab" data-tab="telefonia-doc"><i class="fas fa-phone-volume"></i> Tel. por documento</button>
-                    <button class="vc-tab" data-tab="telefonia-numero"><i class="fas fa-mobile-alt"></i> Tel. por número</button>
+                    <button class="vc-tab" data-tab="buscar-cedula"><i class="fas fa-search"></i> Cédula por nombres</button>
+                    <button class="vc-tab" data-tab="buscar-dni"><i class="fas fa-search"></i> DNI por nombres</button>
+                    <button class="vc-tab" data-tab="telefonia-doc"><i class="fas fa-phone-volume"></i> Teléfonos por DNI</button>
+                    <button class="vc-tab" data-tab="telefonia-numero"><i class="fas fa-mobile-alt"></i> Teléfonos por número</button>
                 </div>
 
                 <!-- DNI -->
                 <section class="vc-panel active" id="panel-dni">
                     <div class="vc-card">
                         <div class="vc-card-head">
-                            <h2><i class="fas fa-id-card"></i> Consultar DNI</h2>
+                            <h2><i class="fas fa-id-card"></i> Consulta de DNI por número</h2>
                             <p>Obtén nombres y apellidos registrados en RENIEC a partir del número de DNI.</p>
                         </div>
                         <form class="vc-form" data-endpoint="dni" data-method="GET">
@@ -1183,7 +1219,7 @@
                 <section class="vc-panel" id="panel-cedula">
                     <div class="vc-card">
                         <div class="vc-card-head">
-                            <h2><i class="fas fa-passport"></i> Cédula venezolana</h2>
+                            <h2><i class="fas fa-passport"></i> Consulta de cédula venezolana por número</h2>
                             <p>Consulta datos asociados a una cédula de identidad venezolana.</p>
                         </div>
                         <form class="vc-form" data-endpoint="cedula" data-method="POST">
@@ -1217,7 +1253,7 @@
                 <section class="vc-panel" id="panel-buscar-cedula">
                     <div class="vc-card">
                         <div class="vc-card-head">
-                            <h2><i class="fas fa-search"></i> Buscar cédula por nombre</h2>
+                            <h2><i class="fas fa-search"></i> Buscar cédula venezolana por nombres y apellidos</h2>
                             <p>Encuentra posibles cédulas venezolanas a partir de nombres y apellidos completos.</p>
                         </div>
                         <form class="vc-form" data-endpoint="buscar-cedula" data-method="POST">
@@ -1251,7 +1287,7 @@
                 <section class="vc-panel" id="panel-buscar-dni">
                     <div class="vc-card">
                         <div class="vc-card-head">
-                            <h2><i class="fas fa-search"></i> Buscar DNI por nombres</h2>
+                            <h2><i class="fas fa-search"></i> Buscar DNI por nombres y apellidos</h2>
                             <p>Encuentra el DNI de una persona a partir de sus nombres y apellidos.</p>
                         </div>
                         <form class="vc-form" data-endpoint="buscar-dni" data-method="POST">
@@ -1292,8 +1328,8 @@
                 <section class="vc-panel" id="panel-telefonia-doc">
                     <div class="vc-card">
                         <div class="vc-card-head">
-                            <h2><i class="fas fa-phone-volume"></i> Telefonía por documento</h2>
-                            <p>Consulta los números móviles y fijos asociados a un DNI o RUC.</p>
+                            <h2><i class="fas fa-phone-volume"></i> Consulta de teléfonos por DNI o RUC</h2>
+                            <p>Consulta los números móviles y fijos asociados a un número de DNI o RUC.</p>
                         </div>
                         <form class="vc-form" data-endpoint="telefonia-doc" data-method="POST">
                             <div class="vc-form-row">
@@ -1326,7 +1362,7 @@
                 <section class="vc-panel" id="panel-telefonia-numero">
                     <div class="vc-card">
                         <div class="vc-card-head">
-                            <h2><i class="fas fa-mobile-alt"></i> Telefonía por número</h2>
+                            <h2><i class="fas fa-mobile-alt"></i> Consulta de teléfonos por número</h2>
                             <p>Verifica la titularidad, operador y estado de un número telefónico específico.</p>
                         </div>
                         <form class="vc-form" data-endpoint="telefonia-numero" data-method="POST">
