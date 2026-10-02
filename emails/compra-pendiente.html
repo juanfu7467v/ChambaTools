@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="color-scheme" content="light">
 <meta name="supported-color-schemes" content="light">
-<title>Tu compra quedó a un clic de completarse — FacilitoTools</title>
+<title>Tu recarga quedó a un clic de completarse — FacilitoTools</title>
 <!--[if mso]>
 <style type="text/css">
   table, td { border-collapse: collapse; }
@@ -27,7 +27,7 @@
 <body style="margin:0; padding:0; background-color:#eef2f6;">
   <!-- Preheader: texto visible en la vista previa de la bandeja de entrada -->
   <div style="display:none; max-height:0; overflow:hidden; mso-hide:all; opacity:0;">
-    Tu selección en FacilitoTools sigue disponible. Retoma tu compra cuando quieras, sin cargos pendientes.
+    Tu recarga en FacilitoTools quedó pendiente. Retómala ahora fácilmente y sin cargos extra.
   </div>
 
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#eef2f6;">
@@ -49,16 +49,16 @@
           <tr>
             <td class="px" style="padding:38px 36px 6px;">
               <h1 class="fallback-font hero-title" style="margin:0 0 20px; font-size:23px; line-height:1.35; font-weight:800; color:#0A1628; border-left:4px solid #FFD700; padding-left:14px;">
-                Tu compra quedó a un paso
+                Tu recarga quedó a un clic de completarse
               </h1>
               <p style="margin:0 0 16px; font-size:15px; line-height:1.65; color:#3f4b5b;">
                 Hola <strong style="color:#0A1628;">{{nombre}}</strong>,
               </p>
               <p style="margin:0 0 18px; font-size:15px; line-height:1.65; color:#3f4b5b;">
-                Notamos que seleccionaste <strong style="color:#0A1628;">{{descripcion}}</strong> y visitaste FacilitoTools, pero la compra todavía no se completó.
+                Notamos que iniciaste una compra de <strong style="color:#0A1628;">{{descripcion}}</strong> en FacilitoTools, pero la transacción no llegó a completarse.
               </p>
               <p style="margin:0 0 22px; font-size:15px; line-height:1.65; color:#3f4b5b;">
-                Tu selección sigue disponible para que puedas retomarla cuando te resulte conveniente.
+                Si fue un corte de señal o un problema momentáneo del sistema, ¡no te preocupes! Puedes retomar tu orden en segundos con el mismo monto seleccionado.
               </p>
             </td>
           </tr>
@@ -69,8 +69,8 @@
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#ecfdf5; border:1px solid #a7f3d0; border-radius:10px;">
                 <tr>
                   <td style="padding:17px 20px;">
-                    <p class="fallback-font" style="margin:0 0 6px; font-size:14px; font-weight:800; color:#065f46;">No se realizó ningún cargo</p>
-                    <p style="margin:0; font-size:13.5px; line-height:1.6; color:#166534;">Si no confirmaste el pago, no se descontó dinero de tu cuenta ni de tu tarjeta. Tus datos y tu saldo permanecen intactos.</p>
+                    <p class="fallback-font" style="margin:0 0 6px; font-size:14px; font-weight:800; color:#065f46;">✅ Sin cargos pendientes</p>
+                    <p style="margin:0; font-size:13.5px; line-height:1.6; color:#166534;">No se ha descontado dinero de tu cuenta ni de tu tarjeta por esta operación. Tu saldo actual permanece intacto y seguro.</p>
                   </td>
                 </tr>
               </table>
@@ -83,10 +83,10 @@
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f8fafc; border:1px solid #dbe4ee; border-radius:10px;">
                 <tr>
                   <td style="padding:21px 22px;">
-                    <p class="fallback-font" style="margin:0 0 12px; font-size:12.5px; font-weight:800; letter-spacing:.5px; text-transform:uppercase; color:#0A1628; border-bottom:1px solid #e7edf3; padding-bottom:10px;">Resumen de tu selección</p>
+                    <p class="fallback-font" style="margin:0 0 12px; font-size:12.5px; font-weight:800; letter-spacing:.5px; text-transform:uppercase; color:#0A1628; border-bottom:1px solid #e7edf3; padding-bottom:10px;">Detalle de tu orden</p>
                     <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
                       <tr>
-                        <td style="padding:6px 0; font-size:13.5px; color:#64748b;">Producto</td>
+                        <td style="padding:6px 0; font-size:13.5px; color:#64748b;">Paquete</td>
                         <td align="right" style="padding:6px 0; font-size:13.5px; font-weight:700; color:#0A1628;">{{descripcion}}</td>
                       </tr>
                       <tr>
@@ -94,11 +94,11 @@
                         <td align="right" style="padding:6px 0; font-size:13.5px; font-weight:700; color:#0A1628;">{{tipo_compra}}</td>
                       </tr>
                       <tr>
-                        <td style="padding:6px 0; font-size:13.5px; color:#64748b;">Créditos / beneficios</td>
+                        <td style="padding:6px 0; font-size:13.5px; color:#64748b;">Créditos a recibir</td>
                         <td align="right" style="padding:6px 0; font-size:13.5px; font-weight:700; color:#0A8448;">{{creditos}}</td>
                       </tr>
                       <tr>
-                        <td style="padding:6px 0; border-top:1px solid #e7edf3; font-size:13.5px; color:#64748b;">Monto seleccionado</td>
+                        <td style="padding:6px 0; border-top:1px solid #e7edf3; font-size:13.5px; color:#64748b;">Total a pagar</td>
                         <td align="right" style="padding:6px 0; border-top:1px solid #e7edf3; font-size:15px; font-weight:800; color:#0A1628;">S/ {{monto}}</td>
                       </tr>
                       <tr>
@@ -115,19 +115,19 @@
           <!-- Beneficios -->
           <tr>
             <td class="px" style="padding:22px 36px 0;">
-              <p class="fallback-font" style="margin:0 0 12px; font-size:14px; font-weight:800; color:#0A1628;">Con FacilitoTools podrás</p>
+              <p class="fallback-font" style="margin:0 0 12px; font-size:14px; font-weight:800; color:#0A1628;">Beneficios de tu recarga en FacilitoTools</p>
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
                 <tr>
                   <td valign="top" style="width:25px; padding:2px 8px 8px 0; font-size:15px; color:#00A844;">✓</td>
-                  <td style="padding:0 0 8px; font-size:13.5px; line-height:1.55; color:#475569;"><strong style="color:#0A1628;">Generar comprobantes profesionales</strong> para tu negocio de forma sencilla.</td>
+                  <td style="padding:0 0 8px; font-size:13.5px; line-height:1.55; color:#475569;"><strong style="color:#0A1628;">Activación inmediata:</strong> Tus créditos se acreditan automáticamente al confirmar el pago.</td>
                 </tr>
                 <tr>
                   <td valign="top" style="width:25px; padding:2px 8px 8px 0; font-size:15px; color:#00A844;">✓</td>
-                  <td style="padding:0 0 8px; font-size:13.5px; line-height:1.55; color:#475569;"><strong style="color:#0A1628;">Validar DNI, RUC y teléfonos</strong> según los beneficios de tu selección.</td>
+                  <td style="padding:0 0 8px; font-size:13.5px; line-height:1.55; color:#475569;"><strong style="color:#0A1628;">Emisión de comprobantes:</strong> Genera documentos profesionales para tu negocio al instante.</td>
                 </tr>
                 <tr>
                   <td valign="top" style="width:25px; padding:2px 8px 8px 0; font-size:15px; color:#00A844;">✓</td>
-                  <td style="padding:0 0 8px; font-size:13.5px; line-height:1.55; color:#475569;"><strong style="color:#0A1628;">Activar tus beneficios rápidamente</strong> una vez que Mercado Pago confirme la operación.</td>
+                  <td style="padding:0 0 8px; font-size:13.5px; line-height:1.55; color:#475569;"><strong style="color:#0A1628;">Validaciones rápidas:</strong> Consulta datos de DNI, RUC y teléfonos sin interrupciones.</td>
                 </tr>
               </table>
             </td>
@@ -139,11 +139,11 @@
               <table role="presentation" cellpadding="0" cellspacing="0">
                 <tr>
                   <td align="center" bgcolor="#00C853" style="border-radius:8px; box-shadow:0 5px 14px rgba(0,168,68,.22);">
-                    <a href="{{checkout_url}}" class="fallback-font" style="display:inline-block; padding:15px 34px; font-size:13.5px; font-weight:800; letter-spacing:.6px; text-transform:uppercase; color:#0A1628; text-decoration:none;">Retomar mi compra</a>
+                    <a href="{{checkout_url}}" class="fallback-font" style="display:inline-block; padding:15px 34px; font-size:13.5px; font-weight:800; letter-spacing:.6px; text-transform:uppercase; color:#0A1628; text-decoration:none;">Completar mi recarga ahora</a>
                   </td>
                 </tr>
               </table>
-              <p style="margin:12px 0 0; font-size:12px; line-height:1.55; color:#94a3b8;">Volverás al checkout seguro de FacilitoTools con tu selección.</p>
+              <p style="margin:12px 0 0; font-size:12px; line-height:1.55; color:#94a3b8;">Serás redirigido al pago seguro de FacilitoTools sin perder tu selección.</p>
             </td>
           </tr>
 
@@ -153,10 +153,10 @@
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f1f5f9; border-radius:8px;">
                 <tr>
                   <td align="center" style="padding:16px 20px; font-size:13px; line-height:1.6; color:#475569;">
-                    <strong style="color:#0A1628;">¿Tuviste un problema?</strong><br>
-                    Estamos para ayudarte. Escríbenos por WhatsApp al
+                    <strong style="color:#0A1628;">¿Necesitas ayuda con tu recarga?</strong><br>
+                    Si tuviste un problema con el pago o la pasarela, escríbenos a WhatsApp
                     <a href="https://wa.me/51944950234" style="color:#008f3d; font-weight:700;">+51 944 950 234</a>
-                    o por correo a
+                    o a
                     <a href="mailto:soporte@facilitotools.com" style="color:#008f3d; font-weight:700;">soporte@facilitotools.com</a>.
                   </td>
                 </tr>
@@ -166,7 +166,7 @@
 
           <tr>
             <td class="px" style="padding:20px 36px 36px;">
-              <p style="margin:0; font-size:12.5px; line-height:1.6; color:#94a3b8;">Recibes este mensaje porque seleccionaste un plan o recarga en facilitotools.com. Si ya completaste la compra, puedes ignorar este correo; la activación se realiza después de la confirmación del pago.</p>
+              <p style="margin:0; font-size:12.5px; line-height:1.6; color:#94a3b8;">Recibes este correo porque iniciaste un proceso de recarga en facilitotools.com. Si ya completaste tu pago en los últimos minutos, puedes ignorar este mensaje; tus créditos se cargarán automáticamente.</p>
             </td>
           </tr>
 
@@ -178,7 +178,7 @@
               <p style="margin:0 0 10px; font-size:12px; color:#8a94a6;">
                 <a href="https://facilitotools.com" style="color:#00A844; font-weight:600;">facilitotools.com</a>
                 &nbsp;·&nbsp;
-                <a href="mailto:soporte@facilitotools.com" style="color:#00A844; font-weight:600;">soporte@facilitotools.com</a>
+                <a href="mailto:soporte@facilitotools.com" style="color:#008f3d; font-weight:600;">soporte@facilitotools.com</a>
               </p>
               <p style="margin:0; font-size:11px; color:#b6bec9;">© 2026 FacilitoTools. Todos los derechos reservados.</p>
             </td>
