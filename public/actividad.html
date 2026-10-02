@@ -280,6 +280,105 @@
         .account-modal-btn.danger .account-modal-btn-icon{background:rgba(229,57,53,.12); color:var(--ruby-light);}
         .account-modal-btn.danger .account-modal-btn-text strong{color:var(--ruby-light);}
 
+        /* ═══ DIÁLOGOS PERSONALIZADOS (reemplazan confirm / prompt del navegador) ═══ */
+        .ft-dialog-overlay{
+            position:fixed; inset:0; background:rgba(5,10,20,.8);
+            backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+            display:none; align-items:center; justify-content:center;
+            z-index:700; padding:20px; opacity:0; transition:opacity .25s ease;
+            overflow-y:auto;
+        }
+        .ft-dialog-overlay.open{display:flex;}
+        .ft-dialog-overlay.show{opacity:1;}
+        .ft-dialog{
+            width:100%; max-width:420px; margin:auto; position:relative; overflow:hidden;
+            background:var(--navy-card); border:1px solid var(--border-subtle);
+            border-radius:var(--radius); box-shadow:0 24px 60px rgba(0,0,0,.55);
+            padding:0 26px 24px; text-align:center;
+            max-height:90vh; max-height:90dvh; overflow-x:hidden; overflow-y:auto;
+            overscroll-behavior:contain; scrollbar-width:thin; scrollbar-color:var(--navy-border) transparent;
+            transform:translateY(18px) scale(.95); opacity:0;
+            transition:transform .32s cubic-bezier(.34,1.56,.64,1), opacity .25s ease;
+        }
+        .ft-dialog-overlay.show .ft-dialog{transform:translateY(0) scale(1); opacity:1;}
+        .ft-dialog::before{
+            content:''; position:absolute; top:0; left:0; right:0; height:120px; pointer-events:none;
+            background:radial-gradient(ellipse at 50% 0%, var(--ft-accent-glow, rgba(229,57,53,.22)) 0%, transparent 70%);
+        }
+        .ft-dialog.is-danger{--ft-accent:var(--ruby-light); --ft-accent-glow:rgba(229,57,53,.22); --ft-accent-bg:rgba(229,57,53,.12); --ft-accent-border:rgba(229,57,53,.3);}
+        .ft-dialog.is-info{--ft-accent:var(--emerald); --ft-accent-glow:rgba(0,200,83,.2); --ft-accent-bg:rgba(0,200,83,.1); --ft-accent-border:var(--border-active);}
+        .ft-dialog-avatar{
+            position:relative; width:92px; height:92px; margin:-0px auto 0; padding-top:0;
+            display:flex; align-items:center; justify-content:center;
+            animation:ftAvatarIn .5s cubic-bezier(.34,1.56,.64,1) both;
+        }
+        .ft-dialog-avatar-wrap{padding-top:26px; position:relative;}
+        .ft-dialog-avatar svg{width:92px; height:92px; filter:drop-shadow(0 8px 18px rgba(0,0,0,.35));}
+        .ft-dialog-avatar .ft-tear{animation:ftTear 2.4s ease-in infinite;}
+        .ft-dialog-avatar .ft-wave{transform-origin:78px 74px; animation:ftWave 2.2s ease-in-out infinite;}
+        @keyframes ftAvatarIn{from{transform:scale(.6); opacity:0;} to{transform:scale(1); opacity:1;}}
+        @keyframes ftTear{0%,15%{transform:translateY(0); opacity:0;} 30%{opacity:1;} 100%{transform:translateY(9px); opacity:0;}}
+        @keyframes ftWave{0%,60%,100%{transform:rotate(0);} 10%{transform:rotate(16deg);} 20%{transform:rotate(-8deg);} 30%{transform:rotate(16deg);} 40%{transform:rotate(-4deg);} 50%{transform:rotate(10deg);}}
+        .ft-dialog-title{
+            position:relative; font-family:var(--font-display); font-size:1.28rem; font-weight:700;
+            color:var(--white); margin:16px 0 8px; line-height:1.3;
+        }
+        .ft-dialog-message{position:relative; font-size:.88rem; color:var(--text-muted); line-height:1.6; margin:0;}
+        .ft-dialog-note{
+            position:relative; display:flex; align-items:flex-start; gap:10px; text-align:left;
+            margin-top:16px; padding:12px 14px; border-radius:var(--radius-sm);
+            background:var(--ft-accent-bg); border:1px solid var(--ft-accent-border);
+            font-size:.78rem; color:var(--text-primary); line-height:1.5;
+        }
+        .ft-dialog-note i{color:var(--ft-accent); margin-top:2px; flex-shrink:0;}
+        .ft-dialog-field{position:relative; margin-top:18px; text-align:left;}
+        .ft-dialog-field label{display:block; font-size:.76rem; font-weight:600; color:var(--text-muted); margin-bottom:6px;}
+        .ft-dialog-input-wrap{position:relative;}
+        .ft-dialog-input{
+            width:100%; padding:13px 44px 13px 14px; border-radius:var(--radius-sm);
+            background:rgba(255,255,255,.04); border:1px solid var(--border-subtle);
+            color:var(--white); font-family:var(--font-family); font-size:.92rem; outline:none;
+            transition:border-color .2s ease, box-shadow .2s ease, background .2s ease;
+        }
+        .ft-dialog-input::placeholder{color:var(--text-subtle);}
+        .ft-dialog-input:focus{border-color:var(--emerald); background:rgba(0,200,83,.05); box-shadow:0 0 0 3px var(--emerald-glow);}
+        .ft-dialog-input.has-error{border-color:var(--ruby); box-shadow:0 0 0 3px var(--ruby-glow);}
+        .ft-dialog-eye{
+            position:absolute; top:50%; right:6px; transform:translateY(-50%);
+            width:34px; height:34px; border:none; background:transparent; border-radius:8px;
+            color:var(--text-muted); cursor:pointer; display:flex; align-items:center; justify-content:center;
+            transition:color .2s ease, background .2s ease;
+        }
+        .ft-dialog-eye:hover{color:var(--white); background:rgba(255,255,255,.06);}
+        .ft-dialog-error{display:none; margin-top:6px; font-size:.74rem; color:var(--ruby-light);}
+        .ft-dialog-error.visible{display:block;}
+        .ft-dialog-actions{position:relative; display:flex; gap:10px; margin-top:24px;}
+        .ft-dialog-btn{
+            flex:1; padding:13px 16px; border-radius:var(--radius-sm); cursor:pointer;
+            font-family:var(--font-family); font-size:.9rem; font-weight:700;
+            display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:48px;
+            transition:all .2s ease; border:1px solid transparent;
+        }
+        .ft-dialog-btn:focus-visible{outline:2px solid var(--white); outline-offset:2px; position:relative; z-index:1;}
+        .ft-dialog-btn.cancel{background:rgba(255,255,255,.04); border-color:var(--border-subtle); color:var(--text-primary);}
+        .ft-dialog-btn.cancel:hover{background:rgba(255,255,255,.09); color:var(--white);}
+        .ft-dialog-btn.cancel:active{transform:translateY(1px);}
+        .ft-dialog-btn.confirm{color:#fff; background:linear-gradient(135deg,var(--ruby),#C62828); box-shadow:0 4px 18px rgba(229,57,53,.3);}
+        .ft-dialog-btn.confirm:hover{transform:translateY(-1px); box-shadow:0 6px 24px rgba(229,57,53,.45);}
+        .ft-dialog-btn.confirm:active{transform:translateY(1px);}
+        .ft-dialog.is-info .ft-dialog-btn.confirm{color:var(--navy-deep); background:linear-gradient(135deg,var(--emerald),var(--emerald-dark)); box-shadow:var(--shadow-emerald);}
+        .ft-dialog.is-info .ft-dialog-btn.confirm:hover{box-shadow:0 6px 24px var(--emerald-glow-strong);}
+        @media (max-width:480px){
+            .ft-dialog-overlay{align-items:flex-end; padding:12px 12px max(12px, env(safe-area-inset-bottom));}
+            .ft-dialog{padding:0 20px 20px; margin:0 auto; max-height:calc(100vh - 24px); max-height:calc(100dvh - 24px);}
+            .ft-dialog-actions{flex-direction:column; gap:9px;}
+            .ft-dialog-btn{padding:14px 16px; min-height:50px; width:100%;}
+            .ft-dialog-input{font-size:16px; min-height:48px;}
+        }
+        @media (prefers-reduced-motion:reduce){
+            .ft-dialog, .ft-dialog-overlay, .ft-dialog-avatar, .ft-dialog-avatar .ft-tear, .ft-dialog-avatar .ft-wave{animation:none !important; transition:none !important;}
+        }
+
         /* ═══ CARDS GENERALES ═══ */
         .profile-card{
             background:var(--navy-card); border:1px solid var(--border-subtle);
@@ -766,6 +865,32 @@
     </div>
 </div>
 
+<!-- ═══ DIÁLOGO PERSONALIZADO (confirmaciones / contraseña) ═══ -->
+<div class="ft-dialog-overlay" id="ftDialogOverlay">
+    <div class="ft-dialog is-danger" id="ftDialog" role="dialog" aria-modal="true" aria-labelledby="ftDialogTitle" aria-describedby="ftDialogMessage">
+        <div class="ft-dialog-avatar-wrap">
+            <div class="ft-dialog-avatar" id="ftDialogAvatar" aria-hidden="true"></div>
+        </div>
+        <h3 class="ft-dialog-title" id="ftDialogTitle"></h3>
+        <p class="ft-dialog-message" id="ftDialogMessage"></p>
+        <div class="ft-dialog-note" id="ftDialogNote" style="display:none;">
+            <i class="fas fa-triangle-exclamation"></i><span id="ftDialogNoteText"></span>
+        </div>
+        <div class="ft-dialog-field" id="ftDialogField" style="display:none;">
+            <label for="ftDialogInput" id="ftDialogInputLabel">Contraseña</label>
+            <div class="ft-dialog-input-wrap">
+                <input class="ft-dialog-input" id="ftDialogInput" type="password" autocomplete="current-password" placeholder="Ingresa tu contraseña" />
+                <button class="ft-dialog-eye" id="ftDialogEye" type="button" aria-label="Mostrar contraseña"><i class="fas fa-eye"></i></button>
+            </div>
+            <div class="ft-dialog-error" id="ftDialogError" role="alert">Ingresa tu contraseña para continuar.</div>
+        </div>
+        <div class="ft-dialog-actions">
+            <button class="ft-dialog-btn cancel" id="ftDialogCancel" type="button">Cancelar</button>
+            <button class="ft-dialog-btn confirm" id="ftDialogConfirm" type="button">Confirmar</button>
+        </div>
+    </div>
+</div>
+
 <!-- ═══ FOOTER ═══ -->
 <footer class="footer-content">
     <p>FacilitoTools.com · Generación de comprobantes y validación de clientes © 2026</p>
@@ -1073,6 +1198,182 @@
         } catch (e) { console.error('Firebase init error:', e); }
     }
 
+    // ════════════════════════════════════════════════════
+    //  DIÁLOGOS PERSONALIZADOS (reemplazan confirm() y prompt())
+    // ════════════════════════════════════════════════════
+    const FT_AVATARS = {
+        // Carita triste y amigable (despedida)
+        sad: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <defs><radialGradient id="ftFaceSad" cx="50%" cy="35%" r="70%"><stop offset="0%" stop-color="#FFE27A"/><stop offset="100%" stop-color="#F5B82E"/></radialGradient></defs>
+            <circle cx="50" cy="50" r="44" fill="url(#ftFaceSad)" stroke="rgba(255,255,255,.25)" stroke-width="2"/>
+            <ellipse cx="30" cy="60" rx="7" ry="4.5" fill="#FF8A80" opacity=".45"/>
+            <ellipse cx="70" cy="60" rx="7" ry="4.5" fill="#FF8A80" opacity=".45"/>
+            <path d="M26 36 Q34 30 42 36" stroke="#5D4037" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <path d="M58 36 Q66 30 74 36" stroke="#5D4037" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <ellipse cx="35" cy="47" rx="4.5" ry="6" fill="#3E2723"/>
+            <ellipse cx="65" cy="47" rx="4.5" ry="6" fill="#3E2723"/>
+            <circle cx="33.5" cy="45" r="1.6" fill="#fff"/><circle cx="63.5" cy="45" r="1.6" fill="#fff"/>
+            <path class="ft-tear" d="M28 54 q-3 6 0 8 q3 -2 0 -8z" fill="#4FC3F7"/>
+            <path d="M38 71 Q50 62 62 71" stroke="#5D4037" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+        </svg>`,
+        // Carita sonriente saludando (cerrar sesión)
+        wave: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <defs><radialGradient id="ftFaceWave" cx="50%" cy="35%" r="70%"><stop offset="0%" stop-color="#8FF0B8"/><stop offset="100%" stop-color="#00C853"/></radialGradient></defs>
+            <circle cx="46" cy="52" r="40" fill="url(#ftFaceWave)" stroke="rgba(255,255,255,.25)" stroke-width="2"/>
+            <ellipse cx="26" cy="60" rx="6" ry="4" fill="#fff" opacity=".25"/>
+            <ellipse cx="58" cy="60" rx="6" ry="4" fill="#fff" opacity=".25"/>
+            <ellipse cx="33" cy="47" rx="4" ry="5.5" fill="#0A1628"/>
+            <ellipse cx="55" cy="47" rx="4" ry="5.5" fill="#0A1628"/>
+            <circle cx="31.8" cy="45" r="1.4" fill="#fff"/><circle cx="53.8" cy="45" r="1.4" fill="#fff"/>
+            <path d="M32 62 Q44 72 56 62" stroke="#0A1628" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+            <g class="ft-wave"><circle cx="80" cy="68" r="11" fill="#FFE27A" stroke="rgba(255,255,255,.3)" stroke-width="1.5"/>
+            <path d="M75 66 q5 -6 10 0" stroke="#B8960F" stroke-width="2" fill="none" stroke-linecap="round"/></g>
+        </svg>`,
+        // Candado (verificación de contraseña)
+        lock: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <defs><linearGradient id="ftLockG" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FFE27A"/><stop offset="100%" stop-color="#F5B82E"/></linearGradient></defs>
+            <circle cx="50" cy="50" r="44" fill="rgba(0,200,83,.12)" stroke="rgba(0,200,83,.4)" stroke-width="2"/>
+            <path d="M36 46 V38 a14 14 0 0 1 28 0 V46" stroke="#E2E8F0" stroke-width="6" fill="none" stroke-linecap="round"/>
+            <rect x="30" y="45" width="40" height="30" rx="8" fill="url(#ftLockG)"/>
+            <circle cx="50" cy="58" r="4.5" fill="#5D4037"/><rect x="48.2" y="60" width="3.6" height="8" rx="1.8" fill="#5D4037"/>
+        </svg>`
+    };
+
+    const ftDialogOverlay = document.getElementById('ftDialogOverlay');
+    const ftDialogEl      = document.getElementById('ftDialog');
+    const ftDialogAvatar  = document.getElementById('ftDialogAvatar');
+    const ftDialogTitle   = document.getElementById('ftDialogTitle');
+    const ftDialogMessage = document.getElementById('ftDialogMessage');
+    const ftDialogNote    = document.getElementById('ftDialogNote');
+    const ftDialogNoteTxt = document.getElementById('ftDialogNoteText');
+    const ftDialogField   = document.getElementById('ftDialogField');
+    const ftDialogInput   = document.getElementById('ftDialogInput');
+    const ftDialogEye     = document.getElementById('ftDialogEye');
+    const ftDialogError   = document.getElementById('ftDialogError');
+    const ftDialogCancel  = document.getElementById('ftDialogCancel');
+    const ftDialogConfirm = document.getElementById('ftDialogConfirm');
+    let ftDialogResolve = null;
+    let ftDialogHasInput = false;
+
+    function ftDialogIsOpen() { return ftDialogOverlay.classList.contains('open'); }
+
+    function ftCloseDialog(result) {
+        if (!ftDialogResolve) return;
+        const resolve = ftDialogResolve;
+        ftDialogResolve = null;
+        ftDialogOverlay.classList.remove('show');
+        // Solo liberar el scroll si el modal de cuenta no sigue abierto debajo
+        if (!accountModalOverlay || !accountModalOverlay.classList.contains('open')) {
+            document.body.style.overflow = '';
+        }
+        setTimeout(() => {
+            if (!ftDialogOverlay.classList.contains('show')) {
+                ftDialogOverlay.classList.remove('open');
+                ftDialogInput.value = '';
+                ftDialogInput.type = 'password';
+            }
+        }, 250);
+        resolve(result);
+    }
+
+    /**
+     * Muestra un diálogo personalizado y devuelve una Promise.
+     * Resuelve { confirmed: boolean, value: string }
+     */
+    function ftDialog(opts) {
+        const o = Object.assign({
+            variant: 'danger', avatar: 'sad', title: '', message: '', note: '',
+            confirmText: 'Confirmar', cancelText: 'Cancelar', confirmIcon: '',
+            input: false, inputLabel: 'Contraseña', inputPlaceholder: ''
+        }, opts || {});
+
+        // Si ya había uno abierto, se cancela
+        if (ftDialogResolve) ftCloseDialog({ confirmed: false, value: '' });
+
+        ftDialogEl.className = 'ft-dialog ' + (o.variant === 'info' ? 'is-info' : 'is-danger');
+        ftDialogAvatar.innerHTML = FT_AVATARS[o.avatar] || FT_AVATARS.sad;
+        ftDialogTitle.textContent = o.title;
+        ftDialogMessage.textContent = o.message;
+        ftDialogMessage.style.display = o.message ? '' : 'none';
+        ftDialogNote.style.display = o.note ? 'flex' : 'none';
+        ftDialogNoteTxt.textContent = o.note;
+        ftDialogHasInput = !!o.input;
+        ftDialogField.style.display = o.input ? '' : 'none';
+        ftDialogError.classList.remove('visible');
+        ftDialogInput.classList.remove('has-error');
+        ftDialogInput.value = '';
+        ftDialogInput.type = 'password';
+        ftDialogEye.innerHTML = '<i class="fas fa-eye"></i>';
+        document.getElementById('ftDialogInputLabel').textContent = o.inputLabel;
+        ftDialogInput.placeholder = o.inputPlaceholder || '';
+        ftDialogCancel.textContent = o.cancelText;
+        ftDialogConfirm.innerHTML = (o.confirmIcon ? '<i class="' + o.confirmIcon + '"></i>' : '') + '<span></span>';
+        ftDialogConfirm.querySelector('span').textContent = o.confirmText;
+
+        ftDialogOverlay.classList.add('open');
+        requestAnimationFrame(() => ftDialogOverlay.classList.add('show'));
+        document.body.style.overflow = 'hidden';
+
+        return new Promise(resolve => {
+            ftDialogResolve = resolve;
+            setTimeout(() => {
+                // Foco seguro: en acciones destructivas, el botón Cancelar; con campo, el input
+                (o.input ? ftDialogInput : ftDialogCancel).focus();
+            }, 120);
+        });
+    }
+
+    function ftSubmitDialog() {
+        if (ftDialogHasInput) {
+            const val = ftDialogInput.value;
+            if (!val) {
+                ftDialogError.classList.add('visible');
+                ftDialogInput.classList.add('has-error');
+                ftDialogInput.focus();
+                return;
+            }
+            ftCloseDialog({ confirmed: true, value: val });
+            return;
+        }
+        ftCloseDialog({ confirmed: true, value: '' });
+    }
+
+    ftDialogConfirm.addEventListener('click', ftSubmitDialog);
+    ftDialogCancel.addEventListener('click', () => ftCloseDialog({ confirmed: false, value: '' }));
+    ftDialogOverlay.addEventListener('click', (e) => {
+        if (e.target === ftDialogOverlay) ftCloseDialog({ confirmed: false, value: '' });
+    });
+    ftDialogInput.addEventListener('input', () => {
+        ftDialogError.classList.remove('visible');
+        ftDialogInput.classList.remove('has-error');
+    });
+    ftDialogInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); ftSubmitDialog(); }
+    });
+    ftDialogEye.addEventListener('click', () => {
+        const show = ftDialogInput.type === 'password';
+        ftDialogInput.type = show ? 'text' : 'password';
+        ftDialogEye.innerHTML = '<i class="fas ' + (show ? 'fa-eye-slash' : 'fa-eye') + '"></i>';
+        ftDialogEye.setAttribute('aria-label', show ? 'Ocultar contraseña' : 'Mostrar contraseña');
+        ftDialogInput.focus();
+    });
+    // Captura: Escape y Tab se gestionan aquí antes que el resto de listeners de la página
+    window.addEventListener('keydown', (e) => {
+        if (!ftDialogIsOpen()) return;
+        if (e.key === 'Escape') {
+            e.stopPropagation();
+            ftCloseDialog({ confirmed: false, value: '' });
+            return;
+        }
+        if (e.key === 'Tab') {
+            const focusables = Array.from(ftDialogEl.querySelectorAll('button, input')).filter(el => el.offsetParent !== null);
+            if (!focusables.length) return;
+            const first = focusables[0], last = focusables[focusables.length - 1];
+            if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+            else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+        }
+    }, true);
+
     const btnLogoutEl = document.getElementById('btnLogout');
     if (btnLogoutEl) {
         btnLogoutEl.addEventListener('click', async () => {
@@ -1136,7 +1437,15 @@
     async function reauthenticateBeforeDeletion(user) {
         const providers = (user.providerData || []).map(provider => provider.providerId);
         if (providers.includes('password')) {
-            const password = window.prompt('Por seguridad, confirma tu contraseña para eliminar la cuenta:');
+            const passwordDialog = await ftDialog({
+                variant: 'danger', avatar: 'lock',
+                title: 'Confirma tu identidad',
+                message: 'Por seguridad, confirma tu contraseña para eliminar la cuenta.',
+                input: true, inputLabel: 'Contraseña', inputPlaceholder: 'Ingresa tu contraseña',
+                confirmText: 'Eliminar cuenta', cancelText: 'Cancelar',
+                confirmIcon: 'fas fa-user-slash'
+            });
+            const password = passwordDialog.confirmed ? passwordDialog.value : '';
             if (!password) {
                 const error = new Error('Reautenticación cancelada.');
                 error.code = 'auth/requires-recent-login';
@@ -1173,8 +1482,15 @@
 
     if (btnDeleteAccountEl) {
         btnDeleteAccountEl.addEventListener('click', async () => {
-            const confirmado = confirm('¿Estás seguro de que deseas darte de baja?\n\nEsta acción eliminará tu cuenta y todos tus datos de forma permanente y no se puede deshacer.');
-            if (!confirmado) return;
+            const bajaDialog = await ftDialog({
+                variant: 'danger', avatar: 'sad',
+                title: '¿Estás seguro de que deseas darte de baja?',
+                message: 'Lamentamos que quieras irte. Nos encantaría seguir acompañándote en FacilitoTools.',
+                note: 'Esta acción eliminará tu cuenta y todos tus datos de forma permanente y no se puede deshacer.',
+                confirmText: 'Sí, darme de baja', cancelText: 'Cancelar',
+                confirmIcon: 'fas fa-user-slash'
+            });
+            if (!bajaDialog.confirmed) return;
 
             btnDeleteAccountEl.disabled = true;
             try {
