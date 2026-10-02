@@ -1180,9 +1180,40 @@
         let currentPaymentId = null;
         let currentPaymentData = null;
         let activeMethod = 'card';
+        let checkoutIntentRegistered = false;
         const brickControllers = {
             card: null
         };
+
+        async function registerCheckoutIntent(force = false) {
+            if (checkoutIntentRegistered && !force) return;
+            try {
+                const response = await fetch('/api/checkout-intent', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({ planId, paymentMethod: activeMethod })
+                });
+                if (!response.ok) throw new Error('No se pudo registrar la selección');
+                checkoutIntentRegistered = true;
+            } catch (error) {
+                // El checkout no debe bloquearse si el recordatorio falla.
+                console.warn('No se pudo programar el recordatorio de checkout:', error.message);
+            }
+        }
+
+        async function cancelCheckoutIntent() {
+            try {
+                await fetch('/api/checkout-intent/cancel', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({ planId })
+                });
+            } catch (error) {
+                console.warn('No se pudo cancelar el recordatorio de checkout:', error.message);
+            }
+        }
 
         const premiumVariables = {
             formBackgroundColor: 'rgba(15, 23, 42, 0.7)',
@@ -1347,6 +1378,7 @@
                     if (method === activeMethod) return;
                     activeMethod = method;
                     updateSegmentedControl(method);
+                    await registerCheckoutIntent(true);
                     await ensureMethodMounted(method);
                 });
             });
@@ -1646,6 +1678,7 @@
 
         async function showSuccessScreen(paymentId) {
             currentPaymentId = paymentId;
+            await cancelCheckoutIntent();
             currentPaymentData = await fetchPaymentDetail(paymentId);
 
             document.getElementById('success-email').textContent = currentPaymentData.email || email;
@@ -1866,6 +1899,7 @@
                 setupMethodSelector();
                 document.getElementById('yapeForm').addEventListener('submit', handleYapeSubmit);
                 setupVoucherDownload();
+                await registerCheckoutIntent();
 
                 const config = await fetchJSON('/api/config');
                 mp = new MercadoPago(config.mercadopagoPublicKey, { locale: 'es-PE' });

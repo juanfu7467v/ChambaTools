@@ -1,7 +1,7 @@
-# fly.toml app configuration file generated for masitaprexv2
+# fly.toml app configuration for FacilitoTools
 
-app = 'masitaprexv2'
-primary_region = 'iad'
+app = 'facilitotools'
+primary_region = 'gru'
 
 [build]
 
@@ -13,6 +13,7 @@ primary_region = 'iad'
   HOST_URL = 'https://www.masitaprex.com'
   RECAPTCHA_CLAVE_SECRETA = ''
   RESEND_API_KEY = ''
+  CHECKOUT_REMINDER_DELAY_MINUTES = '5'
   SLACK_WEBHOOK_URL = ''
   TELEGRAM_BOT_TOKEN = ''
 
@@ -21,7 +22,9 @@ primary_region = 'iad'
   force_https = true
   auto_stop_machines = 'stop'
   auto_start_machines = true
-  min_machines_running = 0
+  # El worker de checkout necesita al menos una máquina viva para ejecutar
+  # el recordatorio aun cuando el usuario cierre la página.
+  min_machines_running = 1
   processes = ['app']
 
   # Margen de gracia corto para permitir un apagado limpio e inmediato (5 segundos)

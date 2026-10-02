@@ -38,6 +38,7 @@ import {
   enviarBienvenida, 
   enviarCorreoSospechoso, 
   enviarCorreoRechazo,
+  enviarCorreoCompraPendiente,
   enviarCorreoSoporte,
   buildInvoiceProxyUrl,
   otorgarBeneficio,          // <--- Importamos la nueva función
@@ -202,6 +203,127 @@ const PLAN_NOMBRES = {
   recarga_maxima: 'Recarga Máxima'
 };
 
+// Precios publicados en planes.html/checkout.html. Se usan únicamente para
+// que el recordatorio conserve el importe que el usuario seleccionó.
+const PLAN_PRECIOS = {
+  semanal: 10,
+  mensual: 22,
+  bimestral: 35,
+  recarga_basica: 22,
+  recarga_estandar: 35,
+  recarga_avanzada: 45,
+  recarga_pro: 55,
+  recarga_maxima: 65
+};
+const CHECKOUT_INTENTS_COLLECTION = 'checkout_intents';
+const configuredCheckoutDelayMinutes = Number(process.env.CHECKOUT_REMINDER_DELAY_MINUTES || 5);
+const checkoutDelayMinutes = Number.isFinite(configuredCheckoutDelayMinutes)
+  ? Math.max(1, configuredCheckoutDelayMinutes)
+  : 5;
+const CHECKOUT_REMINDER_DELAY_MS = checkoutDelayMinutes * 60 * 1000;
+let checkoutReminderWorkerRunning = false;
+
+function getCheckoutIntentId(uid, planId) {
+  return crypto.createHash('sha256').update(`${uid}:${planId}`).digest('hex');
+}
+
+function getCheckoutBenefits(planId, planConfig) {
+  if (planConfig.tipo === 'recarga') {
+    return `${planConfig.consultasLimite} consultas DNI/RUC · ${planConfig.consultasTelefonosLimite} consultas de teléfonos`;
+  }
+  return `${planConfig.comprobantesLimite} comprobantes · ${planConfig.consultasLimite} consultas DNI/RUC · ${planConfig.duracionDias} días`;
+}
+
+function getCheckoutMethodLabel(method) {
+  return method === 'yape' ? 'Yape' : 'Tarjeta';
+}
+
+function buildCheckoutUrl(planId, uid, email) {
+  const baseUrl = (process.env.PUBLIC_APP_URL || 'https://facilitotools.com').replace(/\/+$/, '');
+  return `${baseUrl}/checkout.html?planId=${encodeURIComponent(planId)}&uid=${encodeURIComponent(uid)}&email=${encodeURIComponent(email)}`;
+}
+
+async function markCheckoutIntentCompleted(uid, planId) {
+  if (!db || !uid || !planId || !PLANES_CONFIG[planId]) return;
+  try {
+    await db.collection(CHECKOUT_INTENTS_COLLECTION).doc(getCheckoutIntentId(uid, planId)).set({
+      status: 'completed',
+      completedAt: new Date(),
+      updatedAt: new Date()
+    }, { merge: true });
+    logger.info('CHECKOUT_INTENT', 'Intención pendiente cancelada por pago confirmado', { uid, planId });
+  } catch (error) {
+    logger.error('CHECKOUT_INTENT', 'No se pudo cancelar la intención de checkout', error, { uid, planId });
+  }
+}
+
+async function processPendingCheckoutReminders() {
+  if (checkoutReminderWorkerRunning || !db || !resend) return;
+  checkoutReminderWorkerRunning = true;
+  try {
+    // Se consulta solo por status para evitar exigir un índice compuesto de
+    // Firestore; reminderAt se filtra en memoria y el lote está acotado.
+    const snapshot = await db.collection(CHECKOUT_INTENTS_COLLECTION)
+      .where('status', '==', 'pending')
+      .limit(25)
+      .get();
+    const now = Date.now();
+
+    for (const doc of snapshot.docs) {
+      const ref = doc.ref;
+      let intent;
+      let claimed = false;
+      await db.runTransaction(async transaction => {
+        const current = await transaction.get(ref);
+        const data = current.data() || {};
+        const reminderAt = data.reminderAt?.toDate ? data.reminderAt.toDate().getTime() : new Date(data.reminderAt || 0).getTime();
+        const claimAt = data.reminderClaimedAt?.toDate ? data.reminderClaimedAt.toDate().getTime() : new Date(data.reminderClaimedAt || 0).getTime();
+        const claimIsFresh = claimAt && now - claimAt < 10 * 60 * 1000;
+        if (!current.exists || data.status !== 'pending' || data.reminderSent || !reminderAt || reminderAt > now || claimIsFresh) return;
+        transaction.update(ref, { reminderClaimedAt: new Date(), updatedAt: new Date() });
+        intent = data;
+        claimed = true;
+      });
+      if (!claimed || !intent) continue;
+
+      try {
+        const result = await enviarCorreoCompraPendiente(
+          intent.email,
+          intent.nombre,
+          intent.descripcion,
+          intent.tipoCompra,
+          intent.creditos,
+          intent.monto,
+          intent.metodoPago,
+          intent.checkoutUrl,
+          resend
+        );
+        if (!result.success) throw new Error(result.error || 'No se pudo enviar el recordatorio');
+        await ref.set({
+          status: 'sent',
+          reminderSent: true,
+          reminderSentAt: new Date(),
+          updatedAt: new Date()
+        }, { merge: true });
+        logger.info('CHECKOUT_REMINDER', 'Recordatorio de checkout enviado', { email: intent.email, planId: intent.planId });
+      } catch (error) {
+        // Permite reintentar en la siguiente pasada si Resend o la red fallan.
+        await ref.set({ reminderClaimedAt: null, updatedAt: new Date() }, { merge: true });
+        logger.error('CHECKOUT_REMINDER', 'Error enviando recordatorio de checkout', error, { email: intent.email, planId: intent.planId });
+      }
+    }
+  } catch (error) {
+    logger.error('CHECKOUT_REMINDER', 'Error procesando intenciones pendientes', error);
+  } finally {
+    checkoutReminderWorkerRunning = false;
+  }
+}
+
+// El worker usa Firestore como fuente de verdad, por lo que sobrevive a
+// reinicios. Fly.io se configura con una máquina siempre disponible para que
+// este ciclo pueda ejecutar el envío aun cuando el usuario cierre checkout.
+setInterval(processPendingCheckoutReminders, 60 * 1000);
+
 // Plantillas exclusivas del plan gratuito (deben coincidir con plantillas.js)
 const PLANTILLAS_PLAN_GRATIS = ['moderna'];
 const PLANTILLAS_PLAN_PAGO = ['moderna', 'elegante', 'corporativa', 'premium', 'sakura', 'imperial', 'jade', 'dragon'];
@@ -220,6 +342,75 @@ app.get('/api/session', (req, res) => {
   }
 
   res.status(200).json({ authenticated: true, uid, email });
+});
+
+// Registra que una persona llegó al checkout. El correo solo se programa si
+// la intención continúa pendiente después del plazo configurado y se cancela
+// automáticamente cuando Mercado Pago confirma el pago.
+app.post('/api/checkout-intent', async (req, res) => {
+  const context = 'CHECKOUT_INTENT';
+  try {
+    const uid = getAuthenticatedUid(req);
+    const email = req.signedCookies?.user_email;
+    const { planId, paymentMethod } = req.body || {};
+    const planConfig = PLANES_CONFIG[planId];
+    if (!uid || !email) return res.status(401).json({ success: false, error: 'No autenticado.' });
+    if (!planConfig || planId === 'gratis') return res.status(400).json({ success: false, error: 'Plan no válido para checkout.' });
+    if (!db) return res.status(503).json({ success: false, error: 'Base de datos no disponible.' });
+
+    let nombre = email.split('@')[0];
+    try {
+      const userDoc = await db.collection('usuarios').doc(uid).get();
+      if (userDoc.exists) {
+        const data = userDoc.data();
+        nombre = data.name || data.displayName || data.nombre || nombre;
+      }
+    } catch (_) { /* el correo puede continuar con el nombre derivado */ }
+
+    const intent = {
+      uid,
+      email,
+      nombre,
+      planId,
+      descripcion: planConfig.descripcion,
+      tipoCompra: planConfig.tipo === 'recarga' ? 'Recarga de consultas' : 'Plan de FacilitoTools',
+      creditos: getCheckoutBenefits(planId, planConfig),
+      monto: PLAN_PRECIOS[planId] || null,
+      metodoPago: getCheckoutMethodLabel(paymentMethod),
+      checkoutUrl: buildCheckoutUrl(planId, uid, email),
+      status: 'pending',
+      reminderSent: false,
+      reminderClaimedAt: null,
+      reminderAt: new Date(Date.now() + CHECKOUT_REMINDER_DELAY_MS),
+      updatedAt: new Date()
+    };
+    const ref = db.collection(CHECKOUT_INTENTS_COLLECTION).doc(getCheckoutIntentId(uid, planId));
+    const current = await ref.get();
+    await ref.set({
+      ...intent,
+      // Una nueva visita al checkout representa una nueva oportunidad; se
+      // reinicia el plazo incluso si un recordatorio anterior ya fue enviado.
+      createdAt: current.exists ? (current.data().createdAt || new Date()) : new Date()
+    }, { merge: true });
+    logger.info(context, 'Intención de checkout registrada', { uid, planId, email, reminderAt: intent.reminderAt.toISOString() });
+    res.json({ success: true, reminderInMinutes: Math.ceil(CHECKOUT_REMINDER_DELAY_MS / 60000) });
+  } catch (error) {
+    logger.error(context, 'Error registrando intención de checkout', error);
+    res.status(500).json({ success: false, error: 'No se pudo registrar la compra pendiente.' });
+  }
+});
+
+app.post('/api/checkout-intent/cancel', async (req, res) => {
+  try {
+    const uid = getAuthenticatedUid(req);
+    const { planId } = req.body || {};
+    if (!uid) return res.status(401).json({ success: false, error: 'No autenticado.' });
+    await markCheckoutIntentCompleted(uid, planId);
+    res.json({ success: true });
+  } catch (error) {
+    logger.error('CHECKOUT_INTENT', 'Error cancelando intención de checkout', error);
+    res.status(500).json({ success: false, error: 'No se pudo actualizar la compra pendiente.' });
+  }
 });
 
 // Endpoint: cierra la sesión del lado del servidor eliminando las cookies
@@ -993,6 +1184,7 @@ app.post("/api/pay", async (req, res) => {
     // ninguna validación de seguridad: seguimos confiando exclusivamente
     // en el estado real devuelto por la API de Mercado Pago.
     if (result.status === 'approved') {
+      await markCheckoutIntentCompleted(uid, planId);
       otorgarBeneficio(
         uid,
         payer.email,
@@ -1045,6 +1237,7 @@ app.post("/api/webhook/mercadopago", async (req, res) => {
         const email = metadata.email || paymentInfo.payer?.email;
 
         if (uid && planId && email) {
+          await markCheckoutIntentCompleted(uid, planId);
           await otorgarBeneficio(
             uid,
             email,
