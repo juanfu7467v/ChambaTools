@@ -10,7 +10,8 @@ primary_region = 'gru'
   FIREBASE_PRIVATE_KEY = ''
   FIREBASE_PROJECT_ID = ''
   FIREBASE_SERVICE_ACCOUNT = ''
-  HOST_URL = 'https://www.masitaprex.com'
+  HOST_URL = 'https://facilitotools.com'
+  PUBLIC_APP_URL = 'https://facilitotools.com'
   RECAPTCHA_CLAVE_SECRETA = ''
   RESEND_API_KEY = ''
   CHECKOUT_REMINDER_DELAY_MINUTES = '5'
@@ -20,16 +21,18 @@ primary_region = 'gru'
 [http_service]
   internal_port = 8080
   force_https = true
+  # Igual que Masitaprex: detener cuando no haya tráfico y despertar con la
+  # siguiente solicitud, manteniendo el consumo en cero durante la inactividad.
   auto_stop_machines = 'stop'
   auto_start_machines = true
-  # El worker de checkout necesita al menos una máquina viva para ejecutar
-  # el recordatorio aun cuando el usuario cierre la página.
-  min_machines_running = 1
+  # El worker de recordatorios usa Firestore como fuente persistente. Al no
+  # fijar una máquina mínima, Fly.io puede entrar en reposo cuando no haya
+  # usuarios, tal como ocurre en la integración funcional de Masitaprex.
+  min_machines_running = 0
   processes = ['app']
 
-  # Margen de gracia corto para permitir un apagado limpio e inmediato (5 segundos)
-  kill_signal = 'SIGINT'
-  kill_timeout = '5s'
+  kill_signal = 'SIGTERM'
+  kill_timeout = '1200s'
 
 [[vm]]
   cpu_kind = 'shared'

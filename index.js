@@ -10,6 +10,7 @@ import fs from "fs";
 import { generateInvoicePDF } from './pdfGenerator.js';
 import { Resend } from "resend";
 import helmet from "helmet";
+import compression from "compression";
 import rateLimit from 'express-rate-limit';
 import { helmetConfig, corsAllowedOrigins } from './cspConfig.js';
 import plantillasRouter, { setDb as setPlantillasDb } from './plantillas.js';
@@ -91,6 +92,8 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser(sessionCookieSecret));
 app.use(helmet(helmetConfig));
+// Reduce el peso de HTML/CSS/JS sin tocar respuestas JSON sensibles.
+app.use(compression({ threshold: 1024 }));
 
 // Límites generales y específicos contra abuso de endpoints costosos.
 app.use(rateLimit({ windowMs: 15 * 60 * 1000, limit: 300, standardHeaders: 'draft-7', legacyHeaders: false }));
@@ -319,10 +322,12 @@ async function processPendingCheckoutReminders() {
   }
 }
 
-// El worker usa Firestore como fuente de verdad, por lo que sobrevive a
-// reinicios. Fly.io se configura con una máquina siempre disponible para que
-// este ciclo pueda ejecutar el envío aun cuando el usuario cierre checkout.
+// Revisa periódicamente las intenciones vencidas. El estado queda en
+// Firestore, por lo que un reinicio no pierde los abandonos pendientes.
 setInterval(processPendingCheckoutReminders, 60 * 1000);
+processPendingCheckoutReminders().catch(error => {
+  logger.error('CHECKOUT_REMINDER', 'Error en la primera revisión de compras pendientes', error);
+});
 
 // Plantillas exclusivas del plan gratuito (deben coincidir con plantillas.js)
 const PLANTILLAS_PLAN_GRATIS = ['moderna'];
@@ -1490,6 +1495,11 @@ const serveHtmlWithGA = (req, res, next) => {
       try {
         let html = fs.readFileSync(filePath, 'utf8');
         html = injectGA(html);
+        // El HTML no contiene datos de usuario: las credenciales y el estado
+        // se cargan posteriormente mediante endpoints protegidos. Un TTL
+        // corto mejora la navegación sin conservar cambios durante mucho
+        // tiempo después de un despliegue.
+        res.setHeader('Cache-Control', 'public, max-age=60, stale-while-revalidate=300');
         return res.send(html);
       } catch (err) {
         logger.error('GA_INJECTION', `Error inyectando GA en ${fileName}`, err);
@@ -1501,7 +1511,14 @@ const serveHtmlWithGA = (req, res, next) => {
 };
 
 app.use(serveHtmlWithGA);
-app.use(express.static(path.join(__dirname, 'public'), { extensions: ['html'] }));
+app.use(express.static(path.join(__dirname, 'public'), {
+  extensions: ['html'],
+  setHeaders: (res, filePath) => {
+    if (/\.(?:css|js|mjs|png|jpe?g|gif|svg|ico|webp|woff2?|ttf)$/i.test(filePath)) {
+      res.setHeader('Cache-Control', 'public, max-age=86400, stale-while-revalidate=604800');
+    }
+  }
+}));
 
 app.get("/api", (req, res) => res.json({ status: "ok" }));
 
