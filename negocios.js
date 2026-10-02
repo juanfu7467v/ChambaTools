@@ -599,6 +599,50 @@ export async function enviarCorreoRechazo(email, nombre, orderId, monto, descrip
   }
 }
 
+/**
+ * Envía el recordatorio de una selección de checkout que quedó pendiente.
+ * La decisión de cuándo enviar el recordatorio pertenece al flujo de
+ * abandono de checkout; esta función solo renderiza y entrega el correo.
+ */
+export async function enviarCorreoCompraPendiente(
+  email,
+  nombre,
+  descripcion,
+  tipoCompra,
+  creditos,
+  monto,
+  metodoPago,
+  checkoutUrl,
+  resend
+) {
+  const context = 'EMAIL_COMPRA_PENDIENTE';
+  try {
+    const html = readHtmlTemplate('compra-pendiente.html', {
+      nombre: nombre || email.split('@')[0],
+      descripcion: descripcion || 'Selección de FacilitoTools',
+      tipo_compra: tipoCompra || 'Plan o recarga',
+      creditos: creditos || 'Según selección',
+      monto: monto != null ? Number(monto).toFixed(2) : '—',
+      metodo_pago: metodoPago || 'No definido',
+      checkout_url: checkoutUrl || 'https://facilitotools.com/planes'
+    });
+
+    const { data, error } = await resend.emails.send({
+      from: process.env.EMAIL_FROM || 'FacilitoTools <noreply@facilitotools.com>',
+      to: email,
+      subject: 'Tu selección de FacilitoTools sigue disponible',
+      html
+    });
+    if (error) throw getEmailError(error);
+    logger.info(context, 'Correo de compra pendiente enviado', { email, messageId: data?.id });
+    return { success: true, messageId: data?.id };
+  } catch (error) {
+    const emailError = getEmailError(error);
+    logger.error(context, 'Error enviando correo de compra pendiente', emailError, { email });
+    return { success: false, error: emailError.message };
+  }
+}
+
 export async function enviarCorreoExito(email, nombre, orderId, monto, descripcion, urlBoleta, resend) {
   const context = 'EMAIL_EXITO';
   try {
