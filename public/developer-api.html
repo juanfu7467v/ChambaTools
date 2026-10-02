@@ -176,6 +176,25 @@
             box-shadow: var(--shadow-card);
         }
 
+        .api-recommendation {
+            display: flex; align-items: center; justify-content: space-between; gap: 24px;
+            background: linear-gradient(135deg, rgba(0,191,255,0.09), rgba(0,200,83,0.06));
+            border-color: rgba(0,191,255,0.28);
+        }
+        .api-recommendation .section-title { display: flex; align-items: center; gap: 10px; font-size: clamp(17px, 2.5vw, 20px); }
+        .api-recommendation .section-title i { color: var(--tech-blue-light); }
+        .api-recommendation p { color: var(--text-muted); font-size: 14px; line-height: 1.6; }
+        .api-recommendation strong { color: var(--white); }
+        .api-recommendation-link {
+            display: inline-flex; align-items: center; gap: 8px; flex-shrink: 0;
+            padding: 11px 14px; border: 1px solid rgba(0,191,255,0.35); border-radius: 10px;
+            background: rgba(0,191,255,0.08); color: var(--tech-blue-light);
+            font-size: 13px; font-weight: 700; text-decoration: none; overflow-wrap: anywhere;
+            transition: background .2s ease, border-color .2s ease, transform .2s ease;
+        }
+        .api-recommendation-link:hover { background: rgba(0,191,255,0.15); border-color: var(--tech-blue); transform: translateY(-1px); }
+        .api-recommendation-link:focus-visible { outline: 2px solid var(--tech-blue-light); outline-offset: 3px; }
+
         /* Create-key card */
         .create-key-row { display: flex; gap: 12px; align-items: center; margin-bottom: 18px; flex-wrap: wrap; }
         .create-key-row input {
@@ -331,6 +350,7 @@
             .hero h1 { font-size: 28px; }
             main { padding: 0 16px 64px; }
             .panel { padding: 18px; }
+            .api-recommendation { flex-direction: column; align-items: flex-start; gap: 16px; }
             .keys-table { font-size: 12px; min-width: 560px; }
             .keys-table th, .keys-table td { padding: 10px 10px; }
         }
@@ -407,6 +427,18 @@
                 desde tu backend, ecommerce o app móvil con una API REST simple y autenticada por API Key.
                 <strong>Cero impacto en la interfaz actual para usuarios normales.</strong>
             </p>
+        </section>
+
+        <section class="section" aria-labelledby="validation-api-recommendation-title">
+            <div class="panel api-recommendation">
+                <div>
+                    <h2 class="section-title" id="validation-api-recommendation-title"><i class="fas fa-user-check" aria-hidden="true"></i>¿Necesitas validar también a tus clientes mediante APIs?</h2>
+                    <p>Te recomendamos <strong>Masitaprex</strong>, que ofrece APIs para Perú, Ecuador y Venezuela.</p>
+                </div>
+                <a class="api-recommendation-link" href="https://masitaprex.com/API-Docs" target="_blank" rel="noopener noreferrer" aria-label="Abrir documentación de Masitaprex en una pestaña nueva">
+                    <i class="fas fa-book-open" aria-hidden="true"></i> Documentación: masitaprex.com/API-Docs <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i>
+                </a>
+            </div>
         </section>
 
         <!-- ═══ AUTH REQUIRED BANNER ═══ -->
