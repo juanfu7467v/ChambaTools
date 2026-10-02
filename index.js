@@ -50,10 +50,19 @@ const __dirname = path.dirname(__filename);
 const app = express();
 app.set('trust proxy', 1);
 
-// La identidad de sesión se firma con un secreto del servidor.
-const sessionCookieSecret = process.env.SESSION_COOKIE_SECRET || process.env.COOKIE_SECRET || crypto.randomBytes(32).toString('hex');
-if (!process.env.SESSION_COOKIE_SECRET && !process.env.COOKIE_SECRET && process.env.NODE_ENV === 'production') {
-  logger.warn('SESSION', 'SESSION_COOKIE_SECRET no configurado; las sesiones se invalidarán al reiniciar.');
+// La identidad de sesión se firma con un secreto estable del servidor.
+// En Fly.io un autostop/reinicio reemplaza el proceso, por lo que usar un
+// secreto aleatorio aquí invalida todas las cookies existentes. Preferimos el
+// secreto explícito de despliegue; como fallback seguro, derivamos uno de la
+// clave privada de Firebase (que también es estable y nunca es pública).
+const configuredSessionSecret = process.env.SESSION_COOKIE_SECRET || process.env.COOKIE_SECRET;
+const firebaseSecretMaterial = process.env.FIREBASE_PRIVATE_KEY || process.env.FIREBASE_SERVICE_ACCOUNT;
+const derivedSessionSecret = firebaseSecretMaterial
+  ? crypto.createHash('sha256').update(firebaseSecretMaterial).digest('hex')
+  : null;
+const sessionCookieSecret = configuredSessionSecret || derivedSessionSecret || crypto.randomBytes(32).toString('hex');
+if (!configuredSessionSecret && !derivedSessionSecret && process.env.NODE_ENV === 'production') {
+  logger.warn('SESSION', 'SESSION_COOKIE_SECRET y credenciales Firebase no configurados; las sesiones se invalidarán al reiniciar.');
 }
 
 app.disable('x-powered-by');
@@ -585,24 +594,31 @@ app.post("/api/login-success", authRateLimit, async (req, res) => {
         
         if (userDoc.exists) {
           const userData = userDoc.data();
-          const lastDevice = userData.lastDeviceModel;
-          
-          if (lastDevice && deviceModel && lastDevice !== deviceModel) {
+          const lastDevice = typeof userData.lastDeviceModel === 'string'
+            ? userData.lastDeviceModel.trim()
+            : '';
+          const currentDevice = typeof deviceModel === 'string' ? deviceModel.trim() : '';
+          const isKnownDevice = value => value && value !== 'Unknown Device';
+
+          // El modelo puede no estar disponible en algunos navegadores. Ese
+          // valor no representa un dispositivo nuevo y tampoco debe borrar el
+          // último dispositivo conocido ni generar un correo de seguridad.
+          if (isKnownDevice(lastDevice) && isKnownDevice(currentDevice) && lastDevice !== currentDevice) {
             const ip = getClientIp(req);
             const location = await getLocationFromIP(ip);
             const nombre = displayName || userData.name || email.split('@')[0];
             
             logger.warn(context, '⚠️ Inicio de sesión sospechoso detectado (cambio de dispositivo)', {
-              email, uid, oldDevice: lastDevice, newDevice: deviceModel, ip
+              email, uid, oldDevice: lastDevice, newDevice: currentDevice, ip
             });
             
             enviarCorreoSospechoso(email, nombre, location, ip, req.headers['user-agent'], resend)
               .catch(err => logger.error(context, 'Error enviando correo sospechoso', err));
           }
           
-          if (deviceModel) {
+          if (isKnownDevice(currentDevice)) {
             await userRef.update({ 
-              lastDeviceModel: deviceModel,
+              lastDeviceModel: currentDevice,
               lastLoginAt: admin.firestore.FieldValue.serverTimestamp()
             });
           }

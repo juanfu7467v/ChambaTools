@@ -1256,42 +1256,10 @@
                               (result.additionalUserInfo && result.additionalUserInfo.isNewUser === true));
             console.log('[🔵 GOOGLE] ¿Usuario nuevo?', isNewUser);
 
-            // 2. ✅ CORRECCIÓN: Llamar a /api/login-success con isNewUser
-            // para sincronizar plan, créditos y documento en "usuarios"
-            console.log('[🔵 GOOGLE] Sincronizando con backend...');
-            let attempts = 0;
-            const maxAttempts = 3;
-            while (attempts < maxAttempts) {
-                try {
-                    const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 20000);
-                    if (attempts > 0) showMessageModal('Sincronizando con el servidor...', 'loading');
-                    const deviceModel = await getDeviceModel();
-                    const idToken = await result.user.getIdToken();
-                    const lsResp = await fetch('/api/login-success', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            idToken,
-                            deviceModel
-                        }),
-                        signal: controller.signal
-                    });
-                    clearTimeout(timeoutId);
-                    if (lsResp.ok) {
-                        console.log('[🔵 GOOGLE] Backend sincronizado correctamente');
-                    } else {
-                        console.warn('[🔵 GOOGLE] Backend respondió con error:', lsResp.status);
-                    }
-                    break;
-                } catch (e) {
-                    attempts++;
-                    if (attempts >= maxAttempts) console.warn('Backend notification failed after retries');
-                    await new Promise(r => setTimeout(r, 2000));
-                }
-            }
-            if (attempts > 0) closeMessageModal();
-            
+            // La sincronización con el backend se realiza una sola vez en
+            // redirectAfterAuth(). onAuthStateChanged puede invocarlo también
+            // cuando Firebase restaura una sesión persistida; esa función usa
+            // sessionBootstrapPromise para deduplicar ambas rutas.
             // 3. ✅ Delay de seguridad 500ms
             console.log('[🔵 GOOGLE] Delay seguridad 500ms...');
             await new Promise(resolve => setTimeout(resolve, 500));
@@ -1336,42 +1304,10 @@
                               (result.additionalUserInfo && result.additionalUserInfo.isNewUser === true));
             console.log('[⚫ GITHUB] ¿Usuario nuevo?', isNewUser);
 
-            // 2. ✅ CORRECCIÓN: Llamar a /api/login-success con isNewUser
-            // para sincronizar plan, créditos y documento en "usuarios"
-            console.log('[⚫ GITHUB] Sincronizando con backend...');
-            let attempts = 0;
-            const maxAttempts = 3;
-            while (attempts < maxAttempts) {
-                try {
-                    const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 20000);
-                    if (attempts > 0) showMessageModal('Sincronizando con el servidor...', 'loading');
-                    const deviceModel = await getDeviceModel();
-                    const idToken = await result.user.getIdToken();
-                    const lsResp = await fetch('/api/login-success', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            idToken,
-                            deviceModel
-                        }),
-                        signal: controller.signal
-                    });
-                    clearTimeout(timeoutId);
-                    if (lsResp.ok) {
-                        console.log('[⚫ GITHUB] Backend sincronizado correctamente');
-                    } else {
-                        console.warn('[⚫ GITHUB] Backend respondió con error:', lsResp.status);
-                    }
-                    break;
-                } catch (e) {
-                    attempts++;
-                    if (attempts >= maxAttempts) console.warn('Backend notification failed after retries');
-                    await new Promise(r => setTimeout(r, 2000));
-                }
-            }
-            if (attempts > 0) closeMessageModal();
-            
+            // La sincronización con el backend se realiza una sola vez en
+            // redirectAfterAuth(). onAuthStateChanged puede invocarlo también
+            // cuando Firebase restaura una sesión persistida; esa función usa
+            // sessionBootstrapPromise para deduplicar ambas rutas.
             // 3. ✅ Delay de seguridad 500ms
             console.log('[⚫ GITHUB] Delay seguridad 500ms...');
             await new Promise(resolve => setTimeout(resolve, 500));
