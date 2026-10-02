@@ -196,13 +196,46 @@
         .api-recommendation-link:focus-visible { outline: 2px solid var(--tech-blue-light); outline-offset: 3px; }
 
         /* Create-key card */
-        .create-key-row { display: flex; gap: 12px; align-items: center; margin-bottom: 18px; flex-wrap: wrap; }
+        .api-key-manager-head { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+        .api-key-manager-head .section-title { margin: 0; }
+        .api-key-help-button {
+            display: inline-flex; align-items: center; justify-content: center; flex: 0 0 30px;
+            width: 30px; height: 30px; padding: 0; border: 1px solid var(--navy-border);
+            border-radius: 50%; background: rgba(0,191,255,0.08); color: var(--tech-blue-light);
+            cursor: pointer; transition: background .2s ease, border-color .2s ease, transform .2s ease;
+        }
+        .api-key-help-button:hover { background: rgba(0,191,255,0.18); border-color: var(--tech-blue); transform: translateY(-1px); }
+        .api-key-help-button:focus-visible, .api-key-help-close:focus-visible { outline: 2px solid var(--tech-blue-light); outline-offset: 3px; }
+        .api-key-help-dialog {
+            width: min(560px, calc(100vw - 32px)); max-width: none; max-height: 85vh; margin: auto; padding: 0;
+            overflow: hidden; color: var(--text-primary); background: linear-gradient(160deg, var(--navy-card), var(--navy-surface));
+            border: 1px solid var(--border-active); border-radius: 18px; box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+        }
+        .api-key-help-dialog::backdrop { background: rgba(3,9,20,0.78); backdrop-filter: blur(5px); }
+        .api-key-help-content { max-height: 85vh; overflow-y: auto; padding: 26px; }
+        .api-key-help-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
+        .api-key-help-heading h2 { display: flex; align-items: center; gap: 10px; margin: 0; color: var(--white); font-family: var(--font-display); font-size: 19px; line-height: 1.35; }
+        .api-key-help-heading h2 i { color: var(--tech-blue-light); }
+        .api-key-help-close {
+            display: inline-flex; align-items: center; justify-content: center; flex: 0 0 34px;
+            width: 34px; height: 34px; padding: 0; border: 1px solid var(--border-subtle);
+            border-radius: 9px; background: rgba(255,255,255,0.05); color: var(--text-muted); cursor: pointer;
+        }
+        .api-key-help-close:hover { color: var(--white); border-color: var(--border-active); background: rgba(255,255,255,0.1); }
+        .api-key-help-copy p { margin: 0 0 14px; color: var(--text-muted); font-size: 14px; line-height: 1.7; }
+        .api-key-help-copy p:last-child { margin-bottom: 0; }
+        .api-key-help-copy strong { color: var(--white); }
+        .api-key-help-copy code { color: var(--emerald-light); font-family: var(--font-mono); }
+        .create-key-row { display: flex; gap: 12px; align-items: flex-end; margin-bottom: 18px; flex-wrap: wrap; }
+        .create-key-field { display: flex; flex: 1 1 260px; min-width: 0; flex-direction: column; gap: 7px; }
+        .create-key-field label { color: var(--text-primary); font-size: 13px; font-weight: 600; }
         .create-key-row input {
-            flex: 1; min-width: 220px; padding: 12px 14px; border-radius: 10px;
-            background: rgba(0,0,0,0.25); border: 1px solid var(--border-active);
+            width: 100%; min-width: 0; padding: 12px 14px; border-radius: 10px;
+            background: rgba(5,13,26,0.72); border: 1px solid var(--navy-border);
             color: var(--text-primary); font-family: var(--font-family); font-size: 14px;
         }
-        .create-key-row input:focus { outline: none; border-color: var(--emerald); box-shadow: var(--shadow-emerald); }
+        .create-key-row input::placeholder { color: var(--text-subtle); }
+        .create-key-row input:focus-visible { outline: none; border-color: var(--emerald); box-shadow: var(--shadow-emerald); }
 
         .btn {
             display: inline-flex; align-items: center; gap: 8px;
@@ -350,6 +383,12 @@
             .hero h1 { font-size: 28px; }
             main { padding: 0 16px 64px; }
             .panel { padding: 18px; }
+            .api-key-help-dialog { width: calc(100vw - 24px); max-height: 88vh; }
+            .api-key-help-content { max-height: 88vh; padding: 20px; }
+            .api-key-help-heading h2 { font-size: 17px; }
+            .create-key-row { align-items: stretch; }
+            .create-key-field { flex-basis: 100%; }
+            .create-key-row > .btn { width: 100%; justify-content: center; }
             .api-recommendation { flex-direction: column; align-items: flex-start; gap: 16px; }
             .keys-table { font-size: 12px; min-width: 560px; }
             .keys-table th, .keys-table td { padding: 10px 10px; }
@@ -429,18 +468,6 @@
             </p>
         </section>
 
-        <section class="section" aria-labelledby="validation-api-recommendation-title">
-            <div class="panel api-recommendation">
-                <div>
-                    <h2 class="section-title" id="validation-api-recommendation-title"><i class="fas fa-user-check" aria-hidden="true"></i>¿Necesitas validar también a tus clientes mediante APIs?</h2>
-                    <p>Te recomendamos <strong>Masitaprex</strong>, que ofrece APIs para Perú, Ecuador y Venezuela.</p>
-                </div>
-                <a class="api-recommendation-link" href="https://masitaprex.com/API-Docs" target="_blank" rel="noopener noreferrer" aria-label="Abrir documentación de Masitaprex en una pestaña nueva">
-                    <i class="fas fa-book-open" aria-hidden="true"></i> Documentación: masitaprex.com/API-Docs <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i>
-                </a>
-            </div>
-        </section>
-
         <!-- ═══ AUTH REQUIRED BANNER ═══ -->
         <section class="section requires-auth" style="display:none;">
             <div id="authGate" class="panel empty-state">
@@ -456,17 +483,18 @@
 
         <!-- ═══ API KEY MANAGER (auth-only) ═══ -->
         <section class="section auth-only requires-auth" style="display:none;" id="apiKeyManager" name="apiKeyManager">
-            <h2 class="section-title" id="apiKeyManagerTitle">🎟️ Tus API Keys</h2>
-            <p class="section-sub">
-                Genera hasta <strong>5 claves activas</strong>, rótalas o revócalas cuando quieras.
-                Las claves se almacenan como <code style="font-family:var(--font-mono);color:var(--emerald-light);">hash sha256</code> en Firestore:
-                nunca podemos recuperar la clave completa, solo tú la verás al crearla.
-                La API consume del <strong>mismo cupo de comprobantes</strong> que la interfaz normal de generación de boletas.
-            </p>
-
             <div class="panel">
+                <div class="api-key-manager-head">
+                    <h2 class="section-title" id="apiKeyManagerTitle">Tus API Keys</h2>
+                    <button class="api-key-help-button" id="apiKeyHelpButton" type="button" aria-label="Información sobre tus API Keys" aria-haspopup="dialog" aria-controls="apiKeyHelpDialog">
+                        <i class="fas fa-question" aria-hidden="true"></i>
+                    </button>
+                </div>
                 <div class="create-key-row">
-                    <input id="newKeyName" type="text" placeholder="Nombre (ej. Producción Web, Staging)" maxlength="60" />
+                    <div class="create-key-field">
+                        <label for="newKeyName">Nombre de la API Key</label>
+                        <input id="newKeyName" type="text" placeholder="Ej. Producción Web o Staging" maxlength="60" autocomplete="off" />
+                    </div>
                     <button id="createKeyBtn" class="btn btn-primary" disabled>
                         <i class="fas fa-key"></i> Crear API Key
                     </button>
@@ -501,6 +529,34 @@
                         </tbody>
                     </table>
                 </div>
+            </div>
+
+            <dialog class="api-key-help-dialog" id="apiKeyHelpDialog" aria-labelledby="apiKeyHelpTitle">
+                <div class="api-key-help-content">
+                    <div class="api-key-help-heading">
+                        <h2 id="apiKeyHelpTitle"><i class="fas fa-circle-info" aria-hidden="true"></i>Información sobre tus API Keys</h2>
+                        <button class="api-key-help-close" id="apiKeyHelpClose" type="button" aria-label="Cerrar información">
+                            <i class="fas fa-xmark" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                    <div class="api-key-help-copy">
+                        <p>Genera hasta <strong>5 claves activas</strong>, rótalas o revócalas cuando quieras.</p>
+                        <p>Las claves se almacenan como <code>&quot;hash SHA-256&quot;</code> en Firestore: nunca podemos recuperar la clave completa, solo tú la verás al crearla.</p>
+                        <p>La API consume del mismo cupo de comprobantes que la interfaz normal de generación de boletas.</p>
+                    </div>
+                </div>
+            </dialog>
+        </section>
+
+        <section class="section" aria-labelledby="validation-api-recommendation-title">
+            <div class="panel api-recommendation">
+                <div>
+                    <h2 class="section-title" id="validation-api-recommendation-title"><i class="fas fa-user-check" aria-hidden="true"></i>¿Necesitas validar también a tus clientes mediante APIs?</h2>
+                    <p>Te recomendamos <strong>Masitaprex</strong>, que ofrece APIs para Perú, Ecuador y Venezuela.</p>
+                </div>
+                <a class="api-recommendation-link" href="https://masitaprex.com/API-Docs" target="_blank" rel="noopener noreferrer" aria-label="Abrir documentación de Masitaprex en una pestaña nueva">
+                    <i class="fas fa-book-open" aria-hidden="true"></i> Documentación: masitaprex.com/API-Docs <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i>
+                </a>
             </div>
         </section>
 
@@ -791,6 +847,17 @@ curl_close($ch);</pre>
         const authGate = document.getElementById('authGate');
         const authGateSection = authGate ? authGate.closest('section') : null;
         const apiKeyManagerSection = document.getElementById('apiKeyManager');
+        const apiKeyHelpButton = document.getElementById('apiKeyHelpButton');
+        const apiKeyHelpDialog = document.getElementById('apiKeyHelpDialog');
+        const apiKeyHelpClose = document.getElementById('apiKeyHelpClose');
+
+        if (apiKeyHelpButton && apiKeyHelpDialog && apiKeyHelpClose && typeof apiKeyHelpDialog.showModal === 'function') {
+            apiKeyHelpButton.addEventListener('click', () => apiKeyHelpDialog.showModal());
+            apiKeyHelpClose.addEventListener('click', () => apiKeyHelpDialog.close());
+            apiKeyHelpDialog.addEventListener('click', event => {
+                if (event.target === apiKeyHelpDialog) apiKeyHelpDialog.close();
+            });
+        }
 
         // 🆕 Controla la visibilidad real de las secciones según el estado de sesión.
         // Antes, el atributo inline "style=display:none" de estas secciones tenía más
