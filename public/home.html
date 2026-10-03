@@ -729,7 +729,9 @@
             bottom: 12px;
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 6px;
+            max-width: 100%;
             padding: 8px 10px;
             border: 1px solid rgba(255,255,255,0.13);
             border-radius: 11px;
@@ -739,7 +741,8 @@
             font-size: 0.64rem;
             font-weight: 700;
             line-height: 1.2;
-            white-space: nowrap;
+            text-align: center;
+            white-space: normal;
             backdrop-filter: blur(10px);
         }
         .benefit-proof i { color: var(--benefit-accent); }
@@ -757,17 +760,17 @@
         }
         .benefits-cta-copy { color: var(--white); font-family: var(--font-display); font-size: 1.05rem; font-weight: 700; }
         .benefits-cta-copy span { display: block; margin-top: 4px; color: var(--text-muted); font-family: var(--font-family); font-size: 0.78rem; font-weight: 400; }
-        .benefits-cta-actions { display: flex; flex-wrap: wrap; gap: 10px; }
-        .benefits-cta .hero-outline-btn { min-height: 44px; padding: 10px 15px; font-size: 0.72rem; }
+        .benefits-cta-actions { display: flex; flex-wrap: wrap; gap: 10px; width: min(100%, 440px); }
+        .benefits-cta .hero-outline-btn { width: auto; min-height: 44px; flex: 1 1 165px; padding: 10px 15px; font-size: 0.72rem; }
         @media (max-width: 420px) {
             .benefit-card { grid-template-columns: minmax(0, 1fr) 105px; min-height: 300px; padding: 19px 9px 19px 16px; }
             .benefit-card h3 { font-size: 1.06rem; }
             .benefit-card p { font-size: 0.74rem; }
             .benefit-badge { font-size: 0.56rem; }
-            .benefit-proof { right: -2px; padding: 7px 8px; font-size: 0.57rem; }
+            .benefit-proof { right: 0; padding: 7px 8px; font-size: 0.57rem; }
             .benefits-cta { padding: 20px 16px; }
             .benefits-cta-actions { width: 100%; }
-            .benefits-cta .hero-outline-btn { flex: 1 1 145px; }
+            .benefits-cta .hero-outline-btn { flex: 1 1 100%; }
         }
 
         /* ═══ SECTIONS (genéricas) ═══ */
