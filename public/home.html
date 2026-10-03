@@ -704,6 +704,27 @@
             font-size: 0.79rem;
             line-height: 1.65;
         }
+        .benefit-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 15px;
+            padding: 0;
+            border: 0;
+            background: transparent;
+            color: #00E676;
+            font-family: var(--font-display);
+            font-size: 0.76rem;
+            font-weight: 700;
+            line-height: 1.4;
+            text-align: left;
+            cursor: pointer;
+            transition: color 0.2s ease, gap 0.2s ease;
+        }
+        .benefit-action i { font-size: 0.82rem; transition: transform 0.2s ease; }
+        .benefit-action:hover { color: #69F0AE; gap: 12px; }
+        .benefit-action:hover i { transform: translateX(2px); }
+        .benefit-action:focus-visible { outline: 2px solid #00E676; outline-offset: 5px; border-radius: 2px; }
         .benefit-visual {
             position: relative;
             align-self: stretch;
@@ -772,6 +793,29 @@
             .benefits-cta-actions { width: 100%; }
             .benefits-cta .hero-outline-btn { flex: 1 1 100%; }
         }
+        @media (max-width: 480px) {
+            .benefit-card {
+                display: flex;
+                flex-direction: column;
+                align-items: stretch;
+                min-height: 0;
+                padding: 22px 18px;
+            }
+            .benefit-copy { width: 100%; }
+            .benefit-visual {
+                width: 100%;
+                align-self: auto;
+                padding: 18px 0 48px;
+            }
+            .benefit-visual img {
+                width: 100%;
+                max-width: 100%;
+                max-height: none;
+                height: auto;
+                margin-inline: auto;
+            }
+            .benefit-proof { right: 0; bottom: 10px; }
+        }
 
         /* ═══ SECTIONS (genéricas) ═══ */
         .section {
@@ -790,7 +834,7 @@
             font-weight: 300; color: var(--white);
             line-height: 1.1; margin-bottom: 14px;
         }
-        .section-title em { font-style: italic; color: var(--emerald); }
+        .section-title em { font-style: italic; color: #00E676; }
         .section-body {
             font-size: 0.95rem; color: var(--text-muted);
             line-height: 1.8;
@@ -1769,6 +1813,7 @@
                             <span class="benefit-badge"><i class="fas fa-shield-halved" aria-hidden="true"></i> Seguridad al despachar</span>
                             <h3>Valida antes de enviar</h3>
                             <p>Consulta el DNI y los datos disponibles de tu comprador antes de despachar. Reduce el riesgo de pedidos falsos y de envíos que rebotan en Shalom u Olva.</p>
+                            <button type="button" class="benefit-action" onclick="handleValidateClients()">Probar validación ahora <i class="fas fa-arrow-right" aria-hidden="true"></i></button>
                         </div>
                         <div class="benefit-visual">
                             <img src="/assets/home/file-0000000097e4720695e43c78fb9094f9.webp" alt="Herramientas de validación de clientes y documentos" loading="lazy">
@@ -1781,6 +1826,7 @@
                             <span class="benefit-badge"><i class="fas fa-bolt" aria-hidden="true"></i> Más tiempo para atender</span>
                             <h3>Emite sin volver a escribir todo</h3>
                             <p>Genera boletas y comprobantes con los datos de tu cliente. Descarga un PDF o una imagen listos para compartir en tu chat.</p>
+                            <button type="button" class="benefit-action" onclick="handleGenerateBoletas()">Generar comprobante gratis <i class="fas fa-arrow-right" aria-hidden="true"></i></button>
                         </div>
                         <div class="benefit-visual">
                             <img src="/assets/home/image.webp" alt="Comprobante digital listo para compartir" loading="lazy">
@@ -1793,6 +1839,7 @@
                             <span class="benefit-badge"><i class="fas fa-briefcase" aria-hidden="true"></i> Imagen profesional</span>
                             <h3>Haz que tu marca inspire confianza</h3>
                             <p>Envía comprobantes limpios y ordenados, con la identidad visual de tu negocio. Cada entrega puede sentirse tan cuidada como tu marca.</p>
+                            <button type="button" class="benefit-action" onclick="handleGenerateBoletas()">Crear comprobante con tu marca <i class="fas fa-arrow-right" aria-hidden="true"></i></button>
                         </div>
                         <div class="benefit-visual">
                             <img src="/assets/home/file-000000003f2072068aea63ad1c15a520.webp" alt="Comprobantes digitales con una presentación profesional" loading="lazy">
@@ -1805,6 +1852,7 @@
                             <span class="benefit-badge"><i class="fas fa-mobile-screen-button" aria-hidden="true"></i> 100% desde tu celular</span>
                             <h3>Gestiona tu negocio estés donde estés</h3>
                             <p>Sin instalar programas pesados: entra desde el navegador para consultar datos, revisar tu historial y emitir comprobantes desde donde estés.</p>
+                            <button type="button" class="benefit-action" onclick="handleValidateClients()">Explorar herramientas desde el celular <i class="fas fa-arrow-right" aria-hidden="true"></i></button>
                         </div>
                         <div class="benefit-visual">
                             <img src="/assets/home/file-00000000bee8720686d99441dc110608.webp" alt="Emprendedora gestionando ventas y comprobantes desde su celular" loading="lazy">
