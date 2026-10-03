@@ -408,14 +408,14 @@
             animation: fadeUp 0.8s 0.1s ease forwards; opacity: 0;
         }
         .hero-title {
-            font-family: var(--font-serif);
-            font-size: clamp(2.5rem, 8.5vw, 5rem);
-            font-weight: 600; line-height: 1.04;
-            letter-spacing: -0.015em; color: #FFFFFF;
-            max-width: 15ch; margin-bottom: 8px;
+            font-family: var(--font-display);
+            font-size: clamp(2.3rem, 7.4vw, 4.4rem);
+            font-weight: 800; line-height: 1.08;
+            letter-spacing: -0.03em; color: #FFFFFF;
+            max-width: 16ch; margin-bottom: 8px;
             animation: fadeUp 0.9s 0.2s ease forwards; opacity: 0;
         }
-        .hero-title em, .hero-tagline em { font-style: italic; color: #00E676; }
+        .hero-title .hl { font-style: normal; font-weight: 800; color: #00E676; }
         .hero-divider {
             width: 60px; height: 2px;
             background: var(--emerald);
@@ -425,11 +425,11 @@
         }
         @keyframes expandLine { to { transform: scaleX(1); } }
         .hero-tagline {
-            font-family: var(--font-serif);
-            font-size: clamp(1.35rem, 3.4vw, 2rem);
-            font-weight: 600; font-style: italic;
+            font-family: var(--font-display);
+            font-size: clamp(1.15rem, 2.9vw, 1.65rem);
+            font-weight: 700; font-style: normal;
             color: #FFFFFF; max-width: 600px;
-            line-height: 1.4; margin-bottom: 16px;
+            line-height: 1.35; margin-bottom: 16px;
             animation: fadeUp 0.9s 0.5s ease forwards; opacity: 0;
         }
         .hero-sub {
@@ -487,18 +487,18 @@
         .hero-outline-btn:active { transform: translateY(1px); }
         .hero-outline-btn:focus-visible { outline: 3px solid #FFFFFF; outline-offset: 3px; }
 
-        /* Variante azul (Validar clientes), también sólida */
+        /* Botón secundario (Validar clientes): transparente, borde verde, texto blanco */
         .hero-outline-btn.hero-outline-btn-blue {
-            background: #00BFFF;
-            border-color: #00BFFF;
-            color: #03121C;
-            box-shadow: 0 8px 24px rgba(0,191,255,0.28);
+            background: transparent;
+            border-color: #00E676;
+            color: #FFFFFF;
+            box-shadow: none;
         }
         .hero-outline-btn.hero-outline-btn-blue:hover {
-            background: #66D9FF;
-            border-color: #66D9FF;
-            color: #03121C;
-            box-shadow: 0 12px 30px rgba(0,191,255,0.4);
+            background: rgba(0,230,118,0.14);
+            border-color: #69F0AE;
+            color: #FFFFFF;
+            box-shadow: 0 8px 24px rgba(0,230,118,0.22);
         }
 
         /* Los estilos originales de hero-cta y hero-cta-secondary se mantienen intactos
@@ -562,9 +562,9 @@
         }
         .stat-item:last-child { border-right: none; }
         .stat-num {
-            font-family: var(--font-serif);
-            font-size: 2rem; font-weight: 600;
-            color: var(--emerald); display: block;
+            font-family: var(--font-display);
+            font-size: 2rem; font-weight: 800;
+            color: #00E676; display: block;
         }
         .stat-label {
             font-size: 0.68rem; color: var(--text-muted);
@@ -793,12 +793,13 @@
             margin-bottom: 14px; display: block;
         }
         .section-title {
-            font-family: var(--font-serif);
-            font-size: clamp(2rem, 5vw, 3.5rem);
-            font-weight: 300; color: var(--white);
-            line-height: 1.1; margin-bottom: 14px;
+            font-family: var(--font-display);
+            font-size: clamp(1.9rem, 5vw, 3rem);
+            font-weight: 700; color: #FFFFFF;
+            line-height: 1.15; letter-spacing: -0.025em;
+            margin-bottom: 14px;
         }
-        .section-title em { font-style: italic; color: #00E676; }
+        .section-title em { font-style: normal; font-weight: 700; color: #00E676; }
         .section-body {
             font-size: 0.95rem; color: var(--text-muted);
             line-height: 1.8;
@@ -1325,12 +1326,13 @@
             z-index: 1;
         }
         .cta-final h2 {
-            font-family: var(--font-serif);
-            font-size: clamp(2rem, 5vw, 3.5rem);
-            font-weight: 300; color: var(--white);
-            line-height: 1.2; margin-bottom: 16px;
+            font-family: var(--font-display);
+            font-size: clamp(1.9rem, 5vw, 3rem);
+            font-weight: 700; color: #FFFFFF;
+            line-height: 1.2; letter-spacing: -0.025em;
+            margin-bottom: 16px;
         }
-        .cta-final h2 em { color: var(--emerald); font-style: italic; }
+        .cta-final h2 em { color: #00E676; font-style: normal; font-weight: 700; }
         .cta-final p {
             font-size: 0.95rem; color: var(--text-muted);
             max-width: 500px; margin: 0 auto 28px;
@@ -1698,9 +1700,9 @@
         <section class="hero" id="home">
             <div class="hero-line"></div>
             <span class="hero-eyebrow">Comprobantes profesionales · Validación de clientes · 2026</span>
-            <h1 class="hero-title">Valida clientes y <em>genera comprobantes</em></h1>
+            <h1 class="hero-title">Valida <span class="hl">clientes</span> y genera <span class="hl">comprobantes</span></h1>
             <div class="hero-divider"></div>
-            <p class="hero-tagline">⚡ Automatiza tu negocio <em>en segundos</em></p>
+            <p class="hero-tagline">⚡ Automatiza tu negocio en segundos</p>
             <p class="hero-sub">Con FacilitoTools puedes consultar DNI y RUC, buscar documentos por nombres y apellidos, consultar teléfonos por número o DNI y generar comprobantes profesionales en un solo lugar.</p>
 
             <!-- CTAs sólidos: Generar comprobantes (verde) y Validar clientes (azul) -->
@@ -1725,7 +1727,7 @@
         <section class="tech-benefits-section" aria-labelledby="benefits-title">
             <div class="content-grid">
                 <span class="section-label">Menos fricción, más confianza</span>
-                <h2 class="section-title" id="benefits-title">Tu negocio, <em>más ágil y profesional</em></h2>
+                <h2 class="section-title" id="benefits-title">Tu negocio, más ágil y <em>profesional</em></h2>
                 <p class="section-body">Deja atrás tareas repetidas y atiende cada pedido con herramientas pensadas para emprender desde redes sociales.</p>
 
                 <div class="benefits-grid">
@@ -1873,7 +1875,7 @@
         <section class="section">
             <div class="content-grid">
                 <span class="section-label">Ventajas</span>
-                <h2 class="section-title">Beneficios para <em>emprendedores, negocios y empresas</em></h2>
+                <h2 class="section-title">Beneficios para emprendedores, negocios y <em>empresas</em></h2>
                 <p class="section-body">FacilitoTools está diseñado para acompañarte en cada etapa de tu crecimiento.</p>
 
                 <!-- Nuevo diseño: Mapa mental vertical -->
@@ -2017,7 +2019,7 @@
         <section class="section" id="testimonios">
             <div class="content-grid">
                 <span class="section-label">Confianza</span>
-                <h2 class="section-title">Lo que dicen <em>nuestros usuarios</em></h2>
+                <h2 class="section-title">Lo que dicen nuestros <em>usuarios</em></h2>
                 <p class="section-body">Emprendedores que validan clientes y emiten comprobantes desde su celular, todos los días.</p>
 
                 <div class="testimonials-carousel-wrap">
@@ -2210,7 +2212,7 @@
         <!-- ═══ CTA FINAL ═══ -->
         <section class="cta-final" id="ctaFinalSection">
             <canvas id="ctaCanvas"></canvas>
-            <h2>¿Listo para <em>impulsar</em> tu negocio?</h2>
+            <h2>¿Listo para impulsar tu <em>negocio</em>?</h2>
             <p>Únete a más de 2,400 usuarios que ya confían en FacilitoTools para generar comprobantes y validar clientes.</p>
             <button class="hero-cta" onclick="handleFreeStart()">
                 <i class="fas fa-rocket"></i> Comenzar gratis
