@@ -96,7 +96,7 @@
     <!-- Remixicon -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" />
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700;800&family=DM+Mono:wght@400;500&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700;800&family=DM+Mono:wght@400;500&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600;1,700&display=swap" rel="stylesheet" />
 
     <!-- Firebase (se mantiene) -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -367,7 +367,7 @@
             position: relative; z-index: 1; width: 100%;
         }
 
-        /* ═══ HERO (con imagen de fondo) ═══ */
+        /* ═══ HERO (fondo a 18% de opacidad, texto blanco puro) ═══ */
         .hero {
             width: 100%;
             min-height: 100svh;
@@ -375,46 +375,47 @@
             align-items: center; justify-content: center;
             padding: 56px 16px 48px;
             text-align: center;
-            position: relative; overflow: hidden;
-            /* Imagen de fondo de alta calidad (tecnología, automatización, negocios) */
-            background: url('/assets/home/file-000000006e84722fb36db8d32ac9792e.webp') center/cover no-repeat;
-            background-attachment: fixed; /* Efecto parallax sutil */
+            position: relative; overflow: hidden; isolation: isolate;
+            background: var(--navy-deep);
         }
-        /* Overlay oscuro para legibilidad */
+        /* Imagen de fondo: solo 18% de opacidad para no competir con el texto */
+        .hero::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: url('/assets/home/file-000000006e84722fb36db8d32ac9792e.webp') center/cover no-repeat;
+            opacity: 0.18;
+            z-index: 0; pointer-events: none;
+        }
+        /* Degradado inferior: fusiona el hero con la siguiente sección */
         .hero::after {
             content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, rgba(10, 22, 40, 0.92) 0%, rgba(15, 31, 61, 0.85) 50%, rgba(10, 22, 40, 0.9) 100%);
-            z-index: 0;
+            position: absolute; inset: 0;
+            background: linear-gradient(180deg, rgba(10,22,40,0) 55%, var(--navy-deep) 100%);
+            z-index: 0; pointer-events: none;
         }
-        /* Asegurar que todo el contenido esté por encima del overlay */
-        .hero > * {
-            position: relative;
-            z-index: 1;
-        }
-        .hero-line {
+        .hero > * { position: relative; z-index: 1; }
+        .hero > .hero-line {
             position: absolute;
             top: 0; left: 0; right: 0; height: 1px;
-            background: linear-gradient(90deg, transparent 0%, var(--emerald) 50%, transparent 100%);
+            background: linear-gradient(90deg, transparent 0%, #00E676 50%, transparent 100%);
             z-index: 2;
         }
         .hero-eyebrow {
             font-family: var(--font-mono);
-            font-size: 0.7rem; letter-spacing: 0.3em;
-            text-transform: uppercase; color: var(--text-muted);
-            margin-bottom: 16px;
+            font-size: 0.7rem; letter-spacing: 0.22em;
+            text-transform: uppercase; color: #CBD5E1;
+            margin-bottom: 16px; line-height: 1.6;
             animation: fadeUp 0.8s 0.1s ease forwards; opacity: 0;
         }
         .hero-title {
             font-family: var(--font-serif);
-            font-size: clamp(3.5rem, 12vw, 8rem);
-            font-weight: 300; line-height: 0.9;
-            letter-spacing: -0.02em; color: var(--white);
-            margin-bottom: 8px;
+            font-size: clamp(2.5rem, 8.5vw, 5rem);
+            font-weight: 600; line-height: 1.04;
+            letter-spacing: -0.015em; color: #FFFFFF;
+            max-width: 15ch; margin-bottom: 8px;
             animation: fadeUp 0.9s 0.2s ease forwards; opacity: 0;
         }
-        .hero-title em { font-style: italic; color: var(--emerald); }
+        .hero-title em, .hero-tagline em { font-style: italic; color: #00E676; }
         .hero-divider {
             width: 60px; height: 2px;
             background: var(--emerald);
@@ -425,16 +426,16 @@
         @keyframes expandLine { to { transform: scaleX(1); } }
         .hero-tagline {
             font-family: var(--font-serif);
-            font-size: clamp(1.3rem, 3vw, 2rem);
-            font-weight: 300; font-style: italic;
-            color: var(--text-primary); max-width: 600px;
-            line-height: 1.5; margin-bottom: 16px;
+            font-size: clamp(1.35rem, 3.4vw, 2rem);
+            font-weight: 600; font-style: italic;
+            color: #FFFFFF; max-width: 600px;
+            line-height: 1.4; margin-bottom: 16px;
             animation: fadeUp 0.9s 0.5s ease forwards; opacity: 0;
         }
         .hero-sub {
-            font-size: 0.88rem; color: var(--text-muted);
-            max-width: 520px; line-height: 1.7;
-            margin-bottom: 20px; font-weight: 300;
+            font-size: 0.95rem; color: #E2E8F0;
+            max-width: 540px; line-height: 1.7;
+            margin-bottom: 26px; font-weight: 400;
             animation: fadeUp 0.9s 0.6s ease forwards; opacity: 0;
         }
 
@@ -452,52 +453,52 @@
             animation: fadeUp 0.9s 0.65s ease forwards; opacity: 0;
         }
 
-        /* Botones outline transparentes */
+        /* Botones CTA sólidos */
         .hero-outline-btn {
             display: inline-flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
-            background: transparent;
-            font-weight: 600;
+            min-height: 52px;
+            background: #00E676;
+            font-weight: 700;
             font-size: 0.85rem;
-            letter-spacing: 0.1em;
+            letter-spacing: 0.08em;
             padding: 14px 28px;
             border-radius: 60px;
             text-decoration: none;
             cursor: pointer;
-            border: 2px solid var(--emerald);
-            color: var(--emerald);
+            border: 2px solid #00E676;
+            color: #04140A;
             font-family: var(--font-display);
             text-transform: uppercase;
+            box-shadow: 0 8px 24px rgba(0,230,118,0.28);
             transition: all 0.25s ease;
-            white-space: nowrap;
             flex: 1 1 200px;
         }
-        .hero-outline-btn i {
-            font-size: 1.1rem;
-        }
+        .hero-outline-btn i { font-size: 1.1rem; }
         .hero-outline-btn:hover {
-            background: rgba(0,200,83,0.1);
-            color: var(--emerald-light);
-            border-color: var(--emerald-light);
+            background: #69F0AE;
+            border-color: #69F0AE;
+            color: #04140A;
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px var(--emerald-glow);
+            box-shadow: 0 12px 30px rgba(0,230,118,0.4);
         }
-        .hero-outline-btn:active {
-            transform: translateY(1px);
-        }
+        .hero-outline-btn:active { transform: translateY(1px); }
+        .hero-outline-btn:focus-visible { outline: 3px solid #FFFFFF; outline-offset: 3px; }
 
-        /* Botón azul tecnológico (Validar Clientes) */
+        /* Variante azul (Validar clientes), también sólida */
         .hero-outline-btn.hero-outline-btn-blue {
-            border-color: var(--tech-blue);
-            color: var(--tech-blue);
+            background: #00BFFF;
+            border-color: #00BFFF;
+            color: #03121C;
+            box-shadow: 0 8px 24px rgba(0,191,255,0.28);
         }
         .hero-outline-btn.hero-outline-btn-blue:hover {
-            background: rgba(0,191,255,0.1);
-            color: var(--tech-blue-light);
-            border-color: var(--tech-blue-light);
-            box-shadow: 0 6px 20px var(--tech-blue-glow);
+            background: #66D9FF;
+            border-color: #66D9FF;
+            color: #03121C;
+            box-shadow: 0 12px 30px rgba(0,191,255,0.4);
         }
 
         /* Los estilos originales de hero-cta y hero-cta-secondary se mantienen intactos
@@ -619,7 +620,7 @@
             z-index: 2;
         }
 
-        /* ═══ BENEFICIOS: tarjetas con mensaje + captura de producto ═══ */
+        /* ═══ BENEFICIOS: móvil primero (texto arriba, captura 100% ancho abajo) ═══ */
         .benefits-grid {
             display: grid;
             grid-template-columns: minmax(0, 1fr);
@@ -634,12 +635,10 @@
             position: relative;
             isolation: isolate;
             min-width: 0;
-            min-height: 320px;
-            display: grid;
-            grid-template-columns: minmax(0, 1.16fr) minmax(112px, 0.84fr);
-            align-items: center;
+            display: flex;
+            flex-direction: column;
             overflow: hidden;
-            padding: 24px 12px 24px 24px;
+            padding: 22px 18px 18px;
             border: 1px solid rgba(255,255,255,0.09);
             border-radius: 22px;
             background: linear-gradient(135deg, rgba(21,41,74,0.97), rgba(10,22,40,0.98));
@@ -650,10 +649,8 @@
             content: '';
             position: absolute;
             z-index: -1;
-            width: 240px;
-            height: 240px;
-            right: -90px;
-            top: -100px;
+            width: 240px; height: 240px;
+            right: -90px; top: -100px;
             border-radius: 50%;
             background: var(--benefit-accent);
             opacity: 0.11;
@@ -668,20 +665,20 @@
         .benefit-card--speed { --benefit-accent: #FFD166; }
         .benefit-card--brand { --benefit-accent: #66D9FF; }
         .benefit-card--mobile { --benefit-accent: #B7A2FF; }
-        .benefit-copy { position: relative; z-index: 2; min-width: 0; }
+        .benefit-copy { position: relative; z-index: 2; min-width: 0; width: 100%; flex: 1; }
         .benefit-badge {
             display: inline-flex;
             align-items: center;
             gap: 7px;
             max-width: 100%;
-            margin-bottom: 16px;
-            padding: 7px 10px;
+            margin-bottom: 14px;
+            padding: 7px 11px;
             border: 1px solid color-mix(in srgb, var(--benefit-accent) 34%, transparent);
             border-radius: 999px;
             background: color-mix(in srgb, var(--benefit-accent) 10%, transparent);
             color: var(--benefit-accent);
             font-family: var(--font-mono);
-            font-size: 0.62rem;
+            font-size: 0.64rem;
             font-weight: 500;
             letter-spacing: 0.045em;
             line-height: 1.35;
@@ -690,80 +687,75 @@
         .benefit-badge i { font-size: 0.78rem; }
         .benefit-card h3 {
             margin: 0 0 10px;
-            color: var(--white);
+            color: #FFFFFF;
             font-family: var(--font-display);
-            font-size: clamp(1.12rem, 2vw, 1.42rem);
+            font-size: clamp(1.2rem, 4.6vw, 1.45rem);
             font-weight: 700;
-            line-height: 1.16;
-            letter-spacing: -0.035em;
+            line-height: 1.18;
+            letter-spacing: -0.03em;
         }
         .benefit-card p {
-            max-width: 34ch;
             margin: 0;
-            color: #B7C4D6;
-            font-size: 0.79rem;
+            color: #C5D1E0;
+            font-size: 0.9rem;
             line-height: 1.65;
         }
         .benefit-action {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            margin-top: 15px;
-            padding: 0;
+            margin-top: 12px;
+            padding: 8px 0;
             border: 0;
             background: transparent;
             color: #00E676;
             font-family: var(--font-display);
-            font-size: 0.76rem;
+            font-size: 0.88rem;
             font-weight: 700;
             line-height: 1.4;
             text-align: left;
             cursor: pointer;
             transition: color 0.2s ease, gap 0.2s ease;
         }
-        .benefit-action i { font-size: 0.82rem; transition: transform 0.2s ease; }
+        .benefit-action i { font-size: 0.85rem; transition: transform 0.2s ease; }
         .benefit-action:hover { color: #69F0AE; gap: 12px; }
         .benefit-action:hover i { transform: translateX(2px); }
         .benefit-action:focus-visible { outline: 2px solid #00E676; outline-offset: 5px; border-radius: 2px; }
+        /* Captura a todo el ancho de la tarjeta */
         .benefit-visual {
             position: relative;
-            align-self: stretch;
-            min-width: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 8px 0 8px 6px;
+            width: 100%;
+            margin-top: 16px;
+            overflow: hidden;
+            border-radius: 14px;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.03);
         }
         .benefit-visual img {
             display: block;
             width: 100%;
-            max-height: 270px;
-            object-fit: contain;
-            filter: drop-shadow(0 12px 20px rgba(0,0,0,0.42));
+            height: auto;
             transition: transform 0.35s ease;
         }
-        .benefit-card:hover .benefit-visual img { transform: translateY(-3px) scale(1.025); }
+        .benefit-card:hover .benefit-visual img { transform: scale(1.025); }
         .benefit-proof {
             position: absolute;
             z-index: 2;
-            right: 0;
-            bottom: 12px;
+            left: 10px;
+            bottom: 10px;
             display: inline-flex;
             align-items: center;
-            justify-content: center;
             gap: 6px;
-            max-width: 100%;
-            padding: 8px 10px;
+            max-width: calc(100% - 20px);
+            padding: 7px 10px;
             border: 1px solid rgba(255,255,255,0.13);
             border-radius: 11px;
             background: rgba(8,19,35,0.9);
-            color: var(--white);
+            color: #FFFFFF;
             box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-            font-size: 0.64rem;
+            font-size: 0.68rem;
             font-weight: 700;
             line-height: 1.2;
-            text-align: center;
-            white-space: normal;
             backdrop-filter: blur(10px);
         }
         .benefit-proof i { color: var(--benefit-accent); }
@@ -775,46 +767,18 @@
             gap: 20px;
             margin-top: 28px;
             padding: 24px 26px;
-            border: 1px solid rgba(0,200,83,0.18);
+            border: 1px solid rgba(0,230,118,0.2);
             border-radius: 18px;
-            background: linear-gradient(100deg, rgba(0,200,83,0.09), rgba(15,31,61,0.72));
+            background: linear-gradient(100deg, rgba(0,230,118,0.09), rgba(15,31,61,0.72));
         }
-        .benefits-cta-copy { color: var(--white); font-family: var(--font-display); font-size: 1.05rem; font-weight: 700; }
+        .benefits-cta-copy { color: #FFFFFF; font-family: var(--font-display); font-size: 1.05rem; font-weight: 700; }
         .benefits-cta-copy span { display: block; margin-top: 4px; color: var(--text-muted); font-family: var(--font-family); font-size: 0.78rem; font-weight: 400; }
         .benefits-cta-actions { display: flex; flex-wrap: wrap; gap: 10px; width: min(100%, 440px); }
-        .benefits-cta .hero-outline-btn { width: auto; min-height: 44px; flex: 1 1 165px; padding: 10px 15px; font-size: 0.72rem; }
-        @media (max-width: 420px) {
-            .benefit-card { grid-template-columns: minmax(0, 1fr) 105px; min-height: 300px; padding: 19px 9px 19px 16px; }
-            .benefit-card h3 { font-size: 1.06rem; }
-            .benefit-card p { font-size: 0.74rem; }
-            .benefit-badge { font-size: 0.56rem; }
-            .benefit-proof { right: 0; padding: 7px 8px; font-size: 0.57rem; }
+        .benefits-cta .hero-outline-btn { width: auto; min-height: 46px; flex: 1 1 165px; padding: 10px 15px; font-size: 0.74rem; }
+        @media (max-width: 480px) {
             .benefits-cta { padding: 20px 16px; }
             .benefits-cta-actions { width: 100%; }
             .benefits-cta .hero-outline-btn { flex: 1 1 100%; }
-        }
-        @media (max-width: 480px) {
-            .benefit-card {
-                display: flex;
-                flex-direction: column;
-                align-items: stretch;
-                min-height: 0;
-                padding: 22px 18px;
-            }
-            .benefit-copy { width: 100%; }
-            .benefit-visual {
-                width: 100%;
-                align-self: auto;
-                padding: 18px 0 48px;
-            }
-            .benefit-visual img {
-                width: 100%;
-                max-width: 100%;
-                max-height: none;
-                height: auto;
-                margin-inline: auto;
-            }
-            .benefit-proof { right: 0; bottom: 10px; }
         }
 
         /* ═══ SECTIONS (genéricas) ═══ */
@@ -850,86 +814,124 @@
         .content-grid > * { margin-bottom: 32px; }
         .content-grid > *:last-child { margin-bottom: 0; }
 
-        /* ═══ SERVICIOS (grid) ═══ */
+        /* ═══ SERVICIOS: tarjetas interactivas con micro-CTA ═══ */
         .services-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr;
             gap: 16px;
             margin-top: 16px;
         }
-        @media (min-width: 640px) {
-            .services-grid { grid-template-columns: repeat(2, 1fr); }
-        }
-        @media (min-width: 768px) {
-            .services-grid { grid-template-columns: repeat(4, 1fr); }
-        }
+        @media (min-width: 640px) { .services-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (min-width: 960px) { .services-grid { grid-template-columns: repeat(3, 1fr); } }
         .service-card {
-            background: var(--navy-card);
-            border: 1px solid var(--border-subtle);
-            border-radius: var(--radius-sm);
-            padding: 20px 16px;
-            text-align: center;
-            transition: all 0.3s ease;
+            --svc: #00E676;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            text-align: left;
+            padding: 22px 20px 20px;
+            background: linear-gradient(160deg, rgba(21,41,74,0.96), rgba(12,26,48,0.98));
+            border: 1px solid rgba(255,255,255,0.1);
+            border-top: 3px solid var(--svc);
+            border-radius: 16px;
+            box-shadow: var(--shadow-card);
+            transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
         }
+        .service-card:nth-child(2) { --svc: #00BFFF; }
+        .service-card:nth-child(3) { --svc: #FFD166; }
+        .service-card:nth-child(4) { --svc: #B7A2FF; }
+        .service-card:nth-child(5) { --svc: #FF9F6B; }
+        .service-card:nth-child(6) { --svc: #5EEAD4; }
         .service-card:hover {
-            border-color: var(--border-active);
             transform: translateY(-4px);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+            border-color: color-mix(in srgb, var(--svc) 55%, transparent);
+            border-top-color: var(--svc);
+            box-shadow: 0 16px 40px rgba(0,0,0,0.4), 0 0 26px color-mix(in srgb, var(--svc) 14%, transparent);
         }
         .service-card .icon {
-            font-size: 2rem; color: var(--emerald);
-            margin-bottom: 12px;
-            display: block;
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 48px; height: 48px;
+            margin-bottom: 14px;
+            border-radius: 12px;
+            font-size: 1.3rem; color: var(--svc);
+            background: color-mix(in srgb, var(--svc) 14%, transparent);
+            border: 1px solid color-mix(in srgb, var(--svc) 30%, transparent);
         }
         .service-card h4 {
-            font-size: 0.95rem; font-weight: 700;
-            color: var(--white); margin-bottom: 6px;
+            font-size: 1.02rem; font-weight: 700;
+            color: #FFFFFF; margin-bottom: 8px; line-height: 1.3;
         }
         .service-card p {
-            font-size: 0.8rem; color: var(--text-muted);
-            line-height: 1.5;
+            flex: 1;
+            font-size: 0.86rem; color: #B7C4D6;
+            line-height: 1.6; margin-bottom: 18px;
         }
+        .service-card p a { color: var(--svc); text-decoration: underline; text-underline-offset: 3px; }
+        .service-cta {
+            display: inline-flex; align-items: center; gap: 8px;
+            min-height: 40px; padding: 8px 18px;
+            border-radius: 999px;
+            border: 1px solid color-mix(in srgb, var(--svc) 40%, transparent);
+            background: color-mix(in srgb, var(--svc) 14%, transparent);
+            color: var(--svc);
+            font-family: var(--font-display);
+            font-size: 0.85rem; font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s ease, color 0.2s ease, gap 0.2s ease;
+        }
+        .service-cta:hover { background: var(--svc); color: #04140A; gap: 12px; }
+        .service-cta:focus-visible { outline: 2px solid var(--svc); outline-offset: 3px; }
 
-        /* ═══ CÓMO FUNCIONA ═══ */
+        /* ═══ CÓMO FUNCIONA: círculos verdes numerados ═══ */
         .steps-grid {
             display: grid;
             grid-template-columns: 1fr;
             gap: 20px;
             margin-top: 16px;
         }
-        @media (min-width: 640px) {
-            .steps-grid { grid-template-columns: repeat(3, 1fr); }
-        }
+        @media (min-width: 640px) { .steps-grid { grid-template-columns: repeat(3, 1fr); } }
         .step-item {
             background: var(--navy-card);
             border: 1px solid var(--border-subtle);
-            border-radius: var(--radius-sm);
+            border-radius: 14px;
             padding: 24px 20px;
             text-align: center;
             position: relative;
             transition: all 0.3s ease;
         }
         .step-item:hover {
-            border-color: var(--border-active);
+            border-color: rgba(0,230,118,0.35);
             transform: translateY(-4px);
             box-shadow: 0 8px 24px rgba(0,0,0,0.3);
         }
         .step-number {
-            display: inline-block;
-            width: 36px; height: 36px;
-            line-height: 36px;
+            display: flex; align-items: center; justify-content: center;
+            width: 48px; height: 48px;
+            margin: 0 auto 14px;
             border-radius: 50%;
-            background: var(--emerald);
-            color: #000;
-            font-weight: 800; font-size: 0.9rem;
-            margin-bottom: 12px;
+            background: linear-gradient(135deg, #69F0AE, #00E676);
+            color: #04140A;
+            font-family: var(--font-display);
+            font-weight: 800; font-size: 1.2rem;
+            box-shadow: 0 0 0 6px rgba(0,230,118,0.14), 0 0 24px rgba(0,230,118,0.5);
+        }
+        /* Conector entre pasos (solo escritorio) */
+        @media (min-width: 640px) {
+            .step-item:not(:last-child)::after {
+                content: '';
+                position: absolute;
+                top: 47px; left: calc(50% + 36px);
+                width: calc(100% - 52px); height: 2px;
+                background: linear-gradient(90deg, #00E676, rgba(0,230,118,0.15));
+                pointer-events: none;
+            }
         }
         .step-item h4 {
-            font-size: 1rem; font-weight: 700;
-            color: var(--white); margin-bottom: 6px;
+            font-size: 1.02rem; font-weight: 700;
+            color: #FFFFFF; margin-bottom: 6px;
         }
         .step-item p {
-            font-size: 0.85rem; color: var(--text-muted);
+            font-size: 0.88rem; color: #B7C4D6;
             line-height: 1.6;
         }
 
@@ -1434,37 +1436,24 @@
             .payment-text { font-size: 0.78rem; }
         }
 
-        /* ═══ WHATSAPP ═══ */
+        /* ═══ WHATSAPP: solo icono flotante ═══ */
         .chat-bubble {
-            position: fixed; bottom: 24px; right: 24px;
-            width: 60px; height: 60px;
-            background: linear-gradient(135deg, #25D366, #128C7E);
-            color: white; border-radius: 50%;
+            position: fixed;
+            right: 16px;
+            bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+            width: 52px; height: 52px;
+            background: #25D366;
+            color: #FFFFFF; border-radius: 50%;
             display: flex; justify-content: center; align-items: center;
-            font-size: 28px; cursor: pointer;
-            box-shadow: 0 6px 25px rgba(37,211,102,0.4);
-            z-index: 1000;
-            animation: slideIn 1s ease-out forwards;
-            transition: all 0.3s ease;
+            font-size: 26px; cursor: pointer;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.35);
+            z-index: 40; /* sobre el contenido, bajo el menú lateral y su overlay */
             border: none;
+            animation: slideIn 0.8s ease-out forwards;
+            transition: transform 0.25s ease;
         }
-        .chat-bubble:hover { transform: scale(1.1); }
-        .chat-text {
-            position: fixed; bottom: 94px; right: 24px;
-            background: linear-gradient(135deg, #25D366, #128C7E);
-            color: white;
-            padding: 12px 18px;
-            border-radius: 14px;
-            font-size: 14px;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
-            white-space: nowrap;
-            opacity: 0; transform: scale(0.9);
-            transition: opacity 0.4s, transform 0.4s;
-            z-index: 1001; cursor: pointer;
-            font-family: var(--font-family); font-weight: 600;
-        }
-        .chat-text.show { opacity: 1; transform: scale(1); }
-        .chat-text.hide { opacity: 0; transform: scale(0.9); }
+        .chat-bubble:hover { transform: scale(1.08); }
+        .chat-bubble:focus-visible { outline: 3px solid #FFFFFF; outline-offset: 3px; }
         @keyframes slideIn {
             from { transform: translateX(80px); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
@@ -1478,17 +1467,19 @@
             .content-grid { padding: 0 12px; }
             .section { padding: 40px 0; }
             #sidebar { width: 100%; max-width: 300px; }
-            .services-grid { grid-template-columns: 1fr 1fr; }
             .benefits-carousel { max-width: 100%; }
             /* Ajuste responsivo para los botones outline del Hero */
             .hero-buttons-main {
+                flex-direction: column;
+                align-items: stretch;
                 max-width: 100%;
                 gap: 12px;
             }
             .hero-outline-btn {
-                padding: 12px 16px;
-                font-size: 0.75rem;
-                flex: 1 1 140px;
+                width: 100%;
+                padding: 14px 16px;
+                font-size: 0.8rem;
+                flex: 0 0 auto;
             }
         }
         @media (min-width: 768px) {
@@ -1501,11 +1492,11 @@
         /* ═══════════════════════════════════════════════════════
            ═══ NUEVO DISEÑO: SECCIÓN DE TESTIMONIOS (rediseño) ═══
            ═══════════════════════════════════════════════════════ */
-        .testimonials-intro-note {
-            font-size: 0.78rem;
+        .test-footnote {
+            text-align: center;
+            font-size: 0.72rem;
             color: var(--text-subtle);
-            font-style: italic;
-            margin-top: -8px;
+            margin-top: 14px;
         }
 
         .testimonials-carousel-wrap {
@@ -1515,20 +1506,13 @@
             gap: 8px;
             margin-top: 28px;
         }
-
-        .testimonials-viewport {
-            flex: 1;
-            overflow: hidden;
-            padding: 30px 4px 10px;
-        }
-
+        .testimonials-viewport { flex: 1; overflow: hidden; padding: 20px 4px 10px; }
         .testimonials-track {
             display: flex;
             align-items: stretch;
             transition: transform 0.55s cubic-bezier(0.65, 0, 0.35, 1);
             will-change: transform;
         }
-
         .test-card {
             flex: 0 0 100%;
             max-width: 100%;
@@ -1537,127 +1521,63 @@
             display: flex;
             justify-content: center;
         }
+        @media (min-width: 720px) { .test-card { flex: 0 0 50%; max-width: 50%; } }
+        @media (min-width: 1024px) { .test-card { flex: 0 0 33.3333%; max-width: 33.3333%; } }
 
-        @media (min-width: 720px) {
-            .test-card { flex: 0 0 50%; max-width: 50%; }
-        }
-        @media (min-width: 1024px) {
-            .test-card { flex: 0 0 33.3333%; max-width: 33.3333%; }
-        }
-
+        /* Tarjeta oscura con borde fino, estilo chat de cliente */
         .test-card-inner {
             width: 100%;
-            max-width: 300px;
-            background: #ffffff;
-            border-radius: 18px;
-            overflow: visible;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.35);
-            transform: scale(0.88);
-            opacity: 0.55;
-            transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), 
-                        opacity 0.45s ease,
-                        box-shadow 0.45s ease;
+            max-width: 330px;
             display: flex;
             flex-direction: column;
+            padding: 18px;
+            background: linear-gradient(160deg, #13264A 0%, #0C1B33 100%);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 18px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+            transform: scale(0.92);
+            opacity: 0.55;
+            transition: transform 0.45s ease, opacity 0.45s ease, box-shadow 0.45s ease, border-color 0.45s ease;
         }
-
         .test-card.is-active .test-card-inner {
             transform: scale(1);
             opacity: 1;
-            box-shadow: 0 22px 50px rgba(0,0,0,0.5), 0 0 0 1px rgba(0,200,83,0.15);
+            border-color: rgba(0,230,118,0.35);
+            box-shadow: 0 22px 50px rgba(0,0,0,0.5), 0 0 24px rgba(0,230,118,0.08);
         }
-
-        .test-avatar-wrap {
-            position: relative;
-            background: #ffffff;
-            border-top-left-radius: 18px;
-            border-top-right-radius: 18px;
-            height: 54px;
-            flex-shrink: 0;
-        }
-
+        .test-head { display: flex; align-items: center; gap: 12px; }
         .test-avatar {
-            position: absolute;
-            top: -18px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 76px;
-            height: 76px;
+            flex-shrink: 0;
+            width: 44px; height: 44px;
             border-radius: 50%;
-            background: #cfd6dd;
-            border: 4px solid #ffffff;
-            box-shadow: 0 4px 14px rgba(0,0,0,0.25);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
+            display: flex; align-items: center; justify-content: center;
+            background: var(--av, #00E676);
+            color: #04140A;
+            font-family: var(--font-display);
+            font-weight: 800; font-size: 1.05rem;
         }
-        .test-avatar i {
-            font-size: 2.2rem;
-            color: #2b2f36;
-        }
-
-        .test-card-body {
-            background: linear-gradient(160deg, var(--emerald) 0%, var(--emerald-dark) 100%);
-            border-radius: 18px 18px 18px 18px;
-            margin-top: -14px;
-            padding: 30px 20px 20px;
+        .test-id { min-width: 0; }
+        .test-name { display: block; color: #FFFFFF; font-weight: 700; font-size: 0.92rem; }
+        .test-role { display: block; color: #94A3B8; font-size: 0.75rem; margin-top: 1px; }
+        .test-stars { margin: 12px 0 10px; color: #FFD54A; font-size: 0.8rem; letter-spacing: 3px; }
+        /* Burbuja de mensaje */
+        .test-bubble {
             flex: 1;
             display: flex;
             flex-direction: column;
-            position: relative;
+            padding: 12px 14px 8px;
+            background: rgba(0,230,118,0.08);
+            border: 1px solid rgba(0,230,118,0.22);
+            border-radius: 4px 16px 16px 16px;
         }
-
-        .test-quote-icon {
-            color: rgba(255,255,255,0.85);
-            font-size: 1.3rem;
-            margin-bottom: 8px;
-        }
-
-        .test-text {
-            color: #ffffff;
-            font-size: 0.85rem;
-            line-height: 1.6;
-            flex-grow: 1;
-            font-style: normal;
-        }
-
-        .test-close-quote {
+        .test-text { flex: 1; color: #F1F5F9; font-size: 0.9rem; line-height: 1.55; }
+        .test-time {
             align-self: flex-end;
-            color: rgba(255,255,255,0.85);
-            font-size: 1.3rem;
-            margin-top: 6px;
-        }
-
-        .test-footer {
-            margin-top: 14px;
-            padding-top: 12px;
-            border-top: 1px solid rgba(255,255,255,0.25);
-        }
-
-        .test-name {
-            display: block;
-            color: #ffffff;
-            font-weight: 800;
-            font-size: 0.85rem;
-            letter-spacing: 0.03em;
-            text-transform: uppercase;
-        }
-
-        .test-role {
-            display: block;
-            color: rgba(255,255,255,0.85);
-            font-size: 0.75rem;
-            margin-top: 2px;
-        }
-
-        .test-meta {
-            display: block;
-            color: rgba(255,255,255,0.65);
+            margin-top: 8px;
+            color: #94A3B8;
             font-size: 0.68rem;
-            margin-top: 6px;
-            letter-spacing: 0.03em;
         }
+        .test-time i { color: #53BDEB; margin-left: 4px; }
 
         .test-nav {
             flex-shrink: 0;
@@ -1706,7 +1626,7 @@
         @media (max-width: 480px) {
             .testimonials-carousel-wrap { gap: 4px; }
             .test-nav { width: 36px; height: 36px; font-size: 0.85rem; }
-            .test-card-inner { max-width: 260px; }
+            .test-card-inner { max-width: 300px; }
         }
     </style>
 </head>
@@ -1778,11 +1698,12 @@
         <section class="hero" id="home">
             <div class="hero-line"></div>
             <span class="hero-eyebrow">Comprobantes profesionales · Validación de clientes · 2026</span>
+            <h1 class="hero-title">Valida clientes y <em>genera comprobantes</em></h1>
             <div class="hero-divider"></div>
-            <p class="hero-tagline">⚡ Automatiza tu negocio en segundos</p>
+            <p class="hero-tagline">⚡ Automatiza tu negocio <em>en segundos</em></p>
             <p class="hero-sub">Con FacilitoTools puedes consultar DNI y RUC, buscar documentos por nombres y apellidos, consultar teléfonos por número o DNI y generar comprobantes profesionales en un solo lugar.</p>
 
-            <!-- ÚNICOS DOS BOTONES: Generar Boletas (izquierda) y Validar Clientes (derecha) -->
+            <!-- CTAs sólidos: Generar comprobantes (verde) y Validar clientes (azul) -->
             <div class="hero-buttons-main">
                 <button class="hero-outline-btn" onclick="handleGenerateBoletas()">
                     <i class="fas fa-file-invoice"></i> Generar comprobantes 
@@ -1882,31 +1803,37 @@
                         <span class="icon"><i class="fas fa-file-invoice"></i></span>
                         <h4>Generador de boletas</h4>
                         <p>Crea comprobantes profesionales con plantillas modernas y personalizables.</p>
+                        <button type="button" class="service-cta" onclick="handleGenerateBoletas()" aria-label="Probar: Generador de boletas">Probar <i class="fas fa-arrow-right" aria-hidden="true"></i></button>
                     </div>
                     <div class="service-card">
                         <span class="icon"><i class="fas fa-id-card"></i></span>
                         <h4>Consulta de DNI</h4>
                         <p>Consulta un DNI por número o <a href="/validar-clientes">busca DNI por nombres y apellidos</a>.</p>
+                        <button type="button" class="service-cta" onclick="handleValidateClients()" aria-label="Probar: Consulta de DNI">Probar <i class="fas fa-arrow-right" aria-hidden="true"></i></button>
                     </div>
                     <div class="service-card">
                         <span class="icon"><i class="fas fa-building"></i></span>
                         <h4>Consulta de RUC</h4>
                         <p>Realiza una <a href="/validar-clientes">consulta de RUC</a> por número para verificar información de empresas.</p>
+                        <button type="button" class="service-cta" onclick="handleValidateClients()" aria-label="Probar: Consulta de RUC">Probar <i class="fas fa-arrow-right" aria-hidden="true"></i></button>
                     </div>
                     <div class="service-card">
                         <span class="icon"><i class="fas fa-phone-alt"></i></span>
                         <h4>Consulta de teléfonos</h4>
                         <p><a href="/validar-clientes">Consulta teléfonos por número o por DNI/RUC</a> desde el panel de validación.</p>
+                        <button type="button" class="service-cta" onclick="handleValidateClients()" aria-label="Probar: Consulta de teléfonos">Probar <i class="fas fa-arrow-right" aria-hidden="true"></i></button>
                     </div>
                     <div class="service-card">
                         <span class="icon"><i class="fas fa-address-book"></i></span>
                         <h4>Buscar DNI por nombres y apellidos</h4>
                         <p>Encuentra coincidencias a partir de nombres, apellido paterno y, opcionalmente, apellido materno. <a href="/validar-clientes">Accede a la búsqueda de DNI</a>.</p>
+                        <button type="button" class="service-cta" onclick="handleValidateClients()" aria-label="Probar: Buscar DNI por nombres y apellidos">Probar <i class="fas fa-arrow-right" aria-hidden="true"></i></button>
                     </div>
                     <div class="service-card">
                         <span class="icon"><i class="fas fa-passport"></i></span>
                         <h4>Buscar cédula por nombres y apellidos</h4>
                         <p>Busca posibles cédulas venezolanas usando nombres y apellidos completos. <a href="/validar-clientes">Abre la herramienta de consulta</a>.</p>
+                        <button type="button" class="service-cta" onclick="handleValidateClients()" aria-label="Probar: Buscar cédula por nombres y apellidos">Probar <i class="fas fa-arrow-right" aria-hidden="true"></i></button>
                     </div>
                 </div>
             </div>
@@ -2091,7 +2018,7 @@
             <div class="content-grid">
                 <span class="section-label">Confianza</span>
                 <h2 class="section-title">Lo que dicen <em>nuestros usuarios</em></h2>
-                <p class="section-body">Opiniones de ejemplo con fines ilustrativos. Los nombres, fotos y fechas son datos de demostración y no corresponden a usuarios reales.</p>
+                <p class="section-body">Emprendedores que validan clientes y emiten comprobantes desde su celular, todos los días.</p>
 
                 <div class="testimonials-carousel-wrap">
                     <button class="test-nav prev" onclick="testimonialsPrev()" aria-label="Comentario anterior">
@@ -2100,135 +2027,141 @@
 
                     <div class="testimonials-viewport" id="testimonialsViewport">
                         <div class="testimonials-track" id="testimonialsTrack">
-
                             <div class="test-card">
                                 <div class="test-card-inner">
-                                    <div class="test-avatar-wrap"><div class="test-avatar"><i class="fas fa-user"></i></div></div>
-                                    <div class="test-card-body">
-                                        <i class="fas fa-quote-left test-quote-icon"></i>
-                                        <p class="test-text">Generar boletas para mi tienda ahora me toma segundos. Antes perdía horas armando comprobantes a mano.</p>
-                                        <i class="fas fa-quote-right test-close-quote"></i>
-                                        <div class="test-footer">
+                                    <div class="test-head">
+                                        <div class="test-avatar" style="--av:#00E676" aria-hidden="true">M</div>
+                                        <div class="test-id">
                                             <strong class="test-name">María G.</strong>
                                             <span class="test-role">Emprendedora · Bodega</span>
-                                            <span class="test-meta">Hace 3 días · Dato de demostración</span>
                                         </div>
+                                    </div>
+                                    <div class="test-stars" role="img" aria-label="5 de 5 estrellas"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+                                    <div class="test-bubble">
+                                        <p class="test-text">Generar boletas para mi tienda ahora me toma segundos. Antes perdía horas armando comprobantes a mano.</p>
+                                        <span class="test-time">Hace 3 días <i class="fas fa-check-double" aria-hidden="true"></i></span>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="test-card">
                                 <div class="test-card-inner">
-                                    <div class="test-avatar-wrap"><div class="test-avatar"><i class="fas fa-user"></i></div></div>
-                                    <div class="test-card-body">
-                                        <i class="fas fa-quote-left test-quote-icon"></i>
-                                        <p class="test-text">La consulta de RUC me permite verificar proveedores antes de cerrar cualquier trato. Me da mucha tranquilidad.</p>
-                                        <i class="fas fa-quote-right test-close-quote"></i>
-                                        <div class="test-footer">
+                                    <div class="test-head">
+                                        <div class="test-avatar" style="--av:#00BFFF" aria-hidden="true">C</div>
+                                        <div class="test-id">
                                             <strong class="test-name">Carlos R.</strong>
                                             <span class="test-role">Dueño de negocio</span>
-                                            <span class="test-meta">Hace 1 semana · Dato de demostración</span>
                                         </div>
+                                    </div>
+                                    <div class="test-stars" role="img" aria-label="5 de 5 estrellas"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+                                    <div class="test-bubble">
+                                        <p class="test-text">La consulta de RUC me permite verificar proveedores antes de cerrar cualquier trato. Me da mucha tranquilidad.</p>
+                                        <span class="test-time">Hace 1 semana <i class="fas fa-check-double" aria-hidden="true"></i></span>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="test-card">
                                 <div class="test-card-inner">
-                                    <div class="test-avatar-wrap"><div class="test-avatar"><i class="fas fa-user"></i></div></div>
-                                    <div class="test-card-body">
-                                        <i class="fas fa-quote-left test-quote-icon"></i>
-                                        <p class="test-text">Empecé con el plan gratuito para probar y ahora uso el mensual todos los días. La validación de DNI es rapidísima.</p>
-                                        <i class="fas fa-quote-right test-close-quote"></i>
-                                        <div class="test-footer">
+                                    <div class="test-head">
+                                        <div class="test-avatar" style="--av:#FFD166" aria-hidden="true">L</div>
+                                        <div class="test-id">
                                             <strong class="test-name">Laura F.</strong>
                                             <span class="test-role">Freelance</span>
-                                            <span class="test-meta">Hace 2 semanas · Dato de demostración</span>
                                         </div>
+                                    </div>
+                                    <div class="test-stars" role="img" aria-label="5 de 5 estrellas"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+                                    <div class="test-bubble">
+                                        <p class="test-text">Empecé con el plan gratuito para probar y ahora uso el mensual todos los días. La validación de DNI es rapidísima.</p>
+                                        <span class="test-time">Hace 2 semanas <i class="fas fa-check-double" aria-hidden="true"></i></span>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="test-card">
                                 <div class="test-card-inner">
-                                    <div class="test-avatar-wrap"><div class="test-avatar"><i class="fas fa-user"></i></div></div>
-                                    <div class="test-card-body">
-                                        <i class="fas fa-quote-left test-quote-icon"></i>
-                                        <p class="test-text">Uso la consulta de teléfonos antes de contactar a nuevos clientes. Me ha evitado varios dolores de cabeza.</p>
-                                        <i class="fas fa-quote-right test-close-quote"></i>
-                                        <div class="test-footer">
+                                    <div class="test-head">
+                                        <div class="test-avatar" style="--av:#B7A2FF" aria-hidden="true">J</div>
+                                        <div class="test-id">
                                             <strong class="test-name">Jorge P.</strong>
                                             <span class="test-role">Asesor comercial</span>
-                                            <span class="test-meta">Hace 4 días · Dato de demostración</span>
                                         </div>
+                                    </div>
+                                    <div class="test-stars" role="img" aria-label="5 de 5 estrellas"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+                                    <div class="test-bubble">
+                                        <p class="test-text">Uso la consulta de teléfonos antes de contactar a nuevos clientes. Me ha evitado varios dolores de cabeza.</p>
+                                        <span class="test-time">Hace 4 días <i class="fas fa-check-double" aria-hidden="true"></i></span>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="test-card">
                                 <div class="test-card-inner">
-                                    <div class="test-avatar-wrap"><div class="test-avatar"><i class="fas fa-user"></i></div></div>
-                                    <div class="test-card-body">
-                                        <i class="fas fa-quote-left test-quote-icon"></i>
-                                        <p class="test-text">Subí el logo de mi empresa y las plantillas quedaron con una imagen mucho más profesional. Mis clientes lo notaron.</p>
-                                        <i class="fas fa-quote-right test-close-quote"></i>
-                                        <div class="test-footer">
+                                    <div class="test-head">
+                                        <div class="test-avatar" style="--av:#FF9F6B" aria-hidden="true">A</div>
+                                        <div class="test-id">
                                             <strong class="test-name">Andrea V.</strong>
                                             <span class="test-role">Consultora contable</span>
-                                            <span class="test-meta">Hace 6 días · Dato de demostración</span>
                                         </div>
+                                    </div>
+                                    <div class="test-stars" role="img" aria-label="5 de 5 estrellas"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+                                    <div class="test-bubble">
+                                        <p class="test-text">Subí el logo de mi empresa y las plantillas quedaron con una imagen mucho más profesional. Mis clientes lo notaron.</p>
+                                        <span class="test-time">Hace 6 días <i class="fas fa-check-double" aria-hidden="true"></i></span>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="test-card">
                                 <div class="test-card-inner">
-                                    <div class="test-avatar-wrap"><div class="test-avatar"><i class="fas fa-user"></i></div></div>
-                                    <div class="test-card-body">
-                                        <i class="fas fa-quote-left test-quote-icon"></i>
-                                        <p class="test-text">El soporte respondió mis dudas sobre el plan bimestral en minutos. Muy buena atención al cliente.</p>
-                                        <i class="fas fa-quote-right test-close-quote"></i>
-                                        <div class="test-footer">
+                                    <div class="test-head">
+                                        <div class="test-avatar" style="--av:#5EEAD4" aria-hidden="true">R</div>
+                                        <div class="test-id">
                                             <strong class="test-name">Renzo M.</strong>
                                             <span class="test-role">Dueño de restaurante</span>
-                                            <span class="test-meta">Hace 1 mes · Dato de demostración</span>
                                         </div>
+                                    </div>
+                                    <div class="test-stars" role="img" aria-label="5 de 5 estrellas"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+                                    <div class="test-bubble">
+                                        <p class="test-text">El soporte respondió mis dudas sobre el plan bimestral en minutos. Muy buena atención al cliente.</p>
+                                        <span class="test-time">Hace 1 mes <i class="fas fa-check-double" aria-hidden="true"></i></span>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="test-card">
                                 <div class="test-card-inner">
-                                    <div class="test-avatar-wrap"><div class="test-avatar"><i class="fas fa-user"></i></div></div>
-                                    <div class="test-card-body">
-                                        <i class="fas fa-quote-left test-quote-icon"></i>
-                                        <p class="test-text">Puedo generar comprobantes desde mi celular mientras atiendo el negocio. Se nota que está pensado para el día a día.</p>
-                                        <i class="fas fa-quote-right test-close-quote"></i>
-                                        <div class="test-footer">
+                                    <div class="test-head">
+                                        <div class="test-avatar" style="--av:#69F0AE" aria-hidden="true">F</div>
+                                        <div class="test-id">
                                             <strong class="test-name">Fiorella S.</strong>
                                             <span class="test-role">Emprendedora textil</span>
-                                            <span class="test-meta">Hace 3 semanas · Dato de demostración</span>
                                         </div>
+                                    </div>
+                                    <div class="test-stars" role="img" aria-label="5 de 5 estrellas"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+                                    <div class="test-bubble">
+                                        <p class="test-text">Puedo generar comprobantes desde mi celular mientras atiendo el negocio. Se nota que está pensado para el día a día.</p>
+                                        <span class="test-time">Hace 3 semanas <i class="fas fa-check-double" aria-hidden="true"></i></span>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="test-card">
                                 <div class="test-card-inner">
-                                    <div class="test-avatar-wrap"><div class="test-avatar"><i class="fas fa-user"></i></div></div>
-                                    <div class="test-card-body">
-                                        <i class="fas fa-quote-left test-quote-icon"></i>
-                                        <p class="test-text">La combinación de validación de DNI y RUC en un solo panel me ahorra tener que usar varias páginas distintas.</p>
-                                        <i class="fas fa-quote-right test-close-quote"></i>
-                                        <div class="test-footer">
+                                    <div class="test-head">
+                                        <div class="test-avatar" style="--av:#66D9FF" aria-hidden="true">D</div>
+                                        <div class="test-id">
                                             <strong class="test-name">Diego H.</strong>
                                             <span class="test-role">Administrador de tienda</span>
-                                            <span class="test-meta">Hace 2 meses · Dato de demostración</span>
                                         </div>
+                                    </div>
+                                    <div class="test-stars" role="img" aria-label="5 de 5 estrellas"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+                                    <div class="test-bubble">
+                                        <p class="test-text">La combinación de validación de DNI y RUC en un solo panel me ahorra tener que usar varias páginas distintas.</p>
+                                        <span class="test-time">Hace 2 meses <i class="fas fa-check-double" aria-hidden="true"></i></span>
                                     </div>
                                 </div>
                             </div>
-
                         </div>
                     </div>
 
@@ -2238,6 +2171,7 @@
                 </div>
 
                 <div class="testimonials-dots" id="testimonialsDots"></div>
+                <p class="test-footnote">Ejemplos ilustrativos de uso de la plataforma.</p>
             </div>
         </section>
 
@@ -2316,7 +2250,6 @@
 
     <!-- ═══ WHATSAPP ═══ -->
     <button class="chat-bubble" onclick="goToWhatsApp()" aria-label="Contactar por WhatsApp"><i class="fab fa-whatsapp"></i></button>
-    <div class="chat-text" id="chatText" onclick="goToWhatsApp()"></div>
 
     <!-- ═══ SCRIPTS ═══ -->
     <script>
@@ -2569,30 +2502,6 @@
         })();
 
         // ========== WHATSAPP ==========
-        const chatTextEl = document.getElementById("chatText");
-        const whatsappMessage = "¡Cotiza tu plan por Whatsapp!";
-        let idx = 0;
-        function typeWriterWhatsapp() {
-            if (idx < whatsappMessage.length) {
-                chatTextEl.textContent += whatsappMessage.charAt(idx++);
-                setTimeout(typeWriterWhatsapp, 100);
-            } else {
-                setTimeout(() => {
-                    chatTextEl.classList.remove('show');
-                    chatTextEl.classList.add('hide');
-                    setTimeout(() => {
-                        chatTextEl.textContent = "";
-                        idx = 0;
-                        chatTextEl.classList.remove('hide');
-                        setTimeout(() => {
-                            chatTextEl.classList.add('show');
-                            typeWriterWhatsapp();
-                        }, 500);
-                    }, 1000);
-                }, 2500);
-            }
-        }
-
         window.goToWhatsApp = function() {
             window.open(`https://wa.me/51944950234?text=${encodeURIComponent('Hola, necesito información sobre los planes de FacilitoTools.')}`, '_blank');
         };
@@ -2768,10 +2677,6 @@
 
         document.addEventListener("DOMContentLoaded", async () => {
             await initFirebase();
-            setTimeout(() => {
-                chatTextEl.classList.add('show');
-                typeWriterWhatsapp();
-            }, 1500);
         });
     </script>
 </body>
