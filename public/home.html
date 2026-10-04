@@ -642,7 +642,7 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            padding: 22px 18px 18px;
+            padding: 22px 18px 0;
             border: 1px solid var(--border-subtle);
             border-radius: 22px;
             background: linear-gradient(160deg, #FFFFFF, #F4F8FC);
@@ -669,18 +669,21 @@
         .benefit-card--speed { --benefit-accent: #B45309; }
         .benefit-card--brand { --benefit-accent: #0B5FC4; }
         .benefit-card--mobile { --benefit-accent: #6B2AA5; }
-        .benefit-copy { position: relative; z-index: 2; min-width: 0; width: 100%; flex: 1; }
+        .benefit-copy { position: relative; z-index: 2; min-width: 0; width: 100%; flex: 1; padding-bottom: 18px; }
         .benefit-badge {
-            display: inline-flex;
+            display: flex;
             align-items: center;
             gap: 7px;
-            max-width: 100%;
+            width: 100%;
+            max-width: none;
+            min-height: 42px;
             margin-bottom: 14px;
-            padding: 7px 11px;
+            padding: 9px 13px;
             border: 1px solid color-mix(in srgb, var(--benefit-accent) 34%, transparent);
-            border-radius: 999px;
-            background: color-mix(in srgb, var(--benefit-accent) 10%, transparent);
+            border-radius: 13px;
+            background: color-mix(in srgb, var(--benefit-accent) 11%, #FFFFFF);
             color: var(--benefit-accent);
+            box-shadow: inset 3px 0 0 var(--benefit-accent), 0 4px 12px rgba(15,23,42,0.05);
             font-family: var(--font-mono);
             font-size: 0.64rem;
             font-weight: 500;
@@ -728,12 +731,24 @@
         /* Captura a todo el ancho de la tarjeta */
         .benefit-visual {
             position: relative;
-            width: 100%;
-            margin-top: 16px;
+            flex: 0 0 auto;
+            width: calc(100% + 36px);
+            align-self: center;
+            margin: auto -18px 0;
             overflow: hidden;
-            border-radius: 14px;
-            border: 1px solid var(--border-subtle);
+            border-radius: 0 0 21px 21px;
             background: var(--navy-card);
+        }
+        .benefit-visual::before {
+            content: '';
+            position: absolute;
+            z-index: 1;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 88px;
+            background: linear-gradient(180deg, rgba(244,248,252,0.98), rgba(244,248,252,0));
+            pointer-events: none;
         }
         .benefit-visual img {
             display: block;
@@ -1743,7 +1758,7 @@
                             <button type="button" class="benefit-action" onclick="handleValidateClients()">Probar validación ahora <i class="fas fa-arrow-right" aria-hidden="true"></i></button>
                         </div>
                         <div class="benefit-visual">
-                            <img src="/assets/home/file-0000000097e4720695e43c78fb9094f9.webp" alt="Herramientas de validación de clientes y documentos" loading="lazy">
+                            <img src="/assets/home/file_000000000330820e820e21c531e9dc19.webp" alt="Herramientas de validación de clientes y documentos" loading="lazy">
                             <span class="benefit-proof"><i class="fas fa-circle-check" aria-hidden="true"></i> Verifica primero</span>
                         </div>
                     </article>
@@ -1756,7 +1771,7 @@
                             <button type="button" class="benefit-action" onclick="handleGenerateBoletas()">Generar comprobante gratis <i class="fas fa-arrow-right" aria-hidden="true"></i></button>
                         </div>
                         <div class="benefit-visual">
-                            <img src="/assets/home/image.webp" alt="Comprobante digital listo para compartir" loading="lazy">
+                            <img src="/assets/home/IMG_20261004_121405.webp" alt="Comprobante digital listo para compartir" loading="lazy">
                             <span class="benefit-proof"><i class="fas fa-file-arrow-down" aria-hidden="true"></i> Listo para enviar</span>
                         </div>
                     </article>
@@ -1769,7 +1784,7 @@
                             <button type="button" class="benefit-action" onclick="handleGenerateBoletas()">Crear comprobante con tu marca <i class="fas fa-arrow-right" aria-hidden="true"></i></button>
                         </div>
                         <div class="benefit-visual">
-                            <img src="/assets/home/file-000000003f2072068aea63ad1c15a520.webp" alt="Comprobantes digitales con una presentación profesional" loading="lazy">
+                            <img src="/assets/home/file_000000009d68820ebf42f27261a8f6c3.webp" alt="Comprobantes digitales con una presentación profesional" loading="lazy">
                             <span class="benefit-proof"><i class="fas fa-star" aria-hidden="true"></i> Tu negocio, bien presentado</span>
                         </div>
                     </article>
@@ -1782,7 +1797,7 @@
                             <button type="button" class="benefit-action" onclick="handleValidateClients()">Explorar herramientas desde el celular <i class="fas fa-arrow-right" aria-hidden="true"></i></button>
                         </div>
                         <div class="benefit-visual">
-                            <img src="/assets/home/file-00000000bee8720686d99441dc110608.webp" alt="Emprendedora gestionando ventas y comprobantes desde su celular" loading="lazy">
+                            <img src="/assets/home/file_0000000004d4820ebd4799d5f3ecc0f0.webp" alt="Emprendedora gestionando ventas y comprobantes desde su celular" loading="lazy">
                             <span class="benefit-proof"><i class="fas fa-globe" aria-hidden="true"></i> Desde tu navegador</span>
                         </div>
                     </article>
