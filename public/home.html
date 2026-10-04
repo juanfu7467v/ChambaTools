@@ -847,9 +847,9 @@
             --svc: #0A7B3E;
             display: flex;
             flex-direction: column;
-            align-items: flex-start;
             text-align: left;
-            padding: 22px 20px 20px;
+            overflow: hidden;
+            padding: 0;
             background: linear-gradient(160deg, #FFFFFF, #F4F8FC);
             border: 1px solid var(--border-subtle);
             border-top: 3px solid var(--svc);
@@ -868,14 +868,39 @@
             border-top-color: var(--svc);
             box-shadow: 0 16px 40px rgba(15,23,42,0.24), 0 0 26px color-mix(in srgb, var(--svc) 14%, transparent);
         }
-        .service-card .icon {
-            display: inline-flex; align-items: center; justify-content: center;
-            width: 48px; height: 48px;
-            margin-bottom: 14px;
-            border-radius: 12px;
-            font-size: 1.3rem; color: var(--svc);
-            background: color-mix(in srgb, var(--svc) 14%, transparent);
-            border: 1px solid color-mix(in srgb, var(--svc) 30%, transparent);
+        .service-visual {
+            position: relative;
+            isolation: isolate;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            overflow: hidden;
+            flex: 0 0 auto;
+            background: #E6EEF8;
+        }
+        .service-visual::after {
+            content: '';
+            position: absolute;
+            z-index: 1;
+            inset: auto 0 0;
+            height: 76px;
+            background: linear-gradient(180deg, rgba(244,248,252,0), rgba(244,248,252,0.72) 58%, #F4F8FC 100%);
+            pointer-events: none;
+        }
+        .service-visual img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+        .service-card:hover .service-visual img { transform: scale(1.025); }
+        .service-card-content {
+            display: flex;
+            flex: 1;
+            flex-direction: column;
+            align-items: flex-start;
+            width: 100%;
+            padding: 3px 20px 20px;
         }
         .service-card h4 {
             font-size: 1.02rem; font-weight: 700;
@@ -1821,40 +1846,52 @@
                 <p class="section-body">Todo lo que necesitas para gestionar tus comprobantes y validar la información de tus clientes en un solo ecosistema.</p>
                 <div class="services-grid">
                     <div class="service-card">
-                        <span class="icon"><i class="fas fa-file-invoice"></i></span>
-                        <h4>Generador de boletas</h4>
-                        <p>Crea comprobantes profesionales con plantillas modernas y personalizables.</p>
-                        <button type="button" class="service-cta" onclick="handleGenerateBoletas()" aria-label="Probar: Generador de boletas">Probar <i class="fas fa-arrow-right" aria-hidden="true"></i></button>
+                        <div class="service-visual"><img src="/assets/home/grok_1791135758706.webp" alt="Generador de boletas y comprobantes" loading="lazy"></div>
+                        <div class="service-card-content">
+                            <h4>Generador de boletas</h4>
+                            <p>Crea comprobantes profesionales con plantillas modernas y personalizables.</p>
+                            <button type="button" class="service-cta" onclick="handleGenerateBoletas()" aria-label="Probar: Generador de boletas">Probar <i class="fas fa-arrow-right" aria-hidden="true"></i></button>
+                        </div>
                     </div>
                     <div class="service-card">
-                        <span class="icon"><i class="fas fa-id-card"></i></span>
-                        <h4>Consulta de DNI</h4>
-                        <p>Consulta un DNI por número o <a href="/validar-clientes">busca DNI por nombres y apellidos</a>.</p>
-                        <button type="button" class="service-cta" onclick="handleValidateClients()" aria-label="Probar: Consulta de DNI">Probar <i class="fas fa-arrow-right" aria-hidden="true"></i></button>
+                        <div class="service-visual"><img src="/assets/home/file_1791089031077.webp" alt="Consulta y validación de DNI" loading="lazy"></div>
+                        <div class="service-card-content">
+                            <h4>Consulta de DNI</h4>
+                            <p>Consulta un DNI por número o <a href="/validar-clientes">busca DNI por nombres y apellidos</a>.</p>
+                            <button type="button" class="service-cta" onclick="handleValidateClients()" aria-label="Probar: Consulta de DNI">Probar <i class="fas fa-arrow-right" aria-hidden="true"></i></button>
+                        </div>
                     </div>
                     <div class="service-card">
-                        <span class="icon"><i class="fas fa-building"></i></span>
-                        <h4>Consulta de RUC</h4>
-                        <p>Realiza una <a href="/validar-clientes">consulta de RUC</a> por número para verificar información de empresas.</p>
-                        <button type="button" class="service-cta" onclick="handleValidateClients()" aria-label="Probar: Consulta de RUC">Probar <i class="fas fa-arrow-right" aria-hidden="true"></i></button>
+                        <div class="service-visual"><img src="/assets/home/file_1791089034120.webp" alt="Consulta y validación de RUC" loading="lazy"></div>
+                        <div class="service-card-content">
+                            <h4>Consulta de RUC</h4>
+                            <p>Realiza una <a href="/validar-clientes">consulta de RUC</a> por número para verificar información de empresas.</p>
+                            <button type="button" class="service-cta" onclick="handleValidateClients()" aria-label="Probar: Consulta de RUC">Probar <i class="fas fa-arrow-right" aria-hidden="true"></i></button>
+                        </div>
                     </div>
                     <div class="service-card">
-                        <span class="icon"><i class="fas fa-phone-alt"></i></span>
-                        <h4>Consulta de teléfonos</h4>
-                        <p><a href="/validar-clientes">Consulta teléfonos por número o por DNI/RUC</a> desde el panel de validación.</p>
-                        <button type="button" class="service-cta" onclick="handleValidateClients()" aria-label="Probar: Consulta de teléfonos">Probar <i class="fas fa-arrow-right" aria-hidden="true"></i></button>
+                        <div class="service-visual"><img src="/assets/home/file_1791087324564.webp" alt="Consulta de teléfonos por número o documento" loading="lazy"></div>
+                        <div class="service-card-content">
+                            <h4>Consulta de teléfonos</h4>
+                            <p><a href="/validar-clientes">Consulta teléfonos por número o por DNI/RUC</a> desde el panel de validación.</p>
+                            <button type="button" class="service-cta" onclick="handleValidateClients()" aria-label="Probar: Consulta de teléfonos">Probar <i class="fas fa-arrow-right" aria-hidden="true"></i></button>
+                        </div>
                     </div>
                     <div class="service-card">
-                        <span class="icon"><i class="fas fa-address-book"></i></span>
-                        <h4>Buscar DNI por nombres y apellidos</h4>
-                        <p>Encuentra coincidencias a partir de nombres, apellido paterno y, opcionalmente, apellido materno. <a href="/validar-clientes">Accede a la búsqueda de DNI</a>.</p>
-                        <button type="button" class="service-cta" onclick="handleValidateClients()" aria-label="Probar: Buscar DNI por nombres y apellidos">Probar <i class="fas fa-arrow-right" aria-hidden="true"></i></button>
+                        <div class="service-visual"><img src="/assets/home/file_1791087334769.webp" alt="Búsqueda de DNI por nombres y apellidos" loading="lazy"></div>
+                        <div class="service-card-content">
+                            <h4>Buscar DNI por nombres y apellidos</h4>
+                            <p>Encuentra coincidencias a partir de nombres, apellido paterno y, opcionalmente, apellido materno. <a href="/validar-clientes">Accede a la búsqueda de DNI</a>.</p>
+                            <button type="button" class="service-cta" onclick="handleValidateClients()" aria-label="Probar: Buscar DNI por nombres y apellidos">Probar <i class="fas fa-arrow-right" aria-hidden="true"></i></button>
+                        </div>
                     </div>
                     <div class="service-card">
-                        <span class="icon"><i class="fas fa-passport"></i></span>
-                        <h4>Buscar cédula por nombres y apellidos</h4>
-                        <p>Busca posibles cédulas venezolanas usando nombres y apellidos completos. <a href="/validar-clientes">Abre la herramienta de consulta</a>.</p>
-                        <button type="button" class="service-cta" onclick="handleValidateClients()" aria-label="Probar: Buscar cédula por nombres y apellidos">Probar <i class="fas fa-arrow-right" aria-hidden="true"></i></button>
+                        <div class="service-visual"><img src="/assets/home/file_1791087341980.webp" alt="Búsqueda de cédula por nombres y apellidos" loading="lazy"></div>
+                        <div class="service-card-content">
+                            <h4>Buscar cédula por nombres y apellidos</h4>
+                            <p>Busca posibles cédulas venezolanas usando nombres y apellidos completos. <a href="/validar-clientes">Abre la herramienta de consulta</a>.</p>
+                            <button type="button" class="service-cta" onclick="handleValidateClients()" aria-label="Probar: Buscar cédula por nombres y apellidos">Probar <i class="fas fa-arrow-right" aria-hidden="true"></i></button>
+                        </div>
                     </div>
                 </div>
             </div>
