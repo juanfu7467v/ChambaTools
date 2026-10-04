@@ -17,7 +17,7 @@
     overlay.innerHTML = `
         <section id="exit-intent-dialog" role="dialog" aria-modal="true" aria-labelledby="exit-intent-title" aria-describedby="exit-intent-subtitle" tabindex="-1">
             <button class="exit-intent-close" type="button" aria-label="Cerrar oferta">&times;</button>
-            <p class="exit-intent-kicker"><span aria-hidden="true">✦</span> Oferta exclusiva de salida</p>
+            <p class="exit-intent-kicker"><span aria-hidden="true">✦</span> OFERTA EXCLUSIVA</p>
             <h2 class="exit-intent-title" id="exit-intent-title">¡Espera! No te vayas con las manos vacías 🚀</h2>
             <p class="exit-intent-subtitle" id="exit-intent-subtitle">Aprovecha un <strong>20% DE DESCUENTO</strong> exclusivo en tu primera compra activa hoy.</p>
             <button class="exit-intent-cta" type="button"><span>RECLAMAR MI 20% DE DESCUENTO</span><span aria-hidden="true">→</span></button>
