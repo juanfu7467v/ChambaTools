@@ -629,10 +629,10 @@
     }
 
     /* ═══════════════════════════════════════════════════════════════
-       TELÉFONOS (≤767px): interfaz a pantalla completa, sin tarjeta,
+       TELÉFONOS Y TABLETS (≤1023px): interfaz a pantalla completa, sin tarjeta,
        con un único fondo blanco uniforme. No afecta al escritorio.
        ═══════════════════════════════════════════════════════════════ */
-    @media (max-width: 767px) {
+    @media (max-width: 1023px) {
         body {
             background: #FFFFFF;
             display: block;
@@ -664,7 +664,7 @@
 
         .screen::before { display: none; }
 
-        /* Evita que el contenido se estire demasiado en teléfonos anchos */
+        /* Evita que el contenido se estire demasiado en pantallas anchas */
         .screen > * { max-width: 480px; }
     }
 
