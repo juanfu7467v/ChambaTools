@@ -794,6 +794,11 @@
         .benefits-cta-copy span { display: block; margin-top: 4px; color: var(--text-muted); font-family: var(--font-family); font-size: 0.78rem; font-weight: 400; }
         .benefits-cta-actions { display: flex; flex-wrap: wrap; gap: 10px; width: min(100%, 440px); }
         .benefits-cta .hero-outline-btn { width: auto; min-height: 46px; flex: 1 1 165px; padding: 10px 15px; font-size: 0.74rem; }
+        @media (min-width: 768px) {
+            .benefits-cta { justify-content: center; text-align: center; }
+            .benefits-cta-copy { flex: 1 1 100%; }
+            .benefits-cta-actions { justify-content: center; margin-inline: auto; }
+        }
         @media (max-width: 480px) {
             .benefits-cta { padding: 20px 16px; }
             .benefits-cta-actions { width: 100%; }
@@ -1760,7 +1765,7 @@
             </div>
 
             <div class="hero-stats">
-                <div class="stat-item"><span class="stat-num">+2,400</span><span class="stat-label">Usuarios Activos</span></div>
+                <div class="stat-item"><span class="stat-num" id="active-users-count" aria-live="off">+2,400</span><span class="stat-label">Usuarios Activos</span></div>
                 <div class="stat-item"><span class="stat-num">6</span><span class="stat-label">Servicios</span></div>
                 <div class="stat-item"><span class="stat-num">24/7</span><span class="stat-label">Disponibilidad</span></div>
                 <div class="stat-item"><span class="stat-num">100%</span><span class="stat-label">Seguridad</span></div>
@@ -2269,7 +2274,7 @@
         <section class="cta-final" id="ctaFinalSection">
             <canvas id="ctaCanvas"></canvas>
             <h2>¿Listo para impulsar tu <em>negocio</em>?</h2>
-            <p>Únete a más de 2,400 usuarios que ya confían en FacilitoTools para generar comprobantes y validar clientes.</p>
+            <p>Únete a emprendedores que usan FacilitoTools para generar comprobantes y validar clientes.</p>
             <button class="hero-cta" onclick="handleFreeStart()">
                 <i class="fas fa-rocket"></i> Comenzar gratis
             </button>
@@ -2608,7 +2613,7 @@
                 getRandomStat() {
                     const stats = [
                         '+24% ingresos', 'S/19/mes', '800 comp.', '60 consultas',
-                        '+2,400 users', '99.9% uptime', 'S/32 plan', '140 valid.',
+                        'usuarios activos', '99.9% uptime', 'S/32 plan', '140 valid.',
                         'x3 ROI', '🚀 crece', '📈 +45%', '💡 ahorra',
                         '⚡ rápido', '🔒 seguro', '🎯 preciso', '💎 premium'
                     ];
@@ -2731,6 +2736,56 @@
             }, { threshold: 0.1 });
             observer.observe(section);
 
+        })();
+
+        // ========== CONTADOR VISUAL SIMULADO DE USUARIOS ACTIVOS ==========
+        (function initActiveUsersCounter() {
+            const counter = document.getElementById('active-users-count');
+            if (!counter) return;
+
+            const formatter = new Intl.NumberFormat('es-PE');
+            const baseline = 2400;
+            let displayedValue = baseline;
+
+            function getSimulatedCount() {
+                const elapsed = Date.now() / 1000;
+                const gentleVariation =
+                    Math.sin(elapsed / 127) * 2.1 +
+                    Math.sin(elapsed / 337) * 1.7 +
+                    Math.cos(elapsed / 53) * 0.8;
+                return baseline + Math.round(gentleVariation);
+            }
+
+            function animateCount(target) {
+                const start = displayedValue;
+                displayedValue = target;
+                const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+                if (reduceMotion || start === target) {
+                    counter.textContent = `+${formatter.format(target)}`;
+                    return;
+                }
+
+                const duration = 700;
+                const startedAt = performance.now();
+                function frame(now) {
+                    const progress = Math.min((now - startedAt) / duration, 1);
+                    const eased = 1 - Math.pow(1 - progress, 3);
+                    const value = Math.round(start + (target - start) * eased);
+                    counter.textContent = `+${formatter.format(value)}`;
+                    if (progress < 1) requestAnimationFrame(frame);
+                }
+                requestAnimationFrame(frame);
+            }
+
+            function refreshSimulatedCount() {
+                if (!document.hidden) animateCount(getSimulatedCount());
+            }
+
+            refreshSimulatedCount();
+            window.setInterval(refreshSimulatedCount, 12_000);
+            document.addEventListener('visibilitychange', () => {
+                if (!document.hidden) refreshSimulatedCount();
+            });
         })();
 
         document.addEventListener("DOMContentLoaded", async () => {
