@@ -218,6 +218,43 @@ const PLAN_PRECIOS = {
   recarga_pro: 55,
   recarga_maxima: 65
 };
+// El token del exit-intent solo se emite desde el CTA de home y caduca en 24 h.
+const EXIT_INTENT_PROMO_CODE = 'EXIT20';
+const EXIT_INTENT_PROMO_CAMPAIGN = 'exit-intent-20';
+const EXIT_INTENT_PROMO_TTL_MS = 24 * 60 * 60 * 1000;
+
+function createExitIntentPromotionToken() {
+  const payload = Buffer.from(JSON.stringify({
+    campaign: EXIT_INTENT_PROMO_CAMPAIGN,
+    expiresAt: Date.now() + EXIT_INTENT_PROMO_TTL_MS,
+    nonce: crypto.randomBytes(16).toString('hex')
+  })).toString('base64url');
+  const signature = crypto.createHmac('sha256', sessionCookieSecret).update(payload).digest('base64url');
+  return `${payload}.${signature}`;
+}
+
+function verifyExitIntentPromotionToken(token) {
+  if (typeof token !== 'string' || token.length > 2048) return null;
+  const [payload, signature, ...extraParts] = token.split('.');
+  if (!payload || !signature || extraParts.length) return null;
+  const expectedSignature = crypto.createHmac('sha256', sessionCookieSecret).update(payload).digest();
+  let providedSignature;
+  try {
+    providedSignature = Buffer.from(signature, 'base64url');
+  } catch (_) {
+    return null;
+  }
+  if (providedSignature.length !== expectedSignature.length || !crypto.timingSafeEqual(providedSignature, expectedSignature)) return null;
+
+  try {
+    const data = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8'));
+    if (data.campaign !== EXIT_INTENT_PROMO_CAMPAIGN || !Number.isFinite(data.expiresAt) || data.expiresAt <= Date.now()) return null;
+    return data;
+  } catch (_) {
+    return null;
+  }
+}
+
 const CHECKOUT_INTENTS_COLLECTION = 'checkout_intents';
 const configuredCheckoutDelayMinutes = Number(process.env.CHECKOUT_REMINDER_DELAY_MINUTES || 5);
 const checkoutDelayMinutes = Number.isFinite(configuredCheckoutDelayMinutes)
@@ -1099,11 +1136,42 @@ app.post("/api/report-failed-login", authRateLimit, async (req, res) => {
   }
 });
 
+// Emite un token de promoción solo ante una solicitud same-origin del CTA de home.
+app.post('/api/promotions/exit-intent/redeem', rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 20,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false
+}), (req, res) => {
+  const origin = req.get('origin');
+  let sourceIsHome = false;
+  try {
+    const referer = new URL(req.get('referer'));
+    sourceIsHome = referer.origin === origin && allowedOrigins.includes(referer.origin)
+      && ['/', '/home.html'].includes(referer.pathname);
+  } catch (_) {
+    sourceIsHome = false;
+  }
+  if (!origin || !allowedOrigins.includes(origin) || !sourceIsHome) {
+    return res.status(403).json({ error: 'Origen no permitido para esta promoción.' });
+  }
+  if (req.body?.campaign !== EXIT_INTENT_PROMO_CODE) {
+    return res.status(400).json({ error: 'La promoción solicitada no es válida.' });
+  }
+
+  res.set('Cache-Control', 'no-store');
+  return res.json({
+    code: EXIT_INTENT_PROMO_CODE,
+    token: createExitIntentPromotionToken(),
+    expiresInSeconds: Math.floor(EXIT_INTENT_PROMO_TTL_MS / 1000)
+  });
+});
+
 // Endpoint de pago (actualizado para usar planId)
 app.post("/api/pay", async (req, res) => {
   const context = 'PAY_API';
   try {
-    const { transaction_amount, token, description, installments, payment_method_id, payer, planId } = req.body || {};
+    const { transaction_amount, token, description, installments, payment_method_id, payer, planId, promotionToken } = req.body || {};
     const uid = getAuthenticatedUid(req);
     if (!uid) return res.status(401).json({ error: 'No autenticado.' });
     if (!mpClient) return res.status(503).json({ error: 'Mercado Pago not configured' });
@@ -1123,6 +1191,23 @@ app.post("/api/pay", async (req, res) => {
       return res.status(400).json({ error: 'Invalid planId' });
     }
 
+    // El cliente no decide el precio: el servidor compara el monto con el precio
+    // oficial y solo acepta -20% si el CTA emitió un token vigente.
+    const basePrice = Number(PLAN_PRECIOS[planId]);
+    if (!Number.isFinite(basePrice)) {
+      return res.status(400).json({ error: 'Precio no disponible para el plan seleccionado.' });
+    }
+    const promotion = promotionToken ? verifyExitIntentPromotionToken(promotionToken) : null;
+    if (promotionToken && !promotion) {
+      return res.status(400).json({ error: 'La oferta de 20% venció o no es válida. Vuelve a solicitarla desde la página de inicio.' });
+    }
+    const expectedAmount = promotion
+      ? Math.round(basePrice * 0.8 * 100) / 100
+      : basePrice;
+    if (Math.round(Number(transaction_amount) * 100) !== Math.round(expectedAmount * 100)) {
+      return res.status(400).json({ error: 'El importe no coincide con el precio autorizado para este plan.' });
+    }
+
     const payment = new Payment(mpClient);
     const result = await payment.create({
       body: {
@@ -1137,8 +1222,10 @@ app.post("/api/pay", async (req, res) => {
         metadata: { 
           uid, 
           email: payer.email, 
-          amount: transaction_amount, 
-          plan_id: planId
+          amount: expectedAmount,
+          plan_id: planId,
+          promo_code: promotion ? EXIT_INTENT_PROMO_CODE : null,
+          promo_campaign: promotion ? promotion.campaign : null
         }
       }
     });

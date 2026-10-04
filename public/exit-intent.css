@@ -1,0 +1,213 @@
+/* Exit-intent de FacilitoTools: se carga únicamente desde home.html. */
+#exit-intent-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 12000;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 0;
+    background: rgba(7, 16, 31, 0.58);
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 240ms ease, visibility 240ms ease;
+}
+
+#exit-intent-overlay.is-visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+#exit-intent-dialog {
+    position: relative;
+    width: 100%;
+    max-width: none;
+    overflow: hidden;
+    padding: clamp(25px, 4vw, 42px) clamp(20px, 5vw, 72px) 30px;
+    border: 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.55);
+    border-radius: 0 0 16px 16px;
+    background:
+        radial-gradient(ellipse at 8% 0%, rgba(0, 230, 118, 0.13), transparent 42%),
+        linear-gradient(135deg, #ffffff 0%, #f3f8f5 100%);
+    color: #102018;
+    box-shadow: 0 20px 55px rgba(3, 12, 8, 0.28);
+    transform: translateY(-18px);
+    transition: transform 300ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    text-align: center;
+}
+
+#exit-intent-overlay.is-visible #exit-intent-dialog {
+    transform: translateY(0);
+}
+
+#exit-intent-dialog .exit-intent-close {
+    position: absolute;
+    top: 14px;
+    right: 18px;
+    display: grid;
+    width: 42px;
+    height: 42px;
+    place-items: center;
+    border: 1px solid rgba(16, 32, 24, 0.14);
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.82);
+    color: #26392f;
+    font: inherit;
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: transform 180ms ease, background 180ms ease, box-shadow 180ms ease;
+}
+
+#exit-intent-dialog .exit-intent-close:hover {
+    transform: rotate(90deg);
+    background: #ffffff;
+    box-shadow: 0 4px 14px rgba(16, 32, 24, 0.15);
+}
+
+#exit-intent-dialog .exit-intent-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 11px;
+    color: #08783e;
+    font-size: 0.77rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+#exit-intent-dialog .exit-intent-title {
+    max-width: 900px;
+    margin: 0 auto 10px;
+    color: #11241a;
+    font-family: 'Space Grotesk', 'Outfit', sans-serif;
+    font-size: clamp(1.6rem, 3.1vw, 2.55rem);
+    font-weight: 800;
+    line-height: 1.14;
+    letter-spacing: -0.035em;
+}
+
+#exit-intent-dialog .exit-intent-subtitle {
+    max-width: 720px;
+    margin: 0 auto 22px;
+    color: #3d5046;
+    font-size: clamp(0.97rem, 1.7vw, 1.13rem);
+    line-height: 1.55;
+}
+
+#exit-intent-dialog .exit-intent-subtitle strong {
+    color: #08783e;
+    font-weight: 900;
+}
+
+#exit-intent-dialog .exit-intent-cta {
+    display: inline-flex;
+    min-height: 54px;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: min(100%, 440px);
+    padding: 14px 22px;
+    border: 0;
+    border-radius: 12px;
+    background: #00e676;
+    color: #062515;
+    box-shadow: 0 0 0 1px rgba(0, 164, 83, 0.15), 0 0 24px rgba(0, 230, 118, 0.36), 0 8px 18px rgba(0, 128, 64, 0.18);
+    font: inherit;
+    font-size: 0.95rem;
+    font-weight: 900;
+    letter-spacing: 0.025em;
+    cursor: pointer;
+    transition: transform 180ms ease, background 180ms ease, box-shadow 180ms ease;
+}
+
+#exit-intent-dialog .exit-intent-cta:hover:not(:disabled) {
+    transform: translateY(-2px);
+    background: #00f080;
+    box-shadow: 0 0 0 1px rgba(0, 164, 83, 0.22), 0 0 34px rgba(0, 230, 118, 0.56), 0 12px 24px rgba(0, 128, 64, 0.24);
+}
+
+#exit-intent-dialog .exit-intent-cta:focus-visible,
+#exit-intent-dialog .exit-intent-close:focus-visible,
+#exit-intent-dialog .exit-intent-decline:focus-visible {
+    outline: 3px solid #126b41;
+    outline-offset: 4px;
+}
+
+#exit-intent-dialog .exit-intent-cta:disabled {
+    cursor: wait;
+    opacity: 0.75;
+}
+
+#exit-intent-dialog .exit-intent-decline {
+    display: block;
+    margin: 15px auto 0;
+    padding: 7px 10px;
+    border: 0;
+    background: transparent;
+    color: #53645b;
+    font: inherit;
+    font-size: 0.88rem;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+    transition: color 160ms ease;
+}
+
+#exit-intent-dialog .exit-intent-decline:hover {
+    color: #17271e;
+}
+
+#exit-intent-dialog .exit-intent-error {
+    min-height: 1.3em;
+    margin: 10px 0 0;
+    color: #a32121;
+    font-size: 0.84rem;
+}
+
+@media (max-width: 600px) {
+    #exit-intent-dialog {
+        padding: 29px 18px 24px;
+        border-radius: 0 0 16px 16px;
+    }
+
+    #exit-intent-dialog .exit-intent-close {
+        top: 10px;
+        right: 12px;
+        width: 38px;
+        height: 38px;
+    }
+
+    #exit-intent-dialog .exit-intent-kicker {
+        margin: 6px 35px 10px;
+        font-size: 0.69rem;
+    }
+
+    #exit-intent-dialog .exit-intent-title {
+        font-size: clamp(1.5rem, 7.2vw, 2rem);
+    }
+
+    #exit-intent-dialog .exit-intent-subtitle {
+        margin-bottom: 18px;
+        font-size: 0.94rem;
+    }
+
+    #exit-intent-dialog .exit-intent-cta {
+        min-height: 52px;
+        padding: 13px 14px;
+        font-size: 0.84rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #exit-intent-overlay,
+    #exit-intent-dialog,
+    #exit-intent-dialog .exit-intent-close,
+    #exit-intent-dialog .exit-intent-cta {
+        transition-duration: 0.01ms;
+    }
+}

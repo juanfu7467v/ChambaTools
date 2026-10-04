@@ -1145,6 +1145,23 @@
             from { opacity: 0; transform: translateY(24px); }
             to { opacity: 1; transform: translateY(0); }
         }
+
+        .exit-offer-notice {
+            display: none;
+            align-items: flex-start;
+            gap: 12px;
+            margin: 18px 0 22px;
+            padding: 15px 18px;
+            border: 1px solid rgba(10, 123, 62, 0.35);
+            border-radius: 14px;
+            background: linear-gradient(120deg, #e9f9ef, #ffffff);
+            color: #16442b;
+            box-shadow: 0 8px 22px rgba(5, 77, 36, 0.09);
+        }
+        .exit-offer-notice.is-active { display: flex; }
+        .exit-offer-notice strong { display: block; margin-bottom: 3px; }
+        .exit-offer-notice p { margin: 0; font-size: 0.9rem; line-height: 1.45; }
+        .exit-offer-notice i { margin-top: 2px; color: #08783e; font-size: 1.15rem; }
     </style>
 </head>
 <body>
@@ -1224,6 +1241,10 @@
                 <span class="section-label">Elige tu plan</span>
                 <h1 class="section-title">Planes y precios para consultar DNI, RUC y validar clientes</h1>
                 <p class="section-body">Compara planes y recargas para consultar DNI o RUC, buscar DNI y cédulas por nombres y apellidos, y consultar teléfonos por número o DNI. Cada opción muestra sus cupos y precio antes de elegir.</p>
+                <div class="exit-offer-notice" id="exitOfferNotice" role="status" aria-live="polite">
+                    <i class="fas fa-tag" aria-hidden="true"></i>
+                    <p><strong>¡Tu 20% de descuento ya está reservado!</strong>Elige un plan o recarga; el precio promocional se aplicará en el checkout de esta compra.</p>
+                </div>
 
                 <div class="plans-grid">
                     <!-- Plan 7 Días (Prueba Corta) -->
@@ -1568,8 +1589,24 @@
                 return;
             }
 
-            const url = `/checkout.html?planId=${encodeURIComponent(planId)}&uid=${encodeURIComponent(uid)}&email=${encodeURIComponent(email)}`;
+            const url = new URL('/checkout.html', window.location.origin);
+            url.searchParams.set('planId', planId);
+            url.searchParams.set('uid', uid);
+            url.searchParams.set('email', email);
+            if (exitIntentOfferActive) {
+                url.searchParams.set('promo', 'EXIT20');
+                url.searchParams.set('offerToken', exitIntentOfferToken);
+            }
             window.location.href = url;
+        }
+
+        // El aviso/traspaso del cupón solo se activa con la combinación
+        // promocional que entrega el CTA del exit-intent; la API valida el token.
+        const offerParams = new URLSearchParams(window.location.search);
+        const exitIntentOfferToken = offerParams.get('offerToken');
+        const exitIntentOfferActive = offerParams.get('promo') === 'EXIT20' && Boolean(exitIntentOfferToken);
+        if (exitIntentOfferActive) {
+            document.getElementById('exitOfferNotice')?.classList.add('is-active');
         }
 
         // ========== SLIDER ==========

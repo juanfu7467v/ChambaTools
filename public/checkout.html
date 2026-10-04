@@ -1045,6 +1045,10 @@
             <div class="price-section">
                 <p class="price-label">Total a pagar</p>
                 <h1 class="total-price" id="display-amount">S/ 0.00</h1>
+                <p id="promotion-summary" style="display:none; margin-top:6px; color:#08783e; font-size:13px; font-weight:700;">
+                    <span style="color:#526258; font-weight:500;">Precio regular: <s id="regular-price"></s></span>
+                    <span style="display:block; margin-top:3px;">20% de descuento EXIT20 aplicado a esta compra.</span>
+                </p>
             </div>
 
             <div class="payment-carousel-section">
@@ -1232,15 +1236,24 @@
         const uid = urlParams.get('uid');
         const email = urlParams.get('email');
         const planInfo = MAPA_PLANES[planId];
+        const promotionToken = urlParams.get('offerToken');
+        const hasExitIntentPromotion = urlParams.get('promo') === 'EXIT20' && Boolean(promotionToken);
 
         if (!planId || !uid || !email || !planInfo) {
             alert('Error: Datos de pago incompletos o inválidos. Redirigiendo a planes...');
             window.location.href = '/planes.html';
         }
 
-        const amount = Number(planInfo.precio);
+        const regularAmount = Number(planInfo.precio);
+        const amount = hasExitIntentPromotion
+            ? Math.round(regularAmount * 0.8 * 100) / 100
+            : regularAmount;
         const description = planInfo.descripcion;
         document.getElementById('display-amount').textContent = `S/ ${amount.toFixed(2)}`;
+        if (hasExitIntentPromotion) {
+            document.getElementById('regular-price').textContent = `S/ ${regularAmount.toFixed(2)}`;
+            document.getElementById('promotion-summary').style.display = 'block';
+        }
 
         let mp;
         let bricksBuilder;
@@ -1334,6 +1347,10 @@
             cleanUrl.searchParams.set('planId', planId);
             cleanUrl.searchParams.set('uid', uid);
             cleanUrl.searchParams.set('email', email);
+            if (hasExitIntentPromotion) {
+                cleanUrl.searchParams.set('promo', 'EXIT20');
+                cleanUrl.searchParams.set('offerToken', promotionToken);
+            }
             window.location.href = cleanUrl.toString();
         }
 
@@ -1514,6 +1531,7 @@
                                     payment_method_id: cardFormData.payment_method_id,
                                     issuer_id: cardFormData.issuer_id || null,
                                     payer: cardFormData.payer,
+                                    promotionToken: hasExitIntentPromotion ? promotionToken : null,
                                     uid,
                                     tipoPlan: planId,
                                     planId: planId,
@@ -1611,6 +1629,7 @@
                         installments: 1,
                         payment_method_id: 'yape',
                         payer: { email },
+                        promotionToken: hasExitIntentPromotion ? promotionToken : null,
                         uid,
                         planId: planId,
                         tipoPlan: planId,
