@@ -2228,24 +2228,48 @@
                 <h2 class="section-title">Preguntas <em>frecuentes</em></h2>
                 <div class="faq-container-home">
                     <div class="faq-item-home">
-                        <div class="faq-question-home" onclick="toggleFaqHome(this)"><i class="fas fa-chevron-right"></i> ¿Cómo genero una boleta o comprobante?</div>
-                        <div class="faq-answer-home" style="display:none;"><p>Desde el panel principal, selecciona "Nuevo comprobante", elige la plantilla que prefieras, ingresa los datos del cliente y los productos o servicios. Puedes previsualizar y descargar el PDF al instante.</p></div>
+                        <div class="faq-question-home" onclick="toggleFaqHome(this)"><i class="fas fa-chevron-right"></i> ¿Cómo genero y comparto un comprobante?</div>
+                        <div class="faq-answer-home" style="display:none;"><p>Entra a «Generar comprobantes», completa los datos, elige una plantilla y revisa la vista previa. Luego puedes descargar el PDF y compartirlo desde tu dispositivo.</p></div>
                     </div>
                     <div class="faq-item-home">
-                        <div class="faq-question-home" onclick="toggleFaqHome(this)"><i class="fas fa-chevron-right"></i> ¿Cómo funcionan las consultas de DNI, RUC y teléfonos?</div>
-                        <div class="faq-answer-home" style="display:none;"><p>Ingresa el número de documento o teléfono en la sección de validación. El sistema te devuelve los datos públicos disponibles (nombres, razón social, estado) para que puedas verificar la identidad de tus clientes. Cada plan tiene un límite de consultas.</p></div>
+                        <div class="faq-question-home" onclick="toggleFaqHome(this)"><i class="fas fa-chevron-right"></i> ¿FacilitoTools envía mis comprobantes a SUNAT?</div>
+                        <div class="faq-answer-home" style="display:none;"><p>No. FacilitoTools crea un PDF para revisar, descargar y compartir, pero no lo registra ni lo envía a SUNAT. Si necesitas emitir un comprobante electrónico ante SUNAT, debes hacerlo mediante el sistema correspondiente.</p></div>
                     </div>
                     <div class="faq-item-home">
-                        <div class="faq-question-home" onclick="toggleFaqHome(this)"><i class="fas fa-chevron-right"></i> ¿Qué incluye el plan gratuito?</div>
-                        <div class="faq-answer-home" style="display:none;"><p>El plan gratuito te permite generar comprobantes con la plantilla Moderna Azul (con marca de agua), realizar hasta 5 consultas de DNI o RUC y 1 consulta de teléfono. Es ideal para empezar a conocer la plataforma.</p></div>
+                        <div class="faq-question-home" onclick="toggleFaqHome(this)"><i class="fas fa-chevron-right"></i> ¿Qué información puedo consultar antes de atender o despachar?</div>
+                        <div class="faq-answer-home" style="display:none;"><p>Según la herramienta y los cupos de tu plan, puedes consultar DNI y RUC, buscar DNI o cédulas venezolanas por nombres y revisar teléfonos. Los resultados dependen de la información disponible en las fuentes de consulta; confirma los datos importantes antes de tomar una decisión.</p></div>
                     </div>
                     <div class="faq-item-home">
-                        <div class="faq-question-home" onclick="toggleFaqHome(this)"><i class="fas fa-chevron-right"></i> ¿Qué ventajas ofrecen los planes de pago?</div>
-                        <div class="faq-answer-home" style="display:none;"><p>Los planes de pago desbloquean plantillas adicionales (Elegante, Corporativa y Premium), la opción de subir tu propio logotipo, personalizar colores, y un mayor número de comprobantes y consultas. Además, recibes soporte prioritario.</p></div>
+                        <div class="faq-question-home" onclick="toggleFaqHome(this)"><i class="fas fa-chevron-right"></i> ¿Se guardan los datos de mis clientes que ingreso en un comprobante?</div>
+                        <div class="faq-answer-home" style="display:none;"><p>El formulario envía los datos al servicio para preparar la vista previa o el PDF, pero no se guardan en Firestore como un historial de ventas. Si pasas a Validar Clientes y vuelves, el navegador puede conservar temporalmente un borrador para que continúes. Los datos de tu negocio o emisor sí se guardan en tu cuenta para completar futuros comprobantes.</p></div>
                     </div>
                     <div class="faq-item-home">
-                        <div class="faq-question-home" onclick="toggleFaqHome(this)"><i class="fas fa-chevron-right"></i> ¿Cómo protegen mi información y la de mis clientes?</div>
-                        <div class="faq-answer-home" style="display:none;"><p>Utilizamos encriptación avanzada y seguimos estrictas políticas de privacidad. Tus datos y los de tus clientes están protegidos y nunca se comparten con terceros. Todas las consultas se realizan sobre fuentes oficiales.</p></div>
+                        <div class="faq-question-home" onclick="toggleFaqHome(this)"><i class="fas fa-chevron-right"></i> ¿Puedo borrar el historial de mis búsquedas?</div>
+                        <div class="faq-answer-home" style="display:none;"><p>Sí. Puedes borrar resultados o registros desde los controles del historial. También puedes limpiar los datos del sitio en tu navegador; eso eliminará el historial guardado en ese dispositivo.</p></div>
+                    </div>
+                    <div class="faq-item-home">
+                        <div class="faq-question-home" onclick="toggleFaqHome(this)"><i class="fas fa-chevron-right"></i> ¿Dónde queda el historial de las búsquedas de validación?</div>
+                        <div class="faq-answer-home" style="display:none;"><p>El historial se guarda en el LocalStorage del navegador y dispositivo donde haces la consulta; no se sincroniza con tu cuenta ni se conserva como historial en nuestra base de datos. Para responder la búsqueda, los datos ingresados se envían en tiempo real a proveedores de consulta. Puedes borrar registros desde el historial o limpiar los datos del sitio en tu navegador.</p></div>
+                    </div>
+                    <div class="faq-item-home">
+                        <div class="faq-question-home" onclick="toggleFaqHome(this)"><i class="fas fa-chevron-right"></i> ¿Cómo protegen mi cuenta y mis pagos?</div>
+                        <div class="faq-answer-home" style="display:none;"><p>Los datos de tu cuenta y del emisor se guardan asociados a tu usuario, con controles de acceso. FacilitoTools no almacena números de tarjeta ni claves bancarias: los pagos se procesan mediante Mercado Pago. <a href="/politica-privacidad.html">Lee cómo tratamos tus datos</a>.</p></div>
+                    </div>
+                    <div class="faq-item-home">
+                        <div class="faq-question-home" onclick="toggleFaqHome(this)"><i class="fas fa-chevron-right"></i> ¿Qué incluye el plan gratuito y cómo comparo los demás?</div>
+                        <div class="faq-answer-home" style="display:none;"><p>El plan gratuito te permite probar las funciones básicas con cupos limitados y la plantilla gratuita. Los cupos, precios y funciones cambian según el plan; <a href="/planes.html">compara aquí las opciones y sus condiciones actualizadas</a>.</p></div>
+                    </div>
+                    <div class="faq-item-home">
+                        <div class="faq-question-home" onclick="toggleFaqHome(this)"><i class="fas fa-chevron-right"></i> ¿Para qué sirven las recargas? ¿Extienden mi plan?</div>
+                        <div class="faq-answer-home" style="display:none;"><p>Las recargas añaden cupos para consultas de validación. No extienden la duración de tu plan ni agregan comprobantes; revisa el detalle de cada recarga antes de elegirla en <a href="/planes.html">planes y recargas</a>.</p></div>
+                    </div>
+                    <div class="faq-item-home">
+                        <div class="faq-question-home" onclick="toggleFaqHome(this)"><i class="fas fa-chevron-right"></i> ¿Necesito instalar un programa para usar FacilitoTools?</div>
+                        <div class="faq-answer-home" style="display:none;"><p>No. Puedes entrar desde el navegador de tu computadora o celular. Inicia sesión para usar tus herramientas y consultar los cupos disponibles en tu cuenta.</p></div>
+                    </div>
+                    <div class="faq-item-home">
+                        <div class="faq-question-home" onclick="toggleFaqHome(this)"><i class="fas fa-chevron-right"></i> ¿Qué hago si no encuentro un resultado o necesito ayuda?</div>
+                        <div class="faq-answer-home" style="display:none;"><p>Revisa que el documento, teléfono o nombre esté escrito correctamente y vuelve a intentarlo. Algunos datos pueden no estar disponibles en las fuentes consultadas. Si necesitas ayuda con la plataforma, escríbenos a <a href="mailto:soporte@facilitotools.com">soporte@facilitotools.com</a>.</p></div>
                     </div>
                 </div>
             </div>
