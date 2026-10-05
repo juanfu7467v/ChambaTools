@@ -1988,6 +1988,12 @@
                 await registerCheckoutIntent();
 
                 const config = await fetchJSON('/api/config');
+                if (config.mercadopagoConfigured === false) {
+                    throw new Error(config.mercadopagoConfigurationError || 'Mercado Pago no está configurado correctamente.');
+                }
+                if (!config.mercadopagoPublicKey) {
+                    throw new Error('No se recibió la clave pública de Mercado Pago.');
+                }
                 mp = new MercadoPago(config.mercadopagoPublicKey, { locale: 'es-PE' });
                 bricksBuilder = mp.bricks();
 
@@ -1998,9 +2004,10 @@
             } catch (error) {
                 console.error('Error inicializando Mercado Pago:', error);
                 hideLoading();
+                const isConfigurationError = /MERCADOPAGO_MODE|credenciales|clave pública|configurado/i.test(error.message || '');
                 setErrorScreenState({
-                    title: 'Error de conexión',
-                    message: 'No se pudo inicializar la plataforma de pago. Intenta nuevamente en unos segundos.'
+                    title: isConfigurationError ? 'Configuración de pago' : 'Error de conexión',
+                    message: error.message || 'No se pudo inicializar la plataforma de pago. Intenta nuevamente en unos segundos.'
                 });
             }
         }

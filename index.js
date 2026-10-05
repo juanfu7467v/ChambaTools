@@ -4,6 +4,7 @@ import crypto from "crypto";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import { MercadoPagoConfig, Payment } from "mercadopago";
+import { getPublicMercadoPagoConfig, resolveMercadoPagoConfig } from './mercadopagoConfig.js';
 import path from "path";
 import { fileURLToPath } from "url";
 import fs from "fs";
@@ -143,13 +144,28 @@ if (serviceAccount) {
 // 💳 CONFIGURACIÓN DE MERCADO PAGO
 // ================================================================
 
-const MERCADOPAGO_ACCESS_TOKEN = process.env.MERCADOPAGO_ACCESS_TOKEN;
+const mercadoPagoConfig = resolveMercadoPagoConfig(process.env);
 const HOST_URL = process.env.HOST_URL || `https://${process.env.FLY_APP_NAME}.fly.dev`;
 
-const mpClient = MERCADOPAGO_ACCESS_TOKEN ? new MercadoPagoConfig({
-  accessToken: MERCADOPAGO_ACCESS_TOKEN.trim(),
+const mpClient = mercadoPagoConfig.configured ? new MercadoPagoConfig({
+  accessToken: mercadoPagoConfig.accessToken,
   options: { timeout: 10000 }
 }) : null;
+
+if (mercadoPagoConfig.configured) {
+  logger.info('MERCADOPAGO_CONFIG', 'Par de credenciales seleccionado', {
+    mode: mercadoPagoConfig.mode,
+    publicKeyPresent: true,
+    accessTokenPresent: true
+  });
+} else {
+  logger.error('MERCADOPAGO_CONFIG', 'Pagos deshabilitados por configuración incompleta o incompatible', null, {
+    mode: mercadoPagoConfig.mode,
+    publicKeyPresent: Boolean(mercadoPagoConfig.publicKey),
+    accessTokenPresent: Boolean(mercadoPagoConfig.accessToken),
+    reason: mercadoPagoConfig.configurationError
+  });
+}
 
 // ================================================================
 // 🛣️ RUTAS DE LA API
@@ -1062,7 +1078,7 @@ app.post("/api/notify-verification", authRateLimit, async (req, res) => {
 // Endpoint de configuración
 app.get("/api/config", (req, res) => {
   res.json({
-    mercadopagoPublicKey: process.env.MERCADOPAGO_PUBLIC_KEY,
+    ...getPublicMercadoPagoConfig(mercadoPagoConfig),
     recaptchaSiteKey: RECAPTCHA_SITE_KEY,
     firebaseConfig: {
       apiKey: process.env.FIREBASE_API_KEY,
@@ -1171,10 +1187,18 @@ app.post('/api/promotions/exit-intent/redeem', rateLimit({
 app.post("/api/pay", async (req, res) => {
   const context = 'PAY_API';
   try {
-    const { transaction_amount, token, description, installments, payment_method_id, payer, planId, promotionToken } = req.body || {};
+    const { transaction_amount, token, description, installments, payment_method_id, issuer_id, payer, planId, promotionToken } = req.body || {};
     const uid = getAuthenticatedUid(req);
     if (!uid) return res.status(401).json({ error: 'No autenticado.' });
-    if (!mpClient) return res.status(503).json({ error: 'Mercado Pago not configured' });
+    if (!mercadoPagoConfig.configured || !mpClient) {
+      return res.status(503).json({
+        code: 'MERCADOPAGO_CONFIGURATION',
+        error: mercadoPagoConfig.configurationError || 'Mercado Pago no está configurado para procesar pagos.'
+      });
+    }
+    if (typeof token !== 'string' || !token.trim() || typeof payment_method_id !== 'string' || !payment_method_id.trim()) {
+      return res.status(400).json({ error: 'Falta el token o el medio de pago generado por Mercado Pago.' });
+    }
     if (!payer || !payer.email || typeof payer.email !== 'string' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(payer.email)) {
       return res.status(400).json({ error: 'Payer email is required' });
     }
@@ -1208,27 +1232,31 @@ app.post("/api/pay", async (req, res) => {
       return res.status(400).json({ error: 'El importe no coincide con el precio autorizado para este plan.' });
     }
 
-    const payment = new Payment(mpClient);
-    const result = await payment.create({
-      body: {
-        transaction_amount: Number(transaction_amount),
-        token,
-        description,
-        installments: Number(installments),
-        payment_method_id,
-        payer,
-        external_reference: uid,
-        notification_url: `${HOST_URL}/api/webhook/mercadopago`,
-        metadata: { 
-          uid, 
-          email: payer.email, 
-          amount: expectedAmount,
-          plan_id: planId,
-          promo_code: promotion ? EXIT_INTENT_PROMO_CODE : null,
-          promo_campaign: promotion ? promotion.campaign : null
-        }
+    const paymentBody = {
+      transaction_amount: Number(transaction_amount),
+      token: token.trim(),
+      description,
+      installments: Number(installments),
+      payment_method_id,
+      payer,
+      external_reference: uid,
+      notification_url: `${HOST_URL}/api/webhook/mercadopago`,
+      metadata: {
+        uid,
+        email: payer.email,
+        amount: expectedAmount,
+        plan_id: planId,
+        promo_code: promotion ? EXIT_INTENT_PROMO_CODE : null,
+        promo_campaign: promotion ? promotion.campaign : null
       }
-    });
+    };
+    // Card Payment Brick ya envía issuer_id; conservarlo para los medios que lo requieren.
+    if (issuer_id !== undefined && issuer_id !== null && issuer_id !== '') {
+      paymentBody.issuer_id = issuer_id;
+    }
+
+    const payment = new Payment(mpClient);
+    const result = await payment.create({ body: paymentBody });
 
     if (result.status === 'rejected' || result.status === 'cancelled') {
       let userName = payer.email.split('@')[0];
@@ -1303,8 +1331,35 @@ app.post("/api/pay", async (req, res) => {
 
     res.json(result);
   } catch (error) {
-    logger.error(context, 'Error en pago', error);
-    res.status(400).json({ error: error.message });
+    const providerStatus = Number.isInteger(error?.status) ? error.status : null;
+    const providerCode = String(error?.error || error?.name || 'unknown').slice(0, 100);
+    const providerCauses = Array.isArray(error?.causes)
+      ? error.causes.slice(0, 5).map(cause => ({
+          code: String(cause?.code || '').slice(0, 80),
+          description: String(cause?.description || '').slice(0, 180)
+        }))
+      : [];
+
+    logger.error(context, 'Error en pago', error, {
+      paymentMode: mercadoPagoConfig.mode,
+      httpStatus: providerStatus,
+      providerCode,
+      providerCauses
+    });
+
+    if (providerStatus !== null) {
+      const message = providerStatus === 401
+        ? 'Mercado Pago rechazó la autenticación. Verifica que la clave pública y el Access Token pertenezcan al mismo ambiente y aplicación.'
+        : providerStatus >= 500
+          ? 'Mercado Pago no pudo confirmar el pago por un error del servicio. Revisa el estado de la operación antes de volver a intentarlo.'
+          : (error.message || 'Mercado Pago rechazó los datos del pago. Revisa la información e inténtalo nuevamente.');
+      return res.status(502).json({ code: 'MERCADOPAGO_UPSTREAM_ERROR', error: message });
+    }
+
+    return res.status(500).json({
+      code: 'PAYMENT_PROCESSING_ERROR',
+      error: 'No se pudo confirmar el estado del pago. Antes de reintentarlo, revisa tu actividad de pagos para evitar un cobro duplicado.'
+    });
   }
 });
 
