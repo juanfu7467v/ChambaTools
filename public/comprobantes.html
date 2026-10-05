@@ -4350,31 +4350,48 @@
                 context.drawImage(pageCanvas, 0, offsetY);
                 offsetY += pageCanvas.height;
             });
-            return cropCanvasToContent(canvas, Math.round(scale * 12));
+            return cropCanvasToContent(canvas, Math.round(scale * 8));
         }
 
         function cropCanvasToContent(sourceCanvas, padding = 48) {
             const context = sourceCanvas.getContext('2d', { willReadFrequently: true });
             const pixels = context.getImageData(0, 0, sourceCanvas.width, sourceCanvas.height).data;
-            const threshold = 248;
-            let minX = sourceCanvas.width;
-            let minY = sourceCanvas.height;
-            let maxX = -1;
-            let maxY = -1;
-
-            for (let y = 0; y < sourceCanvas.height; y += 2) {
+            const contentThreshold = 242;
+            const rowMinimum = Math.max(4, Math.floor(sourceCanvas.width * 0.002));
+            const columnMinimum = Math.max(4, Math.floor(sourceCanvas.height * 0.001));
+            const isContentPixel = (index) => pixels[index] < contentThreshold ||
+                pixels[index + 1] < contentThreshold || pixels[index + 2] < contentThreshold;
+            const rowHasContent = (y) => {
+                let contentPixels = 0;
                 for (let x = 0; x < sourceCanvas.width; x += 2) {
-                    const index = (y * sourceCanvas.width + x) * 4;
-                    if (pixels[index] < threshold || pixels[index + 1] < threshold || pixels[index + 2] < threshold) {
-                        minX = Math.min(minX, x);
-                        minY = Math.min(minY, y);
-                        maxX = Math.max(maxX, x);
-                        maxY = Math.max(maxY, y);
+                    if (isContentPixel((y * sourceCanvas.width + x) * 4)) {
+                        contentPixels += 1;
+                        if (contentPixels >= rowMinimum) return true;
                     }
                 }
-            }
+                return false;
+            };
+            const columnHasContent = (x) => {
+                let contentPixels = 0;
+                for (let y = 0; y < sourceCanvas.height; y += 2) {
+                    if (isContentPixel((y * sourceCanvas.width + x) * 4)) {
+                        contentPixels += 1;
+                        if (contentPixels >= columnMinimum) return true;
+                    }
+                }
+                return false;
+            };
 
-            if (maxX < 0 || maxY < 0) return sourceCanvas;
+            let minY = 0;
+            while (minY < sourceCanvas.height && !rowHasContent(minY)) minY += 2;
+            let maxY = sourceCanvas.height - 1;
+            while (maxY > minY && !rowHasContent(maxY)) maxY -= 2;
+            let minX = 0;
+            while (minX < sourceCanvas.width && !columnHasContent(minX)) minX += 2;
+            let maxX = sourceCanvas.width - 1;
+            while (maxX > minX && !columnHasContent(maxX)) maxX -= 2;
+
+            if (minY >= sourceCanvas.height || minX >= sourceCanvas.width) return sourceCanvas;
 
             minX = Math.max(0, minX - padding);
             minY = Math.max(0, minY - padding);
@@ -4430,7 +4447,8 @@
         }
 
         function resizeCanvasForTicket(sourceCanvas, widthMm) {
-            const targetWidth = Math.round((widthMm / 25.4) * 96 * 2);
+            // 300 DPI evita que el ticket pierda legibilidad al reducirse al ancho térmico.
+            const targetWidth = Math.round((widthMm / 25.4) * 300);
             const targetHeight = Math.max(1, Math.round(sourceCanvas.height * targetWidth / sourceCanvas.width));
             const ticketCanvas = document.createElement('canvas');
             ticketCanvas.width = targetWidth;
@@ -4458,7 +4476,7 @@
                 const type = format === 'jpg' ? 'image/jpeg' : 'image/png';
                 const extension = format === 'jpg' ? 'jpg' : 'png';
                 const suffix = ticketMm ? `_ticket_${ticketMm}mm` : '';
-                const blob = await canvasToBlob(canvas, type, 0.92);
+                const blob = await canvasToBlob(canvas, type, 0.98);
                 downloadBlob(blob, `${getDocumentBaseName()}${suffix}.${extension}`);
                 setStatus(ticketMm ? `Ticket de ${ticketMm} mm descargado` : `Imagen ${extension.toUpperCase()} descargada`);
                 showSuccess('Imagen descargada correctamente.');
