@@ -1369,7 +1369,6 @@ async function renderVoucherHtml(data, plan = PLAN_GRATIS_ID) {
           <div class="doc-meta">
             <div class="row"><span class="k">Fecha</span><span class="v">${escapeHtml(formatDateTime(issueDate))}</span></div>
             <div class="row"><span class="k">Moneda</span><span class="v">${escapeHtml(currency)}</span></div>
-            <div class="row"><span class="k">Plantilla</span><span class="v">${escapeHtml(template.name)}</span></div>
             <div class="row"><span class="k">Pago</span><span class="v">${escapeHtml(paymentLabel)}</span></div>
           </div>
         </div>
@@ -1422,7 +1421,6 @@ async function renderVoucherHtml(data, plan = PLAN_GRATIS_ID) {
             <div class="summary-pills">
               <div class="summary-pill">${items.length} ítem(s)</div>
               <div class="summary-pill">${escapeHtml(documentType === 'factura' ? 'Factura empresarial' : 'Boleta de venta')}</div>
-              <div class="summary-pill">Plantilla ${escapeHtml(template.name)}</div>
             </div>
             ${notes
               ? `<div class="notes-box"><strong>Observaciones:</strong><br/>${escapeHtml(notes)}</div>`
@@ -1623,7 +1621,6 @@ async function buildPdfBuffer(data, plan = PLAN_GRATIS_ID) {
     const dmRows = [
       ['Fecha', formatDateTime(issueDate)],
       ['Moneda', currency],
-      ['Plantilla', template.name],
       ['Pago', paymentMethod || 'Pago único']
     ];
 
@@ -1795,8 +1792,7 @@ async function buildPdfBuffer(data, plan = PLAN_GRATIS_ID) {
 
     const emissionX = 40 + infoBoxW + infoBoxGap + 15;
     drawLV('Fecha', formatDateTime(issueDate), emissionX, rowStartY, infoBoxW - 30);
-    drawLV('Plantilla', template.name, emissionX, rowStartY + rowGap, infoBoxW - 30);
-    drawLV('Pago', paymentMethod || 'Pago único', emissionX, rowStartY + rowGap * 2, infoBoxW - 30);
+    drawLV('Pago', paymentMethod || 'Pago único', emissionX, rowStartY + rowGap, infoBoxW - 30);
 
     // ================================================================
     // TABLA DE ÍTEMS
