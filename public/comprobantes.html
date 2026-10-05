@@ -96,7 +96,7 @@
     </script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js">
     </script>
-    <script src="returnConfig.js">
+    <script src="/returnConfig.js">
     </script>
 
     <style>
@@ -2920,12 +2920,20 @@
     </template>
 
     <script>
-        // ========== PROTECCIÓN DE SESIÓN (returnConfig) ==========
-        // Igual que en las demás interfaces protegidas: si no hay sesión activa,
-        // ReturnConfig redirige automáticamente a login.html conservando el returnTo.
-        if (typeof ReturnConfig !== 'undefined') {
-            ReturnConfig.enforceAuth();
-        }
+        // ========== PROTECCIÓN DE SESIÓN ==========
+        // Espera la sesión del servidor antes de inicializar la interfaz; no confía en UID local.
+        const requiredSessionPromise = (async () => {
+            try {
+                const response = await fetch('/api/session', { credentials: 'same-origin', cache: 'no-store' });
+                const session = response.ok ? await response.json() : null;
+                if (session && session.authenticated && session.uid) return true;
+            } catch (error) {
+                console.error('Error verificando la sesión requerida:', error);
+            }
+            const returnTo = window.location.pathname + window.location.search;
+            window.location.replace('/login.html?returnTo=' + encodeURIComponent(returnTo));
+            return false;
+        })();
 
         // ========== FIREBASE CONFIGURACIÓN (común) ==========
         let auth;
@@ -4730,6 +4738,7 @@
         // ========== INICIALIZACIÓN ==========
         (async function init() {
             try {
+                if (!(await requiredSessionPromise)) return;
                 setDefaultDateTime();
                 addItemRow({ description: 'Servicio / producto principal', quantity: 1, unitPrice: 0, unitLabel: 'UND' });
                 renderWhatsAppTemplates();

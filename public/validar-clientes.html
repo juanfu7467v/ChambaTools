@@ -52,8 +52,23 @@
     </script>
 
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="returnConfig.js"></script>
-    <script>ReturnConfig.enforceAuth();</script>
+    <script src="/returnConfig.js"></script>
+    <script>
+        (async function enforceRequiredSession() {
+            let authenticated = false;
+            try {
+                const response = await fetch('/api/session', { credentials: 'same-origin', cache: 'no-store' });
+                const session = response.ok ? await response.json() : null;
+                authenticated = !!(session && session.authenticated && session.uid);
+            } catch (error) {
+                console.error('Error verificando la sesión requerida:', error);
+            }
+            if (!authenticated) {
+                const returnTo = window.location.pathname + window.location.search;
+                window.location.replace('/login.html?returnTo=' + encodeURIComponent(returnTo));
+            }
+        })();
+    </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" />
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
