@@ -1896,6 +1896,130 @@
             flex-direction: column;
             gap: 8px;
         }
+        .whatsapp-templates-block {
+            margin-top: 10px;
+        }
+        .whatsapp-templates-intro {
+            margin: -8px 0 14px;
+            color: var(--text-muted);
+            font-size: 0.82rem;
+            line-height: 1.5;
+        }
+        .whatsapp-template-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 270px), 1fr));
+            gap: 14px;
+        }
+        .whatsapp-template-card {
+            min-width: 0;
+            padding: 12px;
+            border: 2px solid #cbd5e1;
+            border-radius: 16px;
+            background: #e9f2e8;
+            cursor: pointer;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+        }
+        .whatsapp-template-card:hover {
+            border-color: #25a56a;
+            transform: translateY(-2px);
+        }
+        .whatsapp-template-card.selected {
+            border-color: #128c5e;
+            box-shadow: 0 0 0 3px rgba(18, 140, 94, 0.14);
+        }
+        .whatsapp-template-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-height: 38px;
+            margin-bottom: 9px;
+        }
+        .whatsapp-template-radio {
+            width: 18px;
+            height: 18px;
+            margin: 0;
+            padding: 0;
+            border: 0;
+            background: transparent;
+            box-shadow: none;
+            accent-color: #128c5e;
+            flex: 0 0 auto;
+        }
+        .whatsapp-template-title {
+            flex: 1;
+            color: #173b2b;
+            font-size: 0.83rem;
+            font-weight: 800;
+            line-height: 1.3;
+        }
+        .whatsapp-template-edit {
+            width: 34px;
+            height: 34px;
+            flex: 0 0 auto;
+            border: 1px solid #a9cbb6;
+            border-radius: 10px;
+            background: #fff;
+            color: #128c5e;
+            cursor: pointer;
+        }
+        .whatsapp-template-edit:hover,
+        .whatsapp-template-edit:focus-visible {
+            background: #e0f2e9;
+            outline: 2px solid #128c5e;
+        }
+        .whatsapp-chat-wallpaper {
+            padding: 9px;
+            border-radius: 12px;
+            background-color: #e5ddd5;
+            background-image: radial-gradient(rgba(255, 255, 255, 0.38) 1px, transparent 1px);
+            background-size: 13px 13px;
+        }
+        .whatsapp-chat-bubble {
+            position: relative;
+            padding: 10px 11px 20px;
+            border-radius: 12px 12px 12px 3px;
+            background: #fff;
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.14);
+            color: #263238;
+            font-size: 0.78rem;
+            line-height: 1.48;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+            min-height: 116px;
+        }
+        .whatsapp-chat-time {
+            position: absolute;
+            right: 9px;
+            bottom: 5px;
+            color: #78909c;
+            font-size: 0.62rem;
+        }
+        .whatsapp-template-editor {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 12px;
+            background: #fff;
+            cursor: default;
+        }
+        .whatsapp-template-editor[hidden] {
+            display: none;
+        }
+        .whatsapp-template-editor label {
+            color: #38534a;
+            font-size: 0.7rem;
+        }
+        .whatsapp-template-editor textarea {
+            min-height: 150px;
+            border-color: #b7c9bf;
+            font-size: 0.82rem;
+        }
+        .whatsapp-template-hint {
+            display: block;
+            margin-top: 6px;
+            color: #53685f;
+            font-size: 0.68rem;
+            line-height: 1.4;
+        }
         .logo-locked-note {
             font-size: 0.82rem;
             color: var(--text-muted);
@@ -2442,6 +2566,12 @@
                                         </div>
                                     </div>
                                 </div>
+                            </section>
+
+                            <section class="gb-block whatsapp-templates-block" aria-labelledby="whatsappTemplatesTitle">
+                                <h3 id="whatsappTemplatesTitle">Mensajes para WhatsApp</h3>
+                                <p class="whatsapp-templates-intro">Elige una tarjeta para usarla al compartir tu comprobante. Puedes editar cada texto; los cambios se guardan automáticamente y el negocio, número y monto se completan al compartir.</p>
+                                <div id="whatsappTemplateList" class="whatsapp-template-list" role="radiogroup" aria-label="Plantilla de mensaje para compartir"></div>
                             </section>
 
                             <div class="step-nav-actions">
@@ -3159,6 +3289,8 @@
         const logoInput = document.getElementById('logoInput');
         const logoPreview = document.getElementById('logoPreview');
         const logoRemoveButton = document.getElementById('logoRemoveButton');
+        const whatsappTemplateList = document.getElementById('whatsappTemplateList');
+        const issuerBusinessNameInput = document.getElementById('issuerBusinessName');
         const generateButton = document.getElementById('generateButton');
         const planStatusEl = document.getElementById('planStatus');
 
@@ -3166,6 +3298,28 @@
         let lastPayload = null;
         let lastDocumentName = 'comprobante.pdf';
         let lastShareText = 'Comprobante generado';
+        const DEFAULT_WHATSAPP_TEMPLATES = [
+            {
+                id: 'sale',
+                title: 'Confirmación de Venta / Pago Exitoso ⭐',
+                message: '¡Hola! 👋 Muchas gracias por tu compra en [Nombre del Negocio].\n\n📄 Adjunto tu comprobante de venta oficial:\n• N° de Comprobante: B001-10892457\n• Total pagado: S/ [Monto]\n\nTu pedido está registrado y en proceso de preparación. 🚀\n¡Es un gusto atenderte!'
+            },
+            {
+                id: 'quotation',
+                title: 'Cotización / Previa de Pago',
+                message: '¡Hola! 👋 Aquí tienes el resumen y comprobante preliminar de tu pedido en [Nombre del Negocio].\n\n📋 Detalle de la orden:\n• Comprobante N°: B001-10892457\n• Total a pagar: S/ [Monto]\n\nQuedamos a la espera de tu comprobante de pago para proceder con el despacho de tu paquete. 📦✨'
+            },
+            {
+                id: 'quick',
+                title: 'Ultra Rápido (Corto y Directo)',
+                message: '📄 Comprobante de venta N° B001-10892457\n🏢 Negocio: [Nombre del Negocio]\n💰 Total: S/ [Monto]\n\n¡Gracias por tu preferencia! 🙌'
+            }
+        ];
+        let whatsappTemplates = DEFAULT_WHATSAPP_TEMPLATES.map((template) => ({ ...template }));
+        let selectedWhatsappTemplate = 'sale';
+        let editingWhatsappTemplate = null;
+        let whatsappTemplateSaveTimer = null;
+        let lastShareContext = { documentNumber: 'B001-10892457', amount: '0.00' };
         let uid = null;
         let logoDataUrl = '';
         let logoPersistUrl = '';
@@ -3252,6 +3406,170 @@
             'issuerWebsite'
         ];
 
+        function getWhatsappTemplateMessage(message, context = lastShareContext) {
+            const businessName = issuerBusinessNameInput?.value.trim() || 'Tu negocio o marca';
+            const documentNumber = String(context?.documentNumber || 'B001-10892457');
+            const amount = Number.isFinite(Number(context?.amount)) ? Number(context.amount).toFixed(2) : '0.00';
+            return String(message || '')
+                .replace(/\[Nombre del Negocio\]/gi, businessName)
+                .replace(/\[Monto\]/gi, amount)
+                .replace(/B001-10892457/g, documentNumber)
+                .replace(/\{\{\s*nombre(?:_del)?_negocio\s*\}\}/gi, businessName)
+                .replace(/\{\{\s*numero(?:_de)?_comprobante\s*\}\}/gi, documentNumber)
+                .replace(/\{\{\s*monto\s*\}\}/gi, amount);
+        }
+
+        function getCurrentShareText() {
+            const template = whatsappTemplates.find((item) => item.id === selectedWhatsappTemplate);
+            return template ? getWhatsappTemplateMessage(template.message) : lastShareText;
+        }
+
+        function updateWhatsappCardPreview(card, template) {
+            const preview = card?.querySelector('[data-template-preview]');
+            if (preview) preview.textContent = getWhatsappTemplateMessage(template.message);
+        }
+
+        function renderWhatsAppTemplates() {
+            if (!whatsappTemplateList) return;
+            whatsappTemplateList.replaceChildren();
+            whatsappTemplates.forEach((template) => {
+                const selected = template.id === selectedWhatsappTemplate;
+                const card = document.createElement('article');
+                card.className = `whatsapp-template-card${selected ? ' selected' : ''}`;
+                card.dataset.templateId = template.id;
+
+                const header = document.createElement('div');
+                header.className = 'whatsapp-template-header';
+                const radio = document.createElement('input');
+                radio.type = 'radio';
+                radio.name = 'selectedWhatsappTemplate';
+                radio.value = template.id;
+                radio.checked = selected;
+                radio.className = 'whatsapp-template-radio';
+                radio.setAttribute('aria-label', `Usar plantilla ${template.title}`);
+                const title = document.createElement('span');
+                title.className = 'whatsapp-template-title';
+                title.textContent = template.title;
+                const editButton = document.createElement('button');
+                editButton.type = 'button';
+                editButton.className = 'whatsapp-template-edit';
+                editButton.dataset.templateAction = 'edit';
+                editButton.title = editingWhatsappTemplate === template.id ? 'Cerrar edición' : 'Editar plantilla';
+                editButton.setAttribute('aria-label', editButton.title);
+                editButton.setAttribute('aria-expanded', String(editingWhatsappTemplate === template.id));
+                const editIcon = document.createElement('i');
+                editIcon.className = `fas ${editingWhatsappTemplate === template.id ? 'fa-check' : 'fa-pen-to-square'}`;
+                editButton.appendChild(editIcon);
+                header.append(radio, title, editButton);
+
+                const wallpaper = document.createElement('div');
+                wallpaper.className = 'whatsapp-chat-wallpaper';
+                const bubble = document.createElement('div');
+                bubble.className = 'whatsapp-chat-bubble';
+                const preview = document.createElement('span');
+                preview.dataset.templatePreview = '';
+                const time = document.createElement('span');
+                time.className = 'whatsapp-chat-time';
+                time.textContent = '12:45  ✓✓';
+                bubble.append(preview, time);
+                wallpaper.appendChild(bubble);
+
+                const editor = document.createElement('div');
+                editor.className = 'whatsapp-template-editor';
+                editor.hidden = editingWhatsappTemplate !== template.id;
+                editor.addEventListener('click', (event) => event.stopPropagation());
+                const label = document.createElement('label');
+                const textareaId = `whatsapp-template-message-${template.id}`;
+                label.htmlFor = textareaId;
+                label.textContent = 'Texto de la plantilla';
+                const textarea = document.createElement('textarea');
+                textarea.id = textareaId;
+                textarea.dataset.templateId = template.id;
+                textarea.maxLength = 3000;
+                textarea.value = template.message;
+                textarea.setAttribute('aria-label', `Editar ${template.title}`);
+                const hint = document.createElement('small');
+                hint.className = 'whatsapp-template-hint';
+                hint.textContent = 'Variables: [Nombre del Negocio], [Monto] y el número de ejemplo B001-10892457 se sustituyen automáticamente.';
+                editor.append(label, textarea, hint);
+
+                card.append(header, wallpaper, editor);
+                whatsappTemplateList.appendChild(card);
+                updateWhatsappCardPreview(card, template);
+            });
+        }
+
+        function loadWhatsAppTemplateSettings(emisor) {
+            const savedMessages = emisor?.whatsappTemplates;
+            whatsappTemplates = DEFAULT_WHATSAPP_TEMPLATES.map((template) => ({
+                ...template,
+                message: savedMessages && typeof savedMessages[template.id] === 'string'
+                    && savedMessages[template.id].length <= 3000
+                    ? savedMessages[template.id]
+                    : template.message
+            }));
+            const savedSelection = emisor?.selectedWhatsappTemplate;
+            selectedWhatsappTemplate = whatsappTemplates.some((template) => template.id === savedSelection)
+                ? savedSelection
+                : 'sale';
+            renderWhatsAppTemplates();
+        }
+
+        function scheduleWhatsAppTemplateSave() {
+            clearTimeout(whatsappTemplateSaveTimer);
+            whatsappTemplateSaveTimer = setTimeout(() => {
+                saveIssuerToServer().then((saved) => {
+                    if (!saved) console.error('No se pudo guardar la plantilla personalizada de WhatsApp.');
+                });
+            }, 700);
+        }
+
+        whatsappTemplateList?.addEventListener('click', (event) => {
+            const card = event.target.closest('.whatsapp-template-card');
+            if (!card) return;
+            const templateId = card.dataset.templateId;
+            const editButton = event.target.closest('[data-template-action="edit"]');
+            if (editButton) {
+                selectedWhatsappTemplate = templateId;
+                editingWhatsappTemplate = editingWhatsappTemplate === templateId ? null : templateId;
+                renderWhatsAppTemplates();
+                scheduleWhatsAppTemplateSave();
+                return;
+            }
+            if (event.target.closest('.whatsapp-template-editor')) return;
+            if (selectedWhatsappTemplate !== templateId) {
+                selectedWhatsappTemplate = templateId;
+                renderWhatsAppTemplates();
+                scheduleWhatsAppTemplateSave();
+            }
+        });
+
+        whatsappTemplateList?.addEventListener('change', (event) => {
+            if (event.target.name !== 'selectedWhatsappTemplate') return;
+            selectedWhatsappTemplate = event.target.value;
+            renderWhatsAppTemplates();
+            scheduleWhatsAppTemplateSave();
+        });
+
+        whatsappTemplateList?.addEventListener('input', (event) => {
+            const textarea = event.target.closest('textarea[data-template-id]');
+            if (!textarea) return;
+            const template = whatsappTemplates.find((item) => item.id === textarea.dataset.templateId);
+            if (!template) return;
+            template.message = textarea.value;
+            updateWhatsappCardPreview(textarea.closest('.whatsapp-template-card'), template);
+            scheduleWhatsAppTemplateSave();
+        });
+
+        function refreshWhatsappTemplatePreviews() {
+            whatsappTemplateList?.querySelectorAll('.whatsapp-template-card').forEach((card) => {
+                const template = whatsappTemplates.find((item) => item.id === card.dataset.templateId);
+                if (template) updateWhatsappCardPreview(card, template);
+            });
+        }
+
+        issuerBusinessNameInput?.addEventListener('input', refreshWhatsappTemplatePreviews);
+
         function collectIssuerData() {
             const data = {};
             EMISOR_FIELD_IDS.forEach((id) => {
@@ -3259,6 +3577,8 @@
                 data[id.replace('issuer', '').toLowerCase()] = el ? el.value.trim() : '';
             });
             data.logoDataUrl = /^https:\/\/.+/i.test(logoPersistUrl) ? logoPersistUrl : '';
+            data.whatsappTemplates = Object.fromEntries(whatsappTemplates.map(({ id, message }) => [id, message]));
+            data.selectedWhatsappTemplate = selectedWhatsappTemplate;
             return data;
         }
 
@@ -3315,6 +3635,7 @@
                     applied = true;
                 }
             });
+            loadWhatsAppTemplateSettings(emisor);
             if (typeof emisor.logoDataUrl === 'string' && emisor.logoDataUrl && planState.permiteLogo) {
                 // Las URLs persistentes se convierten a data URL optimizada para
                 // reutilizar el flujo existente de generación del comprobante.
@@ -3371,6 +3692,8 @@
 
         async function saveIssuerToServer(data) {
             if (!uid) return false;
+            clearTimeout(whatsappTemplateSaveTimer);
+            whatsappTemplateSaveTimer = null;
             try {
                 const payload = data || collectIssuerData();
                 const response = await fetch('/api/emisor', {
@@ -3866,7 +4189,12 @@
             downloadButton2.disabled = false;
             shareButton2.disabled = false;
             lastDocumentName = `${result.summary.documentType}_${result.documentNumber}.pdf`;
-            lastShareText = result.shareText || 'Comprobante generado';
+            lastShareContext = {
+                documentNumber: result.documentNumber || 'B001-10892457',
+                amount: Number.isFinite(Number(result.summary?.total)) ? Number(result.summary.total).toFixed(2) : '0.00'
+            };
+            refreshWhatsappTemplatePreviews();
+            lastShareText = getCurrentShareText().trim() || result.shareText || 'Comprobante generado';
             setStatus(`Vista previa lista · ${result.documentNumber}`);
         }
 
@@ -4140,7 +4468,8 @@
             setStatus('Preparando imagen para compartir...');
             try {
                 const file = await getShareImageFile();
-                const shareData = { files: [file], title: 'Comprobante listo', text: lastShareText };
+                const shareText = getCurrentShareText().trim() || lastShareText;
+                const shareData = { files: [file], title: 'Comprobante listo', text: shareText };
                 const nativeFileShare = navigator.share && navigator.canShare && navigator.canShare({ files: [file] });
                 if ((target === 'native' || target === 'whatsapp') && nativeFileShare) {
                     await retryAsync(
@@ -4174,7 +4503,7 @@
                     return;
                 }
                 downloadBlob(file, file.name);
-                const encodedText = encodeURIComponent(lastShareText);
+                const encodedText = encodeURIComponent(shareText);
                 const shareUrls = {
                     whatsapp: `https://wa.me/?text=${encodedText}`,
                     facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`,
@@ -4292,6 +4621,8 @@
             lastPayload = null;
             lastDocumentName = 'comprobante.pdf';
             lastShareText = 'Comprobante generado';
+            lastShareContext = { documentNumber: 'B001-10892457', amount: '0.00' };
+            renderWhatsAppTemplates();
             setStatus('Formulario reiniciado');
             clearMessages();
             previewFrame.style.transform = 'scale(1)';
@@ -4397,6 +4728,7 @@
             try {
                 setDefaultDateTime();
                 addItemRow({ description: 'Servicio / producto principal', quantity: 1, unitPrice: 0, unitLabel: 'UND' });
+                renderWhatsAppTemplates();
                 uid = await getUid();
 
                 await Promise.all([loadTemplates(), loadPlanInfo()]);

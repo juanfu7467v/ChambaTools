@@ -855,6 +855,8 @@ app.get('/api/emisor', async (req, res) => {
         address: data.address || '',
         email: data.email || '',
         website: data.website || '',
+        whatsappTemplates: data.whatsappTemplates || {},
+        selectedWhatsappTemplate: data.selectedWhatsappTemplate || 'sale',
         logoDataUrl
       }
     });
@@ -875,7 +877,17 @@ app.put('/api/emisor', async (req, res) => {
       return res.status(503).json({ success: false, error: 'Servicio no disponible.' });
     }
 
-    const { businessName, documentNumber, phone, address, email, website, logoDataUrl } = req.body || {};
+    const {
+      businessName,
+      documentNumber,
+      phone,
+      address,
+      email,
+      website,
+      logoDataUrl,
+      whatsappTemplates,
+      selectedWhatsappTemplate
+    } = req.body || {};
 
     const emisorData = {
       businessName: typeof businessName === 'string' ? businessName.trim() : '',
@@ -886,6 +898,20 @@ app.put('/api/emisor', async (req, res) => {
       website: typeof website === 'string' ? website.trim() : '',
       updatedAt: admin.firestore.FieldValue.serverTimestamp()
     };
+
+    const allowedWhatsappTemplateIds = ['sale', 'quotation', 'quick'];
+    if (whatsappTemplates && typeof whatsappTemplates === 'object' && !Array.isArray(whatsappTemplates)) {
+      const safeTemplates = {};
+      allowedWhatsappTemplateIds.forEach((templateId) => {
+        if (typeof whatsappTemplates[templateId] === 'string') {
+          safeTemplates[templateId] = whatsappTemplates[templateId].slice(0, 3000);
+        }
+      });
+      emisorData.whatsappTemplates = safeTemplates;
+    }
+    if (allowedWhatsappTemplateIds.includes(selectedWhatsappTemplate)) {
+      emisorData.selectedWhatsappTemplate = selectedWhatsappTemplate;
+    }
 
     await db.collection('emisores').doc(uid).set(emisorData, { merge: true });
 
