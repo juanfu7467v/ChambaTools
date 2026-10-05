@@ -121,6 +121,7 @@ const connectSources = unique([
   'data:',
   'blob:',
   'wss:',
+  'https://res.cloudinary.com',
   'https://github.com',
   'https://api.github.com',
   ...commonRemoteSources

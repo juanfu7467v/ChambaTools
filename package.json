@@ -12,6 +12,7 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.43.4",
     "axios": "^1.6.0",
+    "cloudinary": "^2.11.0",
     "compression": "^1.8.2",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",

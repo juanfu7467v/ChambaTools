@@ -2434,8 +2434,7 @@
                                                 <input type="file" id="logoInput" form="voucherForm" accept="image/png,image/jpeg,image/webp" style="max-width:220px;" />
                                                 <button type="button" class="btn-danger" id="logoRemoveButton" style="align-self:flex-start;">Quitar logo</button>
                                                 <div class="helper">PNG, JPG o WEBP. Se recomienda fondo transparente, máx. 2MB.</div>
-                                                <div class="helper"><strong>Importante:</strong> El logo que subas desde tu dispositivo se utilizará para generar el documento, pero no se guardará en la base de datos. Si deseas conservarlo y utilizarlo desde cualquier dispositivo, sube tu logo a una plataforma como "i.postimg.cc" y coloca aquí la URL de la imagen.</div>
-                                                <input type="url" id="logoUrlInput" placeholder="https://i.postimg.cc/logo.jpg" style="max-width:260px;" />
+                                                <div class="helper">Tu logo se guardará en tu cuenta para que puedas usarlo desde cualquier dispositivo.</div>
                                             </div>
                                         </div>
                                         <div id="logoLockedNote" class="logo-locked-note" style="display:none;">
@@ -3160,7 +3159,6 @@
         const logoInput = document.getElementById('logoInput');
         const logoPreview = document.getElementById('logoPreview');
         const logoRemoveButton = document.getElementById('logoRemoveButton');
-        const logoUrlInput = document.getElementById('logoUrlInput');
         const generateButton = document.getElementById('generateButton');
         const planStatusEl = document.getElementById('planStatus');
 
@@ -3183,7 +3181,7 @@
         // ========== AUTOGUARDADO DEL FORMULARIO (localStorage) ==========
         const FORM_STORAGE_PREFIX = 'ft_form_';
         const ITEMS_STORAGE_KEY = 'ft_form_items';
-        const AUTOSAVE_EXCLUDED_IDS = new Set(['logoInput', 'logoUrlInput', 'issueDate']);
+        const AUTOSAVE_EXCLUDED_IDS = new Set(['logoInput', 'issueDate']);
 
         function getPersistableFields() {
             return Array.from(voucherForm.elements)
@@ -3243,11 +3241,8 @@
         // Los datos del emisor (Interfaz 1) se guardan en Firestore asociados
         // a la cuenta autenticada, de modo que al iniciar sesión desde otro
         // navegador o dispositivo se cargan automáticamente.
-        // El logo subido desde el dispositivo (data URL base64) es de uso
-        // exclusivo de la sesión actual: NO se guarda en Firestore. Si el
-        // logo se proporciona como URL de imagen (p. ej. https://i.postimg.cc/...),
-        // esa URL sí se guarda en Firestore y se reutiliza desde cualquier
-        // dispositivo para generar los documentos.
+        // El archivo se sube directamente a Cloudinary y su URL segura queda
+        // asociada al perfil del emisor para reutilizarse entre dispositivos.
         const EMISOR_FIELD_IDS = [
             'issuerBusinessName',
             'issuerDocumentNumber',
@@ -3263,10 +3258,50 @@
                 const el = document.getElementById(id);
                 data[id.replace('issuer', '').toLowerCase()] = el ? el.value.trim() : '';
             });
-            // Solo se persiste la URL del logo. El data URL subido desde el
-            // dispositivo nunca se guarda en Firestore (solo se usa en sesión).
             data.logoDataUrl = /^https:\/\/.+/i.test(logoPersistUrl) ? logoPersistUrl : '';
             return data;
+        }
+
+        function getLogoDeliveryUrl(url) {
+            try {
+                const parsed = new URL(url);
+                if (parsed.hostname !== 'res.cloudinary.com') return url;
+                return parsed.href.replace('/image/upload/', '/image/upload/c_limit,w_800,h_800,f_auto,q_auto/');
+            } catch (_) {
+                return url;
+            }
+        }
+
+        function renderLogoPreview(src) {
+            if (!logoPreview) return;
+            const image = document.createElement('img');
+            image.src = src;
+            image.alt = 'Logo del negocio';
+            logoPreview.replaceChildren(image);
+        }
+
+        async function loadLogoFromUrl(url) {
+            const deliveryUrl = getLogoDeliveryUrl(url);
+            try {
+                const response = await fetch(deliveryUrl, {
+                    mode: 'cors',
+                    headers: { Accept: 'image/png,image/jpeg,image/webp' }
+                });
+                if (!response.ok) throw new Error('Respuesta no válida al descargar el logo.');
+                const blob = await response.blob();
+                const dataUrl = await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = () => reject(new Error('No se pudo procesar la imagen.'));
+                    reader.readAsDataURL(blob);
+                });
+                if (logoPersistUrl !== url) return;
+                logoDataUrl = dataUrl;
+                renderLogoPreview(deliveryUrl);
+            } catch (error) {
+                console.error('No se pudo descargar el logo optimizado:', error);
+                if (logoPersistUrl === url) renderLogoPreview(deliveryUrl);
+            }
         }
 
         function applyIssuerData(emisor) {
@@ -3281,32 +3316,18 @@
                 }
             });
             if (typeof emisor.logoDataUrl === 'string' && emisor.logoDataUrl && planState.permiteLogo) {
-                // Firestore solo guarda URLs de imagen (nunca data URLs base64).
-                // Se convierte a base64 en el navegador para reutilizar el flujo
-                // existente de generación de PDF.
+                // Las URLs persistentes se convierten a data URL optimizada para
+                // reutilizar el flujo existente de generación del comprobante.
                 const logoUrl = emisor.logoDataUrl;
                 if (/^data:image\//i.test(logoUrl)) {
                     // Legado: logo base64 guardado por una versión anterior.
                     // Se usa solo en esta sesión y no se vuelve a guardar.
                     logoDataUrl = logoUrl;
-                    if (logoPreview) logoPreview.innerHTML = `<img src="${logoDataUrl}" alt="Logo del negocio" />`;
+                    renderLogoPreview(logoDataUrl);
                     return applied;
                 }
                 logoPersistUrl = logoUrl;
-                if (logoUrlInput && !logoUrlInput.value) logoUrlInput.value = logoUrl;
-                fetch(logoUrl, { mode: 'cors' }).then((r) => r.ok ? r.blob() : Promise.reject()).then((blob) => {
-                    const reader = new FileReader();
-                    reader.onload = () => {
-                        if (logoDataUrl) return; // Un logo subido en esta sesión tiene prioridad.
-                        logoDataUrl = reader.result;
-                        if (logoPreview) logoPreview.innerHTML = `<img src="${logoDataUrl}" alt="Logo del negocio" />`;
-                    };
-                    reader.readAsDataURL(blob);
-                }).catch(() => {
-                    if (!logoDataUrl && logoPreview) {
-                        logoPreview.innerHTML = `<img src="${logoUrl}" alt="Logo del negocio" />`;
-                    }
-                });
+                loadLogoFromUrl(logoUrl);
                 applied = true;
             }
             return applied;
@@ -4183,34 +4204,59 @@
             logoDataUrl = '';
             logoPersistUrl = '';
             if (logoInput) logoInput.value = '';
-            if (logoUrlInput) logoUrlInput.value = '';
             if (logoPreview) logoPreview.innerHTML = '<span>Sin logo</span>';
         }
 
-        function handleLogoFile(file) {
+        async function handleLogoFile(file) {
             if (!file) return;
             if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
                 showError('El logo debe ser una imagen PNG, JPG o WEBP.');
-                clearLogo();
                 return;
             }
             if (file.size > MAX_LOGO_BYTES) {
                 showError('El logo es demasiado pesado. El límite es 2MB.');
-                clearLogo();
                 return;
             }
-            const reader = new FileReader();
-            reader.onload = () => {
-                logoDataUrl = reader.result;
-                logoPersistUrl = '';
-                if (logoUrlInput) logoUrlInput.value = '';
-                logoPreview.innerHTML = `<img src="${logoDataUrl}" alt="Logo del negocio" />`;
-            };
-            reader.onerror = () => {
-                showError('No se pudo leer el archivo del logo. Intenta con otra imagen.');
-                clearLogo();
-            };
-            reader.readAsDataURL(file);
+
+            const previousLogoUrl = logoPersistUrl;
+            const previousLogoData = logoDataUrl;
+            if (logoInput) logoInput.disabled = true;
+            if (logoRemoveButton) logoRemoveButton.disabled = true;
+            if (logoPreview) logoPreview.innerHTML = '<span>Subiendo logo…</span>';
+            try {
+                const response = await fetch('/api/emisor/logo', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: { 'Content-Type': file.type },
+                    body: file
+                });
+                const result = await response.json().catch(() => ({}));
+                if (!response.ok || !result.success || !result.logoUrl) {
+                    throw new Error(result.error || 'No se pudo subir el logo. Inténtalo de nuevo.');
+                }
+
+                logoPersistUrl = result.logoUrl;
+                logoDataUrl = '';
+                await loadLogoFromUrl(logoPersistUrl);
+                if (!/^data:image\//i.test(logoDataUrl)) {
+                    throw new Error('El logo se subió, pero no se pudo preparar para el comprobante. Inténtalo nuevamente.');
+                }
+                const saved = await saveIssuerToServer();
+                if (!saved) throw new Error('El logo se subió, pero no se pudo guardar el perfil. Vuelve a intentarlo.');
+                showSuccess('Logo guardado en tu cuenta.');
+            } catch (error) {
+                logoPersistUrl = previousLogoUrl;
+                logoDataUrl = previousLogoData;
+                if (previousLogoUrl) {
+                    renderLogoPreview(getLogoDeliveryUrl(previousLogoUrl));
+                } else if (logoPreview) {
+                    logoPreview.innerHTML = '<span>Sin logo</span>';
+                }
+                showError(error.message || 'No se pudo subir el logo. Inténtalo de nuevo.');
+            } finally {
+                if (logoInput) logoInput.disabled = false;
+                if (logoRemoveButton) logoRemoveButton.disabled = false;
+            }
         }
 
         if (logoInput) {
@@ -4219,49 +4265,10 @@
             });
         }
         if (logoRemoveButton) {
-            logoRemoveButton.addEventListener('click', clearLogo);
-        }
-
-        if (logoUrlInput) {
-            logoUrlInput.addEventListener('change', () => {
-                const url = logoUrlInput.value.trim();
-                if (!url) {
-                    // Campo de URL vacío: solo se pierde la persistencia; el
-                    // logo subido en la sesión actual sigue disponible.
-                    logoPersistUrl = '';
-                    return;
-                }
-                if (!/^https:\/\/.+/i.test(url)) {
-                    showError('La URL del logo debe comenzar con https://');
-                    logoUrlInput.value = '';
-                    logoPersistUrl = '';
-                    return;
-                }
-                const probe = new Image();
-                probe.onload = () => {
-                    logoPersistUrl = url;
-                    // Se convierte la imagen a base64 en el navegador para
-                    // reutilizar el flujo existente de generación de PDF.
-                    fetch(url, { mode: 'cors' }).then((r) => r.ok ? r.blob() : Promise.reject()).then((blob) => {
-                        const reader = new FileReader();
-                        reader.onload = () => {
-                            if (logoPersistUrl !== url) return; // Se eligió otro logo mientras tanto.
-                            logoDataUrl = reader.result;
-                            logoPreview.innerHTML = `<img src="${logoDataUrl}" alt="Logo del negocio" />`;
-                        };
-                        reader.readAsDataURL(blob);
-                    }).catch(() => {
-                        if (logoPersistUrl === url && logoPreview) {
-                            logoPreview.innerHTML = `<img src="${url}" alt="Logo del negocio" />`;
-                        }
-                    });
-                };
-                probe.onerror = () => {
-                    showError('No se pudo cargar la imagen desde esa URL. Verifícala e inténtalo de nuevo.');
-                    logoUrlInput.value = '';
-                    logoPersistUrl = '';
-                };
-                probe.src = url;
+            logoRemoveButton.addEventListener('click', async () => {
+                clearLogo();
+                const saved = await saveIssuerToServer();
+                if (!saved) showError('No se pudo quitar el logo guardado. Inténtalo de nuevo.');
             });
         }
 

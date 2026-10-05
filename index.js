@@ -13,6 +13,7 @@ import { Resend } from "resend";
 import helmet from "helmet";
 import compression from "compression";
 import rateLimit from 'express-rate-limit';
+import { v2 as cloudinary } from 'cloudinary';
 import { helmetConfig, corsAllowedOrigins } from './cspConfig.js';
 import plantillasRouter, { setDb as setPlantillasDb } from './plantillas.js';
 import validarClientesRouter, { setDb as setValidarClientesDb } from './validarClientes.js';
@@ -52,6 +53,50 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 app.set('trust proxy', 1);
+
+const cloudinaryConfig = {
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME?.trim(),
+  api_key: process.env.CLOUDINARY_API_KEY?.trim(),
+  api_secret: process.env.CLOUDINARY_API_SECRET?.trim(),
+  secure: true
+};
+const cloudinaryConfigured = Boolean(
+  cloudinaryConfig.cloud_name && cloudinaryConfig.api_key && cloudinaryConfig.api_secret
+);
+if (cloudinaryConfigured) cloudinary.config(cloudinaryConfig);
+
+const EMISOR_LOGO_FOLDER = 'facilitotools/emisor-logos';
+const EMISOR_LOGO_MAX_BYTES = 2 * 1024 * 1024;
+
+function getEmisorLogoPublicId(uid) {
+  // Derivar un ID estable y válido de la identidad autenticada; nunca aceptar
+  // un public_id enviado por el navegador.
+  const uidHash = crypto.createHash('sha256').update(uid).digest('hex').slice(0, 32);
+  return `${EMISOR_LOGO_FOLDER}/emisor-${uidHash}`;
+}
+
+function isSupportedLogoImage(buffer, mimeType) {
+  if (!Buffer.isBuffer(buffer)) return false;
+  if (mimeType === 'image/png') {
+    return buffer.length >= 8 && buffer.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]));
+  }
+  if (mimeType === 'image/jpeg') {
+    return buffer.length >= 3 && buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff;
+  }
+  if (mimeType === 'image/webp') {
+    return buffer.length >= 12 && buffer.toString('ascii', 0, 4) === 'RIFF'
+      && buffer.toString('ascii', 8, 12) === 'WEBP';
+  }
+  return false;
+}
+
+async function removeCloudinaryEmisorLogo(uid) {
+  if (!cloudinaryConfigured) return;
+  await cloudinary.uploader.destroy(getEmisorLogoPublicId(uid), {
+    resource_type: 'image',
+    invalidate: true
+  });
+}
 
 // La identidad de sesión se firma con un secreto estable del servidor.
 // En Fly.io un autostop/reinicio reemplaza el proceso, por lo que usar un
@@ -720,9 +765,62 @@ app.get('/api/user/profile', async (req, res) => {
 // Guarda y recupera los datos del emisor (Interfaz 1 de generar-boletas)
 // asociados a la cuenta autenticada. El uid se lee de la cookie httpOnly
 // (user_uid), el mismo mecanismo que usa el resto de la app.
-// El logo (data URL base64) se guarda en un documento aparte
-// (emisores_logos/{uid}) para no superar el límite de 1 MiB por documento.
+// Solo se guarda la URL del logo en un documento aparte; el archivo se aloja
+// en Cloudinary para no almacenar imágenes binarias en Firestore.
 const EMISOR_LOGO_MAX_CHARS = 900000; // ~675 KB en binario, margen bajo 1 MiB
+
+app.post('/api/emisor/logo', (req, res, next) => {
+  express.raw({
+    type: ['image/png', 'image/jpeg', 'image/webp'],
+    limit: EMISOR_LOGO_MAX_BYTES
+  })(req, res, (error) => {
+    if (!error) return next();
+    if (error.type === 'entity.too.large') {
+      return res.status(413).json({ success: false, error: 'El logo es demasiado pesado. El límite es 2MB.' });
+    }
+    return res.status(400).json({ success: false, error: 'No se pudo leer la imagen enviada.' });
+  });
+}, async (req, res) => {
+  const context = 'EMISOR_LOGO_UPLOAD';
+  try {
+    const uid = getAuthenticatedUid(req);
+    if (!uid) return res.status(401).json({ success: false, error: 'No autenticado.' });
+    if (!db) return res.status(503).json({ success: false, error: 'Servicio no disponible.' });
+    if (!cloudinaryConfigured) {
+      return res.status(503).json({ success: false, error: 'La subida de logos no está configurada.' });
+    }
+
+    const mimeType = req.get('content-type')?.split(';')[0].trim().toLowerCase();
+    if (!isSupportedLogoImage(req.body, mimeType)) {
+      return res.status(400).json({ success: false, error: 'El archivo debe ser una imagen PNG, JPG o WEBP válida.' });
+    }
+
+    const userDoc = await db.collection('usuarios').doc(uid).get();
+    if (!userDoc.exists || (userDoc.data().tipoPlan || 'gratis') === 'gratis') {
+      return res.status(403).json({ success: false, error: 'Subir un logo requiere un plan que lo permita.' });
+    }
+
+    const dataUri = `data:${mimeType};base64,${req.body.toString('base64')}`;
+    const result = await cloudinary.uploader.upload(dataUri, {
+      public_id: getEmisorLogoPublicId(uid),
+      overwrite: true,
+      unique_filename: false,
+      use_filename: false,
+      resource_type: 'image',
+      allowed_formats: ['png', 'jpg', 'jpeg', 'webp']
+    });
+
+    await db.collection('emisores_logos').doc(uid).set({
+      logoDataUrl: result.secure_url,
+      updatedAt: admin.firestore.FieldValue.serverTimestamp()
+    }, { merge: true });
+
+    res.json({ success: true, logoUrl: result.secure_url });
+  } catch (error) {
+    logger.error(context, 'Error subiendo el logo a Cloudinary', error);
+    res.status(502).json({ success: false, error: 'No se pudo subir el logo. Inténtalo de nuevo.' });
+  }
+});
 
 app.get('/api/emisor', async (req, res) => {
   const context = 'EMISOR_GET_API';
@@ -741,7 +839,7 @@ app.get('/api/emisor', async (req, res) => {
     }
     const data = emisorDoc.data();
 
-    // Logo en documento separado (evita el límite de 1 MiB por documento)
+    // Logo URL en documento separado (el archivo permanece en Cloudinary).
     let logoDataUrl = '';
     try {
       const logoDoc = await db.collection('emisores_logos').doc(uid).get();
@@ -791,7 +889,7 @@ app.put('/api/emisor', async (req, res) => {
 
     await db.collection('emisores').doc(uid).set(emisorData, { merge: true });
 
-    // Logo en documento aparte (evita superar el límite de 1 MiB por documento)
+    // Mantener únicamente la URL persistente del logo, nunca el archivo binario.
     if (typeof logoDataUrl === 'string' && logoDataUrl.length > 0) {
       if (logoDataUrl.length <= EMISOR_LOGO_MAX_CHARS) {
         await db.collection('emisores_logos').doc(uid).set({
@@ -807,6 +905,11 @@ app.put('/api/emisor', async (req, res) => {
       try {
         await db.collection('emisores_logos').doc(uid).delete();
       } catch (_) { /* no existía */ }
+      try {
+        await removeCloudinaryEmisorLogo(uid);
+      } catch (error) {
+        logger.warn(context, 'No se pudo eliminar el archivo de logo en Cloudinary', { uid, error: error.message });
+      }
     }
 
     res.json({ success: true });
