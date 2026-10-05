@@ -3585,7 +3585,8 @@
             try {
                 const parsed = new URL(url);
                 if (parsed.hostname !== 'res.cloudinary.com') return url;
-                return parsed.href.replace('/image/upload/', '/image/upload/c_limit,w_800,h_800,f_auto,q_auto/');
+                // PDFKit solo embebe PNG/JPEG; f_auto puede entregar WebP, visible en preview pero omitido en el PDF.
+                return parsed.href.replace('/image/upload/', '/image/upload/c_limit,w_600,h_600,f_png,q_auto/');
             } catch (_) {
                 return url;
             }
@@ -4315,7 +4316,7 @@
             const pageCanvases = [];
             let totalHeight = 0;
             let maxWidth = 0;
-            const scale = 2.5;
+            const scale = 3;
             for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
                 updateImageProgress('Renderizando imagen', `Procesando página ${pageNumber} de ${pdf.numPages}…`);
                 const page = await pdf.getPage(pageNumber);
@@ -4470,7 +4471,7 @@
                 const shareText = getCurrentShareText().trim() || lastShareText;
                 const shareData = { files: [file], title: 'Comprobante listo', text: shareText };
                 const nativeFileShare = navigator.share && navigator.canShare && navigator.canShare({ files: [file] });
-                if ((target === 'native' || target === 'whatsapp') && nativeFileShare) {
+                if (['native', 'whatsapp', 'telegram', 'facebook'].includes(target) && nativeFileShare) {
                     await retryAsync(
                         () => navigator.share(shareData),
                         {
@@ -4481,7 +4482,11 @@
                         }
                     );
                     setStatus('Imagen del comprobante compartida');
-                    showSuccess('Comprobante compartido como imagen.');
+                    if (target === 'facebook' || target === 'telegram') {
+                        showSuccess(`Selecciona ${target === 'facebook' ? 'Facebook' : 'Telegram'} en el menú del dispositivo para enviar la imagen y el texto.`);
+                    } else {
+                        showSuccess('Comprobante compartido como imagen.');
+                    }
                     return;
                 }
                 if (target === 'copy') {
