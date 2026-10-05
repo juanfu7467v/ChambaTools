@@ -2078,6 +2078,29 @@ router.post('/pdf', async (req, res) => {
   }
 });
 
+// Fuente PDF para imágenes y tickets: conserva exactamente el render del PDF,
+// pero no incrementa el contador porque no es una descarga PDF del usuario.
+router.post('/image-source', async (req, res) => {
+  try {
+    const payload = req.body || {};
+    const uid = getAuthenticatedUid(req);
+    if (!uid) return res.status(401).json({ ok: false, message: 'No autenticado.' });
+    const { plan } = await verificarLimite(uid);
+    const normalized = normalizePayload(payload);
+    if (plan === PLAN_GRATIS_ID) {
+      if (!PLANTILLAS_PLAN_GRATIS.includes(normalized.templateId)) {
+        return res.status(403).json({ ok: false, message: 'Tu plan gratuito solo permite usar la plantilla Moderna Azul. Actualiza tu plan para desbloquear las demás plantillas.' });
+      }
+      normalized.issuer.logoDataUrl = '';
+    }
+    const pdfBuffer = await buildPdfBuffer(normalized, plan);
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'inline');
+    res.send(pdfBuffer);
+  } catch (error) {
+    res.status(400).json({ ok: false, message: error.message || 'No se pudo preparar el comprobante para imagen.' });
+  }
+});
 router.get('/health', (req, res) => {
   res.json({ ok: true, service: 'plantillas-comprobantes' });
 });

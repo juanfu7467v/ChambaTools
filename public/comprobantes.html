@@ -87,8 +87,8 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700;800&family=DM+Mono:wght@400;500&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&display=swap" rel="stylesheet" />
 
-    <!-- Captura de la vista previa para compartir comprobantes como imagen -->
-    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <!-- Renderizado del PDF para imágenes y tickets idénticos al documento final -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <!-- Firebase (se mantiene) -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js">
     </script>
@@ -1645,6 +1645,60 @@
             font-size: 0.76rem;
             line-height: 1.45;
         }
+        .image-progress-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 300;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: rgba(15, 23, 42, 0.68);
+            backdrop-filter: blur(7px);
+            -webkit-backdrop-filter: blur(7px);
+        }
+        .image-progress-overlay.open {
+            display: flex;
+        }
+        .image-progress-card {
+            width: min(390px, 100%);
+            padding: 28px 24px 24px;
+            border: 2px solid var(--emerald);
+            border-radius: 22px;
+            background: linear-gradient(160deg, #ffffff, #eef7f1);
+            box-shadow: 0 22px 60px rgba(15, 23, 42, 0.35);
+            text-align: center;
+        }
+        .image-progress-dots {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 18px;
+        }
+        .image-progress-dots span {
+            width: 11px;
+            height: 11px;
+            border-radius: 50%;
+            background: var(--emerald);
+            animation: progressDot 1.1s ease-in-out infinite;
+        }
+        .image-progress-dots span:nth-child(2) { animation-delay: 0.16s; }
+        .image-progress-dots span:nth-child(3) { animation-delay: 0.32s; }
+        @keyframes progressDot {
+            0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
+            30% { opacity: 1; transform: translateY(-7px); }
+        }
+        .image-progress-title {
+            color: var(--text-primary);
+            font: 800 1.05rem var(--font-display);
+        }
+        .image-progress-log {
+            min-height: 42px;
+            margin-top: 8px;
+            color: var(--text-muted);
+            font-size: 0.82rem;
+            line-height: 1.5;
+        }
         @media (max-width: 640px) {
             .preview-actions-overlay .action-btn {
                 width: 44px;
@@ -2676,6 +2730,13 @@
             <div class="share-modal-note"><i class="fas fa-circle-info"></i> Si una red social no permite adjuntar la imagen directamente desde el navegador, la imagen se descargará para que puedas adjuntarla en el siguiente paso.</div>
         </section>
     </div>
+    <div class="image-progress-overlay" id="imageProgressOverlay" role="status" aria-live="polite" aria-busy="true">
+        <div class="image-progress-card">
+            <div class="image-progress-dots" aria-hidden="true"><span></span><span></span><span></span></div>
+            <div class="image-progress-title" id="imageProgressTitle">Preparando comprobante</div>
+            <div class="image-progress-log" id="imageProgressLog">Iniciando proceso…</div>
+        </div>
+    </div>
     <!-- ═══ FOOTER ═══ -->
     <footer class="footer-content">
         <h3>Síguenos</h3>
@@ -3081,6 +3142,9 @@
         const shareButton = document.getElementById('shareButton');
         const downloadButton2 = document.getElementById('downloadButton2');
         const shareButton2 = document.getElementById('shareButton2');
+        const imageProgressOverlay = document.getElementById('imageProgressOverlay');
+        const imageProgressTitle = document.getElementById('imageProgressTitle');
+        const imageProgressLog = document.getElementById('imageProgressLog');
         const step3BackBtn = document.getElementById('step3BackBtn');
         const closePreviewBtn = document.getElementById('closePreviewBtn');
         const statusBadge = document.getElementById('statusBadge');
@@ -3727,6 +3791,23 @@
             return data;
         }
 
+        async function requestImagePdfBlob(payload) {
+            const response = await fetch(`${API_BASE}/image-source`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (!response.ok) {
+                let message = 'No se pudo preparar el comprobante para imagen.';
+                try {
+                    const data = await response.json();
+                    message = data.message || message;
+                } catch (_) {}
+                throw new Error(message);
+            }
+            return response.blob();
+        }
+
         async function requestPdfBlob(payload) {
             const response = await fetch(`${API_BASE}/pdf`, {
                 method: 'POST',
@@ -3853,20 +3934,92 @@
             setTimeout(() => URL.revokeObjectURL(url), 1000);
         }
 
+        function showImageProgress(title, log) {
+            imageProgressTitle.textContent = title;
+            imageProgressLog.textContent = log;
+            imageProgressOverlay.classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function updateImageProgress(title, log) {
+            imageProgressTitle.textContent = title;
+            imageProgressLog.textContent = log;
+        }
+
+        function hideImageProgress() {
+            imageProgressOverlay.classList.remove('open');
+            if (!shareModalOverlay.classList.contains('open')) document.body.style.overflow = '';
+        }
+
+        async function retryAsync(operation, { attempts = 3, delayMs = 700, onRetry, shouldRetry = () => true } = {}) {
+            let lastError;
+            for (let attempt = 1; attempt <= attempts; attempt += 1) {
+                try {
+                    return await operation(attempt);
+                } catch (error) {
+                    lastError = error;
+                    if (attempt >= attempts || !shouldRetry(error)) throw lastError;
+                    if (onRetry) onRetry(attempt + 1, error);
+                    await new Promise((resolve) => setTimeout(resolve, delayMs * attempt));
+                }
+            }
+            throw lastError;
+        }
+
+        async function renderPdfBlobToCanvas(pdfBlob) {
+            if (!window.pdfjsLib) throw new Error('No se pudo cargar el renderizador del comprobante.');
+            window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+            const pdf = await window.pdfjsLib.getDocument({ data: await pdfBlob.arrayBuffer() }).promise;
+            const pageCanvases = [];
+            let totalHeight = 0;
+            let maxWidth = 0;
+            const scale = 2.5;
+            for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
+                updateImageProgress('Renderizando imagen', `Procesando página ${pageNumber} de ${pdf.numPages}…`);
+                const page = await pdf.getPage(pageNumber);
+                const viewport = page.getViewport({ scale });
+                const pageCanvas = document.createElement('canvas');
+                pageCanvas.width = Math.ceil(viewport.width);
+                pageCanvas.height = Math.ceil(viewport.height);
+                await page.render({ canvasContext: pageCanvas.getContext('2d'), viewport }).promise;
+                pageCanvases.push(pageCanvas);
+                maxWidth = Math.max(maxWidth, pageCanvas.width);
+                totalHeight += pageCanvas.height;
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = maxWidth;
+            canvas.height = totalHeight;
+            const context = canvas.getContext('2d');
+            context.fillStyle = '#ffffff';
+            context.fillRect(0, 0, canvas.width, canvas.height);
+            let offsetY = 0;
+            pageCanvases.forEach((pageCanvas) => {
+                context.drawImage(pageCanvas, 0, offsetY);
+                offsetY += pageCanvas.height;
+            });
+            return canvas;
+        }
+
         async function captureVoucherCanvas() {
             if (!lastPayload) throw new Error('Primero genera la vista previa del comprobante.');
-            if (!previewFrame.contentDocument?.body) throw new Error('La vista previa aún no está lista.');
-            if (typeof window.html2canvas !== 'function') {
-                throw new Error('No se pudo cargar el módulo de imagen. Recarga la página e inténtalo nuevamente.');
-            }
-            const body = previewFrame.contentDocument.body;
-            if (previewFrame.contentDocument.fonts?.ready) await previewFrame.contentDocument.fonts.ready;
-            return window.html2canvas(body, {
-                backgroundColor: '#ffffff', useCORS: true, allowTaint: false, logging: false,
-                scale: Math.min(2, Math.max(1, window.devicePixelRatio || 1)),
-                width: Math.max(body.scrollWidth, 794), height: body.scrollHeight,
-                windowWidth: Math.max(body.scrollWidth, 794), windowHeight: body.scrollHeight
-            });
+            updateImageProgress('Generando PDF seguro', 'Solicitando el documento final…');
+            const pdfBlob = await retryAsync(
+                () => requestImagePdfBlob(lastPayload),
+                {
+                    attempts: 3,
+                    delayMs: 900,
+                    onRetry: (attempt) => updateImageProgress('Reintentando generación', `Intento ${attempt} de 3…`)
+                }
+            );
+            updateImageProgress('Preparando imagen', 'El PDF está listo; conservando su diseño original…');
+            return retryAsync(
+                () => renderPdfBlobToCanvas(pdfBlob),
+                {
+                    attempts: 3,
+                    delayMs: 650,
+                    onRetry: (attempt) => updateImageProgress('Reintentando renderizado', `Intento ${attempt} de 3…`)
+                }
+            );
         }
 
         function canvasToBlob(canvas, type = 'image/png', quality = 0.92) {
@@ -3896,6 +4049,7 @@
                 return;
             }
             clearMessages();
+            showImageProgress('Preparando comprobante', ticketMm ? `Generando ticket térmico de ${ticketMm} mm…` : 'Generando imagen desde el PDF final…');
             setStatus(ticketMm ? `Preparando ticket térmico de ${ticketMm} mm...` : 'Preparando imagen...');
             try {
                 let canvas = await captureVoucherCanvas();
@@ -3907,9 +4061,12 @@
                 downloadBlob(blob, `${getDocumentBaseName()}${suffix}.${extension}`);
                 setStatus(ticketMm ? `Ticket de ${ticketMm} mm descargado` : `Imagen ${extension.toUpperCase()} descargada`);
                 showSuccess('Imagen descargada correctamente.');
+                await refreshPlanInfo();
             } catch (error) {
                 setStatus('Error al preparar imagen');
                 showError(error.message || 'No se pudo generar la imagen.');
+            } finally {
+                hideImageProgress();
             }
         }
 
@@ -3964,13 +4121,22 @@
             }
             clearMessages();
             closeShareModal();
+            showImageProgress('Preparando imagen para compartir', 'Generando una imagen idéntica al PDF…');
             setStatus('Preparando imagen para compartir...');
             try {
                 const file = await getShareImageFile();
                 const shareData = { files: [file], title: 'Comprobante listo', text: lastShareText };
                 const nativeFileShare = navigator.share && navigator.canShare && navigator.canShare({ files: [file] });
                 if ((target === 'native' || target === 'whatsapp') && nativeFileShare) {
-                    await navigator.share(shareData);
+                    await retryAsync(
+                        () => navigator.share(shareData),
+                        {
+                            attempts: 2,
+                            delayMs: 700,
+                            shouldRetry: (error) => error.name !== 'AbortError',
+                            onRetry: (attempt) => updateImageProgress('Reintentando compartir', `Intento ${attempt} de 2…`)
+                        }
+                    );
                     setStatus('Imagen del comprobante compartida');
                     showSuccess('Comprobante compartido como imagen.');
                     return;
@@ -4006,6 +4172,8 @@
                 if (error.name === 'AbortError') return;
                 setStatus('Error al compartir');
                 showError(error.message || 'No se pudo compartir el comprobante.');
+            } finally {
+                hideImageProgress();
             }
         }
 
