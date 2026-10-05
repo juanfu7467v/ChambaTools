@@ -87,6 +87,8 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700;800&family=DM+Mono:wght@400;500&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&display=swap" rel="stylesheet" />
 
+    <!-- Captura de la vista previa para compartir comprobantes como imagen -->
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <!-- Firebase (se mantiene) -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js">
     </script>
@@ -1428,7 +1430,7 @@
         .preview-frame-wrapper {
             position: relative;
             width: 100%;
-            overflow: hidden;
+            overflow: visible;
             border-radius: var(--radius-sm);
             border: 1px solid var(--navy-border);
             background: #fff;
@@ -1449,11 +1451,11 @@
             right: 10px;
             display: flex;
             gap: 8px;
-            z-index: 10;
+            z-index: 30;
         }
         .preview-actions-overlay .action-btn {
-            width: 40px;
-            height: 40px;
+            width: 44px;
+            height: 44px;
             border-radius: 8px;
             background: rgba(11, 18, 32, 0.92);
             backdrop-filter: blur(4px);
@@ -1476,6 +1478,187 @@
         .preview-actions-overlay .action-btn:active {
             transform: scale(0.95);
         }
+        .preview-actions-overlay .action-btn[aria-expanded="true"] {
+            background: rgba(5, 77, 36, 0.97);
+        }
+        .preview-action-menu {
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            width: min(270px, calc(100vw - 32px));
+            padding: 8px;
+            border: 2px solid var(--navy-border);
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.98);
+            box-shadow: 0 14px 30px rgba(15, 23, 42, 0.28);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            display: none;
+            z-index: 40;
+        }
+        .preview-action-menu.open {
+            display: block;
+            animation: menuAppear 0.18s ease-out;
+        }
+        @keyframes menuAppear {
+            from { opacity: 0; transform: translateY(-6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .preview-action-menu-title {
+            padding: 8px 10px 6px;
+            color: var(--text-primary);
+            font-size: 0.76rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+        .preview-action-menu button {
+            width: 100%;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border: 0;
+            border-radius: 9px;
+            background: transparent;
+            color: var(--text-primary);
+            cursor: pointer;
+            font: 600 0.84rem var(--font-family);
+            text-align: left;
+        }
+        .preview-action-menu button:hover,
+        .preview-action-menu button:focus-visible {
+            background: var(--emerald-glow);
+            color: var(--emerald-dark);
+        }
+        .preview-action-menu button i {
+            width: 20px;
+            color: var(--emerald);
+            text-align: center;
+        }
+        .preview-action-menu .menu-divider {
+            height: 1px;
+            margin: 5px 8px;
+            background: var(--border-subtle);
+        }
+        .share-modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 250;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: rgba(15, 23, 42, 0.64);
+            backdrop-filter: blur(7px);
+            -webkit-backdrop-filter: blur(7px);
+        }
+        .share-modal-overlay.open {
+            display: flex;
+        }
+        .share-modal {
+            width: min(440px, 100%);
+            max-height: min(720px, calc(100vh - 40px));
+            overflow-y: auto;
+            padding: 24px;
+            border: 2px solid var(--emerald);
+            border-radius: 22px;
+            background: linear-gradient(160deg, #ffffff, #eef7f1);
+            box-shadow: 0 22px 60px rgba(15, 23, 42, 0.35);
+            animation: shareModalAppear 0.22s ease-out;
+        }
+        @keyframes shareModalAppear {
+            from { opacity: 0; transform: translateY(12px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .share-modal-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 8px;
+        }
+        .share-modal-header h3 {
+            color: var(--text-primary);
+            font: 800 1.2rem var(--font-display);
+        }
+        .share-modal-header p {
+            margin-top: 4px;
+            color: var(--text-muted);
+            font-size: 0.84rem;
+            line-height: 1.45;
+        }
+        .share-modal-close {
+            flex: 0 0 auto;
+            width: 42px;
+            height: 42px;
+            border: 2px solid var(--navy-border);
+            border-radius: 12px;
+            background: #fff;
+            color: var(--text-primary);
+            cursor: pointer;
+            font-size: 1.05rem;
+        }
+        .share-options {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+            margin-top: 18px;
+        }
+        .share-option {
+            min-height: 76px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            border: 2px solid var(--border-subtle);
+            border-radius: 14px;
+            background: #fff;
+            color: var(--text-primary);
+            cursor: pointer;
+            text-align: left;
+            font: 700 0.82rem var(--font-family);
+            transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .share-option:hover,
+        .share-option:focus-visible {
+            border-color: var(--emerald);
+            box-shadow: 0 6px 18px var(--emerald-glow);
+            transform: translateY(-2px);
+        }
+        .share-option i {
+            width: 30px;
+            color: var(--emerald);
+            font-size: 1.3rem;
+            text-align: center;
+        }
+        .share-option.whatsapp i { color: #128c7e; }
+        .share-option.facebook i { color: #1877f2; }
+        .share-option.telegram i { color: #229ed9; }
+        .share-modal-note {
+            margin-top: 16px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            background: rgba(11, 95, 196, 0.09);
+            color: var(--tech-blue-light);
+            font-size: 0.76rem;
+            line-height: 1.45;
+        }
+        @media (max-width: 640px) {
+            .preview-actions-overlay .action-btn {
+                width: 44px;
+                height: 44px;
+                font-size: 1rem;
+            }
+            .preview-action-menu {
+                right: -4px;
+            }
+            .share-modal {
+                padding: 20px;
+                border-radius: 18px;
+            }
+        }
         /* Ocultar los botones originales de descarga/compartir en el paso 3 */
         #step3 .preview-actions .btn-secondary,
         #step3 .preview-actions .btn-ghost {
@@ -1486,23 +1669,7 @@
             display: none;
         }
 
-        @media (max-width: 640px) {
-            .preview-actions-overlay .action-btn {
-                width: 36px;
-                height: 36px;
-                font-size: 0.95rem;
-            }
-            .preview-frame-wrapper .preview-frame {
-                min-height: 320px;
-            }
-        }
         @media (max-width: 480px) {
-            .preview-actions-overlay .action-btn {
-                width: 32px;
-                height: 32px;
-                font-size: 0.8rem;
-                border-radius: 6px;
-            }
             .preview-frame-wrapper .preview-frame {
                 min-height: 240px;
             }
@@ -2455,17 +2622,26 @@
                             <!-- Contenedor del iframe con los botones superpuestos -->
                             <div class="preview-frame-wrapper">
                                 <iframe id="previewFrame" class="preview-frame" title="Vista previa del comprobante"></iframe>
-                                <!-- Botones superpuestos (solo iconos) -->
-                                <div class="preview-actions-overlay">
-                                    <button class="action-btn" id="step3BackBtn" title="Editar datos">
+                                <!-- Acciones: editar · compartir · más formatos -->
+                                <div class="preview-actions-overlay" role="toolbar" aria-label="Acciones del comprobante">
+                                    <button class="action-btn" id="step3BackBtn" title="Editar datos" aria-label="Editar datos">
                                         <i class="fas fa-pen"></i>
                                     </button>
-                                    <button class="action-btn" id="downloadButton2" title="Descargar PDF" disabled>
-                                        <i class="fas fa-download"></i>
-                                    </button>
-                                    <button class="action-btn" id="shareButton2" title="Compartir" disabled>
+                                    <button class="action-btn" id="shareButton2" title="Compartir comprobante" aria-label="Compartir comprobante" disabled>
                                         <i class="fas fa-share-alt"></i>
                                     </button>
+                                    <button class="action-btn" id="downloadButton2" title="Más opciones de descarga" aria-label="Más opciones de descarga" aria-haspopup="menu" aria-expanded="false" disabled>
+                                        <i class="fas fa-ellipsis-vertical"></i>
+                                    </button>
+                                    <div class="preview-action-menu" id="downloadMenu" role="menu" aria-label="Opciones de descarga">
+                                        <div class="preview-action-menu-title">Descargar comprobante</div>
+                                        <button type="button" role="menuitem" data-download-format="png"><i class="fas fa-image"></i><span>Descargar imagen PNG</span></button>
+                                        <button type="button" role="menuitem" data-download-format="jpg"><i class="fas fa-file-image"></i><span>Descargar imagen JPG</span></button>
+                                        <button type="button" role="menuitem" data-download-format="pdf"><i class="fas fa-file-pdf"></i><span>Descargar PDF</span></button>
+                                        <div class="menu-divider" role="separator"></div>
+                                        <button type="button" role="menuitem" data-download-format="ticket-58"><i class="fas fa-receipt"></i><span>Ticket térmico · 58 mm</span></button>
+                                        <button type="button" role="menuitem" data-download-format="ticket-80"><i class="fas fa-receipt"></i><span>Ticket térmico · 80 mm</span></button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -2479,6 +2655,27 @@
         </div>
     </main>
 
+    <!-- Modal de compartir: prioriza la imagen del comprobante -->
+    <div class="share-modal-overlay" id="shareModalOverlay" role="presentation">
+        <section class="share-modal" role="dialog" aria-modal="true" aria-labelledby="shareModalTitle">
+            <div class="share-modal-header">
+                <div>
+                    <h3 id="shareModalTitle">Compartir comprobante</h3>
+                    <p>La imagen es el formato recomendado para compartir rápidamente, especialmente por WhatsApp.</p>
+                </div>
+                <button type="button" class="share-modal-close" id="shareModalClose" aria-label="Cerrar compartir"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="share-options">
+                <button type="button" class="share-option whatsapp" data-share-target="whatsapp"><i class="fab fa-whatsapp"></i><span>Enviar por WhatsApp</span></button>
+                <button type="button" class="share-option facebook" data-share-target="facebook"><i class="fab fa-facebook-f"></i><span>Compartir en Facebook</span></button>
+                <button type="button" class="share-option telegram" data-share-target="telegram"><i class="fab fa-telegram-plane"></i><span>Enviar por Telegram</span></button>
+                <button type="button" class="share-option" data-share-target="native"><i class="fas fa-mobile-screen-button"></i><span>Más opciones</span></button>
+                <button type="button" class="share-option" data-share-target="copy"><i class="fas fa-copy"></i><span>Copiar imagen</span></button>
+                <button type="button" class="share-option" data-share-target="download"><i class="fas fa-download"></i><span>Guardar imagen</span></button>
+            </div>
+            <div class="share-modal-note"><i class="fas fa-circle-info"></i> Si una red social no permite adjuntar la imagen directamente desde el navegador, la imagen se descargará para que puedas adjuntarla en el siguiente paso.</div>
+        </section>
+    </div>
     <!-- ═══ FOOTER ═══ -->
     <footer class="footer-content">
         <h3>Síguenos</h3>
@@ -3641,6 +3838,81 @@
             goToStep(3);
         }
 
+        function getDocumentBaseName() {
+            return lastDocumentName.replace(/\.pdf$/i, '') || 'comprobante';
+        }
+
+        function downloadBlob(blob, filename) {
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+        }
+
+        async function captureVoucherCanvas() {
+            if (!lastPayload) throw new Error('Primero genera la vista previa del comprobante.');
+            if (!previewFrame.contentDocument?.body) throw new Error('La vista previa aún no está lista.');
+            if (typeof window.html2canvas !== 'function') {
+                throw new Error('No se pudo cargar el módulo de imagen. Recarga la página e inténtalo nuevamente.');
+            }
+            const body = previewFrame.contentDocument.body;
+            if (previewFrame.contentDocument.fonts?.ready) await previewFrame.contentDocument.fonts.ready;
+            return window.html2canvas(body, {
+                backgroundColor: '#ffffff', useCORS: true, allowTaint: false, logging: false,
+                scale: Math.min(2, Math.max(1, window.devicePixelRatio || 1)),
+                width: Math.max(body.scrollWidth, 794), height: body.scrollHeight,
+                windowWidth: Math.max(body.scrollWidth, 794), windowHeight: body.scrollHeight
+            });
+        }
+
+        function canvasToBlob(canvas, type = 'image/png', quality = 0.92) {
+            return new Promise((resolve, reject) => {
+                canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error('No se pudo preparar la imagen.')), type, quality);
+            });
+        }
+
+        function resizeCanvasForTicket(sourceCanvas, widthMm) {
+            const targetWidth = Math.round((widthMm / 25.4) * 96 * 2);
+            const targetHeight = Math.max(1, Math.round(sourceCanvas.height * targetWidth / sourceCanvas.width));
+            const ticketCanvas = document.createElement('canvas');
+            ticketCanvas.width = targetWidth;
+            ticketCanvas.height = targetHeight;
+            const context = ticketCanvas.getContext('2d');
+            context.fillStyle = '#ffffff';
+            context.fillRect(0, 0, targetWidth, targetHeight);
+            context.imageSmoothingEnabled = true;
+            context.imageSmoothingQuality = 'high';
+            context.drawImage(sourceCanvas, 0, 0, targetWidth, targetHeight);
+            return ticketCanvas;
+        }
+
+        async function downloadImage(format = 'png', ticketMm = null) {
+            if (!lastPayload) {
+                showError('Primero genera la vista previa del comprobante.');
+                return;
+            }
+            clearMessages();
+            setStatus(ticketMm ? `Preparando ticket térmico de ${ticketMm} mm...` : 'Preparando imagen...');
+            try {
+                let canvas = await captureVoucherCanvas();
+                if (ticketMm) canvas = resizeCanvasForTicket(canvas, ticketMm);
+                const type = format === 'jpg' ? 'image/jpeg' : 'image/png';
+                const extension = format === 'jpg' ? 'jpg' : 'png';
+                const suffix = ticketMm ? `_ticket_${ticketMm}mm` : '';
+                const blob = await canvasToBlob(canvas, type, 0.92);
+                downloadBlob(blob, `${getDocumentBaseName()}${suffix}.${extension}`);
+                setStatus(ticketMm ? `Ticket de ${ticketMm} mm descargado` : `Imagen ${extension.toUpperCase()} descargada`);
+                showSuccess('Imagen descargada correctamente.');
+            } catch (error) {
+                setStatus('Error al preparar imagen');
+                showError(error.message || 'No se pudo generar la imagen.');
+            }
+        }
+
         async function downloadPdf() {
             if (!lastPayload) {
                 showError('Primero genera la vista previa del comprobante.');
@@ -3654,14 +3926,7 @@
             setStatus('Generando PDF...');
             try {
                 const blob = await requestPdfBlob(lastPayload);
-                const url = URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = lastDocumentName;
-                document.body.appendChild(link);
-                link.click();
-                link.remove();
-                URL.revokeObjectURL(url);
+                downloadBlob(blob, lastDocumentName);
                 setStatus('PDF generado y descargado');
                 showSuccess('PDF descargado correctamente.');
                 await refreshPlanInfo();
@@ -3671,49 +3936,83 @@
             }
         }
 
-        async function sharePdf() {
+        function closeShareModal() {
+            shareModalOverlay.classList.remove('open');
+            document.body.style.overflow = '';
+        }
+
+        function openShareModal() {
             if (!lastPayload) {
                 showError('Primero genera la vista previa del comprobante.');
                 return;
             }
-            if (!uid) {
-                showError('Debes iniciar sesión.');
+            shareModalOverlay.classList.add('open');
+            document.body.style.overflow = 'hidden';
+            shareModalClose.focus();
+        }
+
+        async function getShareImageFile() {
+            const canvas = await captureVoucherCanvas();
+            const blob = await canvasToBlob(canvas, 'image/png');
+            return new File([blob], `${getDocumentBaseName()}.png`, { type: 'image/png' });
+        }
+
+        async function shareImage(target = 'native') {
+            if (!lastPayload) {
+                showError('Primero genera la vista previa del comprobante.');
                 return;
             }
             clearMessages();
-            setStatus('Preparando archivo para compartir...');
+            closeShareModal();
+            setStatus('Preparando imagen para compartir...');
             try {
-                const blob = await requestPdfBlob(lastPayload);
-                const file = new File([blob], lastDocumentName, { type: 'application/pdf' });
-
-                if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-                    await navigator.share({
-                        files: [file],
-                        title: 'Comprobante listo',
-                        text: lastShareText
-                    });
-                    setStatus('Comprobante compartido');
-                    showSuccess('Comprobante compartido correctamente.');
-                    await refreshPlanInfo();
+                const file = await getShareImageFile();
+                const shareData = { files: [file], title: 'Comprobante listo', text: lastShareText };
+                const nativeFileShare = navigator.share && navigator.canShare && navigator.canShare({ files: [file] });
+                if ((target === 'native' || target === 'whatsapp') && nativeFileShare) {
+                    await navigator.share(shareData);
+                    setStatus('Imagen del comprobante compartida');
+                    showSuccess('Comprobante compartido como imagen.');
                     return;
                 }
-
-                if (navigator.clipboard) {
-                    await navigator.clipboard.writeText(lastShareText);
+                if (target === 'copy') {
+                    if (navigator.clipboard?.write && window.ClipboardItem) {
+                        await navigator.clipboard.write([new ClipboardItem({ 'image/png': file })]);
+                        setStatus('Imagen copiada al portapapeles');
+                        showSuccess('Imagen copiada correctamente.');
+                    } else {
+                        downloadBlob(file, file.name);
+                        showSuccess('Tu navegador no permite copiar imágenes; se descargó el PNG.');
+                    }
+                    return;
                 }
-
-                const url = URL.createObjectURL(blob);
-                window.open(url, '_blank');
-                setStatus('Archivo abierto para compartir');
-                showSuccess(
-                    'Tu navegador no soporta compartir archivos directamente. Se abrió el PDF en otra pestaña y se copió un texto base al portapapeles si estaba disponible.'
-                    );
-                setTimeout(() => URL.revokeObjectURL(url), 30000);
-                await refreshPlanInfo();
+                if (target === 'download') {
+                    downloadBlob(file, file.name);
+                    setStatus('Imagen guardada');
+                    showSuccess('Imagen descargada correctamente.');
+                    return;
+                }
+                downloadBlob(file, file.name);
+                const encodedText = encodeURIComponent(lastShareText);
+                const shareUrls = {
+                    whatsapp: `https://wa.me/?text=${encodedText}`,
+                    facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`,
+                    telegram: `https://t.me/share/url?url=${encodeURIComponent(window.location.href)}&text=${encodedText}`
+                };
+                if (shareUrls[target]) window.open(shareUrls[target], '_blank', 'noopener,noreferrer');
+                setStatus('Imagen descargada y aplicación de compartir abierta');
+                showSuccess('Adjunta la imagen descargada en la conversación o publicación.');
             } catch (error) {
+                if (error.name === 'AbortError') return;
                 setStatus('Error al compartir');
                 showError(error.message || 'No se pudo compartir el comprobante.');
             }
+        }
+
+        function toggleDownloadMenu(force) {
+            const shouldOpen = typeof force === 'boolean' ? force : !downloadMenu.classList.contains('open');
+            downloadMenu.classList.toggle('open', shouldOpen);
+            downloadButton2.setAttribute('aria-expanded', String(shouldOpen));
         }
 
         const MAX_LOGO_BYTES = 2 * 1024 * 1024;
@@ -3819,6 +4118,8 @@
             shareButton.disabled = true;
             downloadButton2.disabled = true;
             shareButton2.disabled = true;
+            toggleDownloadMenu(false);
+            closeShareModal();
             lastPayload = null;
             lastDocumentName = 'comprobante.pdf';
             lastShareText = 'Comprobante generado';
@@ -3852,17 +4153,38 @@
         downloadButton.addEventListener('click', async () => {
             await downloadPdf();
         });
-        downloadButton2.addEventListener('click', async () => {
-            await downloadPdf();
+        downloadButton2.addEventListener('click', (event) => {
+            event.stopPropagation();
+            toggleDownloadMenu();
         });
-
-        shareButton.addEventListener('click', async () => {
-            await sharePdf();
+        downloadMenu.querySelectorAll('[data-download-format]').forEach((button) => {
+            button.addEventListener('click', async () => {
+                toggleDownloadMenu(false);
+                const format = button.dataset.downloadFormat;
+                if (format === 'pdf') return downloadPdf();
+                if (format === 'ticket-58') return downloadImage('png', 58);
+                if (format === 'ticket-80') return downloadImage('png', 80);
+                return downloadImage(format);
+            });
         });
-        shareButton2.addEventListener('click', async () => {
-            await sharePdf();
+        shareButton.addEventListener('click', openShareModal);
+        shareButton2.addEventListener('click', openShareModal);
+        shareModalClose.addEventListener('click', closeShareModal);
+        shareModalOverlay.addEventListener('click', (event) => {
+            if (event.target === shareModalOverlay) closeShareModal();
         });
-
+        shareModalOverlay.querySelectorAll('[data-share-target]').forEach((button) => {
+            button.addEventListener('click', () => shareImage(button.dataset.shareTarget));
+        });
+        document.addEventListener('click', (event) => {
+            if (!event.target.closest('#downloadMenu') && !event.target.closest('#downloadButton2')) toggleDownloadMenu(false);
+        });
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                toggleDownloadMenu(false);
+                if (shareModalOverlay.classList.contains('open')) closeShareModal();
+            }
+        });
         step3BackBtn.addEventListener('click', () => {
             goToStep(2);
         });
