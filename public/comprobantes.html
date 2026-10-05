@@ -4324,7 +4324,9 @@
             const pageCanvases = [];
             let totalHeight = 0;
             let maxWidth = 0;
-            const scale = 3;
+            // Renderizar a mayor densidad y recortar el lienzo al contenido real.
+            // Así la imagen compartida no conserva el espacio vacío de la página A4.
+            const scale = 4;
             for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
                 updateImageProgress('Renderizando imagen', `Procesando página ${pageNumber} de ${pdf.numPages}…`);
                 const page = await pdf.getPage(pageNumber);
@@ -4348,7 +4350,55 @@
                 context.drawImage(pageCanvas, 0, offsetY);
                 offsetY += pageCanvas.height;
             });
-            return canvas;
+            return cropCanvasToContent(canvas, Math.round(scale * 12));
+        }
+
+        function cropCanvasToContent(sourceCanvas, padding = 48) {
+            const context = sourceCanvas.getContext('2d', { willReadFrequently: true });
+            const pixels = context.getImageData(0, 0, sourceCanvas.width, sourceCanvas.height).data;
+            const threshold = 248;
+            let minX = sourceCanvas.width;
+            let minY = sourceCanvas.height;
+            let maxX = -1;
+            let maxY = -1;
+
+            for (let y = 0; y < sourceCanvas.height; y += 2) {
+                for (let x = 0; x < sourceCanvas.width; x += 2) {
+                    const index = (y * sourceCanvas.width + x) * 4;
+                    if (pixels[index] < threshold || pixels[index + 1] < threshold || pixels[index + 2] < threshold) {
+                        minX = Math.min(minX, x);
+                        minY = Math.min(minY, y);
+                        maxX = Math.max(maxX, x);
+                        maxY = Math.max(maxY, y);
+                    }
+                }
+            }
+
+            if (maxX < 0 || maxY < 0) return sourceCanvas;
+
+            minX = Math.max(0, minX - padding);
+            minY = Math.max(0, minY - padding);
+            maxX = Math.min(sourceCanvas.width - 1, maxX + padding);
+            maxY = Math.min(sourceCanvas.height - 1, maxY + padding);
+
+            const croppedCanvas = document.createElement('canvas');
+            croppedCanvas.width = maxX - minX + 1;
+            croppedCanvas.height = maxY - minY + 1;
+            const croppedContext = croppedCanvas.getContext('2d');
+            croppedContext.fillStyle = '#ffffff';
+            croppedContext.fillRect(0, 0, croppedCanvas.width, croppedCanvas.height);
+            croppedContext.drawImage(
+                sourceCanvas,
+                minX,
+                minY,
+                croppedCanvas.width,
+                croppedCanvas.height,
+                0,
+                0,
+                croppedCanvas.width,
+                croppedCanvas.height
+            );
+            return croppedCanvas;
         }
 
         async function captureVoucherCanvas() {
