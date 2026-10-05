@@ -1188,7 +1188,7 @@
                 </div>
             </div>
 
-            <button class="action-btn primary-btn" onclick="closePayment()">Volver a la aplicación</button>
+            <button class="action-btn primary-btn" onclick="goToReceipts()">Ver mis comprobantes</button>
             <button class="action-btn secondary-btn" id="downloadVoucherBtn">
                 <i class="fas fa-download"></i> Descargar Boleta de Venta
             </button>
@@ -1205,7 +1205,7 @@
             <p class="result-message" id="error-message">Lo sentimos, no pudimos procesar tu pago. Por favor, intenta con otro método o contacta a tu banco.</p>
 
             <button class="action-btn primary-btn" id="retryPaymentBtn" onclick="retryPayment()">Intentar de nuevo</button>
-            <button class="action-btn secondary-btn" id="secondaryErrorBtn" onclick="closePayment()">Cancelar y volver</button>
+            <button class="action-btn secondary-btn" id="secondaryErrorBtn" onclick="goToPlans()">Cancelar y volver</button>
         </div>
     </div>
 
@@ -1338,8 +1338,12 @@
             }
         }
 
-        function closePayment() {
-            window.location.href = '/home.html';
+        function goToPlans() {
+            window.location.href = '/planes.html';
+        }
+
+        function goToReceipts() {
+            window.location.href = '/comprobantes.html';
         }
 
         function retryPayment() {
