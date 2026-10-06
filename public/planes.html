@@ -1275,13 +1275,14 @@
         .vs-map-head, .vs-map-row { position:relative; z-index:1; display:grid; grid-template-columns:minmax(0,1fr) 86px minmax(0,1fr); align-items:stretch; gap:14px; }
         .vs-map-head { align-items:center; }
         .vs-map-title { padding:14px 18px; border-radius:16px; font-family:var(--font-display); font-size:1rem; font-weight:800; text-align:center; letter-spacing:.01em; }
-        .vs-map-title.bad { background:#FFF8F1; border:1px solid #E8D8C4; color:#76502E; }
-        .vs-map-title.good { background:#F1FAF5; border:1px solid #BBDDC8; color:#12643C; }
+        .vs-map-title.bad { background:#FFF8F1; border:1px solid #B89B7B; color:#24170C; }
+        .vs-map-title.good { background:#F1FAF5; border:1px solid #77B996; color:#063B24; }
+        .vs-connector { align-self:center; justify-self:center; padding:6px 8px; border:1px solid #64748B; border-radius:999px; background:#FFFFFF; color:#111827; font-family:var(--font-display); font-size:.82rem; font-weight:900; letter-spacing:.12em; line-height:1; box-shadow:0 3px 8px rgba(15,23,42,.1); }
         .vs-map-row > .vs-cell { display:flex; align-items:center; min-height:76px; padding:15px 18px; border-radius:16px; font-size:.88rem; line-height:1.5; box-shadow:0 5px 16px rgba(15,23,42,.06); }
-        .vs-cell.bad { background:#FFFDFC; border:1px solid #E8D8C4; color:#5F4935; }
-        .vs-cell.good { background:#FFFFFF; border:1px solid #BBDDC8; color:#19583A; font-weight:600; }
-        .vs-number { align-self:center; justify-self:center; display:grid; place-items:center; width:38px; height:38px; border-radius:50%; background:#fff; border:2px solid #A8B8C8; color:#53677A; font-family:var(--font-display); font-weight:800; box-shadow:0 4px 12px rgba(15,23,42,.08); }
-        @media (max-width:640px){ .vs-map::before { left:20px; top:66px; bottom:24px; } .vs-map-head, .vs-map-row { grid-template-columns:40px minmax(0,1fr); gap:10px; } .vs-map-head .vs-map-title.bad, .vs-map-head .vs-map-title.good { grid-column:2; } .vs-map-head .vs-map-title.good { display:none; } .vs-map-row > .vs-cell.bad { grid-column:2; } .vs-map-row > .vs-number { grid-column:1; grid-row:1 / span 2; } .vs-map-row > .vs-cell.good { grid-column:2; grid-row:2; } .vs-map-row > .vs-cell { min-height:0; padding:13px 14px; font-size:.82rem; } .vs-map-row { background:#F8FAFC; padding:10px; border-radius:18px; } }
+        .vs-cell.bad { background:#FFFDFC; border:1px solid #B89B7B; color:#111827; font-weight:700; }
+        .vs-cell.good { background:#FFFFFF; border:1px solid #77B996; color:#063B24; font-weight:700; }
+        .vs-number { align-self:center; justify-self:center; display:grid; place-items:center; width:38px; height:38px; border-radius:50%; background:#fff; border:2px solid #64748B; color:#111827; font-family:var(--font-display); font-weight:900; box-shadow:0 4px 12px rgba(15,23,42,.12); }
+        @media (max-width:640px){ .vs-map::before { left:50%; top:66px; bottom:24px; } .vs-map-head, .vs-map-row { grid-template-columns:minmax(0,1fr) 38px minmax(0,1fr); gap:6px; } .vs-map-title { padding:12px 6px; font-size:.78rem; } .vs-connector { padding:5px 4px; font-size:.64rem; letter-spacing:0; } .vs-map-row > .vs-cell { min-height:94px; padding:11px 9px; font-size:.74rem; line-height:1.35; } .vs-map-row { background:#F8FAFC; padding:8px; border-radius:18px; } .vs-number { width:32px; height:32px; font-size:.82rem; } }
         .final-cta { display:flex; flex-direction:column; gap:12px; align-items:center; }
 
         .live-toast {
@@ -1712,7 +1713,7 @@
                 <div class="vs-map" role="list" aria-label="Comparación con y sin FacilitoTools">
                     <div class="vs-map-head" aria-hidden="true">
                         <div class="vs-map-title bad">Sin FacilitoTools</div>
-                        <div></div>
+                        <div class="vs-connector">VS</div>
                         <div class="vs-map-title good">Con FacilitoTools</div>
                     </div>
                     <div class="vs-map-row" role="listitem">
