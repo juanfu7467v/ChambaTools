@@ -1167,16 +1167,16 @@
         .risk-viewport { overflow:hidden; border-radius:var(--radius); }
         .risk-track { display:flex; transition:transform .45s cubic-bezier(.4,0,.2,1); }
         .risk-slide {
-            --risk-bg: url('/assets/file_00000000118c820e85fea55c994ffd0d.png');
+            --risk-bg: url('/assets/planes/file_00000000118c820e85fea55c994ffd0d.png');
             position:relative; isolation:isolate; overflow:hidden; flex:0 0 100%; min-height:520px;
             padding:30px 24px; border:1px solid rgba(91,107,130,.28); border-radius:var(--radius);
             box-shadow:0 14px 32px rgba(91,74,51,.16); display:flex; flex-direction:column; gap:14px;
             text-align:left; background-image:linear-gradient(180deg,rgba(255,252,246,.76),rgba(255,251,244,.96)),var(--risk-bg);
             background-size:cover; background-position:center; background-repeat:no-repeat;
         }
-        .risk-slide:nth-child(2) { --risk-bg: url('/assets/file_00000000c54c820ea2d897b194eaf209.png'); }
-        .risk-slide:nth-child(3) { --risk-bg: url('/assets/file_00000000f9dc820e85fd1f16fe561627.png'); }
-        .risk-slide:nth-child(4) { --risk-bg: url('/assets/file_00000000c54c820ea2d897b194eaf209.png'); }
+        .risk-slide:nth-child(2) { --risk-bg: url('/assets/planes/file_00000000c54c820ea2d897b194eaf209.png'); }
+        .risk-slide:nth-child(3) { --risk-bg: url('/assets/planes/file_00000000f9dc820e85fd1f16fe561627.png'); }
+        .risk-slide:nth-child(4) { --risk-bg: url('/assets/planes/file_00000000c54c820ea2d897b194eaf209.png'); }
         .risk-icon { position:relative; z-index:1; width:52px; height:52px; border-radius:50%; background:#fff; color:var(--ruby); display:flex; align-items:center; justify-content:center; font-size:1.4rem; box-shadow:0 5px 15px rgba(91,74,51,.16); }
         .risk-slide h3 { position:relative; z-index:1; font-family:var(--font-display); font-size:1.25rem; color:#34291f; }
         .risk-question { position:relative; z-index:1; font-size:1rem; line-height:1.65; color:#3c3026; font-weight:600; }
@@ -1213,7 +1213,7 @@
         }
         .loss-top, .loss-bottom { width:100%; padding:clamp(24px,4vw,38px); }
         .loss-top { background:#C62828; color:#fff; }
-        .loss-bottom { background:#fff; display:flex; flex-direction:column; align-items:center; gap:20px; }
+        .loss-bottom { background-image:linear-gradient(180deg,rgba(255,255,255,.7),rgba(255,255,255,.88)),url('/assets/planes/file_00000000bee8820e8b7b3c87bd508c45.png'); background-size:cover; background-position:center; background-repeat:no-repeat; display:flex; flex-direction:column; align-items:center; gap:20px; }
         .loss-tag {
             align-self:flex-start; display:inline-flex; align-items:center; gap:8px;
             padding:7px 12px; border-radius:999px; background:rgba(255,255,255,.18);
@@ -1653,7 +1653,7 @@
                             <div class="loss-vs">vs</div>
                             <div class="loss-box good"><small>Plan mensual</small><strong>S/ 22</strong></div>
                         </div>
-                        <button type="button" class="risk-cta big" onclick="goToPlans()">Protege tu negocio desde S/10 <i class="fas fa-arrow-right"></i></button>
+                        <button type="button" class="risk-cta big" onclick="goToPlans()">Protege tu negocio desde S/10</button>
                     </div>
                 </div>
             </div>
