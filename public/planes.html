@@ -1174,20 +1174,22 @@
         .risk-icon { width:52px; height:52px; border-radius:50%; background:var(--ruby-glow); color:var(--ruby); display:flex; align-items:center; justify-content:center; font-size:1.4rem; }
         .risk-slide h3 { font-family:var(--font-display); font-size:1.25rem; color:var(--white); }
         .risk-question { font-size:1rem; line-height:1.65; color:var(--text-primary); font-weight:500; }
-        .risk-loss { background:var(--ruby-glow); border-left:4px solid var(--ruby); border-radius:10px; padding:12px 16px; display:flex; flex-direction:column; }
-        .risk-loss span { font-family:var(--font-mono); font-size:.68rem; letter-spacing:.15em; text-transform:uppercase; color:var(--ruby-light); }
-        .risk-loss strong { font-family:var(--font-display); font-size:1.7rem; color:var(--ruby-light); line-height:1.2; }
-        .risk-loss small { color:var(--text-muted); font-size:.8rem; }
-        .risk-fix { background:var(--emerald-glow); border-radius:10px; padding:12px 16px; font-size:.9rem; color:var(--emerald-dark); font-weight:600; line-height:1.5; }
-        .risk-fix i { margin-right:6px; }
+        .risk-loss, .risk-fix { width:100%; border-radius:10px; padding:14px 16px; display:flex; flex-direction:column; }
+        .risk-loss { background:#C62828; border:0; color:#fff; }
+        .risk-loss span { font-family:var(--font-mono); font-size:.68rem; letter-spacing:.15em; text-transform:uppercase; color:#FFE7E7; }
+        .risk-loss strong { font-family:var(--font-display); font-size:1.7rem; color:#fff; line-height:1.2; }
+        .risk-loss small { color:#FFF5F5; font-size:.8rem; }
+        .risk-fix { background:#0A7B3E; border:0; font-size:.9rem; color:#fff; font-weight:600; line-height:1.5; }
+        .risk-fix i { margin-right:6px; color:#DDFBE8; }
         .risk-cta {
             display:inline-flex; align-items:center; justify-content:center; gap:8px;
             padding:14px 24px; border:none; border-radius:30px; cursor:pointer;
             background:linear-gradient(135deg,var(--emerald),var(--emerald-dark)); color:#fff;
             font-family:var(--font-display); font-weight:800; font-size:.9rem; letter-spacing:.02em;
-            box-shadow:var(--shadow-emerald); transition:all .25s; align-self:flex-start;
+            box-shadow:var(--shadow-emerald); transition:transform .25s, box-shadow .25s; align-self:center;
         }
-        .risk-cta:hover { transform:translateY(-2px); box-shadow:var(--sh-hov); }
+        .risk-cta:hover { animation:riskCtaPulse .55s ease-in-out; box-shadow:var(--sh-hov); }
+        @keyframes riskCtaPulse { 0%,100% { transform:translateY(0); } 35% { transform:translateY(-3px) rotate(-1deg); } 70% { transform:translateY(-2px) rotate(1deg); } }
         .risk-cta.big { font-size:1rem; padding:16px 30px; align-self:center; }
         .risk-cta.ghost { background:#fff; color:var(--emerald-light); border:1px solid var(--border-active); box-shadow:none; }
         .risk-controls { display:flex; align-items:center; justify-content:center; gap:16px; margin-top:16px; }
@@ -1198,34 +1200,33 @@
         .risk-dot.active { width:24px; border-radius:4px; background:var(--ruby); opacity:1; }
 
         .loss-banner {
-            position:relative; overflow:hidden; text-align:left;
-            background:linear-gradient(135deg,#ffffff 0%,#f8fbff 56%,#eef8f2 100%);
-            border:1px solid rgba(10,123,62,.28); border-radius:24px;
-            padding:clamp(24px,4vw,38px); display:flex; flex-direction:column;
-            gap:20px; box-shadow:0 12px 30px rgba(15,23,42,.14);
+            position:relative; overflow:hidden; text-align:left; background:#fff;
+            border:1px solid rgba(198,40,40,.35); border-radius:24px;
+            padding:0; display:flex; flex-direction:column;
+            gap:0; box-shadow:0 12px 30px rgba(15,23,42,.14);
         }
-        .loss-banner::before {
-            content:''; position:absolute; inset:0 auto 0 0; width:6px;
-            background:linear-gradient(180deg,var(--ruby),var(--gold),var(--emerald));
-        }
+        .loss-top, .loss-bottom { width:100%; padding:clamp(24px,4vw,38px); }
+        .loss-top { background:#C62828; color:#fff; }
+        .loss-bottom { background:#fff; display:flex; flex-direction:column; align-items:center; gap:20px; }
         .loss-tag {
             align-self:flex-start; display:inline-flex; align-items:center; gap:8px;
-            padding:7px 12px; border-radius:999px; background:var(--ruby-glow);
-            color:var(--ruby-light); font-family:var(--font-mono); font-size:.7rem;
+            padding:7px 12px; border-radius:999px; background:rgba(255,255,255,.18);
+            color:#fff; font-family:var(--font-mono); font-size:.7rem;
             letter-spacing:.16em; text-transform:uppercase; font-weight:700;
         }
         .loss-headline {
-            max-width:760px; font-family:var(--font-display);
+            max-width:760px; margin-top:18px; font-family:var(--font-display);
             font-size:clamp(1.2rem,3.6vw,1.8rem); font-weight:700;
-            color:var(--text-primary); line-height:1.35;
+            color:#fff; line-height:1.35;
         }
-        .loss-headline em { font-style:normal; color:var(--ruby); }
+        .loss-headline em { font-style:normal; color:#FFE2E2; }
         .loss-compare { display:grid; grid-template-columns:1fr auto 1fr; align-items:stretch; gap:12px; width:100%; max-width:620px; }
         .loss-box { min-width:0; padding:16px 18px; border-radius:16px; display:flex; flex-direction:column; gap:5px; border:1px solid transparent; }
         .loss-box small { font-size:.75rem; color:var(--text-muted); font-weight:600; }
         .loss-box strong { font-family:var(--font-display); font-size:clamp(1.55rem,4vw,2rem); line-height:1.1; }
-        .loss-box.bad { background:#fff1f1; color:var(--ruby-light); border-color:rgba(198,40,40,.16); }
-        .loss-box.good { background:#eaf8ef; color:var(--emerald-dark); border-color:rgba(10,123,62,.18); }
+        .loss-box.bad { background:#C62828; color:#fff; border-color:#A91F1F; }
+        .loss-box.bad small { color:#FFE7E7; }
+        .loss-box.good { background:#fff; color:var(--text-primary); border-color:var(--border-subtle); }
         .loss-vs { align-self:center; font-size:.8rem; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--text-subtle); }
         @media (max-width:480px){ .loss-compare{ grid-template-columns:1fr; } .loss-vs{ justify-self:center; } }
 
@@ -1609,14 +1610,18 @@
         <section class="section" id="perdida">
             <div class="content-grid">
                 <div class="loss-banner">
-                    <span class="loss-tag"><i class="fas fa-triangle-exclamation"></i> Haz la cuenta</span>
-                    <p class="loss-headline">Un solo cliente falso que no validaste con RENIEC/SUNAT te cuesta <em>más que un mes completo</em> de FacilitoTools.</p>
-                    <div class="loss-compare">
-                        <div class="loss-box bad"><small>1 estafa</small><strong>– S/ 450</strong></div>
-                        <div class="loss-vs">vs</div>
-                        <div class="loss-box good"><small>Plan mensual</small><strong>S/ 22</strong></div>
+                    <div class="loss-top">
+                        <span class="loss-tag"><i class="fas fa-triangle-exclamation"></i> Haz la cuenta</span>
+                        <p class="loss-headline">Un solo cliente falso que no validaste con RENIEC/SUNAT te cuesta <em>más que un mes completo</em> de FacilitoTools.</p>
                     </div>
-                    <button type="button" class="risk-cta big" onclick="goToPlans()">Protege tu negocio desde S/10 <i class="fas fa-arrow-right"></i></button>
+                    <div class="loss-bottom">
+                        <div class="loss-compare">
+                            <div class="loss-box bad"><small>1 estafa</small><strong>– S/ 450</strong></div>
+                            <div class="loss-vs">vs</div>
+                            <div class="loss-box good"><small>Plan mensual</small><strong>S/ 22</strong></div>
+                        </div>
+                        <button type="button" class="risk-cta big" onclick="goToPlans()">Protege tu negocio desde S/10 <i class="fas fa-arrow-right"></i></button>
+                    </div>
                 </div>
             </div>
         </section>
