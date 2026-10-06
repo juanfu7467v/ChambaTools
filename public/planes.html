@@ -1164,15 +1164,6 @@
         .exit-offer-notice i { margin-top: 2px; color: #08783e; font-size: 1.15rem; }
 
         /* ═══ RIESGOS / VENTAS ═══ */
-        .risk-tabs { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin-bottom:14px; }
-        @media (min-width:640px){ .risk-tabs{ grid-template-columns:repeat(4,1fr);} }
-        .risk-tab {
-            display:flex; align-items:center; justify-content:center; gap:8px;
-            padding:11px 8px; border-radius:30px; cursor:pointer;
-            background:#fff; border:1px solid var(--border-subtle); color:var(--text-muted);
-            font-family:var(--font-display); font-weight:700; font-size:.8rem; transition:all .25s;
-        }
-        .risk-tab.active { background:linear-gradient(135deg,var(--ruby),var(--ruby-light)); color:#fff; border-color:transparent; box-shadow:0 4px 14px rgba(198,40,40,.35); }
         .risk-viewport { overflow:hidden; border-radius:var(--radius); }
         .risk-track { display:flex; transition:transform .45s cubic-bezier(.4,0,.2,1); }
         .risk-slide {
@@ -1206,17 +1197,37 @@
         .risk-dot { width:8px; height:8px; border-radius:50%; background:var(--navy-border); opacity:.5; cursor:pointer; transition:all .3s; }
         .risk-dot.active { width:24px; border-radius:4px; background:var(--ruby); opacity:1; }
 
-        .loss-banner { text-align:center; background:linear-gradient(160deg,#fff,#FDECEC); border:2px solid var(--ruby); border-radius:var(--radius); padding:30px 20px; display:flex; flex-direction:column; align-items:center; gap:18px; box-shadow:var(--shadow-card); }
-        .loss-tag { font-family:var(--font-mono); font-size:.72rem; letter-spacing:.2em; text-transform:uppercase; color:var(--ruby-light); font-weight:600; }
-        .loss-headline { font-family:var(--font-display); font-size:clamp(1.2rem,3.6vw,1.8rem); font-weight:700; color:var(--white); line-height:1.35; }
-        .loss-headline em { font-style:normal; color:var(--ruby); text-decoration:underline; text-decoration-thickness:3px; }
-        .loss-compare { display:flex; align-items:center; gap:14px; flex-wrap:wrap; justify-content:center; }
-        .loss-box { min-width:130px; padding:12px 18px; border-radius:14px; display:flex; flex-direction:column; }
-        .loss-box small { font-size:.75rem; color:var(--text-muted); }
-        .loss-box strong { font-family:var(--font-display); font-size:1.8rem; }
-        .loss-box.bad { background:var(--ruby-glow); color:var(--ruby-light); }
-        .loss-box.good { background:var(--emerald-glow); color:var(--emerald-dark); }
-        .loss-vs { font-weight:800; color:var(--text-subtle); }
+        .loss-banner {
+            position:relative; overflow:hidden; text-align:left;
+            background:linear-gradient(135deg,#ffffff 0%,#f8fbff 56%,#eef8f2 100%);
+            border:1px solid rgba(10,123,62,.28); border-radius:24px;
+            padding:clamp(24px,4vw,38px); display:flex; flex-direction:column;
+            gap:20px; box-shadow:0 12px 30px rgba(15,23,42,.14);
+        }
+        .loss-banner::before {
+            content:''; position:absolute; inset:0 auto 0 0; width:6px;
+            background:linear-gradient(180deg,var(--ruby),var(--gold),var(--emerald));
+        }
+        .loss-tag {
+            align-self:flex-start; display:inline-flex; align-items:center; gap:8px;
+            padding:7px 12px; border-radius:999px; background:var(--ruby-glow);
+            color:var(--ruby-light); font-family:var(--font-mono); font-size:.7rem;
+            letter-spacing:.16em; text-transform:uppercase; font-weight:700;
+        }
+        .loss-headline {
+            max-width:760px; font-family:var(--font-display);
+            font-size:clamp(1.2rem,3.6vw,1.8rem); font-weight:700;
+            color:var(--text-primary); line-height:1.35;
+        }
+        .loss-headline em { font-style:normal; color:var(--ruby); }
+        .loss-compare { display:grid; grid-template-columns:1fr auto 1fr; align-items:stretch; gap:12px; width:100%; max-width:620px; }
+        .loss-box { min-width:0; padding:16px 18px; border-radius:16px; display:flex; flex-direction:column; gap:5px; border:1px solid transparent; }
+        .loss-box small { font-size:.75rem; color:var(--text-muted); font-weight:600; }
+        .loss-box strong { font-family:var(--font-display); font-size:clamp(1.55rem,4vw,2rem); line-height:1.1; }
+        .loss-box.bad { background:#fff1f1; color:var(--ruby-light); border-color:rgba(198,40,40,.16); }
+        .loss-box.good { background:#eaf8ef; color:var(--emerald-dark); border-color:rgba(10,123,62,.18); }
+        .loss-vs { align-self:center; font-size:.8rem; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--text-subtle); }
+        @media (max-width:480px){ .loss-compare{ grid-template-columns:1fr; } .loss-vs{ justify-self:center; } }
 
         .live-stats { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
         .live-stat { background:#fff; border:1px solid var(--border-subtle); border-radius:14px; padding:16px; display:flex; flex-direction:column; align-items:center; gap:2px; text-align:center; position:relative; box-shadow:var(--shadow-card); }
@@ -1546,13 +1557,6 @@
                 <p class="section-body">Cada pedido sin validar es una apuesta con tu plata. Toca cada riesgo y mira cuánto puede costarte.</p>
 
                 <div class="risk-carousel" id="riskCarousel">
-                    <div class="risk-tabs" role="tablist" aria-label="Riesgos del negocio">
-                        <button type="button" class="risk-tab active" role="tab" aria-selected="true" data-i="0"><i class="fas fa-mobile-screen-button"></i><span>Yape falso</span></button>
-                        <button type="button" class="risk-tab" role="tab" aria-selected="false" data-i="1"><i class="fas fa-truck-fast"></i><span>Envío perdido</span></button>
-                        <button type="button" class="risk-tab" role="tab" aria-selected="false" data-i="2"><i class="fas fa-file-invoice"></i><span>Sin comprobante</span></button>
-                        <button type="button" class="risk-tab" role="tab" aria-selected="false" data-i="3"><i class="fas fa-hourglass-half"></i><span>Tiempo perdido</span></button>
-                    </div>
-
                     <div class="risk-viewport">
                         <div class="risk-track" id="riskTrack">
                             <article class="risk-slide">
@@ -1561,7 +1565,7 @@
                                 <p class="risk-question">¿Cuánto pierdes cuando un cliente te muestra una captura de pago falsa o un DNI que no existe?</p>
                                 <div class="risk-loss"><span>Pérdida típica</span><strong>S/ 450+</strong><small>mercadería + flete que no recuperas</small></div>
                                 <p class="risk-fix"><i class="fas fa-shield-halved"></i> Valida el DNI en RENIEC en segundos y confirma que la identidad coincide antes de enviar.</p>
-                                <button type="button" class="risk-cta" onclick="goToPlans()">Probar validación gratis <i class="fas fa-arrow-right"></i></button>
+                                <button type="button" class="risk-cta" onclick="handlePlanSelection('semanal')">Elegir plan de S/10 <i class="fas fa-arrow-right"></i></button>
                             </article>
                             <article class="risk-slide">
                                 <div class="risk-icon"><i class="fas fa-box-open"></i></div>
@@ -1569,7 +1573,7 @@
                                 <p class="risk-question">Mandar un pedido a una dirección falsa o a una persona no verificada te cuesta flete de ida y vuelta + mercadería retenida.</p>
                                 <div class="risk-loss"><span>Pérdida típica</span><strong>S/ 30 – 80</strong><small>por cada envío devuelto, sin contar la venta</small></div>
                                 <p class="risk-fix"><i class="fas fa-shield-halved"></i> Confirma identidad y datos del cliente antes de despachar.</p>
-                                <button type="button" class="risk-cta" onclick="goToPlans()">Ver planes disponibles <i class="fas fa-arrow-right"></i></button>
+                                <button type="button" class="risk-cta" onclick="handlePlanSelection('mensual')">Elegir plan de S/22 <i class="fas fa-arrow-right"></i></button>
                             </article>
                             <article class="risk-slide">
                                 <div class="risk-icon"><i class="fas fa-boxes-stacked"></i></div>
@@ -1577,7 +1581,7 @@
                                 <p class="risk-question">Perder ventas por no tener comprobantes a la mano para generar confianza inmediata en clientes que compran por internet.</p>
                                 <div class="risk-loss"><span>Pérdida típica</span><strong>Ventas que no cierran</strong><small>el cliente desconfía y compra en otro lado</small></div>
                                 <p class="risk-fix"><i class="fas fa-shield-halved"></i> Genera boletas y comprobantes en PDF/PNG nítidos, listos para WhatsApp.</p>
-                                <button type="button" class="risk-cta" onclick="goToPlans()">Probar gratis <i class="fas fa-arrow-right"></i></button>
+                                <button type="button" class="risk-cta" onclick="handlePlanSelection('mensual')">Elegir plan de S/22 <i class="fas fa-arrow-right"></i></button>
                             </article>
                             <article class="risk-slide">
                                 <div class="risk-icon"><i class="fas fa-clock"></i></div>
@@ -1585,7 +1589,7 @@
                                 <p class="risk-question">Horas consultando manualmente datos en diferentes páginas en lugar de cerrar la venta en 5 segundos.</p>
                                 <div class="risk-loss"><span>Pérdida típica</span><strong>Horas por semana</strong><small>tiempo que podrías usar para vender</small></div>
                                 <p class="risk-fix"><i class="fas fa-shield-halved"></i> DNI, RUC y teléfono en un solo lugar, en segundos.</p>
-                                <button type="button" class="risk-cta" onclick="goToPlans()">Ver planes disponibles <i class="fas fa-arrow-right"></i></button>
+                                <button type="button" class="risk-cta" onclick="handlePlanSelection('bimestral')">Elegir plan de S/35 <i class="fas fa-arrow-right"></i></button>
                             </article>
                         </div>
                     </div>
@@ -1669,10 +1673,6 @@
                         <div class="vs-cell bad" role="cell">Horas consultando datos en diferentes páginas.</div>
                         <div class="vs-cell good" role="cell">Todo en un solo lugar, en segundos.</div>
                     </div>
-                </div>
-                <div class="final-cta">
-                    <button type="button" class="risk-cta big" onclick="goToPlans()">Probar validación gratis <i class="fas fa-arrow-right"></i></button>
-                    <button type="button" class="risk-cta big ghost" onclick="goToPlans()">Ver planes disponibles</button>
                 </div>
             </div>
         </section>
@@ -1834,7 +1834,6 @@
         (function() {
             const track = document.getElementById('riskTrack');
             const dotsBox = document.getElementById('riskDots');
-            const tabs = document.querySelectorAll('.risk-tab');
             const prev = document.getElementById('riskPrev');
             const next = document.getElementById('riskNext');
             if (!track) return;
@@ -1850,12 +1849,10 @@
             function go(i, user) {
                 current = (i + total) % total;
                 track.style.transform = 'translateX(-' + (current * 100) + '%)';
-                tabs.forEach((t, k) => { t.classList.toggle('active', k === current); t.setAttribute('aria-selected', k === current); });
                 dotsBox.querySelectorAll('.risk-dot').forEach((d, k) => d.classList.toggle('active', k === current));
                 if (user) restart();
             }
             function restart() { clearInterval(timer); timer = setInterval(() => go(current + 1), 7000); }
-            tabs.forEach(t => t.addEventListener('click', () => go(+t.dataset.i, true)));
             prev.addEventListener('click', () => go(current - 1, true));
             next.addEventListener('click', () => go(current + 1, true));
             track.addEventListener('touchstart', e => { touchX = e.touches[0].clientX; }, { passive: true });
