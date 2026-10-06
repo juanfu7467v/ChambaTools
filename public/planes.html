@@ -1167,13 +1167,19 @@
         .risk-viewport { overflow:hidden; border-radius:var(--radius); }
         .risk-track { display:flex; transition:transform .45s cubic-bezier(.4,0,.2,1); }
         .risk-slide {
-            flex:0 0 100%; padding:26px 22px; background:linear-gradient(160deg,#fff,var(--navy-card));
-            border:1px solid var(--border-subtle); border-radius:var(--radius); box-shadow:var(--shadow-card);
-            display:flex; flex-direction:column; gap:14px; text-align:left;
+            --risk-bg: url('/assets/file_00000000118c820e85fea55c994ffd0d.png');
+            position:relative; isolation:isolate; overflow:hidden; flex:0 0 100%; min-height:520px;
+            padding:30px 24px; border:1px solid rgba(91,107,130,.28); border-radius:var(--radius);
+            box-shadow:0 14px 32px rgba(91,74,51,.16); display:flex; flex-direction:column; gap:14px;
+            text-align:left; background-image:linear-gradient(180deg,rgba(255,252,246,.76),rgba(255,251,244,.96)),var(--risk-bg);
+            background-size:cover; background-position:center; background-repeat:no-repeat;
         }
-        .risk-icon { width:52px; height:52px; border-radius:50%; background:var(--ruby-glow); color:var(--ruby); display:flex; align-items:center; justify-content:center; font-size:1.4rem; }
-        .risk-slide h3 { font-family:var(--font-display); font-size:1.25rem; color:var(--white); }
-        .risk-question { font-size:1rem; line-height:1.65; color:var(--text-primary); font-weight:500; }
+        .risk-slide:nth-child(2) { --risk-bg: url('/assets/file_00000000c54c820ea2d897b194eaf209.png'); }
+        .risk-slide:nth-child(3) { --risk-bg: url('/assets/file_00000000f9dc820e85fd1f16fe561627.png'); }
+        .risk-slide:nth-child(4) { --risk-bg: url('/assets/file_00000000c54c820ea2d897b194eaf209.png'); }
+        .risk-icon { position:relative; z-index:1; width:52px; height:52px; border-radius:50%; background:#fff; color:var(--ruby); display:flex; align-items:center; justify-content:center; font-size:1.4rem; box-shadow:0 5px 15px rgba(91,74,51,.16); }
+        .risk-slide h3 { position:relative; z-index:1; font-family:var(--font-display); font-size:1.25rem; color:#34291f; }
+        .risk-question { position:relative; z-index:1; font-size:1rem; line-height:1.65; color:#3c3026; font-weight:600; }
         .risk-loss, .risk-fix { width:100%; border-radius:10px; padding:14px 16px; display:flex; flex-direction:column; }
         .risk-loss { background:#C62828; border:0; color:#fff; }
         .risk-loss span { font-family:var(--font-mono); font-size:.68rem; letter-spacing:.15em; text-transform:uppercase; color:#FFE7E7; }
@@ -1193,11 +1199,11 @@
         .risk-cta.big { font-size:1rem; padding:16px 30px; align-self:center; }
         .risk-cta.ghost { background:#fff; color:var(--emerald-light); border:1px solid var(--border-active); box-shadow:none; }
         .risk-controls { display:flex; align-items:center; justify-content:center; gap:16px; margin-top:16px; }
-        .risk-arrow { width:40px; height:40px; border-radius:50%; border:1px solid var(--border-subtle); background:#fff; color:var(--text-primary); cursor:pointer; }
+        .risk-arrow { width:40px; height:40px; border-radius:50%; border:1px solid rgba(91,107,130,.34); background:#fff; color:var(--text-primary); cursor:pointer; box-shadow:0 4px 12px rgba(15,23,42,.08); }
         .risk-arrow:hover { background:var(--emerald); color:#fff; }
         .risk-dots { display:flex; gap:8px; }
         .risk-dot { width:8px; height:8px; border-radius:50%; background:var(--navy-border); opacity:.5; cursor:pointer; transition:all .3s; }
-        .risk-dot.active { width:24px; border-radius:4px; background:var(--ruby); opacity:1; }
+        .risk-dot.active { width:24px; border-radius:4px; background:var(--emerald); opacity:1; }
 
         .loss-banner {
             position:relative; overflow:hidden; text-align:left; background:#fff;
@@ -1264,13 +1270,18 @@
         .test-footnote { text-align:center; font-size:.72rem; color:var(--text-subtle); margin-top:14px; }
         @media (max-width:480px){ .testimonials-carousel-wrap{gap:4px;} .test-nav{width:36px;height:36px;font-size:.85rem;} .test-card-inner{max-width:300px;} }
 
-        .vs-table { border-radius:var(--radius); overflow:hidden; border:1px solid var(--border-subtle); box-shadow:var(--shadow-card); background:#fff; }
-        .vs-row { display:grid; grid-template-columns:1fr 1fr; border-top:1px solid var(--border-subtle); }
-        .vs-row:first-child { border-top:none; }
-        .vs-cell { padding:14px 12px; font-size:.85rem; line-height:1.5; text-align:left; }
-        .vs-cell.bad { background:#FDF1F1; color:var(--ruby-light); }
-        .vs-cell.good { background:#EEF8F2; color:var(--emerald-dark); font-weight:600; }
-        .vs-head .vs-cell { font-family:var(--font-display); font-weight:800; font-size:.9rem; text-align:center; }
+        .vs-map { position:relative; display:grid; gap:18px; }
+        .vs-map::before { content:''; position:absolute; left:50%; top:72px; bottom:34px; width:2px; background:#D6DEE8; transform:translateX(-50%); }
+        .vs-map-head, .vs-map-row { position:relative; z-index:1; display:grid; grid-template-columns:minmax(0,1fr) 86px minmax(0,1fr); align-items:stretch; gap:14px; }
+        .vs-map-head { align-items:center; }
+        .vs-map-title { padding:14px 18px; border-radius:16px; font-family:var(--font-display); font-size:1rem; font-weight:800; text-align:center; letter-spacing:.01em; }
+        .vs-map-title.bad { background:#FFF8F1; border:1px solid #E8D8C4; color:#76502E; }
+        .vs-map-title.good { background:#F1FAF5; border:1px solid #BBDDC8; color:#12643C; }
+        .vs-map-row > .vs-cell { display:flex; align-items:center; min-height:76px; padding:15px 18px; border-radius:16px; font-size:.88rem; line-height:1.5; box-shadow:0 5px 16px rgba(15,23,42,.06); }
+        .vs-cell.bad { background:#FFFDFC; border:1px solid #E8D8C4; color:#5F4935; }
+        .vs-cell.good { background:#FFFFFF; border:1px solid #BBDDC8; color:#19583A; font-weight:600; }
+        .vs-number { align-self:center; justify-self:center; display:grid; place-items:center; width:38px; height:38px; border-radius:50%; background:#fff; border:2px solid #A8B8C8; color:#53677A; font-family:var(--font-display); font-weight:800; box-shadow:0 4px 12px rgba(15,23,42,.08); }
+        @media (max-width:640px){ .vs-map::before { left:20px; top:66px; bottom:24px; } .vs-map-head, .vs-map-row { grid-template-columns:40px minmax(0,1fr); gap:10px; } .vs-map-head .vs-map-title.bad, .vs-map-head .vs-map-title.good { grid-column:2; } .vs-map-head .vs-map-title.good { display:none; } .vs-map-row > .vs-cell.bad { grid-column:2; } .vs-map-row > .vs-number { grid-column:1; grid-row:1 / span 2; } .vs-map-row > .vs-cell.good { grid-column:2; grid-row:2; } .vs-map-row > .vs-cell { min-height:0; padding:13px 14px; font-size:.82rem; } .vs-map-row { background:#F8FAFC; padding:10px; border-radius:18px; } }
         .final-cta { display:flex; flex-direction:column; gap:12px; align-items:center; }
 
         .live-toast {
@@ -1698,26 +1709,31 @@
             <div class="content-grid">
                 <span class="section-label">Contraste directo</span>
                 <h2 class="section-title">Sin FacilitoTools vs. <em>Con FacilitoTools</em></h2>
-                <div class="vs-table" role="table" aria-label="Comparación con y sin FacilitoTools">
-                    <div class="vs-row vs-head" role="row">
-                        <div class="vs-cell bad" role="columnheader">Sin FacilitoTools ❌</div>
-                        <div class="vs-cell good" role="columnheader">Con FacilitoTools 🚀</div>
+                <div class="vs-map" role="list" aria-label="Comparación con y sin FacilitoTools">
+                    <div class="vs-map-head" aria-hidden="true">
+                        <div class="vs-map-title bad">Sin FacilitoTools</div>
+                        <div></div>
+                        <div class="vs-map-title good">Con FacilitoTools</div>
                     </div>
-                    <div class="vs-row" role="row">
-                        <div class="vs-cell bad" role="cell">Riesgo de capturas de pago y DNIs falsos.</div>
-                        <div class="vs-cell good" role="cell">Validación instantánea en RENIEC, SUNAT y OSIPTEL.</div>
+                    <div class="vs-map-row" role="listitem">
+                        <div class="vs-cell bad">Riesgo de capturas de pago y DNIs falsos.</div>
+                        <span class="vs-number" aria-label="Punto 1">1</span>
+                        <div class="vs-cell good">Validación instantánea en RENIEC, SUNAT y OSIPTEL.</div>
                     </div>
-                    <div class="vs-row" role="row">
-                        <div class="vs-cell bad" role="cell">Retornos de envíos por datos de entrega erróneos.</div>
-                        <div class="vs-cell good" role="cell">Confirmación previa de identidad y dirección del cliente.</div>
+                    <div class="vs-map-row" role="listitem">
+                        <div class="vs-cell bad">Retornos de envíos por datos de entrega erróneos.</div>
+                        <span class="vs-number" aria-label="Punto 2">2</span>
+                        <div class="vs-cell good">Confirmación previa de identidad y dirección del cliente.</div>
                     </div>
-                    <div class="vs-row" role="row">
-                        <div class="vs-cell bad" role="cell">Boletas lentas, informales o mal formateadas.</div>
-                        <div class="vs-cell good" role="cell">Comprobantes en PDF/PNG ultra nítidos listos para WhatsApp.</div>
+                    <div class="vs-map-row" role="listitem">
+                        <div class="vs-cell bad">Boletas lentas, informales o mal formateadas.</div>
+                        <span class="vs-number" aria-label="Punto 3">3</span>
+                        <div class="vs-cell good">Comprobantes en PDF/PNG ultra nítidos listos para WhatsApp.</div>
                     </div>
-                    <div class="vs-row" role="row">
-                        <div class="vs-cell bad" role="cell">Horas consultando datos en diferentes páginas.</div>
-                        <div class="vs-cell good" role="cell">Todo en un solo lugar, en segundos.</div>
+                    <div class="vs-map-row" role="listitem">
+                        <div class="vs-cell bad">Horas consultando datos en diferentes páginas.</div>
+                        <span class="vs-number" aria-label="Punto 4">4</span>
+                        <div class="vs-cell good">Todo en un solo lugar, en segundos.</div>
                     </div>
                 </div>
             </div>
