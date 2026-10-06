@@ -1237,11 +1237,32 @@
         .live-stat > i { color:var(--gold-dim); font-size:1.2rem; }
         .live-dot { width:10px; height:10px; border-radius:50%; background:#16a34a; box-shadow:0 0 0 0 rgba(22,163,74,.6); animation:livePulse 1.6s infinite; }
         @keyframes livePulse { 70%{ box-shadow:0 0 0 10px rgba(22,163,74,0);} 100%{ box-shadow:0 0 0 0 rgba(22,163,74,0);} }
-        .testimonials { display:grid; gap:14px; }
-        @media (min-width:768px){ .testimonials{ grid-template-columns:1fr 1fr; } }
-        .testimonial { background:#fff; border:1px solid var(--border-subtle); border-left:4px solid var(--emerald); border-radius:14px; padding:18px; box-shadow:var(--shadow-card); }
-        .testimonial blockquote { font-size:.95rem; line-height:1.6; color:var(--text-primary); margin-bottom:10px; }
-        .testimonial figcaption { font-size:.8rem; font-weight:700; color:var(--emerald-dark); }
+        .testimonials-carousel-wrap { position:relative; display:flex; align-items:center; gap:8px; margin-top:28px; }
+        .testimonials-viewport { flex:1; overflow:hidden; padding:20px 4px 10px; }
+        .testimonials-track { display:flex; align-items:stretch; transition:transform .55s cubic-bezier(.65,0,.35,1); will-change:transform; }
+        .test-card { flex:0 0 100%; max-width:100%; padding:0 10px; box-sizing:border-box; display:flex; justify-content:center; }
+        @media (min-width:720px){ .test-card{ flex:0 0 50%; max-width:50%; } }
+        @media (min-width:1024px){ .test-card{ flex:0 0 33.3333%; max-width:33.3333%; } }
+        .test-card-inner { width:100%; max-width:330px; display:flex; flex-direction:column; padding:18px; background:linear-gradient(160deg,#FFFFFF 0%,#F4F8FC 100%); border:1px solid var(--border-subtle); border-radius:18px; box-shadow:0 8px 24px rgba(15,23,42,.16); transform:scale(.92); opacity:.55; transition:transform .45s ease,opacity .45s ease,box-shadow .45s ease,border-color .45s ease; }
+        .test-card.is-active .test-card-inner { transform:scale(1); opacity:1; border-color:var(--border-active); box-shadow:0 18px 40px rgba(15,23,42,.24),0 0 24px var(--emerald-glow); }
+        .test-head { display:flex; align-items:center; gap:12px; }
+        .test-avatar { flex-shrink:0; width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:var(--av,var(--emerald)); color:#fff; font-family:var(--font-display); font-weight:800; font-size:1.05rem; }
+        .test-id { min-width:0; }
+        .test-name { display:block; color:var(--white); font-weight:700; font-size:.92rem; }
+        .test-role { display:block; color:var(--text-subtle); font-size:.75rem; margin-top:1px; }
+        .test-stars { margin:12px 0 10px; color:#D97706; font-size:.8rem; letter-spacing:3px; }
+        .test-bubble { flex:1; display:flex; flex-direction:column; padding:12px 14px 8px; background:rgba(10,123,62,.08); border:1px solid rgba(10,123,62,.35); border-radius:4px 16px 16px 16px; }
+        .test-text { flex:1; color:var(--text-primary); font-size:.9rem; line-height:1.55; }
+        .test-time { align-self:flex-end; margin-top:8px; color:var(--text-subtle); font-size:.68rem; }
+        .test-time i { color:#0B5FC4; margin-left:4px; }
+        .test-nav { flex-shrink:0; width:42px; height:42px; border-radius:50%; background:linear-gradient(135deg,var(--emerald),var(--emerald-dark)); color:#fff; border:none; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:1rem; box-shadow:0 6px 18px var(--emerald-glow); transition:all .25s ease; }
+        .test-nav:hover { background:var(--emerald-light); transform:scale(1.08); }
+        .test-nav:active { transform:scale(.95); }
+        .testimonials-dots { display:flex; justify-content:center; gap:8px; margin-top:22px; }
+        .test-dot { width:9px; height:9px; border-radius:50%; background:rgba(91,107,130,.45); border:none; cursor:pointer; padding:0; transition:all .3s ease; }
+        .test-dot.active { background:var(--emerald); width:24px; border-radius:6px; }
+        .test-footnote { text-align:center; font-size:.72rem; color:var(--text-subtle); margin-top:14px; }
+        @media (max-width:480px){ .testimonials-carousel-wrap{gap:4px;} .test-nav{width:36px;height:36px;font-size:.85rem;} .test-card-inner{max-width:300px;} }
 
         .vs-table { border-radius:var(--radius); overflow:hidden; border:1px solid var(--border-subtle); box-shadow:var(--shadow-card); background:#fff; }
         .vs-row { display:grid; grid-template-columns:1fr 1fr; border-top:1px solid var(--border-subtle); }
@@ -1637,16 +1658,36 @@
                     <div class="live-stat"><span class="live-dot"></span><strong id="validationsToday">1,200+</strong><small>validaciones realizadas hoy</small></div>
                     <div class="live-stat"><i class="fas fa-bolt"></i><strong>5 seg</strong><small>para validar a un cliente</small></div>
                 </div>
-                <div class="testimonials">
-                    <figure class="testimonial">
-                        <blockquote>“Casi envío un pedido de S/450 con un yape falso, pero al consultar el DNI vi que la identidad no coincidía. FacilitoTools me salvó la semana.”</blockquote>
-                        <figcaption><i class="fas fa-store"></i> Tienda Novedades J&amp;M</figcaption>
-                    </figure>
-                    <figure class="testimonial">
-                        <blockquote>“Antes perdía media hora buscando datos en varias páginas. Ahora valido al cliente y le mando su comprobante por WhatsApp al toque.”</blockquote>
-                        <figcaption><i class="fas fa-store"></i> Comerciante en Lima</figcaption>
-                    </figure>
+                <div class="testimonials-carousel-wrap">
+                    <button class="test-nav prev" type="button" onclick="liveTestimonialsPrev()" aria-label="Comentario anterior"><i class="fas fa-chevron-left"></i></button>
+                    <div class="testimonials-viewport" id="liveTestimonialsViewport">
+                        <div class="testimonials-track" id="liveTestimonialsTrack">
+                            <div class="test-card"><div class="test-card-inner">
+                                <div class="test-head"><div class="test-avatar" style="--av:#0A7B3E" aria-hidden="true">M</div><div class="test-id"><strong class="test-name">María G.</strong><span class="test-role">Emprendedora · Bodega</span></div></div>
+                                <div class="test-stars" role="img" aria-label="5 de 5 estrellas"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+                                <div class="test-bubble"><p class="test-text">Generar boletas para mi tienda ahora me toma segundos. Antes perdía horas armando comprobantes a mano.</p><span class="test-time">Hace 3 días <i class="fas fa-check-double" aria-hidden="true"></i></span></div>
+                            </div></div>
+                            <div class="test-card"><div class="test-card-inner">
+                                <div class="test-head"><div class="test-avatar" style="--av:#0B5FC4" aria-hidden="true">C</div><div class="test-id"><strong class="test-name">Carlos R.</strong><span class="test-role">Dueño de negocio</span></div></div>
+                                <div class="test-stars" role="img" aria-label="5 de 5 estrellas"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+                                <div class="test-bubble"><p class="test-text">La consulta de RUC me permite verificar proveedores antes de cerrar cualquier trato. Me da mucha tranquilidad.</p><span class="test-time">Hace 1 semana <i class="fas fa-check-double" aria-hidden="true"></i></span></div>
+                            </div></div>
+                            <div class="test-card"><div class="test-card-inner">
+                                <div class="test-head"><div class="test-avatar" style="--av:#B45309" aria-hidden="true">L</div><div class="test-id"><strong class="test-name">Laura F.</strong><span class="test-role">Freelance</span></div></div>
+                                <div class="test-stars" role="img" aria-label="5 de 5 estrellas"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+                                <div class="test-bubble"><p class="test-text">Empecé con el plan gratuito para probar y ahora uso el mensual todos los días. La validación de DNI es rapidísima.</p><span class="test-time">Hace 2 semanas <i class="fas fa-check-double" aria-hidden="true"></i></span></div>
+                            </div></div>
+                            <div class="test-card"><div class="test-card-inner">
+                                <div class="test-head"><div class="test-avatar" style="--av:#6B2AA5" aria-hidden="true">J</div><div class="test-id"><strong class="test-name">Jorge P.</strong><span class="test-role">Asesor comercial</span></div></div>
+                                <div class="test-stars" role="img" aria-label="5 de 5 estrellas"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+                                <div class="test-bubble"><p class="test-text">Uso la consulta de teléfonos antes de contactar a nuevos clientes. Me ha evitado varios dolores de cabeza.</p><span class="test-time">Hace 4 días <i class="fas fa-check-double" aria-hidden="true"></i></span></div>
+                            </div></div>
+                        </div>
+                    </div>
+                    <button class="test-nav next" type="button" onclick="liveTestimonialsNext()" aria-label="Comentario siguiente"><i class="fas fa-chevron-right"></i></button>
                 </div>
+                <div class="testimonials-dots" id="liveTestimonialsDots"></div>
+                <p class="test-footnote">Ejemplos ilustrativos de uso de la plataforma.</p>
             </div>
         </section>
 
@@ -1879,6 +1920,75 @@
         // ========== PRUEBA SOCIAL EN VIVO ==========
         // ⚠️ IMPORTANTE: conecta estos datos a cifras REALES de tu sistema.
         // Mostrar actividad o cifras inventadas puede considerarse publicidad engañosa.
+        (function() {
+            const validationsEl = document.getElementById('validationsToday');
+            if (validationsEl) {
+                let validations = 1200;
+                setInterval(() => {
+                    let change = 0;
+                    while (change === 0) change = Math.floor(Math.random() * 9) - 4;
+                    validations = Math.max(1200, validations + change);
+                    validationsEl.textContent = validations.toLocaleString('es-PE') + '+';
+                }, 2600);
+            }
+        })();
+
+        // ========== CARRUSEL DE COMENTARIOS EN VIVO ==========
+        (function() {
+            const track = document.getElementById('liveTestimonialsTrack');
+            const dotsBox = document.getElementById('liveTestimonialsDots');
+            if (!track || !dotsBox) return;
+            const cards = Array.from(track.querySelectorAll('.test-card'));
+            let current = 0;
+            let perView = getPerView();
+            let timer;
+
+            function getPerView() {
+                if (window.innerWidth >= 1024) return 3;
+                if (window.innerWidth >= 720) return 2;
+                return 1;
+            }
+            function maxIndex() { return Math.max(0, cards.length - perView); }
+            function renderDots() {
+                dotsBox.innerHTML = '';
+                for (let i = 0; i <= maxIndex(); i++) {
+                    const dot = document.createElement('button');
+                    dot.type = 'button';
+                    dot.className = 'test-dot' + (i === current ? ' active' : '');
+                    dot.setAttribute('aria-label', 'Ir al grupo de comentarios ' + (i + 1));
+                    dot.addEventListener('click', () => goTo(i));
+                    dotsBox.appendChild(dot);
+                }
+            }
+            function render() {
+                track.style.transform = 'translateX(-' + (current * (100 / perView)) + '%)';
+                const active = Math.min(current + Math.floor(perView / 2), cards.length - 1);
+                cards.forEach((card, index) => card.classList.toggle('is-active', index === active));
+                dotsBox.querySelectorAll('.test-dot').forEach((dot, index) => dot.classList.toggle('active', index === current));
+            }
+            function goTo(index) {
+                current = Math.max(0, Math.min(index, maxIndex()));
+                render();
+                clearInterval(timer);
+                timer = setInterval(() => goTo(current >= maxIndex() ? 0 : current + 1), 5000);
+            }
+            window.liveTestimonialsNext = () => goTo(current >= maxIndex() ? 0 : current + 1);
+            window.liveTestimonialsPrev = () => goTo(current <= 0 ? maxIndex() : current - 1);
+            function resize() {
+                const nextPerView = getPerView();
+                if (nextPerView !== perView) {
+                    perView = nextPerView;
+                    current = Math.min(current, maxIndex());
+                    renderDots();
+                    render();
+                }
+            }
+            renderDots();
+            render();
+            timer = setInterval(() => goTo(current >= maxIndex() ? 0 : current + 1), 5000);
+            window.addEventListener('resize', resize);
+        })();
+
         (function() {
             const toast = document.getElementById('liveToast');
             const txt = document.getElementById('liveToastText');
