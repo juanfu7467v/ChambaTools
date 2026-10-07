@@ -24,6 +24,7 @@ import developerApiRouter, { publicDeveloperRouter, setDb as setDeveloperApiDb }
 // Importar módulos de seguridad y negocios
 import { 
   logger, 
+  requestLogger,
   getClientIp, 
   getAuthenticatedUid,
   checkLoginBlock, 
@@ -53,6 +54,9 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 app.set('trust proxy', 1);
+// Debe ir antes de los parsers y de las rutas para incluir también errores
+// de JSON, respuestas 404 y recursos estáticos en los logs de Fly.io.
+app.use(requestLogger);
 
 const cloudinaryConfig = {
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME?.trim(),

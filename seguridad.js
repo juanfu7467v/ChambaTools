@@ -29,6 +29,55 @@ export const logger = {
   }
 };
 
+/**
+ * Registra el tráfico HTTP en stdout para poder analizarlo desde `fly logs`.
+ * No registra cuerpos, cookies, tokens ni cabeceras de autenticación.
+ */
+export function requestLogger(req, res, next) {
+  const startedAt = process.hrtime.bigint();
+  const requestId = crypto.randomUUID();
+  let logged = false;
+
+  req.requestId = requestId;
+  res.setHeader('X-Request-ID', requestId);
+
+  const writeLog = (aborted = false) => {
+    if (logged) return;
+    logged = true;
+
+    const durationMs = Number(process.hrtime.bigint() - startedAt) / 1e6;
+    const forwardedFor = req.get('x-forwarded-for');
+    const record = {
+      timestamp: new Date().toISOString(),
+      event: 'http_request',
+      requestId,
+      method: req.method,
+      url: req.originalUrl,
+      path: req.path,
+      route: req.route?.path || null,
+      status: res.statusCode,
+      durationMs: Math.round(durationMs * 100) / 100,
+      responseBytes: Number(res.getHeader('content-length')) || 0,
+      aborted,
+      ip: getClientIp(req),
+      proxyIps: req.ips,
+      forwardedFor: forwardedFor || null,
+      userAgent: req.get('user-agent') || null,
+      referer: req.get('referer') || null,
+      host: req.get('host') || null,
+      protocol: req.protocol,
+      accept: req.get('accept') || null,
+      contentType: req.get('content-type') || null
+    };
+
+    console.log(JSON.stringify(record));
+  };
+
+  res.once('finish', () => writeLog(false));
+  res.once('close', () => writeLog(!res.writableEnded));
+  next();
+}
+
 // ================================================================
 // 🔍 HELPERS DE IP
 // ================================================================

@@ -32,7 +32,9 @@ primary_region = 'gru'
   processes = ['app']
 
   kill_signal = 'SIGTERM'
-  kill_timeout = '1200s'
+  # La aplicación no necesita 20 minutos para cerrar: un límite corto evita
+  # mantener una máquina facturable durante una parada defectuosa.
+  kill_timeout = '30s'
 
 [[vm]]
   cpu_kind = 'shared'
