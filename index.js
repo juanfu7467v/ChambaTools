@@ -15,6 +15,7 @@ import compression from "compression";
 import rateLimit from 'express-rate-limit';
 import { v2 as cloudinary } from 'cloudinary';
 import { helmetConfig, corsAllowedOrigins } from './cspConfig.js';
+import { buildGoogleDriveAuthorizationUrl, completeGoogleDriveAuthorization, disconnectGoogleDrive, getGoogleDriveStatus, getUidFromGoogleDriveState, isGoogleDriveConfigured } from './googleDrive.js';
 import plantillasRouter, { setDb as setPlantillasDb } from './plantillas.js';
 import validarClientesRouter, { setDb as setValidarClientesDb } from './validarClientes.js';
 // 🆕 Capa de Developer API (API Keys autogestionadas + endpoints públicos para integradores).
@@ -450,6 +451,54 @@ app.get('/api/session', (req, res) => {
   }
 
   res.status(200).json({ authenticated: true, uid, email });
+});
+
+app.get('/api/google-drive/connect', (req, res) => {
+  try {
+    const uid = getAuthenticatedUid(req);
+    if (!uid) return res.redirect('/login.html?returnTo=' + encodeURIComponent('/comprobantes.html'));
+    if (!isGoogleDriveConfigured()) return res.status(503).send('Google Drive no está configurado en el servidor.');
+    return res.redirect(buildGoogleDriveAuthorizationUrl(uid));
+  } catch (error) {
+    logger.error('GOOGLE_DRIVE_CONNECT', 'No se pudo iniciar OAuth de Google Drive', error);
+    return res.status(500).send('No se pudo iniciar la conexión con Google Drive.');
+  }
+});
+app.get('/api/google-drive/callback', async (req, res) => {
+  try {
+    const uid = getUidFromGoogleDriveState(req.query.state);
+    if (!uid) return res.redirect('/login.html?returnTo=' + encodeURIComponent('/comprobantes.html'));
+    if (req.query.error) return res.redirect('/comprobantes.html?drive=cancelled');
+    if (!req.query.code || !req.query.state) return res.redirect('/comprobantes.html?drive=error');
+    await completeGoogleDriveAuthorization(req.query.code, req.query.state, uid, db);
+    return res.redirect('/comprobantes.html?drive=connected');
+  } catch (error) {
+    logger.error('GOOGLE_DRIVE_CALLBACK', 'No se pudo completar OAuth de Google Drive', error);
+    return res.redirect('/comprobantes.html?drive=error');
+  }
+});
+app.get('/api/google-drive/status', async (req, res) => {
+  try {
+    const uid = getAuthenticatedUid(req);
+    if (!uid) return res.status(401).json({ connected: false, configured: isGoogleDriveConfigured() });
+    if (!db) return res.status(503).json({ connected: false, configured: isGoogleDriveConfigured() });
+    return res.json(await getGoogleDriveStatus(uid, db));
+  } catch (error) {
+    logger.error('GOOGLE_DRIVE_STATUS', 'No se pudo consultar Google Drive', error);
+    return res.status(500).json({ connected: false, configured: false });
+  }
+});
+app.post('/api/google-drive/disconnect', async (req, res) => {
+  try {
+    const uid = getAuthenticatedUid(req);
+    if (!uid) return res.status(401).json({ success: false, error: 'No autenticado.' });
+    if (!db) return res.status(503).json({ success: false, error: 'Base de datos no disponible.' });
+    await disconnectGoogleDrive(uid, db);
+    return res.json({ success: true });
+  } catch (error) {
+    logger.error('GOOGLE_DRIVE_DISCONNECT', 'No se pudo desconectar Google Drive', error);
+    return res.status(500).json({ success: false, error: 'No se pudo desconectar Google Drive.' });
+  }
 });
 
 // Registra que una persona llegó al checkout. El correo solo se programa si

@@ -3,6 +3,7 @@ import PDFDocument from 'pdfkit';
 import QRCode from 'qrcode';
 import admin from './firebaseCompat.js';
 import { getAuthenticatedUid } from './seguridad.js';
+import { savePdfToGoogleDrive } from './googleDrive.js';
 
 const router = express.Router();
 router.use(express.json({ limit: '2mb' }));
@@ -2042,6 +2043,28 @@ router.post('/preview', async (req, res) => {
     });
   } catch (error) {
     res.status(400).json({ ok: false, message: error.message || 'No se pudo generar la vista previa.' });
+  }
+});
+
+router.post('/drive-save', async (req, res) => {
+  try {
+    const payload = req.body || {};
+    const uid = getAuthenticatedUid(req);
+    if (!uid) return res.status(401).json({ ok: false, message: 'No autenticado.' });
+    const { plan } = await verificarLimite(uid);
+    const normalized = normalizePayload(payload);
+    if (plan === PLAN_GRATIS_ID) {
+      if (!PLANTILLAS_PLAN_GRATIS.includes(normalized.templateId)) {
+        return res.status(403).json({ ok: false, message: 'Tu plan gratuito solo permite usar la plantilla Moderna Azul.' });
+      }
+      normalized.issuer.logoDataUrl = '';
+    }
+    const pdfBuffer = await buildPdfBuffer(normalized, plan);
+    const filename = `${normalized.documentType}_${normalized.numbering.full}.pdf`.replace(/\s+/g, '_');
+    const result = await savePdfToGoogleDrive(uid, filename, pdfBuffer, dbInstance);
+    return res.json({ ok: true, ...result, filename });
+  } catch (error) {
+    res.status(400).json({ ok: false, message: error.message || 'No se pudo guardar el comprobante en Google Drive.' });
   }
 });
 

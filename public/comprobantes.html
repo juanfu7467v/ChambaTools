@@ -2567,6 +2567,15 @@
                                 </div>
                             </section>
 
+                            <section class="gb-block" aria-labelledby="googleDriveTitle">
+                                <h3 id="googleDriveTitle"><i class="fab fa-google-drive" aria-hidden="true"></i> Copia automática en Google Drive</h3>
+                                <p class="whatsapp-templates-intro">Vincula tu cuenta de Google y guardaremos automáticamente una copia de cada comprobante que generes.</p>
+                                <div id="googleDriveStatus" class="notice" role="status" aria-live="polite">Comprobando conexión con Google Drive…</div>
+                                <div class="actions" style="margin-top: 12px; display:flex; gap:10px; flex-wrap:wrap;">
+                                    <button type="button" class="btn-next" id="googleDriveConnectButton"><i class="fab fa-google-drive"></i> Vincular Google Drive</button>
+                                    <button type="button" class="btn-ghost" id="googleDriveDisconnectButton" style="display:none;">Desvincular</button>
+                                </div>
+                            </section>
                             <section class="gb-block whatsapp-templates-block" aria-labelledby="whatsappTemplatesTitle">
                                 <h3 id="whatsappTemplatesTitle">Mensajes para WhatsApp</h3>
                                 <p class="whatsapp-templates-intro">Elige una tarjeta para usarla al compartir tu comprobante. Puedes editar cada texto; los cambios se guardan automáticamente y el negocio, número y monto se completan al compartir.</p>
@@ -3300,6 +3309,10 @@
         const issuerBusinessNameInput = document.getElementById('issuerBusinessName');
         const generateButton = document.getElementById('generateButton');
         const planStatusEl = document.getElementById('planStatus');
+        const googleDriveStatus = document.getElementById('googleDriveStatus');
+        const googleDriveConnectButton = document.getElementById('googleDriveConnectButton');
+        const googleDriveDisconnectButton = document.getElementById('googleDriveDisconnectButton');
+        let googleDriveConnected = false;
 
         let currentTemplates = [];
         let lastPayload = null;
@@ -4245,6 +4258,51 @@
             }, 200);
         });
 
+        async function loadGoogleDriveStatus() {
+            if (!googleDriveStatus) return;
+            try {
+                const response = await fetch('/api/google-drive/status', { credentials: 'same-origin', cache: 'no-store' });
+                const data = await response.json().catch(() => ({}));
+                googleDriveConnected = data.connected === true;
+                if (!data.configured) {
+                    googleDriveStatus.textContent = 'Google Drive aún no está disponible. El administrador debe configurar la integración.';
+                    googleDriveConnectButton.style.display = 'none';
+                    googleDriveDisconnectButton.style.display = 'none';
+                } else if (googleDriveConnected) {
+                    googleDriveStatus.textContent = 'Google Drive vinculado. Cada comprobante generado tendrá una copia automática.';
+                    googleDriveStatus.className = 'success';
+                    googleDriveConnectButton.style.display = 'none';
+                    googleDriveDisconnectButton.style.display = 'inline-flex';
+                } else {
+                    googleDriveStatus.textContent = 'Google Drive no está vinculado.';
+                    googleDriveStatus.className = 'notice';
+                    googleDriveConnectButton.style.display = 'inline-flex';
+                    googleDriveDisconnectButton.style.display = 'none';
+                }
+            } catch (_) {
+                googleDriveConnected = false;
+                googleDriveStatus.textContent = 'No se pudo comprobar la conexión con Google Drive.';
+            }
+        }
+
+        async function savePreviewToGoogleDrive(payload) {
+            if (!googleDriveConnected) return;
+            try {
+                const response = await fetch(`${API_BASE}/drive-save`, {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json().catch(() => ({}));
+                if (!response.ok || !result.ok) throw new Error(result.message || 'No se pudo guardar la copia en Google Drive.');
+                setStatus('Vista previa lista · copia guardada en Google Drive');
+            } catch (error) {
+                console.error('No se pudo guardar el comprobante en Google Drive:', error);
+                showError('El comprobante se generó, pero no se pudo guardar la copia en Google Drive.');
+            }
+        }
+
         async function generatePreview() {
             clearMessages();
             if (!uid) {
@@ -4266,6 +4324,7 @@
             const result = await requestPreview(payload);
             lastPayload = payload;
             renderPreview(result);
+            await savePreviewToGoogleDrive(payload);
             // No se guarda en localStorage la vista previa.
             goToStep(3);
         }
@@ -4803,6 +4862,21 @@
             updateSummary();
         });
 
+        googleDriveConnectButton.addEventListener('click', () => {
+            window.location.href = '/api/google-drive/connect';
+        });
+        googleDriveDisconnectButton.addEventListener('click', async () => {
+            googleDriveDisconnectButton.disabled = true;
+            try {
+                const response = await fetch('/api/google-drive/disconnect', { method: 'POST', credentials: 'same-origin' });
+                if (!response.ok) throw new Error('No se pudo desvincular Google Drive.');
+                await loadGoogleDriveStatus();
+            } catch (error) {
+                showError(error.message);
+            } finally {
+                googleDriveDisconnectButton.disabled = false;
+            }
+        });
         // ========== INICIALIZACIÓN ==========
         (async function init() {
             try {
@@ -4812,7 +4886,7 @@
                 renderWhatsAppTemplates();
                 uid = await getUid();
 
-                await Promise.all([loadTemplates(), loadPlanInfo()]);
+                await Promise.all([loadTemplates(), loadPlanInfo(), loadGoogleDriveStatus()]);
 
                 resetForm();
                 applyPlanRestrictions();
