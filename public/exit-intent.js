@@ -60,8 +60,21 @@
         }
     }
 
-    function showModal() {
-        if (isOpen || isSuppressed()) return;
+    async function isPromotionEligible() {
+        try {
+            const response = await fetch('/api/promotions/exit-intent/status', {
+                credentials: 'same-origin',
+                cache: 'no-store'
+            });
+            const result = await response.json().catch(() => ({}));
+            return response.ok && result.eligible === true;
+        } catch (_) {
+            return false;
+        }
+    }
+
+    async function showModal() {
+        if (isOpen || isSuppressed() || !(await isPromotionEligible())) return;
         isOpen = true;
         lastFocusedElement = document.activeElement;
         overlay.classList.add('is-visible');

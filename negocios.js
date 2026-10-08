@@ -258,7 +258,7 @@ export function releasePaymentLock(paymentRef) {
 // 💰 OTORGAR BENEFICIO (NUEVA LÓGICA POR PLAN)
 // ================================================================
 
-export async function otorgarBeneficio(uid, email, montoPagado, processor, paymentRefString, resend, planId) {
+export async function otorgarBeneficio(uid, email, montoPagado, processor, paymentRefString, resend, planId, paymentMethodId = null, hasPromotion = false) {
   const context = 'OTORGAR_BENEFICIO';
   
   if (!db) {
@@ -325,6 +325,9 @@ export async function otorgarBeneficio(uid, email, montoPagado, processor, payme
       }
 
       const userData = userSnap.data() || {};
+      if (hasPromotion && userData.exitIntentPromotionUsedAt) {
+        throw new Error('EXIT_INTENT_PROMOTION_ALREADY_USED');
+      }
 
       // Obtener valores actuales o establecer por defecto
       const esRecarga = planConfig.tipo === 'recarga';
@@ -371,6 +374,9 @@ export async function otorgarBeneficio(uid, email, montoPagado, processor, payme
         consultasCedulaLimite: nuevosConsultasCedulaLimite,
         ultimaCompra: admin.firestore.FieldValue.serverTimestamp()
       };
+      if (hasPromotion) {
+        updateData.exitIntentPromotionUsedAt = admin.firestore.FieldValue.serverTimestamp();
+      }
 
       // Solo los planes de suscripción cambian tipoPlan/planStatus/expiración;
       // las recargas únicamente suman cupos y respetan el plan activo.

@@ -288,9 +288,10 @@ const EXIT_INTENT_PROMO_CODE = 'EXIT20';
 const EXIT_INTENT_PROMO_CAMPAIGN = 'exit-intent-20';
 const EXIT_INTENT_PROMO_TTL_MS = 24 * 60 * 60 * 1000;
 
-function createExitIntentPromotionToken() {
+function createExitIntentPromotionToken(uid) {
   const payload = Buffer.from(JSON.stringify({
     campaign: EXIT_INTENT_PROMO_CAMPAIGN,
+    uid,
     expiresAt: Date.now() + EXIT_INTENT_PROMO_TTL_MS,
     nonce: crypto.randomBytes(16).toString('hex')
   })).toString('base64url');
@@ -313,7 +314,7 @@ function verifyExitIntentPromotionToken(token) {
 
   try {
     const data = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8'));
-    if (data.campaign !== EXIT_INTENT_PROMO_CAMPAIGN || !Number.isFinite(data.expiresAt) || data.expiresAt <= Date.now()) return null;
+    if (data.campaign !== EXIT_INTENT_PROMO_CAMPAIGN || typeof data.uid !== 'string' || !Number.isFinite(data.expiresAt) || data.expiresAt <= Date.now()) return null;
     return data;
   } catch (_) {
     return null;
@@ -1285,13 +1286,32 @@ app.post("/api/report-failed-login", authRateLimit, async (req, res) => {
   }
 });
 
+async function hasRedeemedExitIntentPromotion(uid) {
+  if (!db || !uid) return false;
+  const userSnap = await db.collection('usuarios').doc(uid).get();
+  if (userSnap.exists) return Boolean(userSnap.data()?.exitIntentPromotionUsedAt);
+  const companySnap = await db.collection('empresas').doc(uid).get();
+  return companySnap.exists && Boolean(companySnap.data()?.exitIntentPromotionUsedAt);
+}
+
+app.get('/api/promotions/exit-intent/status', async (req, res) => {
+  try {
+    const uid = getAuthenticatedUid(req);
+    res.set('Cache-Control', 'no-store');
+    return res.json({ eligible: Boolean(uid) && !(await hasRedeemedExitIntentPromotion(uid)) });
+  } catch (error) {
+    logger.error('PROMOTION_STATUS', 'Error verificando elegibilidad de promoción', error);
+    return res.json({ eligible: false });
+  }
+});
+
 // Emite un token de promoción solo ante una solicitud same-origin del CTA de home.
 app.post('/api/promotions/exit-intent/redeem', rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 20,
   standardHeaders: 'draft-7',
   legacyHeaders: false
-}), (req, res) => {
+}), async (req, res) => {
   const origin = req.get('origin');
   let sourceIsHome = false;
   try {
@@ -1304,14 +1324,19 @@ app.post('/api/promotions/exit-intent/redeem', rateLimit({
   if (!origin || !allowedOrigins.includes(origin) || !sourceIsHome) {
     return res.status(403).json({ error: 'Origen no permitido para esta promoción.' });
   }
+  const uid = getAuthenticatedUid(req);
+  if (!uid) return res.status(401).json({ error: 'Inicia sesión para activar esta promoción.' });
   if (req.body?.campaign !== EXIT_INTENT_PROMO_CODE) {
     return res.status(400).json({ error: 'La promoción solicitada no es válida.' });
+  }
+  if (await hasRedeemedExitIntentPromotion(uid)) {
+    return res.status(409).json({ error: 'Esta promoción ya fue utilizada en tu cuenta.' });
   }
 
   res.set('Cache-Control', 'no-store');
   return res.json({
     code: EXIT_INTENT_PROMO_CODE,
-    token: createExitIntentPromotionToken(),
+    token: createExitIntentPromotionToken(uid),
     expiresInSeconds: Math.floor(EXIT_INTENT_PROMO_TTL_MS / 1000)
   });
 });
@@ -1355,8 +1380,11 @@ app.post("/api/pay", async (req, res) => {
       return res.status(400).json({ error: 'Precio no disponible para el plan seleccionado.' });
     }
     const promotion = promotionToken ? verifyExitIntentPromotionToken(promotionToken) : null;
-    if (promotionToken && !promotion) {
+    if (promotionToken && (!promotion || promotion.uid !== uid)) {
       return res.status(400).json({ error: 'La oferta de 20% venció o no es válida. Vuelve a solicitarla desde la página de inicio.' });
+    }
+    if (promotion && await hasRedeemedExitIntentPromotion(uid)) {
+      return res.status(409).json({ error: 'Esta promoción ya fue utilizada en tu cuenta.' });
     }
     const expectedAmount = promotion
       ? Math.round(basePrice * 0.8 * 100) / 100
@@ -1446,7 +1474,8 @@ app.post("/api/pay", async (req, res) => {
         result.id.toString(),
         resend,
         planId,
-        payment_method_id || null
+        payment_method_id || null,
+        Boolean(promotion)
       ).then(activationResult => {
         logger.info(context, 'Beneficio otorgado de forma inmediata tras pago aprobado', {
           paymentId: result.id,
@@ -1526,7 +1555,8 @@ app.post("/api/webhook/mercadopago", async (req, res) => {
             paymentId.toString(),
             resend,
             planId,
-            paymentInfo.payment_method_id || null
+            paymentInfo.payment_method_id || null,
+            metadata.promo_code === EXIT_INTENT_PROMO_CODE
           );
         } else {
           logger.error(context, 'Datos insuficientes en webhook aprobado', { paymentId, uid, planId });
