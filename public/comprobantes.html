@@ -2424,75 +2424,66 @@
         .google-drive-connect-button {
             position: relative;
             display: inline-flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 8px;
-            min-width: 240px;
-            min-height: 108px;
-            padding: 14px 22px;
+            gap: 9px;
+            min-width: 218px;
+            height: 48px;
+            padding: 8px 17px;
             overflow: hidden;
             border: 2px solid var(--emerald-dark);
-            border-radius: 9px;
-            background: linear-gradient(135deg, #0f766e 0%, #047857 52%, #065f46 100%);
-            color: #FFFFFF;
-            box-shadow: 0 8px 18px rgba(6, 95, 70, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+            border-radius: 7px;
+            background: transparent;
+            color: var(--emerald-dark);
+            box-shadow: 0 3px 9px rgba(6, 95, 70, 0.12);
             font-weight: 800;
             letter-spacing: 0.01em;
-            transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
-        }
-        .google-drive-connect-button::before {
-            position: absolute;
-            inset: -55%;
-            content: '';
-            background: linear-gradient(110deg, transparent 42%, rgba(255, 255, 255, 0.2) 50%, transparent 58%);
-            transform: translateX(-45%) rotate(12deg);
-            animation: google-drive-button-shine 4.5s ease-in-out infinite;
-            pointer-events: none;
+            white-space: nowrap;
+            transition: background-color 0.22s ease, transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
         }
         .google-drive-connect-button:hover:not(:disabled) {
-            transform: translateY(-3px) scale(1.015);
-            border-color: #34d399;
-            box-shadow: 0 14px 28px rgba(6, 95, 70, 0.3), 0 0 0 4px rgba(16, 185, 129, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.28);
+            transform: translateY(-2px);
+            border-color: var(--emerald);
+            background: #E3F4EA;
+            box-shadow: 0 7px 16px rgba(6, 95, 70, 0.18);
         }
         .google-drive-connect-button:focus-visible {
-            outline: 3px solid rgba(37, 99, 235, 0.35);
+            outline: 3px solid rgba(37, 99, 235, 0.3);
             outline-offset: 3px;
         }
         .google-drive-connect-visual {
             position: relative;
-            z-index: 1;
-            display: flex;
+            flex: 0 0 66px;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            height: 42px;
-            width: 170px;
+            height: 28px;
         }
         .google-drive-brand-orb,
         .google-drive-drive-orb {
             position: absolute;
             display: grid;
             place-items: center;
-            width: 38px;
-            height: 38px;
-            border: 2px solid rgba(255, 255, 255, 0.88);
-            border-radius: 10px;
-            background: rgba(255, 255, 255, 0.96);
-            box-shadow: 0 5px 12px rgba(0, 0, 0, 0.2);
+            width: 25px;
+            height: 25px;
+            border: 1px solid var(--emerald);
+            border-radius: 6px;
+            background: #FFFFFF;
+            color: var(--emerald-dark);
+            box-shadow: 0 2px 6px rgba(6, 95, 70, 0.16);
         }
         .google-drive-brand-orb {
-            left: 32px;
-            animation: google-drive-brand-connect 3s ease-in-out infinite;
+            left: 1px;
+            animation: google-drive-brand-connect 2.8s ease-in-out infinite;
         }
         .google-drive-drive-orb {
-            right: 32px;
-            color: #16a34a;
-            font-size: 1.35rem;
-            animation: google-drive-drive-connect 3s ease-in-out infinite;
+            right: 1px;
+            font-size: 0.95rem;
+            animation: google-drive-drive-connect 2.8s ease-in-out infinite;
         }
         .google-drive-brand-orb img {
-            width: 27px;
-            height: 27px;
+            width: 19px;
+            height: 19px;
             object-fit: contain;
         }
         .google-drive-connection-bubble {
@@ -2500,47 +2491,35 @@
             z-index: 2;
             display: grid;
             place-items: center;
-            width: 28px;
-            height: 28px;
-            border: 1px solid rgba(255, 255, 255, 0.7);
+            width: 20px;
+            height: 20px;
+            border: 1px solid var(--emerald);
             border-radius: 50%;
-            background: rgba(16, 185, 129, 0.86);
-            color: #FFFFFF;
-            font-size: 0.72rem;
-            box-shadow: 0 0 0 5px rgba(255, 255, 255, 0.11), 0 0 18px rgba(52, 211, 153, 0.82);
+            background: #FFFFFF;
+            color: var(--emerald-dark);
+            font-size: 0.58rem;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12);
             animation: google-drive-magic-pulse 2.2s ease-in-out infinite;
         }
-        .google-drive-connect-label,
-        .google-drive-connect-hint {
+        .google-drive-connect-label {
             position: relative;
             z-index: 1;
-        }
-        .google-drive-connect-label {
-            font-size: 0.92rem;
-        }
-        .google-drive-connect-hint {
-            color: rgba(255, 255, 255, 0.78);
-            font-size: 0.68rem;
-            font-weight: 600;
+            color: var(--emerald-dark);
+            font-size: 0.88rem;
         }
         @keyframes google-drive-brand-connect {
             0%, 100% { transform: translateX(0); }
-            50% { transform: translateX(14px); }
+            50% { transform: translateX(7px); }
         }
         @keyframes google-drive-drive-connect {
             0%, 100% { transform: translateX(0); }
-            50% { transform: translateX(-14px); }
+            50% { transform: translateX(-7px); }
         }
         @keyframes google-drive-magic-pulse {
-            0%, 100% { transform: scale(0.92); opacity: 0.86; }
-            50% { transform: scale(1.12); opacity: 1; }
-        }
-        @keyframes google-drive-button-shine {
-            0%, 55% { transform: translateX(-58%) rotate(12deg); }
-            78%, 100% { transform: translateX(58%) rotate(12deg); }
+            0%, 100% { transform: scale(0.92); opacity: 0.82; }
+            50% { transform: scale(1.08); opacity: 1; }
         }
         @media (prefers-reduced-motion: reduce) {
-            .google-drive-connect-button::before,
             .google-drive-brand-orb,
             .google-drive-drive-orb,
             .google-drive-connection-bubble {
@@ -2703,7 +2682,7 @@
                                 <div id="googleDriveStatus" class="notice" role="status" aria-live="polite">Comprobando conexión con Google Drive…</div>
                                 <div id="googleDriveLocation" class="helper" style="display:none; margin-top: 8px;"></div>
                                 <div id="googleDriveAccount" class="helper" style="display:none; margin-top: 10px;"></div>
-                                <div class="actions" style="margin-top: 12px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+                                <div class="actions" style="margin-top: 12px; display:flex; justify-content:center; gap:10px; flex-wrap:wrap; align-items:center; width:100%;">
                                     <button type="button" class="google-drive-connect-button" id="googleDriveConnectButton">
                                         <span class="google-drive-connect-visual" aria-hidden="true">
                                             <span class="google-drive-brand-orb"><img src="/assets/icons/apple-touch-icon.png" alt=""></span>
@@ -2711,7 +2690,6 @@
                                             <span class="google-drive-drive-orb"><i class="fab fa-google-drive"></i></span>
                                         </span>
                                         <span class="google-drive-connect-label">Vincular Google Drive</span>
-                                        <span class="google-drive-connect-hint">Conexión segura y automática</span>
                                     </button>
                                     <button type="button" class="btn-ghost" id="googleDriveDisconnectButton" style="display:none;">Desvincular</button>
                                 </div>
