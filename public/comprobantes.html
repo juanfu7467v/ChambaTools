@@ -2417,6 +2417,10 @@
             color: var(--emerald-light);
             font-weight: 600;
         }
+        .google-drive-email {
+            color: var(--tech-blue-light);
+            font-weight: 800;
+        }
     </style>
 </head>
 <body>
@@ -2569,7 +2573,7 @@
 
                             <section class="gb-block" aria-labelledby="googleDriveTitle">
                                 <h3 id="googleDriveTitle"><i class="fab fa-google-drive" aria-hidden="true"></i> Copia automática en Google Drive</h3>
-                                <p class="whatsapp-templates-intro">Vincula tu cuenta de Google y guardaremos automáticamente una copia de cada comprobante que generes.</p>
+                                <p id="googleDriveDescription" class="whatsapp-templates-intro">Vincula tu cuenta de Google y guardaremos automáticamente una copia de cada comprobante que generes.</p>
                                 <div id="googleDriveStatus" class="notice" role="status" aria-live="polite">Comprobando conexión con Google Drive…</div>
                                 <div id="googleDriveLocation" class="helper" style="display:none; margin-top: 8px;"></div>
                                 <div id="googleDriveAccount" class="helper" style="display:none; margin-top: 10px;"></div>
@@ -3316,6 +3320,7 @@
         const googleDriveDisconnectButton = document.getElementById('googleDriveDisconnectButton');
         const googleDriveAccount = document.getElementById('googleDriveAccount');
         const googleDriveLocation = document.getElementById('googleDriveLocation');
+        const googleDriveDescription = document.getElementById('googleDriveDescription');
         let googleDriveConnected = false;
 
         let currentTemplates = [];
@@ -4268,21 +4273,30 @@
                 const response = await fetch('/api/google-drive/status', { credentials: 'same-origin', cache: 'no-store' });
                 const data = await response.json().catch(() => ({}));
                 googleDriveConnected = data.connected === true;
-                googleDriveAccount.textContent = data.googleEmail ? `Conectado como: ${data.googleEmail}` : '';
+                googleDriveAccount.replaceChildren();
+                if (data.googleEmail) {
+                    googleDriveAccount.append(document.createTextNode('Conectado '));
+                    const emailElement = document.createElement('span');
+                    emailElement.className = 'google-drive-email';
+                    emailElement.textContent = data.googleEmail;
+                    googleDriveAccount.append(emailElement);
+                }
                 googleDriveAccount.style.display = data.googleEmail ? 'block' : 'none';
-                const hasGoogleDriveLocation = data.connected === true && Boolean(data.folderPath);
-                googleDriveLocation.textContent = hasGoogleDriveLocation ? `Ubicación: tus comprobantes se guardan automáticamente en la carpeta ${data.folderPath} de tu Google Drive.` : '';
-                googleDriveLocation.style.display = hasGoogleDriveLocation ? 'block' : 'none';
+                googleDriveLocation.textContent = '';
+                googleDriveLocation.style.display = 'none';
                 if (!data.configured) {
+                    googleDriveDescription.textContent = 'Google Drive aún no está disponible. El administrador debe configurar la integración.';
                     googleDriveStatus.textContent = 'Google Drive aún no está disponible. El administrador debe configurar la integración.';
                     googleDriveConnectButton.style.display = 'none';
                     googleDriveDisconnectButton.style.display = 'none';
                 } else if (googleDriveConnected) {
+                    googleDriveDescription.textContent = `Tus comprobantes se guardan y sincronizan automáticamente en la carpeta ${data.folderPath || 'FacilitoTools/Comprobantes'} de tu Google Drive.`;
                     googleDriveStatus.textContent = 'Google Drive vinculado. Cada comprobante generado tendrá una copia automática.';
                     googleDriveStatus.className = 'success';
                     googleDriveConnectButton.style.display = 'none';
                     googleDriveDisconnectButton.style.display = 'inline-flex';
                 } else {
+                    googleDriveDescription.textContent = 'Vincula tu cuenta de Google y guardaremos automáticamente una copia de cada comprobante que generes.';
                     googleDriveStatus.textContent = 'Google Drive no está vinculado.';
                     googleDriveStatus.className = 'notice';
                     googleDriveConnectButton.style.display = 'inline-flex';
