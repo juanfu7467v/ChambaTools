@@ -8,6 +8,9 @@ const IDENTITY_SCOPES = ['openid', 'email'];
 const TOKEN_FIELD = 'googleDrive';
 const TOKEN_ALGORITHM = 'aes-256-gcm';
 const TOKEN_VERSION = 1;
+const DRIVE_FOLDER_NAME = 'FacilitoTools';
+const DRIVE_SUBFOLDER_NAME = 'Comprobantes';
+const DRIVE_FOLDER_PATH = `${DRIVE_FOLDER_NAME}/${DRIVE_SUBFOLDER_NAME}`;
 
 function getConfig() {
   return {
@@ -59,6 +62,34 @@ function encodeUid(uid) {
 
 function decodeUid(encodedUid) {
   return Buffer.from(encodedUid, 'base64url').toString('utf8');
+}
+
+async function findOrCreateFolder(drive, name, parentId = 'root') {
+  const escapedName = name.replace(/'/g, "\\'");
+  const response = await drive.files.list({
+    q: `name = '${escapedName}' and mimeType = 'application/vnd.google-apps.folder' and '${parentId}' in parents and trashed = false`,
+    spaces: 'drive',
+    fields: 'files(id,name)',
+    pageSize: 1
+  });
+  if (response.data.files?.[0]?.id) return response.data.files[0].id;
+  const created = await drive.files.create({
+    requestBody: {
+      name,
+      mimeType: 'application/vnd.google-apps.folder',
+      parents: [parentId]
+    },
+    fields: 'id,name'
+  });
+  return created.data.id;
+}
+
+async function ensureComprobantesFolder(drive, stored = {}) {
+  let folderId = stored.folderId;
+  let subfolderId = stored.subfolderId;
+  if (!folderId) folderId = await findOrCreateFolder(drive, DRIVE_FOLDER_NAME);
+  if (!subfolderId) subfolderId = await findOrCreateFolder(drive, DRIVE_SUBFOLDER_NAME, folderId);
+  return { folderId, subfolderId };
 }
 
 function signState(uid, issuedAt, nonce) {
@@ -137,6 +168,8 @@ export async function getGoogleDriveStatus(uid, db) {
     configured: true,
     connected: Boolean(data?.refreshToken),
     googleEmail,
+    folderPath: DRIVE_FOLDER_PATH,
+    folderReady: Boolean(data?.subfolderId),
     connectedAt: data?.connectedAt || null
   };
 }
@@ -153,10 +186,18 @@ export async function savePdfToGoogleDrive(uid, filename, pdfBuffer, db) {
   const oauth = getOAuthClient();
   oauth.setCredentials({ refresh_token: decrypt(stored.refreshToken) });
   const drive = google.drive({ version: 'v3', auth: oauth });
+  const folders = await ensureComprobantesFolder(drive, stored);
+  if (folders.folderId !== stored.folderId || folders.subfolderId !== stored.subfolderId) {
+    await db.collection('usuarios').doc(uid).set({ [TOKEN_FIELD]: folders }, { merge: true });
+  }
   const response = await drive.files.create({
-    requestBody: { name: filename, mimeType: 'application/pdf' },
+    requestBody: {
+      name: filename,
+      mimeType: 'application/pdf',
+      parents: [folders.subfolderId]
+    },
     media: { mimeType: 'application/pdf', body: Readable.from(pdfBuffer) },
-    fields: 'id,name,webViewLink,createdTime'
+    fields: 'id,name,webViewLink,createdTime,parents'
   });
-  return { connected: true, saved: true, file: response.data };
+  return { connected: true, saved: true, folderPath: DRIVE_FOLDER_PATH, file: response.data };
 }

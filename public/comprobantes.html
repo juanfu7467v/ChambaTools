@@ -2571,6 +2571,7 @@
                                 <h3 id="googleDriveTitle"><i class="fab fa-google-drive" aria-hidden="true"></i> Copia automática en Google Drive</h3>
                                 <p class="whatsapp-templates-intro">Vincula tu cuenta de Google y guardaremos automáticamente una copia de cada comprobante que generes.</p>
                                 <div id="googleDriveStatus" class="notice" role="status" aria-live="polite">Comprobando conexión con Google Drive…</div>
+                                <div id="googleDriveLocation" class="helper" style="display:none; margin-top: 8px;"></div>
                                 <div id="googleDriveAccount" class="helper" style="display:none; margin-top: 10px;"></div>
                                 <div class="actions" style="margin-top: 12px; display:flex; gap:10px; flex-wrap:wrap;">
                                     <button type="button" class="btn-next" id="googleDriveConnectButton"><i class="fab fa-google-drive"></i> Vincular Google Drive</button>
@@ -3314,6 +3315,7 @@
         const googleDriveConnectButton = document.getElementById('googleDriveConnectButton');
         const googleDriveDisconnectButton = document.getElementById('googleDriveDisconnectButton');
         const googleDriveAccount = document.getElementById('googleDriveAccount');
+        const googleDriveLocation = document.getElementById('googleDriveLocation');
         let googleDriveConnected = false;
 
         let currentTemplates = [];
@@ -4268,6 +4270,9 @@
                 googleDriveConnected = data.connected === true;
                 googleDriveAccount.textContent = data.googleEmail ? `Conectado como: ${data.googleEmail}` : '';
                 googleDriveAccount.style.display = data.googleEmail ? 'block' : 'none';
+                const hasGoogleDriveLocation = data.connected === true && Boolean(data.folderPath);
+                googleDriveLocation.textContent = hasGoogleDriveLocation ? `Ubicación: tus comprobantes se guardan automáticamente en la carpeta ${data.folderPath} de tu Google Drive.` : '';
+                googleDriveLocation.style.display = hasGoogleDriveLocation ? 'block' : 'none';
                 if (!data.configured) {
                     googleDriveStatus.textContent = 'Google Drive aún no está disponible. El administrador debe configurar la integración.';
                     googleDriveConnectButton.style.display = 'none';
