@@ -1347,10 +1347,12 @@ app.get('/api/promotions/exit-intent/status', async (req, res) => {
   try {
     const uid = getAuthenticatedUid(req);
     res.set('Cache-Control', 'no-store');
-    return res.json({ eligible: Boolean(uid) && !(await hasRedeemedExitIntentPromotion(uid)) });
+    if (!uid) return res.json({ eligible: true, authenticated: false, used: false });
+    const used = await hasRedeemedExitIntentPromotion(uid);
+    return res.json({ eligible: !used, authenticated: true, used });
   } catch (error) {
     logger.error('PROMOTION_STATUS', 'Error verificando elegibilidad de promoción', error);
-    return res.json({ eligible: false });
+    return res.json({ eligible: false, authenticated: false, used: false });
   }
 });
 

@@ -60,21 +60,35 @@
         }
     }
 
-    async function isPromotionEligible() {
+    async function getPromotionStatus() {
         try {
             const response = await fetch('/api/promotions/exit-intent/status', {
                 credentials: 'same-origin',
                 cache: 'no-store'
             });
             const result = await response.json().catch(() => ({}));
-            return response.ok && result.eligible === true;
+            return response.ok ? result : { eligible: false, authenticated: false, used: false };
         } catch (_) {
-            return false;
+            return { eligible: false, authenticated: false, used: false };
         }
     }
 
-    async function showModal() {
-        if (isOpen || isSuppressed() || !(await isPromotionEligible())) return;
+    function showUsedPromotionState() {
+        errorMessage.textContent = 'Esta promoción es válida una sola vez por usuario y ya fue utilizada en tu cuenta. Puedes elegir cualquiera de los paquetes con su precio habitual.';
+        claimButton.querySelector('span').textContent = 'VER PAQUETES A PRECIO HABITUAL';
+        claimButton.dataset.usedPromotion = 'true';
+    }
+
+    async function showModal({ allowUsed = false, status = null } = {}) {
+        if (isOpen || isSuppressed()) return;
+        const promotionStatus = status || await getPromotionStatus();
+        const canShow = promotionStatus.eligible === true
+            || (allowUsed && promotionStatus.authenticated === true && promotionStatus.used === true);
+        if (!canShow) return;
+        errorMessage.textContent = '';
+        claimButton.dataset.usedPromotion = 'false';
+        claimButton.querySelector('span').textContent = 'RECLAMAR MI 20% DE DESCUENTO';
+        if (allowUsed && promotionStatus.used === true) showUsedPromotionState();
         isOpen = true;
         lastFocusedElement = document.activeElement;
         overlay.classList.add('is-visible');
@@ -176,13 +190,35 @@
         }
     });
 
+    function redirectToLoginForPromotion() {
+        hideModal({ suppress: false });
+        const returnTo = '/home.html?promoPending=EXIT20';
+        window.location.assign(`/login.html?returnTo=${encodeURIComponent(returnTo)}`);
+    }
+
     claimButton.addEventListener('click', async () => {
+        if (claimButton.dataset.usedPromotion === 'true') {
+            hideModal({ suppress: false });
+            window.location.assign('/planes.html#planes-cards');
+            return;
+        }
         if (claimButton.disabled) return;
         claimButton.disabled = true;
         errorMessage.textContent = '';
         claimButton.querySelector('span').textContent = 'ACTIVANDO TU OFERTA…';
 
         try {
+            const promotionStatus = await getPromotionStatus();
+            if (promotionStatus.authenticated !== true) {
+                redirectToLoginForPromotion();
+                return;
+            }
+            if (promotionStatus.used === true) {
+                claimButton.disabled = false;
+                showUsedPromotionState();
+                return;
+            }
+
             const response = await fetch('/api/promotions/exit-intent/redeem', {
                 method: 'POST',
                 credentials: 'same-origin',
@@ -207,4 +243,21 @@
             claimButton.disabled = false;
         }
     });
+
+    const pendingPromotion = new URLSearchParams(window.location.search).get('promoPending') === OFFER_CODE;
+    if (pendingPromotion) {
+        const cleanUrl = new URL(window.location.href);
+        cleanUrl.searchParams.delete('promoPending');
+        window.history.replaceState({}, document.title, `${cleanUrl.pathname}${cleanUrl.search}${cleanUrl.hash}`);
+        (async () => {
+            for (let attempt = 0; attempt < 5; attempt += 1) {
+                const status = await getPromotionStatus();
+                if (status.authenticated === true || attempt === 4) {
+                    await showModal({ allowUsed: true, status });
+                    return;
+                }
+                await new Promise(resolve => window.setTimeout(resolve, 250));
+            }
+        })();
+    }
 })();
