@@ -4,6 +4,7 @@ import { google } from 'googleapis';
 import admin from './firebaseCompat.js';
 
 const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
+const IDENTITY_SCOPES = ['openid', 'email'];
 const TOKEN_FIELD = 'googleDrive';
 const TOKEN_ALGORITHM = 'aes-256-gcm';
 const TOKEN_VERSION = 1;
@@ -90,7 +91,7 @@ export function buildGoogleDriveAuthorizationUrl(uid) {
   return oauth.generateAuthUrl({
     access_type: 'offline',
     prompt: 'consent',
-    scope: [DRIVE_SCOPE],
+    scope: [DRIVE_SCOPE, ...IDENTITY_SCOPES],
     state
   });
 }
@@ -100,11 +101,15 @@ export async function completeGoogleDriveAuthorization(code, state, uid, db) {
   const oauth = getOAuthClient();
   const { tokens } = await oauth.getToken(code);
   if (!tokens.refresh_token) throw new Error('Google no entregó un refresh token. Vuelve a autorizar el acceso.');
+  oauth.setCredentials(tokens);
+  const oauth2 = google.oauth2({ version: 'v2', auth: oauth });
+  const { data: profile } = await oauth2.userinfo.get();
   await db.collection('usuarios').doc(uid).set({
     [TOKEN_FIELD]: {
       refreshToken: encrypt(tokens.refresh_token),
+      googleEmail: profile.email || null,
       connectedAt: admin.firestore.FieldValue.serverTimestamp(),
-      scope: DRIVE_SCOPE
+      scope: [DRIVE_SCOPE, ...IDENTITY_SCOPES].join(' ')
     }
   }, { merge: true });
 }
@@ -113,7 +118,27 @@ export async function getGoogleDriveStatus(uid, db) {
   if (!isGoogleDriveConfigured()) return { configured: false, connected: false };
   const snap = await db.collection('usuarios').doc(uid).get();
   const data = snap.exists ? snap.data()?.[TOKEN_FIELD] : null;
-  return { configured: true, connected: Boolean(data?.refreshToken), connectedAt: data?.connectedAt || null };
+  let googleEmail = data?.googleEmail || null;
+  if (data?.refreshToken && !googleEmail) {
+    try {
+      const oauth = getOAuthClient();
+      oauth.setCredentials({ refresh_token: decrypt(data.refreshToken) });
+      const drive = google.drive({ version: 'v3', auth: oauth });
+      const { data: about } = await drive.about.get({ fields: 'user(emailAddress)' });
+      googleEmail = about.user?.emailAddress || null;
+      if (googleEmail) {
+        await db.collection('usuarios').doc(uid).set({ [TOKEN_FIELD]: { googleEmail } }, { merge: true });
+      }
+    } catch (_) {
+      // Una autorización antigua puede no permitir consultar el correo; la conexión sigue válida.
+    }
+  }
+  return {
+    configured: true,
+    connected: Boolean(data?.refreshToken),
+    googleEmail,
+    connectedAt: data?.connectedAt || null
+  };
 }
 
 export async function disconnectGoogleDrive(uid, db) {

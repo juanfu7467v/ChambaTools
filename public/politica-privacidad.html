@@ -53,7 +53,7 @@
         <p style="text-align: center;"><strong>Plataforma Digital FacilitoTools</strong></p>
         <p style="text-align: center;">Titular: José René Cubas Pérez</p>
         <p style="text-align: center;">RUC: 10736224350</p>
-        <p style="text-align: center;">Fecha de última actualización: 16 de septiembre de 2026</p>
+        <p style="text-align: center;">Fecha de última actualización: 8 de octubre de 2026</p>
 
         <h2>1. Marco Legal y Compromiso de Privacidad</h2>
         <p>La presente Política de Privacidad describe la forma en que José René Cubas Pérez, identificado con RUC N° 10736224350 (en adelante, "el Titular"), recopila, procesa, utiliza, almacena y protege la información personal de los usuarios de la plataforma digital FacilitoTools (en adelante, "la Plataforma").</p>
@@ -71,6 +71,7 @@
         <h3>B. Generación de Comprobantes de Venta</h3>
         <p><strong>Datos del Emisor (Base de Datos):</strong> La información del negocio o emisor (razón social o nombre comercial, RUC/DNI, dirección, plantilla seleccionada y logo, entre otros datos configurados por el Usuario en "Datos del emisor") se almacena de forma segura en la base de datos Google Firebase Firestore, asociada a la cuenta del Usuario, con la finalidad de completarse automáticamente en cada comprobante que genere y de estar disponible al consumir el servicio a través de nuestra API.</p>
         <p><strong>Procesamiento Cliente (Client-Side):</strong> El resto de la información utilizada para la confección de cada boleta o factura —datos del cliente, productos o servicios, impuestos y notas— se procesa únicamente en la memoria local del navegador del Usuario. La Plataforma no almacena copia ni registro contable de dicha información en sus servidores.</p>
+        <p><strong>Sincronización opcional con Google Drive:</strong> Si el Usuario decide vincular una cuenta de Google Drive, cada comprobante generado podrá guardarse automáticamente como una copia en el Google Drive de dicha cuenta. Para realizar la vinculación, la Plataforma procesa el correo electrónico de la cuenta de Google autorizada y conserva de forma cifrada los tokens técnicos necesarios para mantener la autorización. La Plataforma utiliza el alcance limitado de Google Drive requerido para crear y administrar los archivos generados por ella; no accede ni analiza otros archivos del Drive del Usuario.</p>
 
         <h2>3. Datos Personales Recopilados y Almacenamiento en la Nube</h2>
         <p>Para la gestión de cuentas, autenticación de usuarios y administración del servicio, el Titular recopila únicamente la información estrictamente necesaria.</p>
@@ -81,6 +82,7 @@
             <li>Dirección de correo electrónico.</li>
             <li>Contraseña encriptada (en caso de registro directo con correo y clave).</li>
             <li>Identificador único de usuario (UID) e información básica del perfil cuando el Usuario opta por autenticarse mediante terceros (Google Sign-In o GitHub OAuth).</li>
+            <li>Correo electrónico de la cuenta de Google vinculada voluntariamente para la sincronización de comprobantes con Google Drive.</li>
         </ul>
 
         <h3>B. Almacenamiento Seguro (Google Firebase Firestore)</h3>
@@ -98,6 +100,7 @@
         <p>El Titular se compromete a no vender, alquilar, ceder ni comercializar los datos personales de sus usuarios con terceras empresas o anunciantes. La transferencia de datos se limita exclusivamente a la infraestructura técnica indispensable para el funcionamiento de la Plataforma:</p>
         <ul>
             <li><strong>Google Cloud / Firebase:</strong> Alojamiento de la base de datos de usuarios y autenticación.</li>
+            <li><strong>Google Drive API:</strong> Servicio externo utilizado, únicamente cuando el Usuario lo autoriza, para guardar automáticamente copias de los comprobantes generados en su cuenta de Google Drive. Google procesa dichos archivos conforme a sus propios términos y política de privacidad.</li>
             <li><strong>Mercado Pago:</strong> Procesamiento seguro de pagos en línea.</li>
             <li><strong>Proveedores de APIs de Consulta:</strong> Canalización de peticiones en tiempo real hacia proveedores externos especializados y fuentes oficiales, con la finalidad de obtener y presentar las respuestas públicas solicitadas por el Usuario.</li>
         </ul>
