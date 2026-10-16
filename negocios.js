@@ -70,8 +70,8 @@ export const PLANES_CONFIG = {
     tipo: 'gratis',
     duracionDias: 0, // sin expiración
     comprobantesLimite: 5,
-    consultasLimite: 10,
-    consultasTelefonosLimite: 5,
+    consultasLimite: 5,
+    consultasTelefonosLimite: 1,
     consultasDniNombresLimite: 0,
     consultasCedulaLimite: 0,
     descripcion: 'Plan Gratuito'
