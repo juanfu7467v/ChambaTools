@@ -955,11 +955,6 @@
         }
         .gauge-fill-path.warn { stroke: var(--amber); }
         .gauge-fill-path.danger { stroke: var(--ruby-light); }
-        .gauge-fill-path.gauge-critical-pulse { animation: gaugeCriticalPulse 1.5s ease-in-out infinite; }
-        @keyframes gaugeCriticalPulse {
-            0%, 100% { filter: drop-shadow(0 0 0px currentColor); }
-            50% { filter: drop-shadow(0 0 7px currentColor); }
-        }
 
         .gauge-inner-info {
             position: absolute;
@@ -1808,7 +1803,6 @@
                 valueEl.style.color = '';
                 arcEl.style.strokeDashoffset = '0';
                 arcEl.style.stroke = 'var(--emerald)';
-                arcEl.classList.remove('gauge-critical-pulse');
                 return;
             }
 
@@ -1833,7 +1827,6 @@
             const offset = MAX_DASH_OFF * (1 - pctRestante);
             arcEl.style.strokeDashoffset = offset.toFixed(1);
             arcEl.style.stroke = color;
-            arcEl.classList.toggle('gauge-critical-pulse', elArcId === 'arcGaugeDocs' && esBajo);
         }
 
         async function loadCupo() {
