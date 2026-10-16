@@ -4,7 +4,7 @@
 // Este módulo expone endpoints backend que actúan como PROXY hacia
 // UQPFACT (DNI/RUC) y MASITAPREX (cédula, búsquedas, telefonía).
 //
-// - Los tokens (TOKEN_UQPFACT, TOKEN_MASITAPREX) viven SOLO en el
+// - Los tokens (TOKEN_UQPFACT, MASITAPREX_TOKEN) viven SOLO en el
 //   servidor (variables de entorno / secrets). Nunca se envían al navegador.
 // - Cada request exige sesión activa (cookie httpOnly user_uid, la
 //   misma que usa el resto de la app) y se asocia siempre al uid real.
@@ -31,13 +31,7 @@
 //
 // Variables de entorno requeridas:
 //   TOKEN_UQPFACT         -> token Bearer de apis.aqpfact.pe (DNI y RUC)
-//   TOKEN_MASITAPREX      -> API key de masitaprex.com
-//   MASITAPREX_AUTH_HEADER (opcional, por defecto "x-api-key")
-//   MASITAPREX_AUTH_SCHEME (opcional, por defecto "" -> sin prefijo)
-//     -> Según https://masitaprex.com/API-Docs.html, el token se envía
-//        SIEMPRE como header "x-api-key: TU_TOKEN" (sin "Bearer" ni
-//        ningún otro prefijo). Ajusta estas variables sólo si Masitaprex
-//        cambia su esquema de autenticación en el futuro.
+//   MASITAPREX_TOKEN      -> API key de masitaprex.com, enviada como x-api-key
 //   VALIDAR_CLIENTES_TIMEOUT_MS (opcional, por defecto 60000)
 //   -> UQPFACT y Masitaprex pueden tardar hasta ~50s en
 //        responder en consultas pesadas (huellas, firma, cruces de
@@ -72,7 +66,7 @@
 //    Se sube a 60s (configurable) + 1 reintento automático ante fallos de
 //    red/timeout.
 //
-// 5) Tokens sin "trim()": TOKEN_UQPFACT y TOKEN_MASITAPREX se usaban tal
+// 5) Tokens sin "trim()": TOKEN_UQPFACT y MASITAPREX_TOKEN se usaban tal
 //    cual llegaban de las variables de entorno. Un espacio o salto de línea
 //    de más en el secret (común al copiar/pegar o al setearlo con
 //    "fly secrets set" desde archivo) invalida el token silenciosamente:
@@ -112,7 +106,7 @@ export function setDb(database) {
 // 🐞 BUG ADICIONAL CORREGIDO (causaba "success:false" en TODAS las consultas
 // de DNI/RUC, ver log [ERROR] [VALIDAR_DNI] ... devolvió success:false):
 //
-// 5) Tokens sin "trim()": si el secret TOKEN_UQPFACT (o TOKEN_MASITAPREX) se
+// 5) Tokens sin "trim()": si el secret TOKEN_UQPFACT (o MASITAPREX_TOKEN) se
 //    configuró en Fly.io con un espacio, tabulador o salto de línea de más al
 //    final (algo muy común al copiar/pegar el valor o al setearlo desde un
 //    archivo con "fly secrets set"), el token enviado a la API externa deja
@@ -123,7 +117,7 @@ export function setDb(database) {
 //    aplicaba .trim() al token de Mercado Pago por esta misma razón; aquí no
 //    se estaba haciendo. Se corrige para ambos proveedores.
 const TOKEN_UQPFACT = (process.env.TOKEN_UQPFACT || '').trim();
-const BACKEND_PRINCIPAL_BASE = (process.env.BACKEND_PRINCIPAL_BASE || 'https://banckend-poxyv1-cosultape-masitaprex.fly.dev').replace(/\/+$/, '');
+const MASITAPREX_TOKEN = (process.env.MASITAPREX_TOKEN || '').trim();
 
 // Diagnóstico de arranque (NUNCA se loguea el valor del token, solo si está
 // presente y su longitud, para poder detectar en los logs de Fly.io casos
@@ -133,7 +127,11 @@ if (!TOKEN_UQPFACT) {
 } else {
   logger.info('VALIDAR_CLIENTES_CONFIG', 'TOKEN_UQPFACT cargado', { length: TOKEN_UQPFACT.length });
 }
-logger.info('VALIDAR_CLIENTES_CONFIG', 'Backend principal configurado', { baseUrl: BACKEND_PRINCIPAL_BASE });
+if (!MASITAPREX_TOKEN) {
+  logger.warn('VALIDAR_CLIENTES_CONFIG', 'MASITAPREX_TOKEN no está configurado: las consultas de Masitaprex fallarán con 500.');
+} else {
+  logger.info('VALIDAR_CLIENTES_CONFIG', 'MASITAPREX_TOKEN cargado', { length: MASITAPREX_TOKEN.length });
+}
 
 // Las APIs externas (UQPFACT y Masitaprex) pueden tardar hasta ~50s en
 // responder consultas pesadas. El timeout debe dar margen suficiente para
@@ -141,20 +139,12 @@ logger.info('VALIDAR_CLIENTES_CONFIG', 'Backend principal configurado', { baseUr
 const EXTERNAL_TIMEOUT_MS = Number(process.env.VALIDAR_CLIENTES_TIMEOUT_MS) || 60000;
 
 const UQPFACT_BASE = 'https://apis.aqpfact.pe/api';
-function backendPrincipalUrl(path, params = {}) {
-  const url = new URL(`${BACKEND_PRINCIPAL_BASE}${path}`);
-  for (const [key, value] of Object.entries(params)) {
-    if (value !== undefined && value !== null && value !== '') {
-      url.searchParams.set(key, value);
-    }
-  }
-  return url.toString();
-}
-
-function backendPrincipalHeaders() {
+const MASITAPREX_BASE = 'https://api.masitaprex.com/v3/consulta';
+function masitaprexHeaders() {
   return {
     'Accept': 'application/json',
-    'User-Agent': 'axios/1.6.0'
+    'Content-Type': 'application/json',
+    'x-api-key': MASITAPREX_TOKEN
   };
 }
 
@@ -383,11 +373,13 @@ function normalizeProviderBody(body, providerName) {
   const provider = String(providerName || '').toLowerCase();
 
   if (provider.includes('buscar dni')) {
+    if (Array.isArray(unwrapped?.resultados)) return { resultados: unwrapped.resultados };
     const items = parseNamesSearchMessage(unwrapped?.message, 'dniNombres');
     return { resultados: items };
   }
 
   if (provider.includes('buscar cédula') || provider.includes('buscar cedula')) {
+    if (Array.isArray(unwrapped?.resultados)) return { resultados: unwrapped.resultados };
     const items = parseNamesSearchMessage(unwrapped?.message, 'cedula');
     return { resultados: items };
   }
@@ -407,6 +399,9 @@ function normalizeProviderBody(body, providerName) {
           }))
           .filter((item) => item.telefono)
       };
+    }
+    if (result && typeof result === 'object' && (result.numero || result.telefono)) {
+      return { telefonos: [{ ...result, telefono: result.telefono || result.numero }] };
     }
   }
 
@@ -609,9 +604,9 @@ router.post('/cedula', requireAuth, async (req, res) => {
   await ejecutarConsulta({
     req, res, tipo: 'cedula', contexto: 'VALIDAR_CEDULA',
     fetchFn: () => callExternal(
-      backendPrincipalUrl('/cedula', { cedula }),
-      { method: 'GET', headers: backendPrincipalHeaders() },
-      'Backend principal (Cédula)'
+      `${MASITAPREX_BASE}/cedula`,
+      { method: 'POST', headers: masitaprexHeaders(), body: JSON.stringify({ cedula }) },
+      'Masitaprex (Cédula)'
     )
   });
 });
@@ -627,9 +622,9 @@ router.post('/buscar-cedula', requireAuth, async (req, res) => {
   await ejecutarConsulta({
     req, res, tipo: 'cedula', contexto: 'BUSCAR_CEDULA',
     fetchFn: () => callExternal(
-      backendPrincipalUrl('/venezolanos_nombres', { query }),
-      { method: 'GET', headers: backendPrincipalHeaders() },
-      'Backend principal (Buscar cédula)'
+      `${MASITAPREX_BASE}/buscar-cedula`,
+      { method: 'POST', headers: masitaprexHeaders(), body: JSON.stringify({ query }) },
+      'Masitaprex (Buscar cédula)'
     )
   });
 });
@@ -648,9 +643,13 @@ router.post('/buscar-dni', requireAuth, async (req, res) => {
   await ejecutarConsulta({
     req, res, tipo: 'dniNombres', contexto: 'BUSCAR_DNI',
     fetchFn: () => callExternal(
-      backendPrincipalUrl('/dni_nombres', { nombres, apepaterno, apematerno }),
-      { method: 'GET', headers: backendPrincipalHeaders() },
-      'Backend principal (Buscar DNI)'
+      `${MASITAPREX_BASE}/buscar-dni`,
+      {
+        method: 'POST',
+        headers: masitaprexHeaders(),
+        body: JSON.stringify({ nombres, apepaterno, ...(apematerno ? { apematerno } : {}) })
+      },
+      'Masitaprex (Buscar DNI)'
     )
   });
 });
@@ -666,9 +665,9 @@ router.post('/telefonia-doc', requireAuth, async (req, res) => {
   await ejecutarConsulta({
     req, res, tipo: 'telefono', contexto: 'TELEFONIA_DOC',
     fetchFn: () => callExternal(
-      backendPrincipalUrl('/telefonia-doc', { documento }),
-      { method: 'GET', headers: backendPrincipalHeaders() },
-      'Backend principal (Telefonía por documento)'
+      `${MASITAPREX_BASE}/telefonia-doc`,
+      { method: 'POST', headers: masitaprexHeaders(), body: JSON.stringify({ documento }) },
+      'Masitaprex (Telefonía por documento)'
     )
   });
 });
@@ -684,9 +683,9 @@ router.post('/telefonia-numero', requireAuth, async (req, res) => {
   await ejecutarConsulta({
     req, res, tipo: 'telefono', contexto: 'TELEFONIA_NUMERO',
     fetchFn: () => callExternal(
-      backendPrincipalUrl('/telefonia-num', { numero }),
-      { method: 'GET', headers: backendPrincipalHeaders() },
-      'Backend principal (Telefonía por número)'
+      `${MASITAPREX_BASE}/telefonia-num`,
+      { method: 'POST', headers: masitaprexHeaders(), body: JSON.stringify({ numero }) },
+      'Masitaprex (Telefonía por número)'
     )
   });
 });
