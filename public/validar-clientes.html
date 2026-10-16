@@ -1738,40 +1738,14 @@
             return false;
         }
 
-        // ========== CUPO (ARCO CIRCULAR ESTILO MOVISTAR, CON DEGRADADO PROGRESIVO) ==========
-        const CUPO_UMBRAL_BAJO = 8;
+        // ========== CUPO (ARCO CIRCULAR ESTILO MOVISTAR) ==========
         const MAX_DASH_OFF = 100;
 
-        // Paleta de transición: verde (lleno) -> ámbar (medio) -> rojo (crítico).
-        // El color del arco (y del número) se interpola suavemente según el % restante,
-        // en vez de saltar bruscamente entre 2 o 3 estados fijos.
-        const GAUGE_COLOR_STOPS = [
-            { p: 1.00, c: '#0A7B3E' }, // verde — cupo lleno
-            { p: 0.55, c: '#0A7B3E' }, // se mantiene verde hasta 55%
-            { p: 0.28, c: '#B45309' }, // ámbar oscuro — advertencia
-            { p: 0.00, c: '#C62828' }  // rojo — crítico
-        ];
-
-        function hexToRgbGauge(hex) {
-            const h = hex.replace('#', '');
-            return [parseInt(h.substring(0, 2), 16), parseInt(h.substring(2, 4), 16), parseInt(h.substring(4, 6), 16)];
-        }
-        function rgbToHexGauge(r, g, b) {
-            return '#' + [r, g, b].map(v => Math.round(Math.max(0, Math.min(255, v))).toString(16).padStart(2, '0')).join('');
-        }
-        function gaugeColorForPct(pct) {
-            pct = Math.max(0, Math.min(1, pct));
-            for (let i = 0; i < GAUGE_COLOR_STOPS.length - 1; i++) {
-                const a = GAUGE_COLOR_STOPS[i], b = GAUGE_COLOR_STOPS[i + 1];
-                if (pct <= a.p && pct >= b.p) {
-                    const span = (a.p - b.p) || 1;
-                    const t = (a.p - pct) / span;
-                    const [r1, g1, b1] = hexToRgbGauge(a.c);
-                    const [r2, g2, b2] = hexToRgbGauge(b.c);
-                    return rgbToHexGauge(r1 + (r2 - r1) * t, g1 + (g2 - g1) * t, b1 + (b2 - b1) * t);
-                }
-            }
-            return pct >= 1 ? GAUGE_COLOR_STOPS[0].c : GAUGE_COLOR_STOPS[GAUGE_COLOR_STOPS.length - 1].c;
+        // El color depende del saldo absoluto de cada categoría, no de su porcentaje.
+        function gaugeColorForRemaining(disponibles) {
+            if (disponibles === 0) return '#C62828'; // rojo — sin consultas
+            if (disponibles <= 10) return '#B45309'; // naranja — saldo por agotarse
+            return '#0A7B3E'; // verde — saldo suficiente
         }
 
         // Cuenta regresiva animada del número "disponibles / límite" para que el consumo
@@ -1807,9 +1781,8 @@
             }
 
             const disponibles = Math.max(limite - consumidas, 0);
-            const esBajo = disponibles <= CUPO_UMBRAL_BAJO;
             const pctRestante = limite > 0 ? Math.min(Math.max(disponibles / limite, 0), 1) : 0;
-            const color = gaugeColorForPct(pctRestante);
+            const color = gaugeColorForRemaining(disponibles);
 
             // Animar el número saliendo desde el valor anterior guardado en el propio elemento.
             const prev = valueEl.dataset.prevValue !== undefined ? parseInt(valueEl.dataset.prevValue, 10) : disponibles;
@@ -1821,7 +1794,7 @@
                 valueEl.classList.add('bump');
             }
 
-            valueEl.classList.toggle('low', esBajo);
+            valueEl.classList.toggle('low', disponibles === 0);
             valueEl.style.color = color;
 
             const offset = MAX_DASH_OFF * (1 - pctRestante);
