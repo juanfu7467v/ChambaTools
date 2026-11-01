@@ -333,7 +333,7 @@ export async function resetLoginAttempts(email) {
 // 🔐 CONFIGURACIÓN DE RECAPTCHA
 // ================================================================
 
-export const RECAPTCHA_SITE_KEY = "6Lfy85ssAAAAAAV0CGl1-aoW-mLKjuKxxm0-YpNn";
+export const RECAPTCHA_SITE_KEY = "6LcKawsuAAAAAM39Fx-RHtW-VXVgKXxwbu3l-xWy";
 
 export async function validateRecaptcha(recaptchaResponse, secretKey) {
   const context = 'RECAPTCHA_VALIDATION';
