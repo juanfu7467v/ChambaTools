@@ -1283,6 +1283,13 @@ app.post("/api/notify-verification", authRateLimit, async (req, res) => {
     if (!uid || !email) {
       return res.status(400).json({ success: false, error: 'La cuenta de Firebase no contiene un correo válido.' });
     }
+    if (decodedToken.email_verified !== true) {
+      logger.warn(context, 'Notificación de bienvenida bloqueada: correo sin verificar', { uid });
+      return res.status(403).json({
+        success: false,
+        error: 'Verifica tu dirección de correo antes de recibir el correo de bienvenida.'
+      });
+    }
 
     let waitAttempts = 0;
     while (!db && waitAttempts < 10) {

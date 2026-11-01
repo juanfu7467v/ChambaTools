@@ -1698,55 +1698,6 @@
     }
 
     // ================================================================
-    // ✅ SOLUCIÓN DEFINITIVA: keepalive: true + await + delays
-    // ================================================================
-    async function notifyBackendWelcomeEmail(user, signal = null) {
-        console.log('[🔔 NOTIFY] Iniciando notificación backend', {
-            uid: user.uid,
-            email: user.email,
-            displayName: user.displayName
-        });
-
-        try {
-            if (!user || !user.uid || !user.email) {
-                console.warn('[⚠️ NOTIFY] Datos incompletos');
-                return;
-            }
-
-            const idToken = await user.getIdToken();
-
-            // ✅ keepalive: true asegura que la petición NO se cancele al redirigir
-            const fetchOptions = {
-                method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify({ idToken }),
-                keepalive: signal ? false : true  // ✅ CLAVE: Mantiene la petición viva después de redirect
-            };
-            if (signal) fetchOptions.signal = signal;
-
-            const response = await fetch('/api/notify-verification', fetchOptions);
-
-            console.log('[📥 NOTIFY] Respuesta recibida', {
-                status: response.status,
-                ok: response.ok
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                console.log('[✅ NOTIFY] Correo enviado exitosamente', data);
-            } else {
-                console.error('[❌ NOTIFY] Error del servidor:', response.status);
-            }
-
-        } catch (err) {
-            console.error('[❌ NOTIFY] Error en petición:', err.message);
-        }
-    }
-
-    // ================================================================
     // ✅ GOOGLE LOGIN: await + delay 500ms + delay 1000ms
     // ================================================================
     window.signInWithGoogle = async function() {
@@ -2027,9 +1978,8 @@
               sessionStorage.setItem('returnTo', returnTo);
           }
 
-          // Este endpoint conserva el correo de bienvenida y el aprovisionamiento
-          // existentes; el enlace de verificación lo emite el endpoint de arriba.
-          await notifyBackendWelcomeEmail(userCredential.user);
+          // El correo de bienvenida se solicita sólo después de que Firebase
+          // confirme la verificación en verificacion.html.
 
           showMessageModal(
               verificationEmailSent
