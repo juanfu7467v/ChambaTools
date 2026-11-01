@@ -1,0 +1,53 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedInAs(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    function validProfileValues() {
+      return request.resource.data.email == request.auth.token.email
+        && request.resource.data.name is string
+        && request.resource.data.name.size() <= 256
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.updatedAt == request.time;
+    }
+
+    function validProfileCreate() {
+      return request.resource.data.keys().hasOnly([
+          'email',
+          'name',
+          'createdAt',
+          'updatedAt'
+        ])
+        && request.resource.data.keys().hasAll([
+          'email',
+          'name',
+          'createdAt',
+          'updatedAt'
+        ])
+        && validProfileValues();
+    }
+
+    // The browser writes only its own basic profile. Existing server-managed
+    // fields are preserved and cannot be changed by the client.
+    match /usuarios/{uid} {
+      allow create: if signedInAs(uid) && validProfileCreate();
+      allow update: if signedInAs(uid)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'email',
+          'name',
+          'createdAt',
+          'updatedAt'
+        ])
+        && validProfileValues();
+    }
+
+    // All other collections and nested paths are denied to client SDKs.
+    // Firebase Admin SDK operations on the server bypass these rules.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

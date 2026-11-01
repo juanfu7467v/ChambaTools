@@ -1805,7 +1805,7 @@ const PUBLIC_DIR = path.join(__dirname, 'public');
 
 const PUBLIC_ROUTES = ['/login', '/register', '/verify', '/reset-password', '/disclaimer-apis', '/API-Docs', '/developer-api'];
 
-const GA4_MEASUREMENT_ID = 'G-ZLG843BTYJ';
+const GA4_MEASUREMENT_ID = 'G-WCTYLKBWQM';
 const injectGA = (html) => {
   const gaId = GA4_MEASUREMENT_ID;
 
