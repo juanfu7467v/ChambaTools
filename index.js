@@ -10,6 +10,7 @@ import { fileURLToPath } from "url";
 import fs from "fs";
 import { generateInvoicePDF } from './pdfGenerator.js';
 import { Resend } from "resend";
+import { enviarCorreoAccionFirebase } from './authEmail.js';
 import helmet from "helmet";
 import compression from "compression";
 import rateLimit from 'express-rate-limit';
@@ -149,6 +150,19 @@ app.use(compression({ threshold: 1024 }));
 // Límites generales y específicos contra abuso de endpoints costosos.
 app.use(rateLimit({ windowMs: 15 * 60 * 1000, limit: 300, standardHeaders: 'draft-7', legacyHeaders: false }));
 const authRateLimit = rateLimit({ windowMs: 15 * 60 * 1000, limit: 30, standardHeaders: 'draft-7', legacyHeaders: false });
+const authEmailRateLimit = () => rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 5,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  handler: (_req, res) => res.status(429).json({
+    success: false,
+    error: 'Demasiadas solicitudes. Espera unos minutos antes de volver a intentarlo.'
+  })
+});
+const verifyEmailRateLimit = authEmailRateLimit();
+const passwordResetRateLimit = authEmailRateLimit();
+const AUTH_PUBLIC_ORIGIN = 'https://facilitotools.com';
 
 // Defensa CSRF para peticiones mutables que llevan una sesión cookie.
 app.use('/api', (req, res, next) => {
@@ -1160,7 +1174,97 @@ app.post("/api/login-success", authRateLimit, async (req, res) => {
   }
 });
 
-// Endpoint de notificación de verificación
+const PASSWORD_RESET_GENERIC_RESPONSE = {
+  success: true,
+  message: 'Si existe una cuenta asociada a ese correo, enviaremos instrucciones para restablecer la contraseña.'
+};
+
+// Emite un enlace de verificación sólo para la identidad Firebase autenticada.
+app.post('/api/auth/verify-email', verifyEmailRateLimit, async (req, res) => {
+  const context = 'AUTH_VERIFY_EMAIL';
+  const tokenMatch = req.get('authorization')?.match(/^Bearer\s+(\S+)$/i);
+  if (!tokenMatch) {
+    return res.status(401).json({ success: false, error: 'Inicia sesión para solicitar la verificación.' });
+  }
+
+  let decodedToken;
+  try {
+    decodedToken = await verifyFirebaseIdToken(tokenMatch[1]);
+  } catch (error) {
+    logger.warn(context, 'ID token de Firebase inválido o expirado', { code: error.code || 'unknown' });
+    return res.status(401).json({ success: false, error: 'La sesión de Firebase expiró. Inicia sesión de nuevo.' });
+  }
+
+  try {
+    const user = await admin.auth().getUser(decodedToken.uid);
+    if (!user.email || user.email.toLowerCase() !== String(decodedToken.email || '').toLowerCase()) {
+      return res.status(401).json({ success: false, error: 'Actualiza tu sesión e inténtalo de nuevo.' });
+    }
+    if (user.disabled) {
+      return res.status(403).json({ success: false, error: 'No se pudo procesar esta cuenta.' });
+    }
+    if (user.emailVerified) {
+      return res.json({ success: true, alreadyVerified: true, message: 'El correo ya está verificado.' });
+    }
+    if (!resend) {
+      logger.error(context, 'Resend no está configurado');
+      return res.status(503).json({ success: false, error: 'El envío de correos no está disponible temporalmente.' });
+    }
+
+    const actionUrl = await admin.auth().generateEmailVerificationLink(user.email, {
+      url: `${AUTH_PUBLIC_ORIGIN}/verificacion`
+    });
+    const emailResult = await enviarCorreoAccionFirebase({
+      tipo: 'verificacion',
+      email: user.email,
+      nombre: user.displayName,
+      actionUrl
+    }, resend);
+    if (!emailResult.success) {
+      return res.status(503).json({ success: false, error: 'No se pudo enviar el correo. Intenta de nuevo más tarde.' });
+    }
+    return res.json({ success: true, message: 'Enviamos un enlace de verificación a tu correo.' });
+  } catch (error) {
+    logger.warn(context, 'No se pudo emitir el enlace de verificación', { code: error.code || 'unknown' });
+    return res.status(503).json({ success: false, error: 'No se pudo enviar el correo. Intenta de nuevo más tarde.' });
+  }
+});
+
+// Solicita un enlace de restablecimiento sin revelar si la cuenta existe.
+app.post('/api/auth/forgot-password', passwordResetRateLimit, async (req, res) => {
+  const context = 'AUTH_PASSWORD_RESET';
+  const email = typeof req.body?.email === 'string' ? req.body.email.trim().toLowerCase() : '';
+  if (!email || email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return res.status(400).json({ success: false, error: 'Ingresa una dirección de correo válida.' });
+  }
+  if (!resend) {
+    logger.error(context, 'Resend no está configurado');
+    return res.status(503).json({ success: false, error: 'El envío de correos no está disponible temporalmente.' });
+  }
+
+  try {
+    const actionUrl = await admin.auth().generatePasswordResetLink(email, {
+      url: `${AUTH_PUBLIC_ORIGIN}/login?passwordReset=1`
+    });
+    const emailResult = await enviarCorreoAccionFirebase({
+      tipo: 'restablecimiento',
+      email,
+      nombre: null,
+      actionUrl
+    }, resend);
+    if (!emailResult.success) {
+      logger.warn(context, 'El proveedor no aceptó el correo de acción');
+    }
+  } catch (error) {
+    // No registrar el email ni distinguir cuentas inexistentes del resto de errores.
+    logger.warn(context, 'Solicitud procesada sin exponer el resultado de cuenta/proveedor', {
+      code: error.code || 'unknown'
+    });
+  }
+  return res.json(PASSWORD_RESET_GENERIC_RESPONSE);
+});
+
+// Endpoint heredado de notificación de bienvenida y aprovisionamiento de cuenta.
 app.post("/api/notify-verification", authRateLimit, async (req, res) => {
   const context = 'NOTIFY_VERIFICATION';
   try {

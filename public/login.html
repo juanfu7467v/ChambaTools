@@ -1265,14 +1265,15 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { 
       getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, 
-      onAuthStateChanged, sendPasswordResetEmail, GoogleAuthProvider, 
-      GithubAuthProvider, signInWithPopup, sendEmailVerification, signOut
+      onAuthStateChanged, GoogleAuthProvider,
+      GithubAuthProvider, signInWithPopup, signOut
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
     import { 
       getFirestore, doc, setDoc, serverTimestamp 
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     let auth, db;
+    let registrationInProgress = false;
     let recaptchaSiteKey = "6LcKawsuAAAAAM39Fx-RHtW-VXVgKXxwbu3l-xWy";
     let appConfig;
     
@@ -1655,6 +1656,7 @@
         }
 
         onAuthStateChanged(auth, (user) => {
+          if (registrationInProgress) return;
           if (user) {
             if (user.emailVerified) {
                 redirectAfterAuth(user);
@@ -1680,6 +1682,20 @@
     }
 
     initFirebase();
+
+    async function sendVerificationEmailFromBackend(user) {
+        if (!user) throw new Error('Inicia sesión para verificar tu correo.');
+        const idToken = await user.getIdToken(true);
+        const response = await fetch('/api/auth/verify-email', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${idToken}` }
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok || !data.success) {
+            throw new Error(data.error || 'No se pudo enviar el correo de verificación.');
+        }
+        return data;
+    }
 
     // ================================================================
     // ✅ SOLUCIÓN DEFINITIVA: keepalive: true + await + delays
@@ -1992,19 +2008,16 @@
       }
       
       showLoadingOverlay();
+      registrationInProgress = true;
       try {
           await validateRecaptchaWithBackend(recaptchaResponse);
           const userCredential = await createUserWithEmailAndPassword(auth, email, password);
           await saveUserProfile(userCredential.user, name);
 
-          // ✅ CORRECCIÓN: enviar el correo de verificación real vía Firebase Auth
-          // (antes se importaba sendEmailVerification pero nunca se invocaba, por lo
-          // que el usuario jamás recibía el enlace y quedaba bloqueado en "verificacion.html")
+          let verificationEmailSent = false;
           try {
-              await sendEmailVerification(userCredential.user, {
-                  url: `${window.location.origin}/login`,
-                  handleCodeInApp: false
-              });
+              await sendVerificationEmailFromBackend(userCredential.user);
+              verificationEmailSent = true;
           } catch (verificationError) {
               console.error('Error enviando correo de verificación:', verificationError);
           }
@@ -2014,18 +2027,22 @@
               sessionStorage.setItem('returnTo', returnTo);
           }
 
-          // ✅ CORRECCIÓN: se reemplaza el fetch a '/api/send-verification-email'
-          // (endpoint inexistente en el backend, siempre devolvía 404) por la función
-          // notifyBackendWelcomeEmail ya definida en este archivo, que sí llama a un
-          // endpoint real ('/api/notify-verification') para enviar el correo de
-          // bienvenida y crear el token/empresa del usuario.
+          // Este endpoint conserva el correo de bienvenida y el aprovisionamiento
+          // existentes; el enlace de verificación lo emite el endpoint de arriba.
           await notifyBackendWelcomeEmail(userCredential.user);
 
-          showMessageModal('Cuenta creada exitosamente. Revisa tu correo para verificar tu cuenta.', 'success');
+          showMessageModal(
+              verificationEmailSent
+                  ? 'Cuenta creada exitosamente. Revisa tu correo para verificar tu cuenta.'
+                  : 'Tu cuenta se creó, pero no pudimos enviar el enlace. Podrás reenviarlo desde la pantalla de verificación.',
+              verificationEmailSent ? 'success' : 'warning'
+          );
           setTimeout(() => {
-              window.location.href = "verificacion.html";
+              registrationInProgress = false;
+              window.location.href = verificationEmailSent ? "verificacion.html" : "verificacion.html?resendNow=1";
           }, 2000);
       } catch (error) {
+          registrationInProgress = false;
           hideLoadingOverlay();
           if (registerRecaptchaWidgetId !== null) grecaptcha.reset(registerRecaptchaWidgetId);
           showMessageModal(getFriendlyErrorMessage(error), 'error');
@@ -2042,16 +2059,17 @@
         
         showLoadingOverlay();
         try {
-            // ✅ CORRECCIÓN: se especifica actionCodeSettings para que el enlace del
-            // correo regrese a la página propia de recuperación (/reset-password) en
-            // vez de a la página genérica de Firebase. Antes el enlace no completaba
-            // el flujo dentro de la app.
-            await sendPasswordResetEmail(auth, email, {
-                url: `${window.location.origin}/reset-password`,
-                handleCodeInApp: false
+            const response = await fetch('/api/auth/forgot-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                body: JSON.stringify({ email })
             });
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok || !data.success) {
+                throw new Error(data.error || 'No se pudo procesar la solicitud. Intenta más tarde.');
+            }
             hideLoadingOverlay();
-            showMessageModal('Hemos enviado un enlace de recuperación a tu correo. Revisa tu bandeja de entrada.', 'success');
+            showMessageModal(data.message || 'Si existe una cuenta con ese correo, recibirás instrucciones para restablecer la contraseña.', 'success');
             setTimeout(() => showLoginForm(), 3000);
         } catch (error) {
             hideLoadingOverlay();

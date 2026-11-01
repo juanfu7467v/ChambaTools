@@ -329,15 +329,15 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged, sendEmailVerification, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
     // --- VARIABLES GLOBALES ---
     let auth;
     let countdownInterval = null;
     let resendAttempts = 0;
-    let autoResendExecuted = false;
     let verificationCheckInterval = null;
     let welcomeEmailSent = false; // 🔥 NUEVO: Bandera para evitar duplicados
+    const resendImmediately = new URLSearchParams(window.location.search).get('resendNow') === '1';
     
     // --- ELEMENTOS DEL DOM ---
     const resendBtn = document.getElementById('resend-btn');
@@ -405,16 +405,13 @@
       try {
         console.log('📧 Notificando al backend para envío de correo de bienvenida...');
         
+        const idToken = await user.getIdToken(true);
         const response = await fetch('/api/notify-verification', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({
-            uid: user.uid,
-            email: user.email,
-            displayName: user.displayName || user.email.split('@')[0]
-          })
+          body: JSON.stringify({ idToken })
         });
 
         const result = await response.json();
@@ -440,7 +437,7 @@
           clearInterval(verificationCheckInterval);
           showMessage('¡Correo verificado!');
           
-          // 🔥 AQUÍ SE ACTIVA EL ENVÍO AUTOMÁTICO
+          // Sincroniza el alta y el correo de bienvenida cuando la verificación ya ocurrió.
           await notifyVerificationComplete(auth.currentUser);
           
           setTimeout(() => {
@@ -467,17 +464,29 @@
 
       showLoading();
       try {
-        await sendEmailVerification(user);
+        const idToken = await user.getIdToken(true);
+        const response = await fetch('/api/auth/verify-email', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${idToken}` }
+        });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok || !result.success) {
+          throw new Error(result.error || 'No se pudo reenviar el correo de verificación.');
+        }
+        if (result.alreadyVerified) {
+          await checkEmailVerificationStatus();
+          return;
+        }
         resendAttempts++;
-        showMessage('Correo de verificación reenviado');
+        showMessage(result.message || 'Correo de verificación reenviado');
         startResendTimer();
       } catch (error) {
         console.error("Error enviando correo:", error);
-        if (error.code === 'auth/too-many-requests') {
-          showMessage('Demasiados intentos. Espera 1 minuto.', true);
+        if (error.message?.includes('Demasiadas solicitudes')) {
+          showMessage(error.message, true);
           startResendTimer();
         } else {
-          showMessage('Error al reenviar. Intenta de nuevo.', true);
+          showMessage(error.message || 'Error al reenviar. Intenta de nuevo.', true);
         }
       } finally {
         hideLoading();
@@ -528,18 +537,9 @@
             return;
           }
           
-          // Enviar el primer correo automáticamente si no se ha hecho
-          if (!autoResendExecuted) {
-            autoResendExecuted = true;
-            try {
-              await sendEmailVerification(user);
-              resendAttempts++;
-            } catch (error) {
-              console.error('Error en reenvío automático:', error);
-            }
-          }
-          
-          startResendTimer();
+          // El registro ya solicita el primer enlace al backend. No volver a
+          // enviarlo automáticamente; si falló, se permite un reintento inmediato.
+          if (!resendImmediately) startResendTimer();
           
           // Iniciar el chequeo periódico (cada 4 segundos para no saturar)
           if(verificationCheckInterval) clearInterval(verificationCheckInterval);
